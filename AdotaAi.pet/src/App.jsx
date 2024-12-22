@@ -19,7 +19,7 @@ function App() {
             <Routes>
               <Route path="/" element={<Home/>}/>
               <Route path="/adotar" element={<Adotar/>}/>
-              <Route path="/adotar/animal" element={<PerfilPet/>}/>
+              <Route path="/adotar/animal/:id" element={<PerfilPet/>}/>
               <Route path="/doar" element={<Doar/>}/>
               <Route path="/ongs" element={<Ongs/>}/>
             </Routes>
