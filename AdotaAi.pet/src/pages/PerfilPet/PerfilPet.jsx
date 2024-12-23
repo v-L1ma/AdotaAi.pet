@@ -21,34 +21,11 @@ function PerfilPet(){
     
       }, [])
 
-      function calcularIdade(dataNascimento) {
-        // Obtém a data atual
-        const dataAtual = new Date();
-    
-        // Converte a data de nascimento para um objeto Date (formato yyyy-mm-dd)
-        const dataNascimentoObj = new Date(dataNascimento);
-    
-        // Calcula a diferença de anos
-        let idade = dataAtual.getFullYear() - dataNascimentoObj.getFullYear();
-    
-        // Verifica se o aniversário já passou no ano atual
-        const mesAtual = dataAtual.getMonth(); // Mês atual (0 a 11)
-        const diaAtual = dataAtual.getDate(); // Dia atual
-        const mesNascimento = dataNascimentoObj.getMonth(); // Mês de nascimento (0 a 11)
-        const diaNascimento = dataNascimentoObj.getDate(); // Dia de nascimento
-    
-        // Se o aniversário ainda não aconteceu neste ano, subtrai 1 da idade
-        if (mesAtual < mesNascimento || (mesAtual === mesNascimento && diaAtual < diaNascimento)) {
-            idade--;
-        }
-    
-        return idade;
-    }
 
     return(
         <main>
             <div className={styles.container}>
-                <img src={animal.foto} alt="foto do pet" />
+                <img src={animal.foto || "https://img.freepik.com/vetores-premium/nenhuma-foto-disponivel-icone-vetorial-simbolo-de-imagem-padrao-imagem-em-breve-para-site-ou-aplicativo-movel_87543-10615.jpg"} alt="foto do pet" />
                 <div className={styles.sobre}>
                     <h1>{animal.nome}</h1>  
                     <p className={styles.loc}><FaLocationDot/>Santos, SP</p>
@@ -57,7 +34,7 @@ function PerfilPet(){
                     <h2>Informações do pet</h2>
                     <div className={styles.infos}>
                         <p>Raca: {animal.raca}</p>
-                        <p>Idade:{calcularIdade(animal.datanasc)}</p>
+                        <p>Data de nascimento: {animal.datanasc}</p>
                         <p>Sexo:{animal.sexo}</p>
                         <p>Vacinado:{animal.vacinado}</p>
                         <p>Castrado:{animal.castrado}</p>

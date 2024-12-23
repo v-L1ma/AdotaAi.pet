@@ -8,16 +8,18 @@ function CardPet({animais}){
     
     return(
         <div  className={styles.card} key={animais.id}>
+            <Link to={`/adotar/animal/${animais.id}`}>
                     <div className={styles.imagem}>
-                        <img src={animais.foto} alt=""/>
+                        <img src={animais.foto || "https://img.freepik.com/vetores-premium/nenhuma-foto-disponivel-icone-vetorial-simbolo-de-imagem-padrao-imagem-em-breve-para-site-ou-aplicativo-movel_87543-10615.jpg"} alt=""/>
                     </div>
                         <div className={styles.infos}>
                             <h1 className={styles.nome}>
-                                <Link to={`/adotar/animal/${animais.id}`}>{animais.nome}</Link>
+                                {animais.nome}
                             </h1> 
                             
                         </div>
-                    </div>
+            </Link>            
+        </div>
     )
 }
 

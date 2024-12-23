@@ -8,13 +8,13 @@ function Ongs() {
 
         <div className={styles.conteudo}>
 
-          <div class={styles.perfil}>
+          <div className={styles.perfil}>
             <img
               src="https://png.pngtree.com/png-vector/20240603/ourmid/pngtree-a-dog-and-cat-engage-in-curious-gaze-capturing-moment-of-png-image_12547998.png"
               alt=""
             />
 
-            <div class={styles.infos_perfil}>
+            <div className={styles.infos_perfil}>
               <h2 className={styles.nome}>SOS Animais de Rua</h2>
               <p className={styles.descricao}>
                 Lorem ipsum dolor sit, amet consectetur adipisicing elit. Ipsum,
@@ -23,16 +23,16 @@ function Ongs() {
                 sint. Fugiat, voluptates voluptatum.
               </p>
             </div>
-            <img src="imagens/Seta.png" alt="" class="seta" />
+            <img src="imagens/Seta.png" alt="" className="seta" />
           </div>
 
-          <div class={styles.perfil}>
+          <div className={styles.perfil}>
             <img
               src="https://png.pngtree.com/png-vector/20240603/ourmid/pngtree-a-dog-and-cat-engage-in-curious-gaze-capturing-moment-of-png-image_12547998.png"
               alt=""
             />
 
-            <div class={styles.infos_perfil}>
+            <div className={styles.infos_perfil}>
               <h2 className={styles.nome}>Animais das Aldeias</h2>
               <p className={styles.descricao}>
                 Assim como o nome sugere, a ONG cuida dos animais das aldeias da
@@ -42,16 +42,16 @@ function Ongs() {
                 ajudar: doando qualquer quantia de ração.
               </p>
             </div>
-            <img src="imagens/Seta.png" alt="" class="seta" />
+            <img src="imagens/Seta.png" alt="" className="seta" />
           </div>
 
-          <div class={styles.perfil}>
+          <div className={styles.perfil}>
             <img
               src="https://png.pngtree.com/png-vector/20240603/ourmid/pngtree-a-dog-and-cat-engage-in-curious-gaze-capturing-moment-of-png-image_12547998.png"
               alt=""
             />
 
-            <div class={styles.infos_perfil}>
+            <div className={styles.infos_perfil}>
               <h2 className={styles.nome}>ONG Viva Bicho Santos</h2>
               <p className={styles.descricao}>
                 A ONG percorre a cidade atendendo os pets de moradores de rua.
@@ -61,16 +61,16 @@ function Ongs() {
               </p>
               
             </div>
-            <img src="imagens/Seta.png" alt="" class="seta" />
+            <img src="imagens/Seta.png" alt="" className="seta" />
           </div>
 
-          <div class={styles.perfil}>
+          <div className={styles.perfil}>
             <img
               src="https://png.pngtree.com/png-vector/20240603/ourmid/pngtree-a-dog-and-cat-engage-in-curious-gaze-capturing-moment-of-png-image_12547998.png"
               alt=""
             />
 
-            <div class={styles.infos_perfil}>
+            <div className={styles.infos_perfil}>
               <h2 className={styles.nome}>Codevida</h2>
               <p className={styles.descricao}>
                 Não é uma entidade, e sim um serviço público da Prefeitura. Na
@@ -80,16 +80,16 @@ function Ongs() {
               </p>
               
             </div>
-            <img src="imagens/Seta.png" alt="" class="seta" />
+            <img src="imagens/Seta.png" alt="" className="seta" />
           </div>
 
-          <div class={styles.perfil}>
+          <div className={styles.perfil}>
             <img
               src="https://png.pngtree.com/png-vector/20240603/ourmid/pngtree-a-dog-and-cat-engage-in-curious-gaze-capturing-moment-of-png-image_12547998.png"
               alt=""
             />
 
-            <div class={styles.infos_perfil}>
+            <div className={styles.infos_perfil}>
               <h2 className={styles.nome}>Projeto Albatroz</h2>
               <p className={styles.descricao}>
                 O Projeto Albatroz existe para reduzir a captura incidental dos
@@ -98,7 +98,7 @@ function Ongs() {
               </p>
               
             </div>
-            <img src="imagens/Seta.png" alt="" class="seta" />
+            <img src="imagens/Seta.png" alt="" className="seta" />
           </div>
         </div>
       </div>

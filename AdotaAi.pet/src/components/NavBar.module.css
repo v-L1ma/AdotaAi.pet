@@ -5,12 +5,16 @@
     box-sizing: border-box;
 }
 
+.nav_mobile{
+    display: none;
+}
+
 header{
     background-color: white;
     width: 100%;  
 }
 
-.nav{
+.nav_desktop{
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -19,31 +23,31 @@ header{
     position: relative;
 }
 
-.nav img{
+.nav_desktop img{
     width: 4em;
     height: 4em;
 }
 
-.nav ul{
+.nav_desktop ul{
     display: flex;
     gap: 2em;
     list-style: none;
 }
 
-.itens{
+.nav_desktop .itens{
     font-size: 1.2em;
     text-decoration: none;
     color: #ffa600;
     font-weight: bolder;
 }
 
-.itens:hover{
+.nav_desktop .itens:hover{
     border-bottom: 5px solid orange;
     padding-bottom: .7em;
     transition: border 100ms;
 }
 
-.cadastrar{
+.nav_desktop .cadastrar{
     background-color: aqua;
 }
 
@@ -57,4 +61,86 @@ header{
     display: flex;
     justify-content: space-between;
     border-radius: 3em;
+}
+
+
+@media (max-width: 950px){
+    .nav_desktop{
+        display: none;
+    }
+
+    .nav_mobile{
+        display: flex;
+        
+    }
+    .nav_mobile img{
+        height: 4em;
+        width: 4em;
+    }
+
+    .nav_mobile{
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: space-between;
+        width: 75vw;
+        margin: auto;
+        position: relative;
+    }
+
+    .top_header{
+        display: flex;
+        justify-content: space-between;
+        width: 100%;
+        align-items: center;
+    }
+
+    .top_header button{
+        width: 1em;
+        height: 1em;
+        font-size: 3em;
+        text-align: center;
+        appearance: none;
+        border: none;
+        background-color: transparent;
+        color: rgb(214, 140, 3);
+        cursor: pointer;
+    }
+    
+    .nav_mobile img{
+        width: 4em;
+        height: 4em;
+    }
+
+    .container_list{
+        width: 100%;
+    }
+
+    .container_list ul{
+        display: flex;
+        flex-direction: column;
+        gap: 2em;
+        list-style: none;
+        width: 100%;
+        text-align: center;  
+
+    }
+    
+    .container_list li{
+        font-size: 1.2em;
+        text-decoration: none;
+        color: rgb(214, 140, 3);
+        font-weight: bolder;
+    }
+    
+    .container_list li:hover{
+        border-bottom: 5px solid orange;
+        padding-bottom: .7em;
+        transition: border 100ms;
+    }
+    
+    .cadastrar{
+        background-color: aqua;
+    }
+    
 }

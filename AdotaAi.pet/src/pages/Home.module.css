@@ -89,7 +89,7 @@ h1{
 
 .card{
     height: 20em;
-    width: 30em;
+    width: 25em;
     overflow: hidden;
     background-color: antiquewhite;
     display: flex;
@@ -126,4 +126,59 @@ h1{
     font-size: 1.5em;
 }
 
+
+@media (max-width: 950px) {
+    main{
+        width: 90vw;
+        margin: 5em auto;
+        box-sizing: border-box;
+    }
+    
+    .banner{
+        margin: 2em auto;   
+    }
+    
+    .banner img{     
+        margin: 0 auto;
+        height: 24em;
+        border-radius: 1.5em;
+        box-sizing: border-box;
+        box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.411);
+    }
+
+    .gallery{
+        display: flex;
+        gap: 2em;
+        margin: 1em auto;
+        align-items: center;background-color: antiquewhite;
+    }
+
+    .card{
+        height: 20em;
+        width: 35em;
+        overflow: hidden;
+        background-color: antiquewhite;
+        display: flex;
+        flex-direction: column;
+        border-radius: 1em;
+        box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.075);
+    }
+    
+    .card:hover{
+        scale: 1.02;
+        transition: 200ms;
+    }
+    
+    .card img{
+        width: 100%;
+        overflow: hidden;
+    }
+
+    .setas{
+        font-size: 10em;
+        align-items: center;
+        color: rgba(0, 0, 0, 0.473);
+        cursor: pointer;
+    }
+}
 

@@ -73,7 +73,8 @@
     margin: 2em auto;
     gap: 2em;
     display: grid;
-    grid-template-columns: 19em 19em 19em;
+    grid-template-columns: repeat(auto-fill, 19em);  
+    align-items: center;
     justify-content: center;
 }
 
@@ -120,9 +121,7 @@
     color: grey;
 }
 
-.infos a{
-    text-decoration: none;    
-    color: #766788;
-}
+
+
 
 

@@ -17,7 +17,6 @@ function Doar(){
     async function cadastrarAnimais() {
 
         await api.post('/animais', {
-
             nome:  inputNome.current.value,
             raca:  inputRaca.current.value,
             foto: inputFoto.current.value,
@@ -29,9 +28,7 @@ function Doar(){
             descricao: inputDesc.current.value
         })
 
-    }
-
-    
+    }  
     
 
     return(
@@ -41,6 +38,17 @@ function Doar(){
 
     <div className={styles.conteudo}>
         <div className={styles.cadastro}>
+
+        <div className={styles.inserir_foto}>
+                <FaCamera className={styles.icone}/>
+                <label htmlFor="foto">Escolha uma foto</label>
+                <input 
+                type="text" 
+                name="foto" 
+                id="foto" 
+                placeholder='Insira o URL da imagem'
+                ref={inputFoto}/>
+            </div>
 
          
             <div className={styles.nome}> 
@@ -52,20 +60,7 @@ function Doar(){
                 id="nomePet"
                 ref={inputNome}
                 />
-            </div>
-
-            <div className={styles.inserir_foto}>
-                <FaCamera className={styles.icone}/>
-                <label htmlFor="foto">Escolha uma foto</label>
-                <input 
-                type="text" 
-                name="foto" 
-                id="foto" 
-                placeholder='Insira o URL da imagem'
-                ref={inputFoto}/>
-            </div>
-
-            
+            </div>        
             
             <div className={styles.raca}>
                 <p>Raça</p>

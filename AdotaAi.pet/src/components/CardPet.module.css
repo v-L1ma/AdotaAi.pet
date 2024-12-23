@@ -9,18 +9,17 @@
     overflow: hidden;
 }
 
-.imagem{
-    height: 30em;
+.card{
     background-color: #71556b;
     overflow: hidden;
     
 }
 
-.imagem img{
-    
+.card img{
+    height:15em;
     object-fit: cover; /* ajusta a imagem para preencher a div */
     object-position: center; /* opcional: centraliza a imagem */
-    border-radius: 5px 5px 0px 0px;
+    margin-bottom: -5px;
 }
 
 .infos{

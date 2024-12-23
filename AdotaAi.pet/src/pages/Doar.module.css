@@ -154,6 +154,7 @@ input[type=checkbox]{
         "descricao descricao"
         "botao botao";
 
+        box-sizing: border-box;
     }
 
     .nome{
@@ -383,8 +384,17 @@ input[type=checkbox]{
     }
 }
 
-@media (max-width: 1315px){
-    .itens a{
-        font-size: 12px;
+@media (max-width: 950px){
+    .cadastro{
+        display: flex;
+        flex-direction: column;
+        box-sizing: border-box;
+        justify-content: center;
     }
+
+    .nasc{
+        grid-area: nasc;
+        width: 100%;
+    }
+   
 }
