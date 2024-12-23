@@ -24,5 +24,9 @@
 .social{
     font-size: 3em;
     margin: 0.6em 0.3em;
-    
+}
+
+.footer a:hover{
+    text-decoration: none;
+    opacity: 0.96;
 }

@@ -5,6 +5,7 @@ function LoginPopUp({onClick}){
     return(
 
         <div className={styles.container}>
+          <button className={styles.closeBtn_mobile} onClick={onClick}><div>X</div></button>
             <form>                
                 <h1>Conecte-se na sua conta</h1>
                 <h2>Seja bem vindo de volta!</h2>
@@ -40,7 +41,6 @@ function LoginPopUp({onClick}){
               <button className={styles.closeBtn} onClick={onClick}><div>X</div></button>
                 <img src="https://www.doglife.com.br/blog/assets/post/convivencia-entre-cachorros-e-gatos-eles-podem-morar-juntos-61fd55bf76950e477610eca4/convivencia-capa.jpg" alt="" />
               </div>
-
               
         </div>
 
