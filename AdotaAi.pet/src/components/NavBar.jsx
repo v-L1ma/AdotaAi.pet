@@ -44,7 +44,7 @@ function NavBar() {
             </a>
           </li>
           <li>
-            <Link className={styles.itens} to="/cadastre">
+            <Link className={styles.itens} to="/cadastro">
               Cadastre-se
             </Link>
           </li>
@@ -85,7 +85,7 @@ function NavBar() {
                 </a>
               </li>
               <li>
-                <Link className={styles.itens} to="/cadastre">
+                <Link className={styles.itens} to="/cadastro">
                   Cadastre-se
                 </Link>
               </li>
