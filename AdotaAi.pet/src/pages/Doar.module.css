@@ -382,6 +382,27 @@ input[type=checkbox]{
             border: none;
         }
     }
+
+    .aviso {
+        display: flex;
+        align-items: center;
+        background-color: orange;
+        overflow: hidden;
+        border-radius: 2em 0em 0em 2em;
+        padding-right: 2em;
+
+        & p{
+            color: white;
+            font-size: 3em;
+            text-align: center;
+        }
+
+        & img{
+            height: 70vh;
+            width: 70vh;
+            margin-right: 2em;
+        }
+    }
 }
 
 @media (max-width: 950px){

@@ -1,13 +1,22 @@
-import { Link } from "react-router";
+import { Link, useNavigate } from "react-router";
 import styles from "./NavBar.module.css";
 import { useState } from "react";
 import LoginPopUp from "./LoginPopUp";
 import Logo from "../assets/logo.png";
 import { IoMdMenu } from "react-icons/io";
+import { IoLogOutOutline } from "react-icons/io5";
 
 function NavBar() {
   const [abrirPopup, setAbrirPopup] = useState(false);
   const [abrirMenu, setAbrirMenu] = useState(false);
+  const token = localStorage.getItem("token");
+  const navigate = useNavigate()
+
+  function sairDaConta(){
+    localStorage.removeItem('token')
+    alert('Logout concluido')
+    navigate('/')
+  }
 
   function abrir(abrirMenu) {
     setAbrirMenu(!abrirMenu);
@@ -37,18 +46,22 @@ function NavBar() {
           </li>
         </ul>
 
-        <ul>
-          <li>
-            <a className={styles.itens} onClick={() => setAbrirPopup(true)}>
-              Login
-            </a>
-          </li>
-          <li>
-            <Link className={styles.itens} to="/cadastro">
-              Cadastre-se
-            </Link>
-          </li>
-        </ul>
+        {token ? (
+          <button className={styles.logout} onClick={() => sairDaConta()}><IoLogOutOutline /></button>
+        ) : (
+          <ul>
+            <li>
+              <a className={styles.itens} onClick={() => setAbrirPopup(true)}>
+                Login
+              </a>
+            </li>
+            <li>
+              <Link className={styles.itens} to="/cadastro">
+                Cadastre-se
+              </Link>
+            </li>
+          </ul>
+        )}
       </nav>
 
       <nav className={styles.nav_mobile}>
@@ -57,7 +70,7 @@ function NavBar() {
             <img src={Logo} alt="" />
           </Link>
 
-          <button onClick={()=>abrir(abrirMenu)}>
+          <button onClick={() => abrir(abrirMenu)}>
             <IoMdMenu />
           </button>
         </div>
@@ -79,16 +92,27 @@ function NavBar() {
                   Ongs por perto
                 </Link>
               </li>
-              <li>
-                <a className={styles.itens} onClick={() => setAbrirPopup(true)}>
-                  Login
-                </a>
-              </li>
-              <li>
-                <Link className={styles.itens} to="/cadastro">
-                  Cadastre-se
-                </Link>
-              </li>
+            
+              {token ? (
+                <button className={styles.logout} onClick={() => sairDaConta()}><IoLogOutOutline /></button>
+              ) : (
+                <ul>
+                  <li>
+                    <a
+                      className={styles.itens}
+                      onClick={() => setAbrirPopup(true)}
+                    >
+                      Login
+                    </a>
+                  </li>
+                  <li>
+                    <Link className={styles.itens} to="/cadastro">
+                      Cadastre-se
+                    </Link>
+                  </li>
+                </ul>
+              )}
+              
             </ul>
           </div>
         )}

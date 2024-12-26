@@ -27,6 +27,7 @@ function Cadastro(){
     return(
     
         <div className={styles.container}>
+
             <form onSubmit={handleSubmit}>                
                 <h1>Conecte-se na sua conta</h1>
                 <h2>Seja bem vindo de volta!</h2>

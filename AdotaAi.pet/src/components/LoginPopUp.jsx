@@ -6,16 +6,19 @@ import api from '../sevices/api';
 function LoginPopUp({onClick}){
     const emailRef = useRef()
     const senhaRef = useRef()
+    
 
     async function handleSubmit(e){
         e.preventDefault()
         
         try{
-         const data = await api.post('/login', {
+         const {data:token} = await api.post('/login', {
             email: emailRef.current.value,
             password: senhaRef.current.value,
           })
 
+          localStorage.setItem('token', token)
+          console.log(token)
           alert('Login efetuado com sucesso')
         }catch(err){
           alert('Email e/ou senha incorretos')

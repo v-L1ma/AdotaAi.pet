@@ -121,6 +121,29 @@
     color: grey;
 }
 
+.aviso{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    gap: 2em;
+    margin-top: 2em;
+    background-color: #FFF;
+    border-radius: 2em;
+    overflow: hidden;    
+    box-shadow: 2px 2px 20px rgba(0, 0, 0, 0.041);
+
+    & p{
+    color: orange;
+    font-size: 2em;
+    text-align: center;
+    }
+ & img{
+    height: 50vh;
+    width: 50vh;
+ }
+}
+
 
 
 
