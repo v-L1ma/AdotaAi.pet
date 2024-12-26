@@ -44,7 +44,7 @@ function LoginPopUp({onClick}){
                 </div>
                 <p>ou continue com o seu email</p>
                 <input 
-                type="text" 
+                type="email" 
                 placeholder="Email"
                 ref={emailRef}
                 />

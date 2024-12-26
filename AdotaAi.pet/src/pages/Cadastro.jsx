@@ -40,7 +40,7 @@ function Cadastro(){
                 ref={nomeRef}
                 />
                 <input 
-                type="text" 
+                type="email" 
                 placeholder="Email"
                 ref={emailRef}
                 />
