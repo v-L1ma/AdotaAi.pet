@@ -1,48 +1,44 @@
-import { useRef } from 'react';
-import styles from './LoginPopUp.module.css'
-import { FaFacebook, FaGoogle  } from "react-icons/fa";
-import api from '../sevices/api';
+import { useRef } from 'react'
+import styles from '../components/LoginPopUp.module.css'
+import api from '../sevices/api'
 
-function LoginPopUp({onClick}){
+function Cadastro(){
+    const nomeRef = useRef()
     const emailRef = useRef()
     const senhaRef = useRef()
-    
 
     async function handleSubmit(e){
         e.preventDefault()
         
         try{
-         const {data:token} = await api.post('/login', {
+          await api.post('/cadastro', {
+            name: nomeRef.current.value,
             email: emailRef.current.value,
             password: senhaRef.current.value,
           })
 
-          localStorage.setItem('token', token)
-          console.log(token)
-          alert('Login efetuado com sucesso')
+          alert("Usuario cadastrado com sucesso")
         }catch(err){
-          alert('Email e/ou senha incorretos')
+            alert("Erro ao cadastrar o usuario")
+            console.log(err)
         }
     }
 
-
     return(
-
+    
         <div className={styles.container}>
-          <button className={styles.closeBtn_mobile} onClick={onClick}><div>X</div></button>
+
             <form onSubmit={handleSubmit}>                
                 <h1>Conecte-se na sua conta</h1>
                 <h2>Seja bem vindo de volta!</h2>
                 <div className={styles.social}>
-                  <button disabled>
-                  <FaGoogle />
-                    google
-                  </button>
-                  <button disabled>
-                    Facebook
-                  </button>
                 </div>
                 <p>ou continue com o seu email</p>
+                <input 
+                type="text" 
+                placeholder="Nome Completo"
+                ref={nomeRef}
+                />
                 <input 
                 type="email" 
                 placeholder="Email"
@@ -69,7 +65,7 @@ function LoginPopUp({onClick}){
               </form>
               <div className={styles.banner}>
                 
-              <button className={styles.closeBtn} onClick={onClick}><div>X</div></button>
+              <button className={styles.closeBtn}><div>X</div></button>
                 <img src="https://www.doglife.com.br/blog/assets/post/convivencia-entre-cachorros-e-gatos-eles-podem-morar-juntos-61fd55bf76950e477610eca4/convivencia-capa.jpg" alt="" />
               </div>
               
@@ -78,4 +74,4 @@ function LoginPopUp({onClick}){
     )
 }
 
-export default LoginPopUp
+export default Cadastro
