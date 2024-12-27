@@ -1,11 +1,13 @@
 import { useRef } from 'react'
-import styles from '../components/Login/LoginPopUp.module.css'
-import api from '../sevices/api'
+import styles from './CadastroPopUp.module.css'
+import api from '../../sevices/api'
+import { useNavigate } from 'react-router'
 
-function Cadastro(){
+function CadastroPopUp({onClick}){
     const nomeRef = useRef()
     const emailRef = useRef()
     const senhaRef = useRef()
+    const navigate = useNavigate()
 
     async function handleSubmit(e){
         e.preventDefault()
@@ -18,6 +20,7 @@ function Cadastro(){
           })
 
           alert("Usuario cadastrado com sucesso")
+          navigate('/')
         }catch(err){
             alert("Erro ao cadastrar o usuario")
             console.log(err)
@@ -29,43 +32,49 @@ function Cadastro(){
         <div className={styles.container}>
 
             <form onSubmit={handleSubmit}>                
-                <h1>Conecte-se na sua conta</h1>
-                <h2>Seja bem vindo de volta!</h2>
+                <h1>Crie sua conta</h1>
+                <h2>Rápido e fácil!</h2>
                 <div className={styles.social}>
                 </div>
-                <p>ou continue com o seu email</p>
                 <input 
                 type="text" 
                 placeholder="Nome Completo"
                 ref={nomeRef}
+                required
+                />
+                <input 
+                type="text" 
+                placeholder="CPF"
+                />
+                <input 
+                type="tel" 
+                placeholder="Telefone"
+                />
+                <input 
+                type="text" 
+                placeholder="Data de nascimento"
                 />
                 <input 
                 type="email" 
                 placeholder="Email"
                 ref={emailRef}
+                required
                 />
                 <input 
                 type="password"
                 placeholder="Senha" 
-                ref={senhaRef}/>
-                <br />
-                <div className={styles.esqueceu}>
-                  <p>
-                    <input type="checkbox" name="" id="" />
-                    Lembrar de mim
-                  </p>
-                  <p>                    
-                    <a href="">Esqueceu sua senha?</a>
-                  </p>
-                </div>
-                <button type='submit'>Log in</button>
-                <p>
-                  Não possui uma conta? <a href="">Crie uma conta</a>
-                </p>
-              </form>
+                ref={senhaRef}
+                required/>
+                 <input 
+                type="password"
+                placeholder="Confirme sua senha" 
+                />
+                
+                <button type='submit'>Cadastrar</button>
+            </form>
               <div className={styles.banner}>
                 
-              <button className={styles.closeBtn}><div>X</div></button>
+              <button className={styles.closeBtn} onClick={onClick}><div>X</div></button>
                 <img src="https://www.doglife.com.br/blog/assets/post/convivencia-entre-cachorros-e-gatos-eles-podem-morar-juntos-61fd55bf76950e477610eca4/convivencia-capa.jpg" alt="" />
               </div>
               
@@ -74,4 +83,4 @@ function Cadastro(){
     )
 }
 
-export default Cadastro
+export default CadastroPopUp

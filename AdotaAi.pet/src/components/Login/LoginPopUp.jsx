@@ -1,7 +1,7 @@
 import { useRef } from 'react';
 import styles from './LoginPopUp.module.css'
 import { FaFacebook, FaGoogle  } from "react-icons/fa";
-import api from '../sevices/api';
+import api from '../../sevices/api';
 
 function LoginPopUp({onClick}){
     const emailRef = useRef()
