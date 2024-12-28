@@ -39,6 +39,7 @@ header{
     text-decoration: none;
     color: #ffa600;
     font-weight: bolder;
+    list-style: none;
 }
 
 .nav_desktop .itens:hover{
