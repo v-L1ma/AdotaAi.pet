@@ -1,0 +1,50 @@
+.main{
+    height: 100vh;
+    display: flex;
+    width: 90vw;
+    border-radius: 1em;
+    overflow: hidden;
+}
+
+.sideBar{    
+    display: flex;
+    flex-direction: column;
+    width: 20%;
+    background-color: white;
+    padding: 3em;
+    padding-top: 5em;
+    gap: 2em;
+
+    & h1{
+        color: rgba(107, 107, 107, 0.555);
+        font-size: 1.3em;
+    }
+
+    & h2{
+        display: flex;
+        color: rgb(3, 0, 43);
+        align-items: center;
+        gap: 1em;
+        cursor: pointer;
+        border-radius: 0.4em;
+        padding: 0.3em;      
+    }
+
+    & h2:hover{
+        color: orange;
+    }
+
+    & span{
+        display: flex;
+        color: red;
+        align-items: center;
+        gap: 1em;
+        cursor: pointer;
+    }
+
+}
+
+.conteudo{
+    background-color: bisque;
+    width: 80%;
+}

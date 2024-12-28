@@ -6,19 +6,14 @@ import CadastroPopUp from "./Cadastro/CadastroPopUp";
 import Logo from "../assets/logo.png";
 import { IoMdMenu } from "react-icons/io";
 import { IoLogOutOutline } from "react-icons/io5";
+import MenuPerfil from "./MenuPerfil/MenuPerfil.jsx";
 
 function NavBar() {
   const [abrirLoginPopup, setAbrirLoginPopup] = useState(false);
   const [abrirCadastroPopup, setAbrirCadastroPopup] = useState(false);
   const [abrirMenu, setAbrirMenu] = useState(false);
   const token = localStorage.getItem("token");
-  const navigate = useNavigate();
-
-  function sairDaConta() {
-    localStorage.removeItem("token");
-    alert("Logout concluido");
-    navigate("/");
-  }
+  
 
   function abrir(abrirMenu) {
     setAbrirMenu(!abrirMenu);
@@ -49,9 +44,7 @@ function NavBar() {
         </ul>
 
         {token ? (
-          <button className={styles.logout} onClick={() => sairDaConta()}>
-            <IoLogOutOutline />
-          </button>
+          <MenuPerfil/>
         ) : (
           <ul>
             <li>
