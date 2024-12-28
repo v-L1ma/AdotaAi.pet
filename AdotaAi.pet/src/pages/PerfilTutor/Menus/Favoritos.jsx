@@ -1,5 +1,5 @@
 function Favoritos(){
-    return <h1>Favoritos</h1>
+    return <h1>Em desenvolvimento</h1>
 }
 
 export default Favoritos

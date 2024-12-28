@@ -1,7 +1,7 @@
 function Editar(){
     return(
         <div>
-            <h1>Editar</h1>
+            <h1>Em desenvolvimento</h1>
         </div>
     )
 }
