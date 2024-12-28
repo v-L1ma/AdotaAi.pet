@@ -77,16 +77,19 @@ a{
     color: #ffa600c2;
 }
 
-.container button[type=submit]{
+.LogarBtn{
     width: 100%;
     height: 4.5vh;
     border-radius: 0.5em;    
     border: 1px solid rgba(128, 128, 128, 0.212);
     padding-left: 0.5em;
-    background-color: #ffa600c2;
+    background-color: #ffa600;
     color: white;
-    font-weight: bolder;
-
+    font-weight: bolder;    
+    cursor: pointer;
+}
+.LogarBtn:hover{
+    background-color: #d18903;
 }
 
 .banner{

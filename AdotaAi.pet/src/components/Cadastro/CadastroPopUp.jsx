@@ -47,13 +47,13 @@ function CadastroPopUp({onClick}){
                 placeholder="CPF"
                 />
                 <input 
-                type="tel" 
-                placeholder="Telefone"
-                />
-                <input 
-                type="text" 
+                type="date" 
                 placeholder="Data de nascimento"
                 />
+                <input 
+                type="tel" 
+                placeholder="Telefone"
+                />                
                 <input 
                 type="email" 
                 placeholder="Email"
@@ -70,7 +70,7 @@ function CadastroPopUp({onClick}){
                 placeholder="Confirme sua senha" 
                 />
                 
-                <button type='submit'>Cadastrar</button>
+                <button className={styles.cadastrarBtn} type='submit'>Cadastrar</button>
             </form>
               <div className={styles.banner}>
                 

@@ -62,7 +62,7 @@ function LoginPopUp({onClick}){
                     <a href="">Esqueceu sua senha?</a>
                   </p>
                 </div>
-                <button type='submit'>Log in</button>
+                <button className={styles.LogarBtn}type='submit'>Log in</button>
                 <p>
                   Não possui uma conta? <a href="">Crie uma conta</a>
                 </p>
