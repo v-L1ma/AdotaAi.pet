@@ -13,7 +13,6 @@ function Home(){
             <div>
                 <div className={styles.titulo}>
                     <h1>Algumas de nossas fofuras</h1>
-                    <p>Ver mais</p>
                 </div>
                 <div className={styles.gallery}>
 

@@ -70,3 +70,10 @@ h2.nome{
     font-family: Arial, Helvetica, sans-serif;
     width: 90%;
 }
+
+@media (max-width:950px) {
+    .perfil{
+        flex-direction: column;
+        justify-content: center;
+    }
+}

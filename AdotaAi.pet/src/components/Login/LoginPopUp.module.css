@@ -136,10 +136,16 @@ img{
 
 @media (max-width: 950px){
 
+    .container{
+        flex-direction: column;
+        gap: 2em;
+    }
+
     .container form{
         width: 100%;
-        position: relative;
+        padding: 2em;
     }
+    
     .banner{
         display: none;
     }
@@ -150,8 +156,8 @@ img{
         height: 2em;
         position: absolute;
         z-index: 1;
-        left: 88%;
-        top: 4%;
+        left: 85%;
+        top: 3%;
         background-color: orange;
         color: white;
         border-radius: 50%;
@@ -171,6 +177,10 @@ img{
     }
 
     .social button{
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5em;
         width: 48%;
         height: 5vh;
         border: 1px solid rgba(128, 128, 128, 0.452);

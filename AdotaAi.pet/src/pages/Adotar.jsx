@@ -23,7 +23,7 @@ function Adotar() {
   }, [])
 
   return (
-    <main>
+    <main className={styles.main}>
       <div className={styles.disponiveis}>
         <h1>Encontre seu novo amigo</h1>
 
@@ -51,7 +51,7 @@ function Adotar() {
             <select name="" id="">
               <option value="">Todas as cidades</option>
             </select>
-            <input type="text" name="" id="" placeholder="Nome do pet" />
+            <input type="text" name="" id="" placeholder="Nome do pet" className={styles.name} />
 
             <button type="submit">Buscar</button>
           </div>
