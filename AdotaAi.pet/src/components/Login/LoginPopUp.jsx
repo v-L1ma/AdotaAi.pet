@@ -23,6 +23,8 @@ function LoginPopUp({onClick}){
         }catch(err){
           alert('Email e/ou senha incorretos')
         }
+
+        onClick()
     }
 
 
@@ -39,6 +41,7 @@ function LoginPopUp({onClick}){
                     google
                   </button>
                   <button disabled>
+                  <FaFacebook/>
                     Facebook
                   </button>
                 </div>
