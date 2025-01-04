@@ -1,15 +1,17 @@
 import { Link, useNavigate } from "react-router";
-import styles from "./NavBar.module.css";
+import styles from "./Navbar.module.css";
 import { useState } from "react";
-import LoginPopUp from "./Login/LoginPopUp.jsx";
-import CadastroPopUp from "./Cadastro/CadastroPopUp";
-import Logo from "../assets/logo.png";
+import LoginPopUp from "../Login/LoginPopUp.jsx";
+import CadastroPopUp from "../Cadastro/CadastroPopUp.jsx";
+import Logo from "../../assets/logo.png";
 import { IoMdMenu } from "react-icons/io";
 import { IoLogOutOutline } from "react-icons/io5";
-import MenuPerfil from "./MenuPerfil/MenuPerfil.jsx";
+import MenuPerfil from "../MenuPerfil/MenuPerfil.jsx";
+import SlidingPanel from 'react-sliding-side-panel';
+import 'react-sliding-side-panel/lib/index.css';
 
 
-function NavBar() {
+function Navbar() {
   const [abrirLoginPopup, setAbrirLoginPopup] = useState(false);
   const [abrirCadastroPopup, setAbrirCadastroPopup] = useState(false);
   const [abrirMenu, setAbrirMenu] = useState(false);
@@ -83,8 +85,13 @@ function NavBar() {
           </button>
         </div>
 
-        {abrirMenu && (
-          <div className={styles.container_list}>
+        <SlidingPanel
+        type={'right'}
+        isOpen={abrirMenu}
+        size={60}
+        >
+        <div className={styles.container_list}>
+            <button onClick={() => abrir(abrirMenu)}>X</button>
             <ul>
               <li>
                 <Link className={styles.itens} to="/adotar">
@@ -111,7 +118,10 @@ function NavBar() {
                   <li>
                     <a
                       className={styles.itens}
-                      onClick={() => setAbrirLoginPopup(!abrirLoginPopup)}
+                      onClick={() => {
+                        setAbrirLoginPopup(!abrirLoginPopup)
+                        setAbrirMenu(!abrirMenu)
+                    }}
                     >
                       Login
                     </a>
@@ -130,7 +140,10 @@ function NavBar() {
               )}
             </ul>
           </div>
-        )}
+        </SlidingPanel>
+
+        
+
       </nav>
 
       {abrirLoginPopup && (
@@ -150,4 +163,4 @@ function NavBar() {
   );
 }
 
-export default NavBar;
+export default Navbar;
