@@ -8,7 +8,7 @@ import Doar from './pages/Doar'
 import Ongs from './pages/Ongs'
 import Home from './pages/Home'
 import PerfilPet from './pages/PerfilPet/PerfilPet'
-import Cadastro from './pages/Cadastro'
+import Cadastro from './pages/Cadastro/Cadastro'
 import Perfil from './pages/PerfilTutor/Perfil';
 import Editar from './pages/PerfilTutor/Menus/Editar';
 import Senha from './pages/PerfilTutor/Menus/Senha';

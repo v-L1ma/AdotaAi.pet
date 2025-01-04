@@ -14,6 +14,7 @@ function NavBar() {
   const [abrirCadastroPopup, setAbrirCadastroPopup] = useState(false);
   const [abrirMenu, setAbrirMenu] = useState(false);
   const token = localStorage.getItem("token");
+  const navigate = useNavigate()
   
 
   function abrir(abrirMenu) {
@@ -22,6 +23,7 @@ function NavBar() {
 
   function sairDaConta(){
     localStorage.removeItem("token")
+    navigate('/')
   }
 
   return (
@@ -60,13 +62,8 @@ function NavBar() {
                 Login
               </a>
             </li>
-            <li>
-              <a
-                className={styles.itens}
-                onClick={() => setAbrirCadastroPopup(!abrirCadastroPopup)}
-              >
-                Cadastre-se
-              </a>
+            <li >
+                <Link to="/cadastro">Cadastre-se</Link>
             </li>
           </ul>
         )}
@@ -116,15 +113,8 @@ function NavBar() {
                       Login
                     </a>
                   </li>
-                  <li>
-                    <a
-                        className={styles.itens}
-                        onClick={() =>
-                          setAbrirCadastroPopup(!abrirCadastroPopup)
-                        }
-                      >
-                        Cadastre-se
-                      </a>
+                  <li >
+                      <Link to="/cadastro">Cadastre-se</Link>
                   </li>
                 </ul>
               )}
