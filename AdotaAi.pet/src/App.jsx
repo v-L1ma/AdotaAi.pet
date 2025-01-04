@@ -1,7 +1,6 @@
 import { BrowserRouter as Router, Routes, Route} from 'react-router'
 import { useState } from 'react'
 import './App.css'
-import NavBar from './components/NavBar'
 import Footer from './components/Footer'
 import Adotar from './pages/Adotar'
 import Doar from './pages/Doar'
@@ -14,13 +13,14 @@ import Editar from './pages/PerfilTutor/Menus/Editar';
 import Senha from './pages/PerfilTutor/Menus/Senha';
 import Favoritos from './pages/PerfilTutor/Menus/Favoritos'
 import Gerenciar from './pages/PerfilTutor/Menus/Gerenciar'
+import Navbar from './components/Navbar/Navbar'
 
 function App() {
 
   return (
       <Router>
 
-          <NavBar/>
+          <Navbar/>
 
             <Routes>
               <Route path="/" element={<Home/>}/>
