@@ -35,7 +35,7 @@
 }
 
 .filtros button{
-    width: 92%;
+    width: 90%;
     margin-left: 1em;
     color: white;
     font-size: 1.3em;
@@ -45,15 +45,6 @@
     cursor: pointer;
 }
 
-
-.disponiveis > h1{
-    font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
-    font-size: 2em;
-    color: #71556b;
-    margin-bottom: 20px;
-    margin-top: 20px;
-    text-align: left;
-}
 
 .disponiveis{
     margin-top: 30px;
@@ -65,7 +56,7 @@
     font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
     font-size: 2em;
     color: orange;
-    margin-bottom: 40px;
+    margin-bottom: 1em;
 }
 
 .gallery{
@@ -144,6 +135,66 @@
  }
 }
 
+
+@media (max-width:950px) {
+    .main{
+        width: 95vw;
+        margin: 0 auto;
+    }
+
+    .disponiveis h1{
+        text-align: center;
+    }
+
+    .filtros{
+        width: 95;
+    }
+
+    .filtros div{
+        margin: 0;        
+        display: flex;
+        flex-wrap: wrap;
+        gap: 1em;
+        margin: 0 auto;
+    }
+
+    .filtros select{
+        width: 47%;
+        padding: .5em;
+        border-radius: 0.5em;
+        border: 1px solid rgba(0, 0, 0, 0.192);
+        font-size: 1.1em;
+        margin: 0;
+
+    }
+    
+    .filtros input[type=text]{
+        width: 47%;
+        padding: .5em;
+        border-radius: 0.5em;
+        border: 1px solid rgba(0, 0, 0, 0.192);
+        font-size: 1.1em;
+        margin: 0;
+    }
+    
+    .filtros button{
+        width: 100%;
+        margin-left: 0em;
+        color: white;
+        font-size: 1.3em;
+        padding: .5em;
+        border-radius: 0.5em;
+        border: none;
+        cursor: pointer;
+    }
+
+    .aviso{
+        width: 95vw;
+        margin: 2em auto;
+        flex-direction: column-reverse;
+        padding: 2em 2em 0 2em;
+    }
+}
 
 
 

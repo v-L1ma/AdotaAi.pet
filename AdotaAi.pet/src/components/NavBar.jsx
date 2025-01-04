@@ -8,6 +8,7 @@ import { IoMdMenu } from "react-icons/io";
 import { IoLogOutOutline } from "react-icons/io5";
 import MenuPerfil from "./MenuPerfil/MenuPerfil.jsx";
 
+
 function NavBar() {
   const [abrirLoginPopup, setAbrirLoginPopup] = useState(false);
   const [abrirCadastroPopup, setAbrirCadastroPopup] = useState(false);
@@ -17,6 +18,10 @@ function NavBar() {
 
   function abrir(abrirMenu) {
     setAbrirMenu(!abrirMenu);
+  }
+
+  function sairDaConta(){
+    localStorage.removeItem("token")
   }
 
   return (
@@ -77,6 +82,7 @@ function NavBar() {
             <IoMdMenu />
           </button>
         </div>
+
         {abrirMenu && (
           <div className={styles.container_list}>
             <ul>

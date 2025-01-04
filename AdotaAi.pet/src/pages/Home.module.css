@@ -63,20 +63,6 @@ h1{
     display: flex;
     align-items: center;
     justify-content: space-between;
-
-    & p{
-        color: white;
-        background-color: orange;
-        padding: 0.5em;
-        border-radius: 0.4em;
-        font-weight: bolder;
-        cursor: pointer;
-    }
-
-    & p:hover{
-        background-color: rgb(160, 104, 0);
-        transition: 200ms;
-    }
 }
 
 .setas{
@@ -129,28 +115,36 @@ h1{
 
 @media (max-width: 950px) {
     main{
-        width: 90vw;
-        margin: 5em auto;
+        width: 100vw;
+        margin: 0;
+        margin-bottom: 5em;
         box-sizing: border-box;
     }
     
     .banner{
-        margin: 2em auto;   
+        margin: 0;   
     }
     
     .banner img{     
         margin: 0 auto;
-        height: 24em;
-        border-radius: 1.5em;
+        height: 35vh;
+        border-radius: 0;
         box-sizing: border-box;
         box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.411);
     }
 
+    .titulo{
+        text-align: center;
+        margin: 2em auto;
+    }
+
+
     .gallery{
         display: flex;
-        gap: 2em;
+        grid-template-rows: none;
         margin: 1em auto;
-        align-items: center;background-color: antiquewhite;
+        gap: 0;
+        align-items: center;
     }
 
     .card{
@@ -179,6 +173,11 @@ h1{
         align-items: center;
         color: rgba(0, 0, 0, 0.473);
         cursor: pointer;
+    }
+
+    .sobre{
+        width: 90vw;
+        margin: 0 auto;
     }
 }
 

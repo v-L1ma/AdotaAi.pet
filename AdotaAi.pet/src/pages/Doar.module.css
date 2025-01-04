@@ -23,7 +23,7 @@ label{
     font-size: 1.2rem;
 }
 
-input[type=text]{
+.conteudo input[type=text]{
     border-radius: 5px;
     height: 1.4rem;
     margin-left: 10px;
@@ -31,18 +31,18 @@ input[type=text]{
     border: 0.5px solid #766788;
 }
 
-.radio{
+.conteudo .radio{
     height: 16px;
     width: 16px;
     margin-bottom: 20px;        
     border: 2px solid #766788;
 }
 
-input[type='radio']:checked{
+.conteudo input[type='radio']:checked{
     border-color: #f97070;
   }
 
-input[type=checkbox]{
+.conteudo input[type=checkbox]{
     height: 16px;
     width: 16px;
     margin-bottom: 20px;        
@@ -117,8 +117,6 @@ input[type=checkbox]{
 
 /*-----------------------------------estilos para desktop---------------------------------*/
 
-@media screen and (min-width: 768px){
- 
     
     section{
         height: 100vh;
@@ -367,20 +365,22 @@ input[type=checkbox]{
         flex-direction: column;
         align-items: center;
 
-        & input{
-            width: 50%;
-            height: 3em;
-            border-radius: 0.5em;
-            border: 1px solid rgba(0, 0, 0, 0.267);
-        }
+        
+    }
 
-        & input:focus{
-            width: 50%;
-            height: 3em;
-            border-radius: 0.5em;
-            outline: 2px solid rgba(224, 153, 0, 0.897);
-            border: none;
-        }
+    .content input{
+        width: 50%;
+        height: 3em;
+        border-radius: 0.5em;
+        border: 1px solid rgba(0, 0, 0, 0.267);
+    }
+
+    .content input:focus{
+        width: 50%;
+        height: 3em;
+        border-radius: 0.5em;
+        outline: 2px solid rgba(224, 153, 0, 0.897);
+        border: none;
     }
 
     .aviso {
@@ -403,7 +403,7 @@ input[type=checkbox]{
             margin-right: 2em;
         }
     }
-}
+
 
 @media (max-width: 950px){
     .cadastro{
@@ -413,9 +413,74 @@ input[type=checkbox]{
         justify-content: center;
     }
 
+
+    .conteudo{
+        margin: 0 auto;
+        width: 95vw;
+        border-radius: 0.5em;
+    }
+
     .nasc{
-        grid-area: nasc;
         width: 100%;
+        margin-bottom: 0.5em;
+    }
+
+    .sexo select{
+        width: 100%;
+        font-size: 1.5rem;
+        margin-top: 0.5em;
+        border-radius: 0.5em;
+    }
+
+    .perguntas{
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        margin-top: 1em;
+    }
+    
+    .perguntas > div{
+        display: flex;
+        flex-direction: column;
+        margin-top: 0.1em;
+        width: 100%;
+    }
+    
+    .perguntas > div > select{
+        height: 50px;
+        width: 100%;
+        margin-top: 20px;
+        margin-bottom: 0.8em;
+    }
+
+    .save{
+        grid-area: botao;
+        border-radius: 1em;
+        margin: auto;
+        margin-top: 30px;
+        padding: 20px;
+        font-weight: bolder;
+        font-size: 1.4rem;
+        background-color: orange;
+        color: white;
+        border: none;
+        cursor: pointer;
+    }
+
+    .aviso{
+        display: flex;
+        flex-direction: column-reverse;
+        text-align: justify;
+        width: 95vw;
+        margin: 2em auto;
+        padding: 2em 2em 0 2em;
+        border-radius: 0.5em;
+
+        & p{
+            font-size: 2em;
+            margin-bottom: 1em;
+        }
+
     }
    
 }
