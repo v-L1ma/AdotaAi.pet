@@ -52,6 +52,11 @@ header{
     background-color: aqua;
 }
 
+.container_list li{
+    cursor: pointer;
+   
+}
+
 .popup{
     width: 60vw;
     position: fixed;
@@ -92,7 +97,7 @@ header{
         flex-direction: column;
         align-items: center;
         justify-content: space-between;
-        width: 75vw;
+        width: 95vw;
         margin: auto;
         position: relative;
     }

@@ -64,8 +64,8 @@ function Navbar() {
                 Login
               </a>
             </li>
-            <li >
-                <Link to="/cadastro">Cadastre-se</Link>
+            <li>
+                <Link className={styles.itens} to="/cadastro">Cadastre-se</Link>
             </li>
           </ul>
         )}
@@ -85,26 +85,26 @@ function Navbar() {
         <SlidingPanel
         type={'right'}
         isOpen={abrirMenu}
-        size={60}
+        size={80}
         >
         <div className={styles.container_list}>
             <button onClick={() => abrir(abrirMenu)}>X</button>
             <ul>
+            <Link className={styles.itens} to="/adotar">  
               <li>
-                <Link className={styles.itens} to="/adotar">
-                  Quero adotar
-                </Link>
+                Quero adotar
               </li>
+              </Link>
+              <Link className={styles.itens} to="/doar">
               <li>
-                <Link className={styles.itens} to="/doar">
                   Quero doar
-                </Link>
               </li>
+              </Link>
+              <Link className={styles.itens} to="/ongs">
               <li>
-                <Link className={styles.itens} to="/ongs">
                   Ongs por perto
-                </Link>
               </li>
+              </Link>
 
               {token ? (
                 <button className={styles.logout} onClick={() => sairDaConta()}>
@@ -112,20 +112,22 @@ function Navbar() {
                 </button>
               ) : (
                 <ul>
-                  <li>
-                    <a
+                  <a
                       className={styles.itens}
                       onClick={() => {
                         setAbrirLoginPopup(!abrirLoginPopup)
                         setAbrirMenu(!abrirMenu)
                     }}
                     >
+                  <li>                    
                       Login
-                    </a>
                   </li>
+                  </a>
+                  <Link to="/cadastro">
                   <li >
-                      <Link to="/cadastro">Cadastre-se</Link>
+                      Cadastre-se
                   </li>
+                  </Link>
                 </ul>
               )}
             </ul>
