@@ -1,19 +1,29 @@
 .main{
-    height: 100vh;
     display: flex;
-    width: 90vw;
+    
+}
+
+.desktop{
+    display: flex;
+    margin: 0 auto;    
     border-radius: 1em;
     overflow: hidden;
+    width: 90vw;
+}
+
+.mobile{
+    display: none;
 }
 
 .sideBar{    
     display: flex;
     flex-direction: column;
-    width: 20%;
+    width: 25vw;
     background-color: white;
     padding: 3em;
     padding-top: 5em;
-    gap: 2em;
+    gap: 2em;    
+    
 
     & h1{
         color: rgba(107, 107, 107, 0.555);
@@ -45,6 +55,71 @@
 }
 
 .conteudo{
-    background-color: bisque;
+    background-color: #ffffffc9;
     width: 80%;
+}
+
+@media (max-width: 1250px) {
+
+    .sideBar{
+        width: 35vw;
+    }
+}
+
+@media (max-width: 950px) {
+    .main{        
+        margin: 2em auto;
+        display: flex;
+        flex-direction: column;    
+    }
+
+    .mobile{
+        display: flex;
+        flex-direction: column;
+        position: relative;
+        
+    margin: 0 auto;    
+    border-radius: 1em;
+    width: 90vw;
+    
+    }
+
+    .desktop{
+        display: none;
+    }
+
+    .sideBar{
+        width: 90vw;
+        margin: 0 auto;
+        height: 100;
+        justify-content: center;
+        border-radius: 0.5em;
+    }
+
+    .conteudo{
+        position: absolute;
+        z-index: 2;
+        background-color: white;
+        width: 100%;
+        height: 100%;
+        overflow: scroll;
+        border-radius: 0.5em;
+    }
+
+    .voltar{
+        appearance: none;
+        display: flex;
+        justify-content: center;
+        margin: 1em;
+        padding: 0.5em;
+        cursor: pointer;
+        border: none;
+        background-color: transparent;
+        font-size: 1.2em;
+        font-weight: bolder;
+    }
+
+
+
+    
 }
