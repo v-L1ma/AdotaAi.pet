@@ -9,6 +9,7 @@ import { IoLogOutOutline } from "react-icons/io5";
 import MenuPerfil from "../MenuPerfil/MenuPerfil.jsx";
 import SlidingPanel from 'react-sliding-side-panel';
 import 'react-sliding-side-panel/lib/index.css';
+import { toast } from "react-toastify";
 
 
 function Navbar() {
@@ -25,6 +26,7 @@ function Navbar() {
 
   function sairDaConta(){
     localStorage.removeItem("token")
+    toast.success('Conta desconectada com sucesso')
     navigate('/')
   }
 
@@ -83,7 +85,7 @@ function Navbar() {
         </div>
 
         <SlidingPanel
-        type={'right'}
+        type='right'
         isOpen={abrirMenu}
         size={80}
         >

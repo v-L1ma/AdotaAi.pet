@@ -2,11 +2,11 @@ import { useRef } from 'react';
 import styles from './LoginPopUp.module.css'
 import { FaFacebook, FaGoogle  } from "react-icons/fa";
 import api from '../../sevices/api';
+import { toast } from 'react-toastify';
 
 function LoginPopUp({onClick}){
     const emailRef = useRef()
     const senhaRef = useRef()
-    
 
     async function handleSubmit(e){
         e.preventDefault()
@@ -19,9 +19,10 @@ function LoginPopUp({onClick}){
 
           localStorage.setItem('token', token)
           console.log(token)
-          alert('Login efetuado com sucesso')
+          toast.success('Login efetuado com sucesso')
+         
         }catch(err){
-          alert('Email e/ou senha incorretos')
+          toast.error('Login e/ou senha inválidos')
         }
 
         onClick()

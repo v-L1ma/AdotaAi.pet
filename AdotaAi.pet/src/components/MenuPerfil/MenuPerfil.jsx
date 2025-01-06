@@ -1,6 +1,8 @@
 import { Link, useNavigate } from "react-router";
 import { CgProfile } from "react-icons/cg";
 import styles from './MenuPerfil.module.css';
+import  { toast } from 'react-toastify';
+
 
 function MenuPerfil({onClick}){
 
@@ -8,9 +10,22 @@ function MenuPerfil({onClick}){
 
   function sairDaConta() {
     localStorage.removeItem("token");
-    alert("Logout concluido");
     navigate("/");
   }
+
+  const notify = () => toast.success('🦄 Wow so easy!', {
+    position: "top-center",
+    autoClose: 5000,
+    hideProgressBar: false,
+    closeOnClick: false,
+    pauseOnHover: true,
+    draggable: true,
+    progress: undefined,
+    theme: "colored",
+    });
+  
+
+
 
     return(
       <>
@@ -24,6 +39,7 @@ function MenuPerfil({onClick}){
             <Link to="/perfil">Meu perfil</Link>
           </p>
           <button className={styles.opcao} type="submit" onClick={sairDaConta}>Sair</button>
+          
         </div>
       </div>
 

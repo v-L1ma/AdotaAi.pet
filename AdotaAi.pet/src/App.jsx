@@ -15,10 +15,11 @@ import Favoritos from './pages/PerfilTutor/Menus/Favoritos'
 import Gerenciar from './pages/PerfilTutor/Menus/Gerenciar'
 import Navbar from './components/Navbar/Navbar'
 
+
 function App() {
 
   return (
-      <Router>
+      <Router> 
 
           <Navbar/>
 
