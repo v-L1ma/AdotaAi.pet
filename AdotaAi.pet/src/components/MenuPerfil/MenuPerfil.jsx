@@ -13,10 +13,11 @@ function MenuPerfil({onClick}){
   }
 
     return(
+      <>
         <div className={styles.dropdown}>
         <div className={styles.button}>
          <span><CgProfile/></span>
-         <p>Username</p>
+         <p>Olá, Username</p>
         </div>
         <div className={styles.dropdown_options}>
           <p className={styles.opcao}>
@@ -25,6 +26,16 @@ function MenuPerfil({onClick}){
           <button className={styles.opcao} type="submit" onClick={sairDaConta}>Sair</button>
         </div>
       </div>
+
+      <div className={styles.mobile}>
+      <Link to="/perfil">
+        <div className={styles.button}>
+         <span><CgProfile/></span>
+         <p>Olá, Username</p>
+        </div>
+      </Link>
+      </div>
+    </>
     )
 }
 

@@ -3,6 +3,10 @@
     position: relative;
   }
 
+.mobile{
+  display: none;
+}
+
 .button{
   color: orange;
   cursor: pointer;
@@ -48,4 +52,16 @@
   
   .dropdown:hover .dropdown_options {
     display: flex;
+  }
+
+
+  @media (max-width:950px) {
+    .dropdown{
+      display: none;
+    }
+
+    .mobile{
+      display: flex;
+      justify-content: center;
+    }
   }

@@ -9,7 +9,7 @@ import Home from './pages/Home'
 import PerfilPet from './pages/PerfilPet/PerfilPet'
 import Cadastro from './pages/Cadastro/Cadastro'
 import Perfil from './pages/PerfilTutor/Perfil';
-import Editar from './pages/PerfilTutor/Menus/Editar';
+import Editar from './pages/PerfilTutor/Menus/Editar/Editar';
 import Senha from './pages/PerfilTutor/Menus/Senha';
 import Favoritos from './pages/PerfilTutor/Menus/Favoritos'
 import Gerenciar from './pages/PerfilTutor/Menus/Gerenciar'

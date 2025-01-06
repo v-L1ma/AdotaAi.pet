@@ -88,8 +88,15 @@ function Navbar() {
         size={80}
         >
         <div className={styles.container_list}>
-            <button onClick={() => abrir(abrirMenu)}>X</button>
+            <button className={styles.close} onClick={() => abrir(abrirMenu)}>X</button>
             <ul>
+              {
+                token && (                  
+                <li>
+                <MenuPerfil/>
+                </li>
+                )
+              }
             <Link className={styles.itens} to="/adotar">  
               <li>
                 Quero adotar
@@ -107,9 +114,11 @@ function Navbar() {
               </Link>
 
               {token ? (
-                <button className={styles.logout} onClick={() => sairDaConta()}>
-                  <IoLogOutOutline />
+                <>
+                <button className={styles.logout} onClick={() => sairDaConta()}>                
+                  <p><IoLogOutOutline /> Sair</p>
                 </button>
+                </>
               ) : (
                 <ul>
                   <a
