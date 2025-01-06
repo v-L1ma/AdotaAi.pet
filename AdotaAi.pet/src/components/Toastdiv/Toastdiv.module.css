@@ -1,0 +1,6 @@
+.toastcontainer {
+    position: fixed; /* Garante que os toasts não afetem o layout */
+    top: 20px; /* Ajusta o espaço no topo */
+    right: 20px; /* Ajusta o espaço à direita */
+    z-index: 9999; /* Garante que o toast apareça acima de outros elementos */
+  }
