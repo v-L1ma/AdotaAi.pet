@@ -14,7 +14,7 @@ function Toastdiv(){
         pauseOnFocusLoss
         draggable
         pauseOnHover
-        theme="light"
+        theme="colored"
         />
         </div>
     )
