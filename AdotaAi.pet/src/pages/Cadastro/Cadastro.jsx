@@ -1,29 +1,32 @@
-import { useRef } from 'react'
+import { useForm } from "react-hook-form"
 import styles from './Cadastro.module.css'
 import api from '../../sevices/api'
-import { useNavigate } from 'react-router'
+import {yupResolver} from '@hookform/resolvers/yup'
+import { userValidationSchema } from "../../utils/userValidation"
+import { toast } from 'react-toastify';
 
-function Cadastro({onClick}){
-    const nomeRef = useRef()
-    const emailRef = useRef()
-    const senhaRef = useRef()
-    const navigate = useNavigate()
+function Cadastro(){
+    const { register, handleSubmit, reset, formState: { errors }} = useForm({
+        resolver: yupResolver(userValidationSchema)
+    })
 
-    async function handleSubmit(e){
-        e.preventDefault()
+    const onSubmit = async (data) => {
         
         try{
           await api.post('/cadastro', {
-            name: nomeRef.current.value,
-            email: emailRef.current.value,
-            password: senhaRef.current.value,
+            name: data.fullname,
+            email: data.email,
+            password: data.password,          
+            cpf: data.cpf, 
+            birthdate: data.birthdate,
+            phone: data.phone
           })
 
-          alert("Usuario cadastrado com sucesso")
-          navigate('/')
+          toast.success("Usuario cadastrado com sucesso")
+          reset()     
         }catch(err){
-            alert("Erro ao cadastrar o usuario")
-            console.log(err)
+          toast.error("Erro ao cadastrar o usuario")
+          console.log(err)
         }
     }
 
@@ -31,7 +34,7 @@ function Cadastro({onClick}){
     
         <div className={styles.container}>
 
-            <form onSubmit={handleSubmit}>                
+            <form onSubmit={handleSubmit(onSubmit)}>                
                 <h1>Crie sua conta</h1>
                 <h2>Rápido e fácil!</h2>
                 <div className={styles.social}>
@@ -39,44 +42,62 @@ function Cadastro({onClick}){
                 <input 
                 type="text" 
                 placeholder="Nome Completo"
-                ref={nomeRef}
-                required
+                name="fullname"
+                id="fullname"
+                {...register('fullname')}
                 />
+                <div className={styles.erros}>{errors.fullname?.message}</div>
                 <input 
                 type="text" 
                 placeholder="CPF"
+                name="cpf"
+                id="cpf"
+                {...register('cpf')}
                 />
+                <div className={styles.erros}>{errors.cpf?.message}</div>
                 <input 
                 type="date" 
                 placeholder="Data de nascimento"
+                name="birthdate"
+                id="birthdate"
+                {...register('birthdate')}
                 />
+                <div className={styles.erros}>{errors.birthdate?.message}</div>
                 <input 
                 type="tel" 
                 placeholder="Telefone"
-                />                
+                name="phone"
+                id="phone"
+                {...register('phone')}
+                />   
+                <div className={styles.erros}>{errors.phone?.message}</div>             
                 <input 
                 type="email" 
                 placeholder="Email"
-                ref={emailRef}
-                required
+                name="email"
+                id="email"
+                {...register('email')}
                 />
+                <div className={styles.erros}>{errors.email?.message}</div>
                 <input 
                 type="password"
                 placeholder="Senha" 
-                ref={senhaRef}
-                required/>
+                name="password"
+                id="password"
+                {...register('password')}
+                />
+                <div className={styles.erros}>{errors.password?.message}</div>
                  <input 
                 type="password"
                 placeholder="Confirme sua senha" 
+                name="confirmpassword"
+                id="confirmpassword"
+                {...register('confirmpassword')}
                 />
+                <div className={styles.erros}>{errors.confirmpassword?.message}</div>
                 
                 <button className={styles.cadastrarBtn} type='submit'>Cadastrar</button>
             </form>
-              <div className={styles.banner}>
-                
-              
-                <img src="https://www.doglife.com.br/blog/assets/post/convivencia-entre-cachorros-e-gatos-eles-podem-morar-juntos-61fd55bf76950e477610eca4/convivencia-capa.jpg" alt="" />
-              </div>
               
         </div>
 

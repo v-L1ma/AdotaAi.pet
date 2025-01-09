@@ -74,7 +74,7 @@ function LoginPopUp({onClick}){
               <div className={styles.banner}>
                 
               <button className={styles.closeBtn} onClick={onClick}><div>X</div></button>
-                <img src="https://www.doglife.com.br/blog/assets/post/convivencia-entre-cachorros-e-gatos-eles-podem-morar-juntos-61fd55bf76950e477610eca4/convivencia-capa.jpg" alt="" />
+                
               </div>
               
         </div>

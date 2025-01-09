@@ -1,4 +1,4 @@
-import { Link, useNavigate } from "react-router";
+import { Link, useNavigate} from "react-router";
 import styles from "./Navbar.module.css";
 import { useState } from "react";
 import LoginPopUp from "../Login/LoginPopUp.jsx";
@@ -18,6 +18,7 @@ function Navbar() {
   const [abrirMenu, setAbrirMenu] = useState(false);
   const token = localStorage.getItem("token");
   const navigate = useNavigate()
+  
   
 
   function abrir(abrirMenu) {

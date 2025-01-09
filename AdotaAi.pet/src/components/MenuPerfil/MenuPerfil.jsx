@@ -6,26 +6,13 @@ import  { toast } from 'react-toastify';
 
 function MenuPerfil({onClick}){
 
-  const navigate = useNavigate();
+  const navigate = useNavigate()
 
-  function sairDaConta() {
-    localStorage.removeItem("token");
-    navigate("/");
+  function sairDaConta(){
+    localStorage.removeItem("token")
+    toast.success('Conta desconectada com sucesso')
+    navigate('/')
   }
-
-  const notify = () => toast.success('🦄 Wow so easy!', {
-    position: "top-center",
-    autoClose: 5000,
-    hideProgressBar: false,
-    closeOnClick: false,
-    pauseOnHover: true,
-    draggable: true,
-    progress: undefined,
-    theme: "colored",
-    });
-  
-
-
 
     return(
       <>
@@ -38,7 +25,7 @@ function MenuPerfil({onClick}){
           <p className={styles.opcao}>
             <Link to="/perfil">Meu perfil</Link>
           </p>
-          <button className={styles.opcao} type="submit" onClick={sairDaConta}>Sair</button>
+          <button className={styles.opcao} onClick={sairDaConta}>Sair</button>
           
         </div>
       </div>
