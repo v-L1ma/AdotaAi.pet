@@ -4,11 +4,11 @@ import { IoIosArrowDropleft, IoIosArrowDropright } from "react-icons/io";
 
 function Home(){
     return(
-        <main>
-            
+        <>
             <div className={styles.banner}>
                 <img src="https://corredorsolidario.baluxpet.com.br/wp-content/uploads/2018/02/banner-site.jpg" alt="" />
             </div>
+            <main>
 
             <div>
                 <div className={styles.titulo}>
@@ -43,6 +43,7 @@ function Home(){
             </div>
 
         </main>
+        </>
     )
 }
 

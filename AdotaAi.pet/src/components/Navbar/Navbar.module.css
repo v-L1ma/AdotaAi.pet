@@ -24,8 +24,8 @@ header{
 }
 
 .nav_desktop img{
-    width: 4em;
-    height: 4em;
+    width: 5em;
+    height: 5em;
 }
 
 .nav_desktop ul{
@@ -35,17 +35,19 @@ header{
 }
 
 .nav_desktop .itens{
-    font-size: 1.2em;
+    font-size: 1.3em;
     text-decoration: none;
-    color: #ffa600;
+    color: #000000d8;
     font-weight: bolder;
     list-style: none;
+    padding: 1.2em;
 }
 
 .nav_desktop .itens:hover{
     border-bottom: 5px solid orange;
     padding-bottom: .7em;
     transition: border 100ms;
+    padding: 1.2em;
 }
 
 .nav_desktop .cadastrar{

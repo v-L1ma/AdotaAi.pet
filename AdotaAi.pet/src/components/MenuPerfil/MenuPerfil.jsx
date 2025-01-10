@@ -19,7 +19,6 @@ function MenuPerfil({onClick}){
         <div className={styles.dropdown}>
         <div className={styles.button}>
          <span><CgProfile/></span>
-         <p>Olá, Username</p>
         </div>
         <div className={styles.dropdown_options}>
           <p className={styles.opcao}>

@@ -1,5 +1,5 @@
 import { BrowserRouter as Router, Routes, Route} from 'react-router'
-import { useState } from 'react'
+import React, { createContext, useState, useEffect } from 'react';
 import './App.css'
 import Footer from './components/Footer'
 import Adotar from './pages/Adotar'
@@ -14,11 +14,26 @@ import Senha from './pages/PerfilTutor/Menus/Senha';
 import Favoritos from './pages/PerfilTutor/Menus/Favoritos'
 import Gerenciar from './pages/PerfilTutor/Menus/Gerenciar'
 import Navbar from './components/Navbar/Navbar'
+import AuthContext from './context/AuthContext'
+
 
 
 function App() {
 
+    
+  const [userInfo, setUserInfo] = useState(() => {
+
+    const savedState = localStorage.getItem('userInfo');
+    return savedState ? JSON.parse(savedState) : { user: null };
+  });
+
+  useEffect(() => {
+    // Salvar no localStorage sempre que o estado mudar
+    localStorage.setItem('userInfo', JSON.stringify(userInfo));
+  }, [userInfo]);
+
   return (
+    <AuthContext.Provider value={{userInfo, setUserInfo}}>
       <Router> 
 
           <Navbar/>
@@ -37,11 +52,11 @@ function App() {
                   <Route path="Gerenciar" element={<Gerenciar/>}/>
               </Route>
 
-
             </Routes>
             
           <Footer/>
       </Router>
+      </AuthContext.Provider>
   )
 }
 
