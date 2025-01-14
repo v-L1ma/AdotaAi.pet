@@ -8,10 +8,15 @@ function PerfilPet(){
 
     const { id } = useParams()
     const [animal, setAnimal] = useState([])
+
+    const token = localStorage.getItem('token')
    
 
     async function infoAnimal(id){
-        const infoFromApi = await api.get(`/animais/${id}`)
+
+        const infoFromApi =  await api.get(`/animais/${id}`, {
+            headers: {Authorization: `Bearer ${token}`}
+          })
         setAnimal(infoFromApi.data)
     }
 
@@ -25,7 +30,7 @@ function PerfilPet(){
     return(
         <main>
             <div className={styles.container}>
-                <img src={animal.foto || "https://img.freepik.com/vetores-premium/nenhuma-foto-disponivel-icone-vetorial-simbolo-de-imagem-padrao-imagem-em-breve-para-site-ou-aplicativo-movel_87543-10615.jpg"} alt="foto do pet" />
+                <img src={`https://drive.google.com/thumbnail?id=${animal.Picture}&sz=s4000` || "https://img.freepik.com/vetores-premium/nenhuma-foto-disponivel-icone-vetorial-simbolo-de-imagem-padrao-imagem-em-breve-para-site-ou-aplicativo-movel_87543-10615.jpg"} alt="foto do pet" />
                 <div className={styles.sobre}>
                     <h1>{animal.nome}</h1>  
                     <p className={styles.loc}><FaLocationDot/>Santos, SP</p>

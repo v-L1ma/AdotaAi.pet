@@ -4,10 +4,7 @@ import { MdEdit } from "react-icons/md";
 import AuthContext from '../../../../context/AuthContext';
 
 function Editar(){
-    const userPhoto = "https://plus.unsplash.com/premium_photo-1682096259050-361e2989706d?q=80&w=1170&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
 
-    const [backgroundImage, setBackgroundImage] = 
-    useState(`url(${userPhoto})`);
     const [isDisabled, setIsDisabled] = useState(true)
     const {userInfo, setUserInfo} = useContext(AuthContext)
 
@@ -18,11 +15,7 @@ function Editar(){
     return(
         <div className={styles.container}>
             <div className={styles.foto}>
-                <div className={styles.photofield} style={{
-                     backgroundImage: backgroundImage
-                }}>
-                </div>
-
+                <img src={`https://drive.google.com/thumbnail?id=${userInfo.Picture}`} alt="" />
                 <div>
                 <button>Alterar foto</button>
                 <p>Recomendado 800x800, no mínimo. <br /> JPG ou PNG são permitidos.</p>

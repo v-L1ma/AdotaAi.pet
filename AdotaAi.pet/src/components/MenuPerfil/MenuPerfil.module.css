@@ -8,19 +8,22 @@
 }
 
 .button{
-  color: orange;
+  color: #03002b;
   cursor: pointer;
   display: flex;
   align-items: center;
+  justify-content: center;
+  padding: 0.5em;
 
   & p{
-    color: orange;
+    color: #03002b;
   }
-  & span{
-    font-size: 3em;
-    padding-top: .3em;
-    margin-right: 0.2em;
-  }
+}
+
+.button img{
+  height: 3em;
+  width: 3em;
+  border-radius: 50%;
 }
 
   .dropdown_options {
@@ -32,7 +35,12 @@
     z-index: 1;
     width: 10.5em;
     border-radius: 0 0 .2em .2em;
-    box-shadow: -1px 20px 20px 0px #00000052;
+    box-shadow: -1px 20px 20px 0px #ffffff00;
+    left: -3.5em;
+    top: 3.8em;
+    border-right: 1px solid #03002b4b;
+    border-bottom: 1px solid #03002b4b;
+    border-left: 1px solid #03002b4b;
   }
 
 .opcao{
@@ -40,7 +48,7 @@
     padding: 1em;
     border: none;
     background-color: white;
-    color: orange;
+    color: #03002b;
     text-align: center;
     font-size: 1em;
     cursor: pointer;

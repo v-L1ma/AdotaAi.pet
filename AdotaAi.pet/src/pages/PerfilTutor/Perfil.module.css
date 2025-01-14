@@ -1,6 +1,7 @@
 .main{
     display: flex;
-    
+    margin-top: 3em;
+    margin-bottom: 3em;
 }
 
 .desktop{
@@ -32,7 +33,7 @@
 
     & h2{
         display: flex;
-        color: rgb(3, 0, 43);
+        color: #03002b;
         align-items: center;
         gap: 1em;
         cursor: pointer;

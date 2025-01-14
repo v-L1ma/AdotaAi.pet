@@ -35,16 +35,16 @@ header{
 }
 
 .nav_desktop .itens{
-    font-size: 1.3em;
+    font-size: 1.2em;
     text-decoration: none;
-    color: #000000d8;
+    color: #03002b;
     font-weight: bolder;
     list-style: none;
     padding: 1.2em;
 }
 
 .nav_desktop .itens:hover{
-    border-bottom: 5px solid orange;
+    border-bottom: 5px solid #03002b;
     padding-bottom: .7em;
     transition: border 100ms;
     padding: 1.2em;

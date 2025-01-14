@@ -12,6 +12,10 @@
     display: none;
 }
 
+.container img{
+    height: 5em;
+}
+
 .container form{
     display: flex;
     flex-direction: column;

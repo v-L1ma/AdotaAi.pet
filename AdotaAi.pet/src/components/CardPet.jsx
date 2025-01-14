@@ -10,7 +10,7 @@ function CardPet({animais}){
         <div  className={styles.card} key={animais.id}>
             <Link to={`/adotar/animal/${animais.id}`}>
                     <div className={styles.imagem}>
-                        <img src={animais.foto || "https://img.freepik.com/vetores-premium/nenhuma-foto-disponivel-icone-vetorial-simbolo-de-imagem-padrao-imagem-em-breve-para-site-ou-aplicativo-movel_87543-10615.jpg"} alt=""/>
+                        <img src={`https://drive.google.com/thumbnail?id=${animais.Picture}&sz=s4000`|| "https://img.freepik.com/vetores-premium/nenhuma-foto-disponivel-icone-vetorial-simbolo-de-imagem-padrao-imagem-em-breve-para-site-ou-aplicativo-movel_87543-10615.jpg"} alt=""/>
                     </div>
                         <div className={styles.infos}>
                             <h1 className={styles.nome}>

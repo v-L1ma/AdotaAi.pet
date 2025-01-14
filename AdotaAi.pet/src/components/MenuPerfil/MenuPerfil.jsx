@@ -2,6 +2,8 @@ import { Link, useNavigate } from "react-router";
 import { CgProfile } from "react-icons/cg";
 import styles from './MenuPerfil.module.css';
 import  { toast } from 'react-toastify';
+import { useContext } from "react";
+import AuthContext from '../../context/AuthContext.jsx';
 
 
 function MenuPerfil({onClick}){
@@ -13,17 +15,18 @@ function MenuPerfil({onClick}){
     toast.success('Conta desconectada com sucesso')
     navigate('/')
   }
+  const {userInfo, setUserInfo} = useContext(AuthContext)
 
     return(
       <>
         <div className={styles.dropdown}>
         <div className={styles.button}>
-         <span><CgProfile/></span>
+         <img src={`https://drive.google.com/thumbnail?id=${userInfo.Picture}`} alt="" />
         </div>
         <div className={styles.dropdown_options}>
-          <p className={styles.opcao}>
-            <Link to="/perfil">Meu perfil</Link>
-          </p>
+          
+            <Link to="/perfil"><p className={styles.opcao}>Meu perfil</p></Link>
+          
           <button className={styles.opcao} onClick={sairDaConta}>Sair</button>
           
         </div>
@@ -32,7 +35,7 @@ function MenuPerfil({onClick}){
       <div className={styles.mobile}>
       <Link to="/perfil">
         <div className={styles.button}>
-         <span><CgProfile/></span>
+         <span><img src={`https://drive.google.com/thumbnail?id=${userInfo.Picture}`} alt="" /></span>
          <p>Olá, Username</p>
         </div>
       </Link>

@@ -41,6 +41,11 @@
     color: rgb(3, 0, 43);
 }
 
+.foto img{
+    border-radius: 50%;
+    width: 10em;
+    height: 10em;
+}
 .info{
     border: 1px solid black;
     margin: 3em;
