@@ -3,105 +3,94 @@ import { useNavigate } from "react-router";
 import styles from "./Doar.module.css";
 import { FaCamera } from "react-icons/fa";
 import api from "../sevices/api";
-import { toast } from 'react-toastify'
+import { toast } from "react-toastify";
 
 function Doar() {
-  const inputNome = useRef();
-  const inputRaca = useRef();
-  const inputFoto = useRef();
-  const inputDataNasc = useRef();
-  const inputSexo = useRef();
-  const selectVacinado = useRef();
-  const selectCastrado = useRef();
-  const selectVermifugado = useRef();
-  const inputDesc = useRef();
-  const navigate = useNavigate();
-
 
   const token = localStorage.getItem("token");
 
-  const validarFormulario = () => {
-    if (
-      inputNome.current.value === "" ||
-      inputRaca.current.value === "" ||
-      inputFoto.current.value === "" ||
-      inputDataNasc.current.value === "" ||
-      inputSexo.current.value === "" ||
-      selectVacinado.current.value === "" ||
-      selectCastrado.current.value === "" ||
-      selectVermifugado.current.value === "" ||
-      inputDesc.current.value === ""
-    ) {
-      toast.error("Por favor, preencha todos os campos obrigatórios.");
-      return false;
-    }
-    return true;
+  const [formData, setFormData] = useState({
+    nome: "",
+    raca: "",
+    sexo: "",
+    vacinado: "",
+    castrado: "",
+    vermifugado: "",
+    descricao: "",
+  });
+
+  const [file, setFile] = useState(null); // Para armazenar o arquivo
+
+  const handleChange = (e) => {
+    setFormData({
+      ...formData,
+      [e.target.name]: e.target.value,
+    });
   };
 
-  async function cadastrarAnimais(e) {
-    e.preventDefault()
+  const handleFileChange = (e) => {
+    setFile(e.target.files[0]); // Armazena o arquivo selecionado
+  };
 
-    if(validarFormulario()==false){
-      return;
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    try {
+      const formDataToSend = new FormData();
+      formDataToSend.append("file", file); // Adiciona o arquivo ao FormData
+
+      // Adiciona os outros campos ao FormData
+      for (const key in formData) {
+        formDataToSend.append(key, formData[key]);
+      }
+
+      // Faz o POST para a rota /cadastro
+      const response = await api.post("/animais", formDataToSend, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      console.log(response.data);
+      toast.success("Usuário cadastrado com sucesso!");
+    } catch (error) {
+      console.error(error);
+      toast.error("Erro ao cadastrar o usuário");
     }
-
-    try{      
-      await api.post("/animais", {
-      nome: inputNome.current.value,
-      raca: inputRaca.current.value,
-      foto: inputFoto.current.value,
-      datanasc: inputDataNasc.current.value,
-      sexo: inputSexo.current.value,
-      vacinado: selectVacinado.current.value,
-      castrado: selectCastrado.current.value,
-      vermifugado: selectVermifugado.current.value,
-      descricao: inputDesc.current.value,
-    });
-
-    toast.success('Animal cadatrado')
-    navigate('/')
-  
-  } catch(e){
-    console.log(console.e)
-    toast.error('Erro ao cadastrar o animal.')
-  }
-  }
+  };
 
   return (
     <main>
       <div className={styles.disponiveis}>
-        {token 
-        ? <div>
+        {token ? (
+          <div>
             <h1>Primeiro passo para o novo lar</h1>
             <div className={styles.conteudo}>
-              <form className={styles.cadastro}>
+              <form className={styles.cadastro} onSubmit={handleSubmit}>
                 <div className={styles.inserir_foto}>
                   <FaCamera className={styles.icone} />
                   <label htmlFor="foto">Escolha uma foto</label>
-                  <input
-                    type="text"
-                    name="foto"
-                    id="foto"
-                    placeholder="Insira o URL da imagem"
-                    ref={inputFoto}
-                    
-                  />
+                  <input type="file" onChange={handleFileChange} required />
                 </div>
                 <div className={styles.nome}>
                   <p>Nome</p>
                   <input
-                    placeholder="Insira o nome do animal"
                     type="text"
-                    name="nomePet"
-                    id="nomePet"
-                    ref={inputNome}
+                    name="nome"
+                    placeholder="Nome"
+                    value={formData.nome}
+                    onChange={handleChange}
                     required
                   />
                 </div>
                 <div className={styles.raca}>
                   <p>Raça</p>
-                  <select id="raças" name="raças" ref={inputRaca} required>
-                    <option disabled defaultValue>
+                  <select name="raca"
+                    value={formData.raca}
+                    onChange={handleChange}
+                    required>
+                    <option disabled value="">
                       -- Escolha uma raça --
                     </option>
                     <option value="Vira-lata">Vira-lata (indefinida)</option>
@@ -138,13 +127,19 @@ function Doar() {
                     <option value="jack-russell-terrier">
                       Jack Russell Terrier
                     </option>
-                    <option value="labrador-retriever">Labrador Retriever</option>
+                    <option value="labrador-retriever">
+                      Labrador Retriever
+                    </option>
                     <option value="lhasa-apso">Lhasa Apso</option>
-                    <option value="malamute-do-alasca">Malamute do Alasca</option>
+                    <option value="malamute-do-alasca">
+                      Malamute do Alasca
+                    </option>
                     <option value="mastiff-ingles">Mastiff Inglês</option>
                     <option value="mastim-napolitano">Mastim Napolitano</option>
                     <option value="pastor-alemao">Pastor Alemão</option>
-                    <option value="pastor-australiano">Pastor Australiano</option>
+                    <option value="pastor-australiano">
+                      Pastor Australiano
+                    </option>
                     <option value="poodle">Poodle</option>
                     <option value="pug">Pug</option>
                     <option value="rottweiler">Rottweiler</option>
@@ -164,12 +159,23 @@ function Doar() {
                 </div>
                 <div className={styles.nasc}>
                   <p>Data de nascimento</p>
-                  <input type="date" name="nasc" id="nasc" ref={inputDataNasc} required />
+                  <input
+                    type="date"
+                    name="datanasc"
+                    value={formData.datanasc}
+                    onChange={handleChange}
+                    required
+                  />
                 </div>
                 <div className={styles.sexo}>
                   <p>Sexo:</p>
-                  <select name="" id="" ref={inputSexo} required>
-                    <option disabled>Escolha o sexo</option>
+                  <select
+                    name="sexo"
+                    value={formData.sexo}
+                    onChange={handleChange}
+                    required
+                  >
+                    <option disabled value="">Escolha o sexo</option>
                     <option value="Macho">Macho</option>
                     <option value="Femea">Fêmea</option>
                   </select>
@@ -177,21 +183,36 @@ function Doar() {
                 <div className={styles.perguntas}>
                   <div>
                     <label htmlFor="vacinado">Vacinado?</label>
-                    <select name="" id="" ref={selectVacinado} required>
+                    <select
+                      name="vacinado"
+                      value={formData.vacinado}
+                      onChange={handleChange}
+                      required
+                    >
                       <option value="Sim">Sim</option>
                       <option value="Nao">Não</option>
                     </select>
                   </div>
                   <div>
                     <label htmlFor="castrado">Castrado?</label>
-                    <select name="" id="" ref={selectCastrado} required>
+                    <select
+                      name="castrado"
+                      value={formData.castrado}
+                      onChange={handleChange}
+                      required
+                    >
                       <option value="Sim">Sim</option>
                       <option value="Nao">Não</option>
                     </select>
                   </div>
                   <div>
                     <label htmlFor="vermifugado">vermifugado?</label>
-                    <select name="" id="" ref={selectVermifugado} required>
+                    <select
+                      name="vermifugado"
+                      value={formData.vermifugado}
+                      onChange={handleChange}
+                      required
+                    >
                       <option value="Sim">Sim</option>
                       <option value="Nao">Não</option>
                     </select>
@@ -202,26 +223,29 @@ function Doar() {
                   <br />
                   <textarea
                     name="descricao"
-                    id="descricao"
+                    value={formData.descricao}
+                    onChange={handleChange}
                     required
-                    ref={inputDesc}
                   ></textarea>
                 </div>
-                <button type="submit" onClick={cadastrarAnimais} className={styles.save}>
+                <button type="submit" className={styles.save}>
                   Salvar & Continuar
                 </button>
               </form>
-              
             </div>
-        </div>
-        :
-        <div className={styles.aviso}>
-            <img src="https://img.freepik.com/vetores-gratis/ilustracao-do-conceito-de-login_114360-4525.jpg?t=st=1735249208~exp=1735252808~hmac=9cef5a27757934c97f24723536096b7446ed73cf54fdae66da38559815d4fd1f&w=826" alt="" />
-            <p>Para cadastrar um animal para adoção é necessário realizar o login!</p>
-        </div>
-        }
-
-        
+          </div>
+        ) : (
+          <div className={styles.aviso}>
+            <img
+              src="https://img.freepik.com/vetores-gratis/ilustracao-do-conceito-de-login_114360-4525.jpg?t=st=1735249208~exp=1735252808~hmac=9cef5a27757934c97f24723536096b7446ed73cf54fdae66da38559815d4fd1f&w=826"
+              alt=""
+            />
+            <p>
+              Para cadastrar um animal para adoção é necessário realizar o
+              login!
+            </p>
+          </div>
+        )}
       </div>
     </main>
   );

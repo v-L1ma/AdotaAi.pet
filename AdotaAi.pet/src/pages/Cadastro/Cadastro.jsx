@@ -49,10 +49,10 @@ function Cadastro() {
       });
 
       console.log(response.data);
-      alert('Usuário cadastrado com sucesso!');
+      toast.success('Usuário cadastrado com sucesso!');
     } catch (error) {
       console.error(error);
-      alert('Erro ao cadastrar o usuário');
+      toast.error('Erro ao cadastrar o usuário');
     }
   };
 
