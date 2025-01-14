@@ -21,12 +21,12 @@ function MenuPerfil({onClick}){
       <>
         <div className={styles.dropdown}>
         <div className={styles.button}>
-         <span><img src={`https://drive.google.com/thumbnail?id=${userInfo.Picture}`} alt="" /></span>
+         <img src={`https://drive.google.com/thumbnail?id=${userInfo.Picture}`} alt="" />
         </div>
         <div className={styles.dropdown_options}>
-          <p className={styles.opcao}>
-            <Link to="/perfil">Meu perfil</Link>
-          </p>
+          
+            <Link to="/perfil"><p className={styles.opcao}>Meu perfil</p></Link>
+          
           <button className={styles.opcao} onClick={sairDaConta}>Sair</button>
           
         </div>

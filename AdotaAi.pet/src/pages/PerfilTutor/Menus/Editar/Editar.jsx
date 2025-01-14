@@ -16,7 +16,6 @@ function Editar(){
         <div className={styles.container}>
             <div className={styles.foto}>
                 <img src={`https://drive.google.com/thumbnail?id=${userInfo.Picture}`} alt="" />
-
                 <div>
                 <button>Alterar foto</button>
                 <p>Recomendado 800x800, no mínimo. <br /> JPG ou PNG são permitidos.</p>
