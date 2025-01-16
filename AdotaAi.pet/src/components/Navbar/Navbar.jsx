@@ -19,8 +19,6 @@ function Navbar() {
   const token = localStorage.getItem("token");
   const navigate = useNavigate()
  
-  
-  
 
   function abrir(abrirMenu) {
     setAbrirMenu(!abrirMenu);

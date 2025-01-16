@@ -10,6 +10,7 @@ function PerfilPet(){
     const [animal, setAnimal] = useState([])
 
     const token = localStorage.getItem('token')
+    const url ='http://localhost:3000'
    
 
     async function infoAnimal(id){
@@ -30,9 +31,10 @@ function PerfilPet(){
     return(
         <main>
             <div className={styles.container}>
-                <img src={`https://drive.google.com/thumbnail?id=${animal.Picture}&sz=s4000` || "https://img.freepik.com/vetores-premium/nenhuma-foto-disponivel-icone-vetorial-simbolo-de-imagem-padrao-imagem-em-breve-para-site-ou-aplicativo-movel_87543-10615.jpg"} alt="foto do pet" />
+                <img src={`${url}/ver/${animal.Picture}` || "https://img.freepik.com/vetores-premium/nenhuma-foto-disponivel-icone-vetorial-simbolo-de-imagem-padrao-imagem-em-breve-para-site-ou-aplicativo-movel_87543-10615.jpg"} alt="foto do pet" />
                 <div className={styles.sobre}>
                     <h1>{animal.nome}</h1>  
+                    
                     <p className={styles.loc}><FaLocationDot/>Santos, SP</p>
                     
                     <p>{animal.descricao}</p>
@@ -44,6 +46,7 @@ function PerfilPet(){
                         <p>Vacinado:{animal.vacinado}</p>
                         <p>Castrado:{animal.castrado}</p>
                         <p>Vermifugado:{animal.vermifugado}</p>
+                        <h2>ID do dono:{animal.idDono}</h2>
                     </div>
                 </div>
             </div>

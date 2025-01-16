@@ -14,7 +14,6 @@ function Adotar() {
       headers: {Authorization: `Bearer ${token}`}
     })
     setAnimais(animaisFromApi.data)
-    console.log(animaisFromApi)
   }
 
   useEffect(() => {

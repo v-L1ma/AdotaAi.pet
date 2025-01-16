@@ -1,15 +1,18 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useContext } from "react";
 import { useNavigate } from "react-router";
 import styles from "./Doar.module.css";
 import { FaCamera } from "react-icons/fa";
 import api from "../sevices/api";
 import { toast } from "react-toastify";
+import AuthContext from "../context/AuthContext";
 
 function Doar() {
 
   const token = localStorage.getItem("token");
+  const {userInfo, setUserInfo} = useContext(AuthContext)
 
   const [formData, setFormData] = useState({
+    idDono: `${userInfo.id}`,
     nome: "",
     raca: "",
     sexo: "",

@@ -7,6 +7,7 @@ function Editar(){
 
     const [isDisabled, setIsDisabled] = useState(true)
     const {userInfo, setUserInfo} = useContext(AuthContext)
+    const url ='http://localhost:3000'
 
     function alterarDados(isDisabled){
         setIsDisabled(!isDisabled)
@@ -15,7 +16,7 @@ function Editar(){
     return(
         <div className={styles.container}>
             <div className={styles.foto}>
-                <img src={`https://drive.google.com/thumbnail?id=${userInfo.Picture}`} alt="" />
+                <img src={`${url}/ver/${userInfo.Picture}`} alt="" />
                 <div>
                 <button>Alterar foto</button>
                 <p>Recomendado 800x800, no mínimo. <br /> JPG ou PNG são permitidos.</p>

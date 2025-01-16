@@ -1,16 +1,13 @@
 import styles from './CardPet.module.css'
 import { Link } from "react-router";
-import { Navigate } from 'react-router-dom';
-
-
 
 function CardPet({animais}){
-    
+    const url ='http://localhost:3000'
     return(
         <div  className={styles.card} key={animais.id}>
             <Link to={`/adotar/animal/${animais.id}`}>
                     <div className={styles.imagem}>
-                        <img src={`https://drive.google.com/thumbnail?id=${animais.Picture}&sz=s4000`|| "https://img.freepik.com/vetores-premium/nenhuma-foto-disponivel-icone-vetorial-simbolo-de-imagem-padrao-imagem-em-breve-para-site-ou-aplicativo-movel_87543-10615.jpg"} alt=""/>
+                        <img src={`${url}/ver/${animais.Picture}`|| "https://img.freepik.com/vetores-premium/nenhuma-foto-disponivel-icone-vetorial-simbolo-de-imagem-padrao-imagem-em-breve-para-site-ou-aplicativo-movel_87543-10615.jpg"} alt=""/>
                     </div>
                         <div className={styles.infos}>
                             <h1 className={styles.nome}>
