@@ -24,30 +24,47 @@ function Adotar() {
 
   return (
     <main className={styles.main}>
+      <h1>Encontre seu novo amigo</h1>
       <div className={styles.disponiveis}>
-        <h1>Encontre seu novo amigo</h1>
 
         <div className={styles.filtros}>
           <div className={styles.filtrosdiv}>
+            <h2>Filtros</h2>
+            <label htmlFor="">Animal</label>
             <select name="" id="">
               <option value="">Todas as espécies</option>
               <option value="">Cachorro</option>
               <option value="">Gato</option>
             </select>
+
+            <label htmlFor="">Sexo</label>
+            <div>
+            <input type="checkbox" name="" id="" />
+            <label htmlFor="">Macho</label>
+            </div>
+
+            <div>
+            <input type="checkbox" name="" id="" />
+            <label htmlFor="">Fêmea</label>
+            </div>
+            
             <select name="" id="">
               <option value="">Todos os Sexos</option>
               <option value="">Macho</option>
               <option value="">Fêmea</option>
             </select>
+
             <select name="" id="">
               <option value="">Todos os portes</option>
               <option value="">Porte pequeno</option>
               <option value="">Porte Médio</option>
               <option value="">Porte Grande</option>
             </select>
+
             <select name="" id="">
               <option value="">Todos os estados</option>
             </select>
+
             <select name="" id="">
               <option value="">Todas as cidades</option>
             </select>
