@@ -2,7 +2,7 @@ import styles from './CardPet.module.css'
 import { Link } from "react-router";
 
 function CardPet({animais}){
-    const url ='http://localhost:3000'
+    const url ='https://backend-adotaaipet-production.up.railway.app'
     return(
         <div  className={styles.card} key={animais.id}>
             <Link to={`/adotar/animal/${animais.id}`}>

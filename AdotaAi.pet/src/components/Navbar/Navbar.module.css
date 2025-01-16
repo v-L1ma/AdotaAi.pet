@@ -23,18 +23,18 @@ header{
 }
 
 .nav_desktop img{
-    width: 5em;
-    height: 5em;
+    width: 3.5em;
+    height: 3.5em;
 }
 
 .nav_desktop ul{
     display: flex;
-    gap: 2em;
+    gap: 1em;
     list-style: none;
 }
 
 .nav_desktop .itens{
-    font-size: 1.2em;
+    font-size: 1em;
     text-decoration: none;
     color: #03002b;
     font-weight: bolder;
