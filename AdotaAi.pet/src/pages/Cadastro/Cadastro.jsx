@@ -5,6 +5,7 @@ import {yupResolver} from '@hookform/resolvers/yup'
 import { userValidationSchema } from "../../utils/userValidation"
 import { toast } from 'react-toastify';
 import { useState } from "react"
+import { FaCircleUser } from "react-icons/fa6";
 
 function Cadastro() {
   const [formData, setFormData] = useState({
@@ -60,7 +61,11 @@ function Cadastro() {
     <div className={styles.container}>
       
       <form onSubmit={handleSubmit}>
-      <input type="file" onChange={handleFileChange} required />
+      <label htmlFor="foto" className={styles.foto_label}>
+      <FaCircleUser className={styles.icone}/>
+      <p>selecione uma foto de perfil</p>
+      </label>
+      <input className={styles.foto} id="foto" type="file" onChange={handleFileChange} required />
       <input
           type="text"
           name="name"

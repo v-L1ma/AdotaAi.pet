@@ -9,6 +9,7 @@ import AuthContext from '../../context/AuthContext.jsx';
 function MenuPerfil({onClick}){
 
   const navigate = useNavigate()
+  const url ='http://localhost:3000'
 
   function sairDaConta(){
     localStorage.removeItem("token")
@@ -21,7 +22,7 @@ function MenuPerfil({onClick}){
       <>
         <div className={styles.dropdown}>
         <div className={styles.button}>
-         <img src={`https://drive.google.com/thumbnail?id=${userInfo.Picture}`} alt="" />
+         <img src={`${url}/ver/${userInfo.Picture}`} alt="" />
         </div>
         <div className={styles.dropdown_options}>
           
@@ -35,7 +36,7 @@ function MenuPerfil({onClick}){
       <div className={styles.mobile}>
       <Link to="/perfil">
         <div className={styles.button}>
-         <span><img src={`https://drive.google.com/thumbnail?id=${userInfo.Picture}`} alt="" /></span>
+         <span><img src={`${url}/ver/${userInfo.Picture}`} alt="" /></span>
          <p>Olá, Username</p>
         </div>
       </Link>
