@@ -24,36 +24,50 @@ function Adotar() {
 
   return (
     <main className={styles.main}>
+      <h1>Encontre seu novo amigo</h1>
       <div className={styles.disponiveis}>
-        <h1>Encontre seu novo amigo</h1>
 
         <div className={styles.filtros}>
           <div className={styles.filtrosdiv}>
-            <select name="" id="">
-              <option value="">Todas as espécies</option>
-              <option value="">Cachorro</option>
-              <option value="">Gato</option>
-            </select>
-            <select name="" id="">
-              <option value="">Todos os Sexos</option>
-              <option value="">Macho</option>
-              <option value="">Fêmea</option>
-            </select>
-            <select name="" id="">
-              <option value="">Todos os portes</option>
-              <option value="">Porte pequeno</option>
-              <option value="">Porte Médio</option>
-              <option value="">Porte Grande</option>
-            </select>
-            <select name="" id="">
-              <option value="">Todos os estados</option>
-            </select>
-            <select name="" id="">
-              <option value="">Todas as cidades</option>
-            </select>
-            <input type="text" name="" id="" placeholder="Nome do pet" className={styles.name} />
+            <h2>Filtros</h2>
 
-            <button type="submit">Buscar</button>
+            <h3>Animal</h3>
+
+            <div className={styles.checkbox}>
+              <input type="checkbox" name="Cachorro" id="Cachorro"/>
+              <label htmlFor="Cachorro">Cachorro</label>
+            </div>
+
+            <div className={styles.checkbox}>
+              <input type="checkbox" name="gato" id="gato" />
+              <label htmlFor="gato">Gato</label>
+            </div>
+
+            <h3>Sexo</h3>
+            <div className={styles.checkbox}>
+            <input type="checkbox" name="" id="" />
+            <label htmlFor="">Macho</label>
+            </div>
+
+            <div className={styles.checkbox}>
+            <input type="checkbox" name="" id="" />
+            <label htmlFor="">Fêmea</label>
+            </div>
+            
+            <h3>Porte</h3>
+            <div className={styles.checkbox}>
+              <input type="checkbox" name="pequeno" id="pequeno" />
+              <label htmlFor="pequeno">Pequeno</label>
+            </div>
+            <div className={styles.checkbox}>
+              <input type="checkbox" name="medio" id="medio" />
+              <label htmlFor="medio">Médio</label>
+            </div>
+            <div className={styles.checkbox}>
+              <input type="checkbox" name="grande" id="grande" />
+              <label htmlFor="grande">Grande</label>
+            </div>
+            
           </div>
         </div>
         
