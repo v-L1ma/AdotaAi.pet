@@ -10,7 +10,6 @@ function PerfilPet(){
     const [animal, setAnimal] = useState([])
 
     const token = localStorage.getItem('token')
-    const url ='http://localhost:3000'
    
 
     async function infoAnimal(id){
@@ -31,7 +30,7 @@ function PerfilPet(){
     return(
         <main>
             <div className={styles.container}>
-                <img src={`${url}/ver/${animal.Picture}` || "https://img.freepik.com/vetores-premium/nenhuma-foto-disponivel-icone-vetorial-simbolo-de-imagem-padrao-imagem-em-breve-para-site-ou-aplicativo-movel_87543-10615.jpg"} alt="foto do pet" />
+                <img src={animal.Picture || "https://img.freepik.com/vetores-premium/nenhuma-foto-disponivel-icone-vetorial-simbolo-de-imagem-padrao-imagem-em-breve-para-site-ou-aplicativo-movel_87543-10615.jpg"} alt="foto do pet" />
                 <div className={styles.sobre}>
                     <h1>{animal.nome}</h1>  
                     
