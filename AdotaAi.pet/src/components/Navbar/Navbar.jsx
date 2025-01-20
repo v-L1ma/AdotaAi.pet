@@ -2,7 +2,6 @@ import { Link, useNavigate} from "react-router";
 import styles from "./Navbar.module.css";
 import { useState } from "react";
 import LoginPopUp from "../Login/LoginPopUp.jsx";
-import CadastroPopUp from "../Cadastro/CadastroPopUp.jsx";
 import Logo from "../../assets/logo.png";
 import { IoMdMenu } from "react-icons/io";
 import { IoLogOutOutline } from "react-icons/io5";

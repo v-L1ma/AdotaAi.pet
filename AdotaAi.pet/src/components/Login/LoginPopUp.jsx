@@ -41,32 +41,25 @@ function LoginPopUp({onClick}){
             <form onSubmit={handleSubmit}>                
                 <h1>Conecte-se na sua conta</h1>
                 <h2>Seja bem vindo de volta!</h2>
-                <div className={styles.social}>
-                  <button disabled>
-                  <FaGoogle />
-                    google
-                  </button>
-                  <button disabled>
-                  <FaFacebook/>
-                    Facebook
-                  </button>
+        
+                <div className={styles.inputs}>
+                  <input
+                  type="email"
+                  placeholder="Email"
+                  ref={emailRef}
+                  />
+                  <input
+                  type="password"
+                  placeholder="Senha"
+                  ref={senhaRef}/>
                 </div>
-                <p>ou continue com o seu email</p>
-                <input 
-                type="email" 
-                placeholder="Email"
-                ref={emailRef}
-                />
-                <input 
-                type="password"
-                placeholder="Senha" 
-                ref={senhaRef}/>
-                <br />
                 <div className={styles.esqueceu}>
-                  <p>
-                    <input type="checkbox" name="" id="" />
-                    Lembrar de mim
-                  </p>
+                <div>
+                  <input type="checkbox" name="" id="" />
+                    <p>
+                      Lembrar de mim
+                    </p>
+                </div>
                   <p>                    
                     <a href="">Esqueceu sua senha?</a>
                   </p>

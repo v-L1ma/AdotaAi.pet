@@ -17,3 +17,9 @@
 .content{
     height: 100%;
 }
+
+@media (max-width:950px) {
+    .banner{
+        height: 60vh;
+    }
+}

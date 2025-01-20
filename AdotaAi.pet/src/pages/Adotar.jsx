@@ -4,9 +4,8 @@ import styles from "./Adotar.module.css";
 import api from "../sevices/api";
 
 function Adotar() {
-  const [animais, setAnimais] = useState([])  
+  const [animais, setAnimais] = useState([]) 
   const token = localStorage.getItem('token')
-  
 
   async function listaAnimais(){
 
