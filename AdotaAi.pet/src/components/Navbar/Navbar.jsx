@@ -98,17 +98,17 @@ function Navbar() {
                 </li>
                 )
               }
-            <Link className={styles.itens} to="/adotar">  
+            <Link onClick={() => abrir(abrirMenu)} className={styles.itens} to="/adotar">  
               <li>
                 Quero adotar
               </li>
               </Link>
-              <Link className={styles.itens} to="/doar">
+              <Link onClick={() => abrir(abrirMenu)} className={styles.itens} to="/doar">
               <li>
                   Quero doar
               </li>
               </Link>
-              <Link className={styles.itens} to="/ongs">
+              <Link onClick={() => abrir(abrirMenu)} className={styles.itens} to="/ongs">
               <li>
                   Ongs por perto
               </li>
@@ -116,7 +116,7 @@ function Navbar() {
 
               {token ? (
                 <>
-                <button className={styles.logout} onClick={() => sairDaConta()}>                
+                <button className={styles.logout} onClick={() => {sairDaConta(); abrir(abrirMenu)}}>                
                   <p><IoLogOutOutline /> Sair</p>
                 </button>
                 </>

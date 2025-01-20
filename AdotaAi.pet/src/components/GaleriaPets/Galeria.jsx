@@ -59,8 +59,8 @@ function Galeria() {
             {
         
                           animais.map((animal)=>(
-                            <SwiperSlide>
-                            <CardPet animais={animal} key={animal.id}/>
+                            <SwiperSlide  key={animal.id}>
+                            <CardPet animais={animal}/>
                             </SwiperSlide>
                           ))
         
