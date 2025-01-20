@@ -1,9 +1,9 @@
 .container{
-    margin: 0 auto;
+    margin: 0em auto;
 }
 
 .banner{ 
-    height: 100vh;    
+    height: 80vh;    
     overflow: hidden;
     background-color: black;
 }
@@ -14,6 +14,13 @@
     box-sizing: border-box;
     margin: 0 auto;
 }
+
 .content{
     height: 100%;
+}
+
+@media (max-width:950px) {
+    .banner{
+        height: 60vh;
+    }
 }

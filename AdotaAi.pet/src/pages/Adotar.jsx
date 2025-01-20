@@ -5,8 +5,10 @@ import api from "../sevices/api";
 
 function Adotar() {
   const [animais, setAnimais] = useState([])  
+  const [filterAnimal, SetFilterAnimal] = useState("Todos")
+  const [filterSexo, SetFilterSexo] = useState("Todos")
+  const [filterPorte, SetFilterPorte] = useState("Todos")
   const token = localStorage.getItem('token')
-  
 
   async function listaAnimais(){
 
@@ -28,29 +30,29 @@ function Adotar() {
       <div className={styles.disponiveis}>
 
         <div className={styles.filtros}>
-          <div className={styles.filtrosdiv}>
+          <form className={styles.filtrosdiv}>
             <h2>Filtros</h2>
 
             <h3>Animal</h3>
 
             <div className={styles.checkbox}>
-              <input type="checkbox" name="Cachorro" id="Cachorro"/>
+              <input onChange={(e)=>{SetFilterAnimal(e.target.value)}} type="checkbox" value="Cachorro" name="Cachorro" id="Cachorro"/>
               <label htmlFor="Cachorro">Cachorro</label>
             </div>
 
             <div className={styles.checkbox}>
-              <input type="checkbox" name="gato" id="gato" />
+              <input onChange={(e)=>{SetFilterAnimal(e.target.value)}}  type="checkbox" value="Gato"  name="gato" id="gato" />
               <label htmlFor="gato">Gato</label>
             </div>
 
             <h3>Sexo</h3>
             <div className={styles.checkbox}>
-            <input type="checkbox" name="" id="" />
+            <input onClick={(e)=>SetFilterSexo(e.target.value)} value="Macho" type="checkbox" name="Macho"/>
             <label htmlFor="">Macho</label>
             </div>
 
             <div className={styles.checkbox}>
-            <input type="checkbox" name="" id="" />
+            <input onClick={(e)=>SetFilterSexo(e.target.value)} value="Femea" type="checkbox" name="Femea"/>
             <label htmlFor="">Fêmea</label>
             </div>
             
@@ -67,15 +69,33 @@ function Adotar() {
               <input type="checkbox" name="grande" id="grande" />
               <label htmlFor="grande">Grande</label>
             </div>
+
+            <button type="reset" onClick={(e)=>{SetFilterSexo('Todos'); SetFilterAnimal('Todos')}}>Limpar filtros</button>
             
-          </div>
+          </form>
         </div>
         
           { token
           ?
           <div className={styles.gallery}>
             {
-          animais.map((animais) => (
+          animais    
+          .filter((animais) => 
+            filterAnimal === 'Todos' // If the filter is 'Todos', return all animals
+            ? true 
+            : filterAnimal === 'Cachorro' // If the filter is 'cachorro', only return animals that are 'cachorro'
+            ? animais.animal === 'Cachorro' 
+            : animais.animal === 'Gato' // If the filter is 'gato', only return animals that are 'gato'
+          )
+             
+          .filter((animais) =>
+            filterSexo === 'Todos'
+              ? true // Retorna todos os animais se o filtro for 'Todos'
+              : filterSexo === 'Macho'
+              ? animais.sexo === 'Macho'
+              : animais.sexo === 'Femea'
+          )
+          .map((animais) => (
             <CardPet animais={animais} key={animais.id} />
           ))
           }

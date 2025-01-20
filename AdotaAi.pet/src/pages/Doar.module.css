@@ -116,10 +116,8 @@ label{
 }*/
 
 /*-----------------------------------estilos para desktop---------------------------------*/
-
-    
     section{
-        height: 100vh;
+        height: auto;
     }
     
     body{
@@ -127,15 +125,14 @@ label{
     }
 
     main{
-        width: 70vw;
-        margin: auto;
         position: relative;
+        display: flex;
+        justify-content: center;
     }
 
     .conteudo{
-        background-color: rgb(255, 255, 255);
-        margin: 2em auto;
-        width: 65vw;
+        width: 45vw;
+        margin: 0 auto;
         border-radius: 1em;
         padding: 2em;
         box-sizing: border-box;
@@ -146,6 +143,7 @@ label{
         display: grid;
         grid-template-areas: 
         "nome      foto"
+        "animal   animal"
         "raca      raca"
         "nasc      sexo"
         "perguntas perguntas"
@@ -204,6 +202,24 @@ label{
         height: 6rem;
         width: 6rem;
         cursor: pointer;
+    }
+
+    .animal{
+        grid-area: animal;
+    }
+
+    .animal select{
+        width: 100%;
+        padding-left: 30px;
+        border-radius: 0.5em; 
+        color: rgba(0, 0, 0, 0.541);
+        height: 3rem;
+        margin-left: 0px;
+        margin-bottom: 20px;
+        margin-top: 15px;
+        border: 0.1px solid #76678828;
+        background-color: rgba(128, 128, 128, 0.082);
+        font-size: 1.5em;
     }
 
     .raca{

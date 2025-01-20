@@ -19,18 +19,27 @@ function MenuPerfil({onClick}){
 
     return(
       <>
-        <div className={styles.dropdown}>
+        <div className={styles.profile}>
+
         <div className={styles.button}>
          <img src={userInfo.Picture || 'https://static-00.iconduck.com/assets.00/profile-circle-icon-512x512-zxne30hp.png'} alt="" />
         </div>
-        <div className={styles.dropdown_options}>
-          
-            <Link to="/perfil"><p className={styles.opcao}>Meu perfil</p></Link>
-          
-          <button className={styles.opcao} onClick={sairDaConta}>Sair</button>
-          
+
+          <div className={styles.menu}>
+
+            <div className={styles.seta}>
+            </div>
+
+            <div className={styles.dropdown_options}>
+
+                <h1 className={styles.opcao}>{userInfo.name}</h1>
+                <Link to="/perfil"><p className={styles.opcao}>Painel de controle</p></Link>
+            
+              <button className={styles.opcao} onClick={sairDaConta}>Sair</button>
+            </div>
+          </div>
         </div>
-      </div>
+
 
       <div className={styles.mobile}>
       <Link to="/perfil">
