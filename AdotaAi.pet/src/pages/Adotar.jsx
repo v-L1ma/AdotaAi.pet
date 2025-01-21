@@ -70,7 +70,7 @@ function Adotar() {
               <label htmlFor="grande">Grande</label>
             </div>
 
-            <button type="reset" onClick={(e)=>{SetFilterSexo('Todos'); SetFilterAnimal('Todos')}}>Limpar filtros</button>
+            <button className={styles.limpar} type="reset" onClick={(e)=>{SetFilterSexo('Todos'); SetFilterAnimal('Todos')}}>Limpar filtros</button>
             
           </form>
         </div>

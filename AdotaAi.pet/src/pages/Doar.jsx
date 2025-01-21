@@ -189,9 +189,6 @@ function Doar() {
                       <option disabled value="">
                         -- Escolha uma raça --
                       </option>
-                      <option disabled value="" selected>
-                        -- Escolha uma raça --
-                      </option>
                       <option value="vira-lata">
                         Vira-lata (Sem raça definida)
                       </option>
@@ -270,6 +267,9 @@ function Doar() {
                       onChange={handleChange}
                       required
                     >
+                      <option disabled value="">
+                         Selecione uma alternativa
+                      </option>
                       <option value="Sim">Sim</option>
                       <option value="Nao">Não</option>
                     </select>
@@ -282,6 +282,9 @@ function Doar() {
                       onChange={handleChange}
                       required
                     >
+                      <option disabled value="">
+                         Selecione uma alternativa
+                      </option>
                       <option value="Sim">Sim</option>
                       <option value="Nao">Não</option>
                     </select>
@@ -294,6 +297,9 @@ function Doar() {
                       onChange={handleChange}
                       required
                     >
+                      <option disabled value="">
+                         Selecione uma alternativa
+                      </option>
                       <option value="Sim">Sim</option>
                       <option value="Nao">Não</option>
                     </select>
