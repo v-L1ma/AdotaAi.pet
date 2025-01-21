@@ -37,20 +37,6 @@ function Galeria() {
             pagination={{
               clickable: true,
             }}
-            breakpoints={{
-                640: {
-                  slidesPerView: 2,
-                  spaceBetween: 6,
-                },
-                950: {
-                  slidesPerView: 4,
-                  spaceBetween: 40,
-                },
-                1024: {
-                  slidesPerView: 5,
-                  spaceBetween: 10,
-                },
-              }}
             navigation={true}
         
             modules={[Pagination, Navigation]}
@@ -59,7 +45,7 @@ function Galeria() {
             {
         
                           animais.map((animal)=>(
-                            <SwiperSlide  key={animal.id}>
+                            <SwiperSlide>
                             <CardPet animais={animal}/>
                             </SwiperSlide>
                           ))

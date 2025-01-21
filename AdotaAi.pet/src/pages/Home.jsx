@@ -17,11 +17,6 @@ function Home() {
           <div className={styles.titulo}>
             <h1>Algumas de nossas fofuras</h1>
           </div>
-          <div className={styles.gallery}>
-            
-            <Galeria/>
-           
-          </div>
         </div>
         <div className={styles.sobre}>
           <h1>Sobre o nosso projeto:</h1>

@@ -2,12 +2,13 @@
 .card{
     display: flex;
     flex-direction: column;
-    width: 11em;
-    height: 15em;
+    width: 12em;
+    height: 17em;
     border-radius: 10px;
     border: 1px solid lightgray;
     overflow: hidden;
     transition: 0.2s;
+    box-sizing: content-box;
 }
 
 .card:hover{
@@ -16,12 +17,30 @@
 }
 
 .card img{
-    height:10em;
+    height:11em;
     width: 100%;
     background-color: aqua;
     object-fit: cover; /* ajusta a imagem para preencher a div */
     object-position: center; /* opcional: centraliza a imagem */
     margin-bottom: -5px;
+}
+
+.titulo{
+    display: flex;
+    align-items: center;
+    gap: 0.5em;
+}
+
+.titulo .sexoM{
+    margin-top: 0.3em;
+    font-size: 1..4em;
+    color: blue;
+}
+
+.titulo .sexoF{
+    margin-top: 0.3em;
+    font-size: 1..4em;
+    color: pink;
 }
 
 .infos{
@@ -36,15 +55,12 @@
 .nome{
     font-weight: bolder;
     font-size: 1.5em;
-    color: #766788;
+    color: rgba(0, 0, 0, 0.753);
 }
 
-.infos p{
+.infos h2{
     color: grey;
+    font-size: 1em;
 }
 
-.infos a{
-    text-decoration: none;    
-    color: #766788;
-}
 
