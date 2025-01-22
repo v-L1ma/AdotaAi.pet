@@ -24,6 +24,11 @@
     }
 }
 
+.titulo{
+    
+    color: rgba(0, 0, 0, 0.836);
+}
+
 .checkbox{
     display: flex;
     margin-bottom: 0.3em;
@@ -195,12 +200,21 @@ input[type="checkbox"] {
         margin: 0 auto;
     }
 
-    .disponiveis h1{
-        text-align: center;
+    .titulo{
+        font-size: 1.5em;
+        margin-left: .4em;
+        color: rgba(0, 0, 0, 0.836);
+    }
+
+    .gallery{
+        width: 100%;
+        padding: 0;
+        justify-content: center;
     }
 
     .filtros{
         width: 95;
+        display: none;
     }
 
     .filtros div{
@@ -247,6 +261,7 @@ input[type="checkbox"] {
         flex-direction: column-reverse;
         padding: 2em 2em 0 2em;
     }
+
 }
 
 

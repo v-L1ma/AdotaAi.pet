@@ -3,9 +3,8 @@
 }
 
 .banner{ 
-    height: 80vh;    
+    height: 85vh;    
     overflow: hidden;
-    background-color: black;
 }
 
 .banner img{     
@@ -21,6 +20,6 @@
 
 @media (max-width:950px) {
     .banner{
-        height: 60vh;
+        height: 45vh;
     }
 }

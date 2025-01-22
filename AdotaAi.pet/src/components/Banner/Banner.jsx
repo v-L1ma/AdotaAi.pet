@@ -4,6 +4,10 @@ import { Swiper, SwiperSlide } from 'swiper/react';
 import 'swiper/css';
 import 'swiper/css/navigation';
 import { Autoplay, Navigation } from 'swiper/modules';
+import banner1 from '../../assets/banner1.jpg'
+import banner2 from '../../assets/banner2.jpg'
+import banner3 from '../../assets/banner3.jpg'
+
 
 
 
@@ -16,14 +20,22 @@ function Banner(){
     <Swiper 
     navigation={true} 
     autoplay={{
-          delay: 2500,
+          delay: 10500,
           disableOnInteraction: false,
     }} 
     modules={[Autoplay,Navigation]} 
     className={styles.banner}>
-        <SwiperSlide  className={styles.banner}><img
-          src="https://corredorsolidario.baluxpet.com.br/wp-content/uploads/2018/02/banner-site.jpg"
-          alt=""/>
+        <SwiperSlide className={styles.banner}>
+          <img src={banner1} alt="" />
+          //images designed by Freepik
+        </SwiperSlide>
+        <SwiperSlide className={styles.banner}>
+          <img src={banner2} alt="" />
+          //images designed by Freepik
+        </SwiperSlide>
+        <SwiperSlide className={styles.banner}>
+          <img src={banner3} alt="" />
+          //images designed by Freepik
         </SwiperSlide>
         
     </Swiper>

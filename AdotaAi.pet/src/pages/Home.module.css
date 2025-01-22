@@ -1,28 +1,21 @@
+@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Lilita+One&display=swap');
+
+.bebas-neue-regular {
+    font-family: "Bebas Neue", serif;
+    font-weight: 400;
+    font-style: normal;
+  }
+
 main{
     width: 85vw;
     margin: 0 auto;
     box-sizing: border-box;
     padding-bottom: 5em;
+    display: flex;
+    flex-direction: column;
 }
 
-.sobre{
-    margin-top: 3em;
-    width: 70%;
-    background-color: white;
-    padding: 2em;
-    border-radius: 0em 2em 2em 2em;
-    box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.034);
 
-    & h1{
-        margin-bottom: 1em;
-    }
-
-    & p {
-        width: 100%;
-        font-size: 1.1em;
-        font-weight: lighter;
-    }
-}
 
 .textos{
     display: flex;
@@ -58,6 +51,94 @@ h1{
     font-size: 5em;
     align-items: center;
     color: rgba(0, 0, 0, 0.473);
+}
+
+.container{
+    display: flex;
+    margin-top: 10em;
+}
+
+.imagem{
+    display: flex;
+    box-sizing: border-box;
+    height: 90vh;
+    width: 39vw;
+    background-image: url('../assets/paw.png');
+    background-size: contain;
+    background-position: center;
+    background-repeat: no-repeat;
+    align-items: center;
+    justify-content: center;   
+}
+
+.imagem img{
+    height: 60%;
+}
+
+.sobre{
+    display: flex;
+    align-items: center;
+    width: 50%;
+    justify-content: center;
+}
+
+.sobre .content{
+    height: 30em;
+    width: 34em;
+    display: flex;
+    flex-direction: column;
+    gap: 1em;
+}
+
+.content h1{
+    text-align: center;
+    box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.13);
+    font-weight: 600;
+    font-size: 1.5em;
+    border-radius: 0.2em;
+    width: 5em;
+    font-family: "Bebas Neue", serif;
+    letter-spacing: .1rem;
+}
+
+.content h2{
+    font-family: "Lilita One", serif;
+    font-weight: 400;
+    font-style: normal;
+    font-size: 2.5em;
+    color: rgb(141, 92, 2);
+    letter-spacing: .1rem;
+}
+
+.content p{
+    font-size: 1em;
+    font-weight: normal;
+    color: #000000d0;
+    line-height: 2em;
+}
+
+.vantagens{
+    display: flex;
+    flex-wrap: wrap;
+}
+
+.vantagens div{
+    display: flex;
+    justify-content: start;
+    align-items: start;
+    width: 16em;
+    gap: 1em;
+}
+
+.vantagens p{
+    margin-top: 0.2em;
+    font-weight: bolder;
+    
+}
+
+.vantagens span{
+    color: orange;
+    font-size: 2em;
 }
 
 
@@ -162,7 +243,21 @@ h1{
 
     .sobre{
         width: 90vw;
-        margin: 0 auto;
+        margin: 3em auto;
     }
+
+    .container{
+        flex-direction: column;
+        margin-top: 0;
+    }
+
+    .content h2{
+        font-size: 1.7em;
+    }
+    
+    .imagem{
+        display: none;
+    }
+
 }
 
