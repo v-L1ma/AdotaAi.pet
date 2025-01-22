@@ -141,11 +141,11 @@ header{
         display: flex;
         flex-direction: column;
         width: 100%;
-        background-color: white;
+        background-color: rgb(245, 245, 245);
         height: 100%;
         align-items: end;
         padding-top: 2em;
-
+        padding: 1em;
     }
 
     .close{
@@ -155,8 +155,7 @@ header{
         justify-content: center;
         width: 2em;
         height: 2em;
-        margin-bottom: 5em;
-        margin-right: 1em;
+        margin-bottom: 2em;
         border: none;
         padding: 1em;
         font-size: 1.2em;
@@ -176,7 +175,7 @@ header{
         gap: 2em;
         list-style: none;
         width: 100%;
-        text-align: center;  
+        text-align: right;  
 
     }
     
@@ -184,13 +183,8 @@ header{
         font-size: 1.2em;
         text-decoration: none;
         color: rgb(214, 140, 3);
+        color: black;
         font-weight: bolder;
-    }
-    
-    .container_list li:hover{
-        border-bottom: 5px solid orange;
-        padding-bottom: .7em;
-        transition: border 100ms;
     }
     
     .cadastrar{
