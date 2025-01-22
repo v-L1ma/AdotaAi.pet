@@ -7,7 +7,6 @@ function Adotar() {
   const [animais, setAnimais] = useState([])  
   const [filterAnimal, SetFilterAnimal] = useState("Todos")
   const [filterSexo, SetFilterSexo] = useState("Todos")
-  const [filterPorte, SetFilterPorte] = useState("Todos")
   const token = localStorage.getItem('token')
 
   async function listaAnimais(){
@@ -26,7 +25,7 @@ function Adotar() {
 
   return (
     <main className={styles.main}>
-      <h1>Encontre seu novo amigo</h1>
+      <h1 className={styles.titulo}>Encontre seu novo amigo</h1>
       <div className={styles.disponiveis}>
 
         <div className={styles.filtros}>

@@ -1,0 +1,16 @@
+.container{
+    background-color: rgba(128, 77, 0, 0.836);
+    padding: .5em;
+    display: flex;
+    gap: 0.5em;
+    color: white;
+    border-radius: 1.5em;
+    align-items: center;
+    border: 2px solid rgb(128, 77, 0);
+    
+}
+.container p{
+    font-size: .9em;
+    font-weight: bolder;
+    color: white;
+}

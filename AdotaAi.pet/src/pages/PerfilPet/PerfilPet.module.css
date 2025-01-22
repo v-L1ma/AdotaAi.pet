@@ -31,11 +31,41 @@
     font-size: 1.1em;
     font-weight: normal;
     color: rgb(161, 161, 161);
-    margin-bottom: 0.5em;
+    margin-bottom: 0em;
 }
 
 .infos{
     font-size: 1em;
+}
+
+.tags{
+    display: flex;
+    gap: .5em;
+}
+
+.divbtn{
+    display: flex;
+    justify-content: center;
+}
+
+.contato{
+    appearance: none;
+    border-radius: .5em;
+    padding: 1em;
+    cursor: pointer;
+    background-color: orange;
+    color: white;
+    border: 3px solid transparent;
+    font-size: 1.1em;
+    font-weight: bolder;
+    margin-top: 2em;
+}
+
+.contato:hover{
+    transition: 200ms;
+    border: 3px solid orange;
+    background-color: white;
+    color: orange;
 }
 
 
