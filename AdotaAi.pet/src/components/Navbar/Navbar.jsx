@@ -9,6 +9,10 @@ import MenuPerfil from "../MenuPerfil/MenuPerfil.jsx";
 import SlidingPanel from 'react-sliding-side-panel';
 import 'react-sliding-side-panel/lib/index.css';
 import { toast } from "react-toastify";
+import { FaRegHeart } from "react-icons/fa";
+import { IoLocationOutline } from "react-icons/io5";
+import { BsBox2Heart } from "react-icons/bs";
+
 
 
 function Navbar() {
@@ -100,24 +104,30 @@ function Navbar() {
               }
             <Link onClick={() => abrir(abrirMenu)} className={styles.itens} to="/adotar">  
               <li>
-                Quero adotar
+                Adotar <span>
+                  <FaRegHeart />
+                </span>
               </li>
               </Link>
               <Link onClick={() => abrir(abrirMenu)} className={styles.itens} to="/doar">
               <li>
-                  Quero doar
+                  Doar <span>
+                    <BsBox2Heart />
+                  </span>
               </li>
               </Link>
               <Link onClick={() => abrir(abrirMenu)} className={styles.itens} to="/ongs">
               <li>
-                  Ongs por perto
+                  ONGs <span>
+                    <IoLocationOutline />
+                  </span>
               </li>
               </Link>
 
               {token ? (
                 <>
                 <button className={styles.logout} onClick={() => {sairDaConta(); abrir(abrirMenu)}}>                
-                  <p><IoLogOutOutline /> Sair</p>
+                  <p>Sair <IoLogOutOutline /> </p>
                 </button>
                 </>
               ) : (

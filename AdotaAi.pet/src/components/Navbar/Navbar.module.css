@@ -71,28 +71,6 @@ header{
     z-index: 2;
 }
 
-.logout{
-    appearance: none;
-    background-color: transparent;
-    border: none;
-    width: 60%;
-    margin: 0 auto;
-    cursor: pointer;
-}
-
-.logout p{
-    display: flex;    
-    background-color: transparent;
-    border: none;
-    font-size: 2em;
-    background-color: red;
-    color: white;
-    border-radius: 0.2em;
-    padding: 0.1em;
-    justify-content: center;
-    align-items: center;
-}
-
 @media (max-width: 950px){
     .nav_desktop{
         display: none;
@@ -162,7 +140,7 @@ header{
         border-radius: 50%;
         color: white;
         background-color: orange;
-        font-weight: bold;
+        font-weight: bolder;
     }
 
     .container_list>button:hover{
@@ -176,15 +154,21 @@ header{
         list-style: none;
         width: 100%;
         text-align: right;  
-
     }
     
     .container_list li{
-        font-size: 1.2em;
+        display: flex;
+        align-items: center;
+        justify-content: end;
+        font-size: 1.5em;
         text-decoration: none;
         color: rgb(214, 140, 3);
         color: black;
         font-weight: bolder;
+    }
+
+    .container_list li span{
+        font-size: 1.6em;
     }
     
     .cadastrar{
@@ -196,5 +180,27 @@ header{
         top: 50%;
         left: 50%;
         transform: translate(-50%, -50%);
-    }    
+    }   
+    
+    .logout{
+        appearance: none;
+        background-color: transparent;
+        border: none;
+        margin-left: auto;
+        cursor: pointer;
+        margin-top: 3em;
+    }
+
+    .logout p{
+        display: flex;    
+        background-color: transparent;
+        border: none;
+        font-size: 2em;
+        text-decoration: none;
+        color: black;
+        font-weight: bolder;
+        justify-content: center;
+        align-items: center;
+        gap: 0.5em;
+    }
 }
