@@ -123,7 +123,7 @@ header{
         height: 100%;
         align-items: end;
         padding-top: 2em;
-        padding: 1em;
+        padding: 1.5em;
     }
 
     .close{
@@ -165,10 +165,16 @@ header{
         color: rgb(214, 140, 3);
         color: black;
         font-weight: bolder;
+        gap: 1em;
     }
 
     .container_list li span{
-        font-size: 1.6em;
+        font-size: 1.4em;
+    }
+
+    .locationIcon{
+        font-size: 1.4em;
+        margin-right: -.2em;
     }
     
     .cadastrar{
@@ -183,19 +189,25 @@ header{
     }   
     
     .logout{
+        display: flex;
         appearance: none;
         background-color: transparent;
         border: none;
         margin-left: auto;
         cursor: pointer;
-        margin-top: 3em;
+        justify-content: center;
+    }
+
+    .logout span{
+        font-size: 1.4em;
+        padding-top: 0.2em;
     }
 
     .logout p{
         display: flex;    
         background-color: transparent;
         border: none;
-        font-size: 2em;
+        font-size: 2.1em;
         text-decoration: none;
         color: black;
         font-weight: bolder;
