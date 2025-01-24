@@ -90,4 +90,16 @@
       display: flex;
       justify-content: center;
     }
+
+    .button{
+      display: flex;
+      justify-content: flex-start;
+      align-items: start;
+      text-align: right;
+    }
+
+    .button img{
+      border-radius: .3em;
+      margin-left: 0.5em;
+    }
   }

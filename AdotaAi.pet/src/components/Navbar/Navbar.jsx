@@ -1,4 +1,4 @@
-import { Link, useNavigate} from "react-router";
+import { Link, useNavigate } from "react-router";
 import styles from "./Navbar.module.css";
 import { useState } from "react";
 import LoginPopUp from "../Login/LoginPopUp.jsx";
@@ -6,27 +6,29 @@ import Logo from "../../assets/logo.png";
 import { IoMdMenu } from "react-icons/io";
 import { IoLogOutOutline } from "react-icons/io5";
 import MenuPerfil from "../MenuPerfil/MenuPerfil.jsx";
-import SlidingPanel from 'react-sliding-side-panel';
-import 'react-sliding-side-panel/lib/index.css';
+import SlidingPanel from "react-sliding-side-panel";
+import "react-sliding-side-panel/lib/index.css";
 import { toast } from "react-toastify";
-
+import { FaRegHeart } from "react-icons/fa";
+import { IoLocationOutline } from "react-icons/io5";
+import { BsBox2Heart } from "react-icons/bs";
+import { IoSettingsOutline } from "react-icons/io5";
 
 function Navbar() {
   const [abrirLoginPopup, setAbrirLoginPopup] = useState(false);
   const [abrirCadastroPopup, setAbrirCadastroPopup] = useState(false);
   const [abrirMenu, setAbrirMenu] = useState(false);
   const token = localStorage.getItem("token");
-  const navigate = useNavigate()
- 
+  const navigate = useNavigate();
 
   function abrir(abrirMenu) {
     setAbrirMenu(!abrirMenu);
   }
 
-  function sairDaConta(){
-    localStorage.removeItem("token")
-    toast.success('Conta desconectada com sucesso')
-    navigate('/')
+  function sairDaConta() {
+    localStorage.removeItem("token");
+    toast.success("Conta desconectada com sucesso");
+    navigate("/");
   }
 
   return (
@@ -54,7 +56,7 @@ function Navbar() {
         </ul>
 
         {token ? (
-          <MenuPerfil/>
+          <MenuPerfil />
         ) : (
           <ul>
             <li>
@@ -66,7 +68,9 @@ function Navbar() {
               </a>
             </li>
             <li>
-                <Link className={styles.itens} to="/cadastro">Cadastre-se</Link>
+              <Link className={styles.itens} to="/cadastro">
+                Cadastre-se
+              </Link>
             </li>
           </ul>
         )}
@@ -83,69 +87,110 @@ function Navbar() {
           </button>
         </div>
 
-        <SlidingPanel
-        type='right'
-        isOpen={abrirMenu}
-        size={80}
-        >
-        <div className={styles.container_list}>
-            <button className={styles.close} onClick={() => abrir(abrirMenu)}>X</button>
+        <SlidingPanel type="right" isOpen={abrirMenu} size={80}>
+          <div className={styles.container_list}>
+            <button className={styles.close} onClick={() => abrir(abrirMenu)}>
+              X
+            </button>
             <ul>
-              {
-                token && (                  
+              {token && (
+                <>
                 <li>
-                <MenuPerfil/>
+                  <MenuPerfil />
                 </li>
-                )
-              }
-            <Link onClick={() => abrir(abrirMenu)} className={styles.itens} to="/adotar">  
-              <li>
-                Quero adotar
-              </li>
+
+                <hr />
+
+                </>
+              )}             
+
+              <Link
+                onClick={() => abrir(abrirMenu)}
+                className={styles.itens}
+                to="/adotar"
+              >
+                <li>
+                  Adotar{" "}
+                  <span>
+                    <FaRegHeart />
+                  </span>
+                </li>
               </Link>
-              <Link onClick={() => abrir(abrirMenu)} className={styles.itens} to="/doar">
-              <li>
-                  Quero doar
-              </li>
+              <Link
+                onClick={() => abrir(abrirMenu)}
+                className={styles.itens}
+                to="/doar"
+              >
+                <li>
+                  Doar{" "}
+                  <span>
+                    <BsBox2Heart />
+                  </span>
+                </li>
               </Link>
-              <Link onClick={() => abrir(abrirMenu)} className={styles.itens} to="/ongs">
-              <li>
-                  Ongs por perto
-              </li>
+              <Link
+                onClick={() => abrir(abrirMenu)}
+                className={styles.itens}
+                to="/ongs"
+              >
+                <li>
+                  ONGs{" "}
+                  <span>
+                    <IoLocationOutline  className={styles.locationIcon}/>
+                  </span>
+                </li>
               </Link>
+
+              <hr />
 
               {token ? (
                 <>
-                <button className={styles.logout} onClick={() => {sairDaConta(); abrir(abrirMenu)}}>                
-                  <p><IoLogOutOutline /> Sair</p>
-                </button>
+                <Link
+                onClick={() => abrir(abrirMenu)}
+                className={styles.itens}
+                to="/perfil"
+              >
+                <li>
+                  Ajustes{" "}
+                  <span>
+                  <IoSettingsOutline />
+                  </span>
+                </li>
+              </Link>
+                  <button
+                    className={styles.logout}
+                    onClick={() => {
+                      sairDaConta();
+                      abrir(abrirMenu);
+                    }}
+                  >
+                    <p>
+                      Sair{" "}
+                      <span>
+                        <IoLogOutOutline />
+                      </span>{" "}
+                    </p>
+                  </button>
                 </>
               ) : (
                 <ul>
                   <a
-                      className={styles.itens}
-                      onClick={() => {
-                        setAbrirLoginPopup(!abrirLoginPopup)
-                        setAbrirMenu(!abrirMenu)
+                    className={styles.itens}
+                    onClick={() => {
+                      setAbrirLoginPopup(!abrirLoginPopup);
+                      setAbrirMenu(!abrirMenu);
                     }}
-                    >
-                  <li>                    
-                      Login
-                  </li>
+                  >
+                    <li>Login</li>
                   </a>
                   <Link to="/cadastro">
-                  <li >
-                      Cadastre-se
-                  </li>
+                    <li>Cadastre-se</li>
                   </Link>
                 </ul>
               )}
             </ul>
           </div>
         </SlidingPanel>
-
-        
-
       </nav>
 
       {abrirLoginPopup && (
