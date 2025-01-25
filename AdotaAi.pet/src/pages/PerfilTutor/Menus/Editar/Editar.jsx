@@ -2,12 +2,12 @@ import { useContext, useState } from 'react';
 import styles from './Editar.module.css'
 import { MdEdit } from "react-icons/md";
 import AuthContext from '../../../../context/AuthContext';
+import { FaCheck } from "react-icons/fa";
 
 function Editar(){
 
     const [isDisabled, setIsDisabled] = useState(true)
     const {userInfo, setUserInfo} = useContext(AuthContext)
-    const url ='http://localhost:3000'
 
     function alterarDados(isDisabled){
         setIsDisabled(!isDisabled)
@@ -16,7 +16,7 @@ function Editar(){
     return(
         <div className={styles.container}>
             <div className={styles.foto}>
-                <img src={`${url}/ver/${userInfo.Picture}`} alt="" />
+                <img src={userInfo.Picture} alt="" />
                 <div>
                 <button>Alterar foto</button>
                 <p>Recomendado 800x800, no mínimo. <br /> JPG ou PNG são permitidos.</p>
@@ -26,7 +26,17 @@ function Editar(){
             <div className={styles.info}>
                 <div className={styles.header}>
                     <h1>Informações pessoais</h1>
-                    <button onClick={()=>alterarDados(isDisabled)} className={styles.teste}><MdEdit /></button>
+                    <button onClick={()=>alterarDados(isDisabled)}>
+                        {
+                            isDisabled 
+                            ? 
+                            <p className={styles.editar}><MdEdit />Editar</p> 
+                            : 
+                            <p className={styles.salvar}><FaCheck />Salvar</p>
+                        }
+                        
+                    
+                    </button>
                 </div>
                 <div className={styles.dados}>
                     <div>

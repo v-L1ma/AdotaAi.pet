@@ -10,7 +10,7 @@ const LazyPerfil = lazy(() => import("./pages/PerfilTutor/Perfil"));
 const LazyEditar = lazy(() => import("./pages/PerfilTutor/Menus/Editar/Editar"));
 const LazySenha = lazy(() => import("./pages/PerfilTutor/Menus/Senha"));
 const LazyFavoritos = lazy(() => import("./pages/PerfilTutor/Menus/Favoritos"));
-const LazyGerenciar = lazy(() => import("./pages/PerfilTutor/Menus/Gerenciar"));
+const LazyGerenciar = lazy(() => import("./pages/PerfilTutor/Menus/Gerenciar/Gerenciar"));
 import Navbar from "./components/Navbar/Navbar";
 import AuthContext from "./context/AuthContext";
 import Loader from "./components/Loader/Loader";

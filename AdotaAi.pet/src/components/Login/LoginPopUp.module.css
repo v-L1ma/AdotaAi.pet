@@ -97,7 +97,7 @@ a{
 }
 
 .banner{
-    background-image: url('https://www.doglife.com.br/blog/assets/post/convivencia-entre-cachorros-e-gatos-eles-podem-morar-juntos-61fd55bf76950e477610eca4/convivencia-capa.jpg');
+    background-image: url('../../assets/loginIlustration.png');
     background-size: cover;
     background-position: center;
     display: flex;
@@ -113,7 +113,7 @@ a{
 .closeBtn{    
     position: relative;
     z-index: 1;
-    left:89%;
+    left:92%;
     top: -45%;
     font-weight: bolder;
     border: none;

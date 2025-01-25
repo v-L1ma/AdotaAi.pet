@@ -417,6 +417,8 @@ label{
         overflow: hidden;
         border-radius: 2em 0em 0em 2em;
         padding-right: 2em;
+        margin: 5em;
+        border-radius: 2em;
 
         & p{
             color: white;

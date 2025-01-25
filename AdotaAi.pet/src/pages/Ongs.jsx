@@ -7,28 +7,28 @@ function Ongs() {
         <h1>Precisa de ajuda? Encontre uma ONG proxima de você!</h1>
 
         <div className={styles.conteudo}>
-
           <div className={styles.perfil}>
             <img
-              src="https://png.pngtree.com/png-vector/20240603/ourmid/pngtree-a-dog-and-cat-engage-in-curious-gaze-capturing-moment-of-png-image_12547998.png"
+              src="https://informasus.ufscar.br/wp-content/uploads/2020/12/SOS-ANIMAIS.png"
               alt=""
+              loading="lazy"
             />
 
             <div className={styles.infos_perfil}>
               <h2 className={styles.nome}>SOS Animais de Rua</h2>
               <p className={styles.descricao}>
-                Lorem ipsum dolor sit, amet consectetur adipisicing elit. Ipsum,
-                necessitatibus ex quisquam modi aut impedit ipsam dolorem,
-                dolore quae sit cupiditate et voluptas asperiores est expedita
-                sint. Fugiat, voluptates voluptatum.
+                A missão da ONG é levar atendimento médico veterinário gratuito
+                in loco - com distribuição e aplicação de produtos e
+                medicamentos - e tratar dos animais de moradores de comunidades
+                muito pobres tais como Vilas, Favelas , Morros e etc... onde
+                normalmente os serviços públicos não chegam.
               </p>
             </div>
-            <img src="imagens/Seta.png" alt="" className="seta" />
           </div>
 
           <div className={styles.perfil}>
             <img
-              src="https://png.pngtree.com/png-vector/20240603/ourmid/pngtree-a-dog-and-cat-engage-in-curious-gaze-capturing-moment-of-png-image_12547998.png"
+              src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQlSsUzAanUF8jrsEIeEIupMe0AQ8L3zyTtaQ&s"
               alt=""
             />
 
@@ -42,12 +42,11 @@ function Ongs() {
                 ajudar: doando qualquer quantia de ração.
               </p>
             </div>
-            <img src="imagens/Seta.png" alt="" className="seta" />
           </div>
 
           <div className={styles.perfil}>
             <img
-              src="https://png.pngtree.com/png-vector/20240603/ourmid/pngtree-a-dog-and-cat-engage-in-curious-gaze-capturing-moment-of-png-image_12547998.png"
+              src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRwz3QldP2B1RF_afBkj7BltzbNAyvbRRpcPA&s"
               alt=""
             />
 
@@ -59,14 +58,12 @@ function Ongs() {
                 alguns casos, os colocam para adoção. Além disso, eles também
                 divulgam feiras de adoção e outros eventos.
               </p>
-              
             </div>
-            <img src="imagens/Seta.png" alt="" className="seta" />
           </div>
 
           <div className={styles.perfil}>
             <img
-              src="https://png.pngtree.com/png-vector/20240603/ourmid/pngtree-a-dog-and-cat-engage-in-curious-gaze-capturing-moment-of-png-image_12547998.png"
+              src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTd6epng4bcx407DQpzUh5-iunFr2KvKH0lTg&s"
               alt=""
             />
 
@@ -78,28 +75,9 @@ function Ongs() {
                 cerca de 70 bichinhos te esperando para passear pelos arredores
                 do Jabaquara.{" "}
               </p>
-              
             </div>
-            <img src="imagens/Seta.png" alt="" className="seta" />
           </div>
 
-          <div className={styles.perfil}>
-            <img
-              src="https://png.pngtree.com/png-vector/20240603/ourmid/pngtree-a-dog-and-cat-engage-in-curious-gaze-capturing-moment-of-png-image_12547998.png"
-              alt=""
-            />
-
-            <div className={styles.infos_perfil}>
-              <h2 className={styles.nome}>Projeto Albatroz</h2>
-              <p className={styles.descricao}>
-                O Projeto Albatroz existe para reduzir a captura incidental dos
-                albatrozes. Para quem não sabe, os albatrozes são aves de grande
-                porte que vivem em alto-mar.
-              </p>
-              
-            </div>
-            <img src="imagens/Seta.png" alt="" className="seta" />
-          </div>
         </div>
       </div>
     </main>
