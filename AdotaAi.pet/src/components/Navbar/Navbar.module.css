@@ -162,18 +162,18 @@ header{
         justify-content: end;
         font-size: 1.5em;
         text-decoration: none;
-        color: rgb(214, 140, 3);
         color: black;
         font-weight: bolder;
         gap: 1em;
     }
 
     .container_list li span{
-        font-size: 1.4em;
+        font-size: 1.2em;
+        padding-top: .2em;
     }
 
     .locationIcon{
-        font-size: 1.4em;
+        font-size: 1.3em;
         margin-right: -.2em;
     }
     
@@ -199,8 +199,9 @@ header{
     }
 
     .logout span{
-        font-size: 1.4em;
+        font-size: 1.2em;
         padding-top: 0.2em;
+        
     }
 
     .logout p{
@@ -214,5 +215,6 @@ header{
         justify-content: center;
         align-items: center;
         gap: 0.5em;
+        margin-right: -0.1em;
     }
 }

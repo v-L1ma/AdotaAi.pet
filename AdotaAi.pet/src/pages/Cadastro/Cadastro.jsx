@@ -5,7 +5,7 @@ import {yupResolver} from '@hookform/resolvers/yup'
 import { userValidationSchema } from "../../utils/userValidation"
 import { toast } from 'react-toastify';
 import { useState } from "react"
-import { FaCircleUser } from "react-icons/fa6";
+import { MdOutlineAddPhotoAlternate } from "react-icons/md";
 
 function Cadastro() {
   const [formData, setFormData] = useState({
@@ -59,61 +59,80 @@ function Cadastro() {
 
   return (
     <div className={styles.container}>
+
+      <h1>Cadastre-se</h1>
       
-      <form onSubmit={handleSubmit}>
-      <label htmlFor="foto" className={styles.foto_label}>
-      <FaCircleUser className={styles.icone}/>
-      <p>selecione uma foto de perfil</p>
-      </label>
-      <input className={styles.foto} id="foto" type="file" onChange={handleFileChange} required />
+      <form onSubmit={handleSubmit}>       
+
+      <div className={styles.containerFoto}>
+        <label htmlFor="foto" className={styles.icone}>
+        <MdOutlineAddPhotoAlternate/>
+        </label>
+        <label htmlFor="foto" className={styles.foto_label}>Escolha uma foto</label>
+        <input className={styles.foto} id="foto" type="file" onChange={handleFileChange} required />
+      </div>
+
+      <label htmlFor="name">Nome</label>
       <input
           type="text"
           name="name"
+          id="name"
           placeholder="Nome"
           value={formData.name}
           onChange={handleChange}
           required
         />
+        <label htmlFor="email">Email</label>
         <input
           type="email"
           name="email"
-          placeholder="Email"
+          id="email"
+          placeholder="seuemail@hotmail.com"
           value={formData.email}
           onChange={handleChange}
           required
         />
+        <label htmlFor="phone">Telefone</label>
         <input
           type="text"
           name="phone"
-          placeholder="Telefone"
+          id="phone"
+          placeholder="(XX) XXXXX-XXXX"
           value={formData.phone}
           onChange={handleChange}
           required
         />
+
+        <label htmlFor="cpf">CPF</label>
         <input
           type="text"
           name="cpf"
+          id="cpf"
           placeholder="CPF"
           value={formData.cpf}
           onChange={handleChange}
           required
         />
+        <label htmlFor="birthdate">Data de nascimento</label>
         <input
           type="date"
           name="birthdate"
+          id="birthdate"
           value={formData.birthdate}
           onChange={handleChange}
           required
         />
+        <label htmlFor="password">Senha</label>
         <input
           type="password"
           name="password"
+          id="password"
           placeholder="Senha"
           value={formData.password}
           onChange={handleChange}
           required
         />
-        <button type="submit">Cadastrar</button>
+        <button className={styles.enviar} type="submit">Cadastrar</button>
       </form>
     </div>
   );

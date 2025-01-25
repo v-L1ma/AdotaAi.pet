@@ -3,6 +3,8 @@
  padding-top: 3em;
  display: flex;
  flex-direction: column;
+ padding-bottom: 10em;
+
 }
 
 .filtros{
@@ -205,11 +207,20 @@ input[type="checkbox"] {
         margin-left: .4em;
         color: rgba(0, 0, 0, 0.836);
     }
+    
+    .containerGallery{
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        width: 100%;
+    }
 
     .gallery{
         width: 100%;
         padding: 0;
-        justify-content: center;
+        justify-content: space-between;
+        margin: 0 auto;
     }
 
     .filtros{

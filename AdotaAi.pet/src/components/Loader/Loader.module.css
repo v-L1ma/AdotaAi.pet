@@ -1,0 +1,24 @@
+.container{
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+}
+
+.loading{
+    height: 3em;
+    width: 3em;
+    border: 5px solid rgba(0, 0, 0, 0.151);
+    border-left-color: orange;
+    border-radius: 50%;
+    animation: spin 1.5s linear infinite;
+}
+
+.container p{
+    color: rgba(0, 0, 0, 0.3);
+}
+
+@keyframes spin {
+    to{ transform: rotate(360deg);}
+}

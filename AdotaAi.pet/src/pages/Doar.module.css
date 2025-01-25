@@ -175,7 +175,7 @@ label{
         margin-left: 0px;
         margin-top: 10px;
         margin-right: 1em;
-        background-color: rgba(128, 128, 128, 0.082);
+        background-color: rgba(128, 128, 128, 0.027);
         border: 0.1px solid #76678828;
         font-size: 1.5em;
     }
@@ -192,6 +192,17 @@ label{
         flex-direction: column;
     } 
 
+    input[type="file"] {
+        display: none;
+    }
+
+    .inserir_foto label{
+        cursor: pointer;
+    }
+    .inserir_foto label:hover{
+        opacity: 0.6;
+    }
+    
     .icone{
         font-size: 3em;
         margin: 0.2em;
@@ -218,7 +229,7 @@ label{
         margin-bottom: 20px;
         margin-top: 15px;
         border: 0.1px solid #76678828;
-        background-color: rgba(128, 128, 128, 0.082);
+        background-color: rgba(128, 128, 128, 0.027);
         font-size: 1.5em;
     }
 
@@ -236,7 +247,7 @@ label{
         margin-bottom: 20px;
         margin-top: 15px;
         border: 0.1px solid #76678828;
-        background-color: rgba(128, 128, 128, 0.082);
+        background-color: rgba(128, 128, 128, 0.027);
         font-size: 1.5em;
     }
 
@@ -254,7 +265,7 @@ label{
         margin-top: 1em;
         border-radius: 0.5em;        
         border: 0.1px solid #76678828;
-        background-color: rgba(128, 128, 128, 0.082);
+        background-color: rgba(128, 128, 128, 0.027);
     }
 
     .sexo{
@@ -270,7 +281,7 @@ label{
         margin-top: 20px;
         border-radius: 20px;        
         border: 0.1px solid #76678828;
-        background-color: rgba(128, 128, 128, 0.082);
+        background-color: rgba(128, 128, 128, 0.027);
     }
 
     .sexo > label{
@@ -300,7 +311,7 @@ label{
         margin-top: 20px;
         border-radius: 20px;        
         border: 0.1px solid #76678828;
-        background-color: rgba(128, 128, 128, 0.082);
+        background-color: rgba(128, 128, 128, 0.027);
     }
 
     .descricao{
@@ -314,7 +325,7 @@ label{
         resize: none;
         border-radius: 20px;        
         border: 0.1px solid #76678828;
-        background-color: rgba(128, 128, 128, 0.082);
+        background-color: rgba(128, 128, 128, 0.027);
         margin-top: 10px;
         font-size: 1.4rem;
         padding: 10px;

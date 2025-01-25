@@ -5,6 +5,7 @@ import { FaCamera } from "react-icons/fa";
 import api from "../sevices/api";
 import { toast } from "react-toastify";
 import AuthContext from "../context/AuthContext";
+import { MdOutlineAddPhotoAlternate } from "react-icons/md";
 
 function Doar() {
   const token = localStorage.getItem("token");
@@ -72,9 +73,9 @@ function Doar() {
             <div className={styles.conteudo}>
               <form className={styles.cadastro} onSubmit={handleSubmit}>
                 <div className={styles.inserir_foto}>
-                  <FaCamera className={styles.icone} />
+                <label htmlFor="foto"><MdOutlineAddPhotoAlternate className={styles.icone} /></label>
                   <label htmlFor="foto">Escolha uma foto</label>
-                  <input type="file" onChange={handleFileChange} required />
+                  <input id="foto" type="file" onChange={handleFileChange} required />
                 </div>
                 <div className={styles.nome}>
                   <p>Nome</p>

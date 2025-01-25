@@ -5,12 +5,18 @@
     border-radius: 2em;
     padding: 2em;
     gap: 3em;
+    margin: 0 auto;
 
     & img{
         height: 30em;
         width: 30em;
         border-radius: .5em;
     }
+}
+
+.containerLoading{
+    height: 100vh;
+    display: flex;
 }
 
 .sobre{
