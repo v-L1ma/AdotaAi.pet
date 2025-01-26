@@ -6,7 +6,7 @@ import api from "../sevices/api";
 import { toast } from "react-toastify";
 import AuthContext from "../context/AuthContext";
 import { MdOutlineAddPhotoAlternate } from "react-icons/md";
-import ilustracao from '../assets/doarILustration.png'
+import ilustracao from '../assets/doarIlustration.png'
 function Doar() {
   const token = localStorage.getItem("token");
   const { userInfo, setUserInfo } = useContext(AuthContext);

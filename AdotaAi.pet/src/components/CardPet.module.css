@@ -19,7 +19,6 @@
 .card img{
     height:11em;
     width: 100%;
-    background-color: aqua;
     object-fit: cover; /* ajusta a imagem para preencher a div */
     object-position: center; /* opcional: centraliza a imagem */
     margin-bottom: -5px;
