@@ -7,6 +7,10 @@
 
 }
 
+.iconeFiltro{
+    display: none;
+}
+
 .filtros{
     width: 15em;
     margin-top: 2em;
@@ -207,6 +211,11 @@ input[type="checkbox"] {
         margin-left: .4em;
         color: rgba(0, 0, 0, 0.836);
     }
+
+    .disponiveis{
+        display: flex;
+        flex-direction: column;
+    }
     
     .containerGallery{
         display: flex;
@@ -223,6 +232,13 @@ input[type="checkbox"] {
         gap: 2em 1em;
         justify-content: flex-start;
         margin: 0 auto;
+    }
+
+    .iconeFiltro{
+        display: flex;
+        height: 4em;
+        width: 4em;
+        font-size: 2em;
     }
 
     .filtros{

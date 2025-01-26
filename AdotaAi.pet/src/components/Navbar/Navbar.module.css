@@ -149,7 +149,7 @@ header{
     .container_list ul{
         display: flex;
         flex-direction: column;
-        gap: 2em;
+        gap:2em;
         list-style: none;
         width: 100%;
         text-align: right;  
@@ -163,7 +163,7 @@ header{
         text-decoration: none;
         color: black;
         font-weight: bolder;
-        gap: 1em;
+        gap: .5em;
     }
 
     .container_list li span{
@@ -213,7 +213,7 @@ header{
         font-weight: bolder;
         justify-content: center;
         align-items: center;
-        gap: 0.5em;
+        gap: 0.4em;
         margin-right: -0.1em;
     }
 }

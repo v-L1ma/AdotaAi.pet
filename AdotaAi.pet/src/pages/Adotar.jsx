@@ -4,6 +4,7 @@ import styles from "./Adotar.module.css";
 import api from "../sevices/api";
 import Loader from "../components/Loader/Loader";
 import ilustracao from '../assets/adotarIlustration.png'
+import { FaFilter } from "react-icons/fa";
 
 function Adotar() {
   const [animais, setAnimais] = useState([])  
@@ -32,8 +33,14 @@ function Adotar() {
       <h1 className={styles.titulo}>Encontre seu novo amigo</h1>
       <div className={styles.disponiveis}>
 
-        <div className={styles.filtros}>
-          <form className={styles.filtrosdiv}>
+        <div className={styles.iconeFiltro}>
+          <FaFilter />
+        </div>
+        
+
+        <div className={styles.filtros}>        
+
+          <form>
             <h2>Filtros</h2>
 
             <h3>Animal</h3>

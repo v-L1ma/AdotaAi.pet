@@ -14,6 +14,10 @@
     }
 }
 
+.infos span{
+    font-weight: bolder;
+}
+
 .containerLoading{
     height: 100vh;
     display: flex;
@@ -84,14 +88,18 @@
 
     .container img{
         width: 100%;
-        height: 20em;
+        height: 25em;
         margin: 0 auto;
     }
 
     .sobre{
         display: flex;
         flex-direction: column;
-        gap: 0em;
+        gap: 1em;
+    }
+
+    .sobre p{
+        font-size: 1em;
     }
 
 

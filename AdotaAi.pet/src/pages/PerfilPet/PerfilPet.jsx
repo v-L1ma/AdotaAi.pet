@@ -49,22 +49,7 @@ function PerfilPet(){
                         <p className={styles.loc}><FaLocationDot/>Santos, SP</p>
                     </div>
 
-                    <div className={styles.tags}>
-                        {
-                            animal.vacinado === 'Sim' &&
-                            <Tag categoria={"Vacinado"}/>
-                        }
-                        {
-                            animal.castrado === 'Sim' &&
-                            <Tag categoria={"Castrado"}/>
-                        }
-                        {
-                            animal.vermifugado === 'Sim' &&
-                            <Tag categoria={"Vermifugado"}/>
-                        }
-                    </div>
-
-                    <div>
+                   <div>
                         <h2>Descrição</h2>
                         <p>{animal.descricao}</p>
                     </div> 
@@ -73,11 +58,17 @@ function PerfilPet(){
                     <h2>Informações do pet</h2>
                     
                         
-                        <p>Raca: {animal.raca}</p>
-                        <p>Sexo: {animal.sexo}</p>
-                        <p>Data de nascimento: {animal.datanasc}</p>                        
+                        <p><span>Raca:</span> {animal.raca}</p>
+                        <p><span>Sexo:</span> {animal.sexo}</p>
+                        <p><span>Data de nascimento:</span> {animal.datanasc}</p>    
+                        <p><span>Vacinado:</span> {animal.vacinado}</p>   
+                        <p><span>Castrado:</span> {animal.castrado}</p>   
+                        <p><span>Vermifugado:</span> {animal.vermifugado}</p>   
+
                         <div className={styles.divbtn}><button className={styles.contato}>Entre em contato com o Dono</button></div>
                     </div>
+
+                    
                 </div>
             </div>
             }

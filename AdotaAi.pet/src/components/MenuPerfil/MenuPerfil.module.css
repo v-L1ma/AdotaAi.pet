@@ -89,6 +89,11 @@
     .mobile{
       display: flex;
       justify-content: center;
+      width: 100%;
+    }
+
+    .nome{
+      width: 100%;
     }
 
     .button{
@@ -99,9 +104,9 @@
     }
 
     .button img{
-      border-radius: .3em;
       margin-left: 0.5em;
-      margin-right: -.4em;
+      margin-right: -.4em; 
+      border-radius: 50%;
     }
 
   }
