@@ -64,10 +64,14 @@ function PerfilPet(){
                         }
                     </div>
 
-                    <h2>Descrição</h2>
-                    <p>{animal.descricao}</p>
-                    <h2>Informações do pet</h2>
+                    <div>
+                        <h2>Descrição</h2>
+                        <p>{animal.descricao}</p>
+                    </div> 
+
                     <div className={styles.infos}>
+                    <h2>Informações do pet</h2>
+                    
                         
                         <p>Raca: {animal.raca}</p>
                         <p>Sexo: {animal.sexo}</p>

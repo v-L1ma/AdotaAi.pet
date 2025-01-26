@@ -214,12 +214,14 @@ input[type="checkbox"] {
         justify-content: center;
         align-items: center;
         width: 100%;
+        padding-left: .9em;
     }
 
     .gallery{
         width: 100%;
         padding: 0;
-        justify-content: space-between;
+        gap: 2em 1em;
+        justify-content: flex-start;
         margin: 0 auto;
     }
 

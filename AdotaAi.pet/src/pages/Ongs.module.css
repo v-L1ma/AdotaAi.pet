@@ -22,7 +22,6 @@
     margin-top: 2em;
 }
 
-
 .perfil{
     width: 30em;
     display: flex; 
@@ -31,8 +30,6 @@
     justify-content: center;
     align-items: center;
 }
-
-
 
 .perfil img{
     height: 10rem;
@@ -43,6 +40,7 @@
     z-index: 1;
     border: 3px solid white;
     box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.041);
+    outline: 1px solid rgba(0, 0, 0, 0.062);;
 
 }
 
@@ -57,6 +55,7 @@
     padding-top: 2em;
     text-align: justify;
     box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.041);
+    border: 1px solid rgba(0, 0, 0, 0.062);
 }
 
  img.localizacao{
@@ -86,7 +85,8 @@ h2.nome{
 
 @media (max-width:950px) {
     .disponiveis h1{
-        margin: 2em;
+        margin: .5em;
+        font-size: 1.5em;
     }
 
 
@@ -98,5 +98,11 @@ h2.nome{
     .conteudo{
         align-items: center;
         justify-content: center;
+        margin-top: 1em;
+    }
+
+    .infos_perfil{
+        height: 15em;
+        border: 1px solid rgba(0, 0, 0, 0.062);
     }
 }
