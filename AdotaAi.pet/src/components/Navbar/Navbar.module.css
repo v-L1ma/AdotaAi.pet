@@ -76,11 +76,6 @@ header{
         display: none;
     }
 
-    .nav_mobile img{
-        height: 4em;
-        width: 4em;
-    }
-
     .nav_mobile{
         display: flex;
         flex-direction: column;
@@ -111,8 +106,8 @@ header{
     }
     
     .nav_mobile img{
-        width: 4em;
-        height: 4em;
+        width: 5em;
+        height: 5em;
     }
 
     .container_list{
@@ -130,16 +125,18 @@ header{
         display: flex;
         align-items: center;
         justify-content: center;
-        width: 2em;
-        height: 2em;
         margin-bottom: 2em;
         border: none;
-        padding: 1em;
         font-size: 1.2em;
         border-radius: 50%;
         color: white;
         background-color: orange;
         font-weight: bolder;
+        padding: .3em .3em 0 .3em;
+    }
+
+    .close p{
+        font-size: 1.5em;
     }
 
     .container_list>button:hover{
@@ -159,7 +156,7 @@ header{
         display: flex;
         align-items: center;
         justify-content: end;
-        font-size: 1.5em;
+        font-size: 1.2em;
         text-decoration: none;
         color: black;
         font-weight: bolder;
@@ -207,7 +204,7 @@ header{
         display: flex;    
         background-color: transparent;
         border: none;
-        font-size: 2.1em;
+        font-size: 1.7em;
         text-decoration: none;
         color: black;
         font-weight: bolder;

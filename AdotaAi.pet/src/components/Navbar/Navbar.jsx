@@ -1,18 +1,16 @@
-import { Link, useNavigate } from "react-router";
 import styles from "./Navbar.module.css";
+import { Link, useNavigate } from "react-router";
 import { useState } from "react";
 import LoginPopUp from "../Login/LoginPopUp.jsx";
 import Logo from "../../assets/logo.png";
-import { IoMdMenu } from "react-icons/io";
-import { IoLogOutOutline } from "react-icons/io5";
 import MenuPerfil from "../MenuPerfil/MenuPerfil.jsx";
 import SlidingPanel from "react-sliding-side-panel";
 import "react-sliding-side-panel/lib/index.css";
 import { toast } from "react-toastify";
 import { FaRegHeart } from "react-icons/fa";
-import { IoLocationOutline } from "react-icons/io5";
 import { BsBox2Heart } from "react-icons/bs";
-import { IoSettingsOutline } from "react-icons/io5";
+import { IoMdMenu } from "react-icons/io";
+import { IoLogOutOutline, IoLocationOutline, IoSettingsOutline, IoClose } from "react-icons/io5";
 
 function Navbar() {
   const [abrirLoginPopup, setAbrirLoginPopup] = useState(false);
@@ -90,7 +88,7 @@ function Navbar() {
         <SlidingPanel type="right" isOpen={abrirMenu} size={80}>
           <div className={styles.container_list}>
             <button className={styles.close} onClick={() => abrir(abrirMenu)}>
-              X
+              <p><IoClose/></p>
             </button>
             <ul>
               {token && (

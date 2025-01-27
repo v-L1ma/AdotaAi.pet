@@ -18,8 +18,9 @@
 }
 
 .disponiveis h1{
-    color: black;
+    color: orange;
     margin-top: 2em;
+    text-align: center;
 }
 
 .perfil{
@@ -35,7 +36,6 @@
     height: 10rem;
     width: 10rem;
     border-radius: 50%;
-    margin-right: 2rem;
     margin-bottom: -2em;
     z-index: 1;
     border: 3px solid white;

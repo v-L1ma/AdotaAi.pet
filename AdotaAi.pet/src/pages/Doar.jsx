@@ -69,7 +69,7 @@ function Doar() {
       <div className={styles.disponiveis}>
         {token ? (
           <div>
-            <h1>Primeiro passo para o novo lar</h1>
+            <h1>Primeiro passo para um novo lar!</h1>
             <div className={styles.conteudo}>
               <form className={styles.cadastro} onSubmit={handleSubmit}>
                 <div className={styles.inserir_foto}>

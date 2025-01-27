@@ -31,8 +31,8 @@
 }
 
 .titulo{
-    
-    color: rgba(0, 0, 0, 0.836);
+    color: orange;
+    margin-bottom: 1em;
 }
 
 .checkbox{
@@ -209,7 +209,6 @@ input[type="checkbox"] {
     .titulo{
         font-size: 1.5em;
         margin-left: .4em;
-        color: rgba(0, 0, 0, 0.836);
     }
 
     .disponiveis{
@@ -236,9 +235,25 @@ input[type="checkbox"] {
 
     .iconeFiltro{
         display: flex;
-        height: 4em;
-        width: 4em;
-        font-size: 2em;
+        justify-content: end;
+        margin-top: 1em;
+    }
+
+    .iconeFiltro button{
+        appearance: none;
+        display: flex;
+        height: 2em;
+        justify-content: end;
+        padding: .5em;
+        font-size: 1.5em;
+        cursor: pointer;
+        gap: .2em;
+        border: none;
+        background-color: transparent;
+    }
+
+    .iconeFiltro p{
+        font-size: .9em;
     }
 
     .filtros{
@@ -289,6 +304,25 @@ input[type="checkbox"] {
         margin: 2em auto;
         flex-direction: column-reverse;
         padding: 2em 2em 0 2em;
+    }
+    
+
+    .filtrosMobile{
+        height: 60%;
+        padding-top: 30vh;
+    }
+
+    .filtrosMobile form{
+        background-color: white;
+        padding: 2em;
+        padding-bottom: 100%;
+    }
+
+    .closeBtn{
+        display: flex;
+        padding: .5em;
+        justify-content: flex-end;
+        color: white;
     }
 
 }
