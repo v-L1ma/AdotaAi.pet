@@ -43,7 +43,7 @@ function Cadastro() {
       }
 
       // Faz o POST para a rota /cadastro
-      const response = await api.post('http://localhost:3000/cadastro', formDataToSend, {
+      const response = await api.post('/cadastro', formDataToSend, {
         headers: {
           'Content-Type': 'multipart/form-data',
         },
