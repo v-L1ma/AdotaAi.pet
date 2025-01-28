@@ -1,9 +1,9 @@
 import { BrowserRouter as Router, Routes, Route } from "react-router";
 import React, { Suspense, lazy, useState, useEffect } from "react";
 import "./App.css";
-import Footer from "./components/Footer";
-const LazyOngs = lazy(() => import("./pages/Ongs"));
-const LazyHome = lazy(() => import("./pages/Home"));
+import Footer from "./components/Footer/Footer";
+const LazyOngs = lazy(() => import("./pages/Ongs/Ongs"));
+const LazyHome = lazy(() => import("./pages/Home/Home"));
 const LazPerfilPet = lazy(() => import("./pages/PerfilPet/PerfilPet"));
 const LazyCadastro = lazy(() => import("./pages/Cadastro/Cadastro"));
 const LazyPerfil = lazy(() => import("./pages/PerfilTutor/Perfil"));
@@ -15,8 +15,8 @@ import Navbar from "./components/Navbar/Navbar";
 import AuthContext from "./context/AuthContext";
 import Loader from "./components/Loader/Loader";
 
-const LazyAdotar = lazy(() => import("./pages/Adotar"));
-const LazyDoar = lazy(() => import("./pages/Doar"));
+const LazyAdotar = lazy(() => import("./pages/Adotar/Adotar"));
+const LazyDoar = lazy(() => import("./pages/Doar/Doar"));
 
 function App() {
   const [userInfo, setUserInfo] = useState(() => {

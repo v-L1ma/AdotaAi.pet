@@ -1,8 +1,6 @@
-import Banner from "../components/Banner/Banner";
+import Banner from "../../components/Banner/Banner";
 import styles from "./Home.module.css";
-import { IoIosArrowDropleft, IoIosArrowDropright } from "react-icons/io";
-import Galeria from "../components/GaleriaPets/Galeria";
-import CaoeGato from "../assets/Cao-e-gato.png";
+import CaoeGato from "../../assets/Cao-e-gato.png";
 import { FaSquareCheck } from "react-icons/fa6";
 
 function Home() {

@@ -1,16 +1,18 @@
-import { useContext, useRef } from 'react';
+import { useContext, useRef, useState } from 'react';
 import styles from './LoginPopUp.module.css'
 import { FaFacebook, FaGoogle  } from "react-icons/fa";
 import api from '../../sevices/api';
 import { toast } from 'react-toastify';
 import AuthContext from '../../context/AuthContext';
 import { Link} from "react-router";
+import { IoMdEye, IoMdEyeOff } from "react-icons/io";
 
 function LoginPopUp({onClick}){
     const emailRef = useRef()
     const senhaRef = useRef()
 
     const {setUserInfo} = useContext(AuthContext)
+    const [showPassword, setShowPassword] = useState("text")
 
     async function handleSubmit(e){
         e.preventDefault()
@@ -33,25 +35,43 @@ function LoginPopUp({onClick}){
         onClick()
     }
 
+    function changeType(showPassword){
+      if (showPassword === "password") {
+        setShowPassword("text")
+      } else {
+        setShowPassword("password")
+      }
+    }
+
 
     return(
 
         <div className={styles.container}>
           <button className={styles.closeBtn_mobile} onClick={onClick}><div>X</div></button>
             <form onSubmit={handleSubmit}>                
-                <h1>Conecte-se na sua conta</h1>
-                <h2>Seja bem vindo de volta!</h2>
+                <div>
+                  <h1>Conecte-se na sua conta</h1>
+                  <h2>Seja bem vindo de volta!</h2>
+                </div>
         
                 <div className={styles.inputs}>
+                  <label htmlFor="email">Email</label>
                   <input
+                  id='email'
                   type="email"
                   placeholder="Email"
                   ref={emailRef}
                   />
-                  <input
-                  type="password"
-                  placeholder="Senha"
-                  ref={senhaRef}/>
+                  <label htmlFor="senha">Senha</label>
+                  <div className={styles.divInput}>
+                    <input
+                    id='senha'
+                    type={showPassword}
+                    placeholder="Senha"
+                    ref={senhaRef}/>
+                    <div className={styles.showPassword} onClick={()=> changeType(showPassword)}><IoMdEye/></div>
+                   
+                  </div>
                 </div>
                 <div className={styles.esqueceu}>
                 <div>

@@ -1,7 +1,8 @@
 import styles from "./Footer.module.css";
 import { FaLinkedin, FaGithub } from "react-icons/fa";
-import Logo from "../assets/favicon.png";
+import Logo from "../../assets/favicon.png";
 import { LiaCopyrightSolid } from "react-icons/lia";
+import { Link } from "react-router";
 
 function Footer() {
   return (
@@ -17,9 +18,18 @@ function Footer() {
         <div>
           <h1>Serviços</h1>
           <ul>
-            <li>Adotar</li>
-            <li>Doar</li>
-            <li>ONG por perto</li>
+          <Link to='/'>
+              <li>Pagina inicial</li>
+            </Link>
+            <Link to='/adotar'>
+              <li>Adotar</li>
+            </Link>
+            <Link to='/doar'>
+              <li>Doar</li>
+            </Link>
+            <Link to='/ongs'>
+              <li>ONG por perto</li>
+            </Link>
           </ul>
         </div>
 

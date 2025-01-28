@@ -1,9 +1,9 @@
 import { useEffect, useState } from "react";
-import CardPet from "../components/CardPet";
+import CardPet from "../../components/CardPet/CardPet";
 import styles from "./Adotar.module.css";
-import api from "../sevices/api";
-import Loader from "../components/Loader/Loader";
-import ilustracao from '../assets/adotarIlustration.png'
+import api from "../../sevices/api";
+import Loader from "../../components/Loader/Loader";
+import ilustracao from '../../assets/adotarIlustration.png'
 import { HiOutlineAdjustmentsHorizontal } from "react-icons/hi2";
 import SlidingPanel from "react-sliding-side-panel";
 import { IoClose } from "react-icons/io5";

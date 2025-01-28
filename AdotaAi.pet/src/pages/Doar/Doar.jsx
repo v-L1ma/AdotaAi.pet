@@ -1,12 +1,10 @@
-import { useState, useRef, useContext } from "react";
-import { useNavigate } from "react-router";
+import { useState, useContext } from "react";
 import styles from "./Doar.module.css";
-import { FaCamera } from "react-icons/fa";
-import api from "../sevices/api";
+import api from "../../sevices/api";
 import { toast } from "react-toastify";
-import AuthContext from "../context/AuthContext";
+import AuthContext from "../../context/AuthContext";
 import { MdOutlineAddPhotoAlternate } from "react-icons/md";
-import ilustracao from '../assets/doarIlustration.png'
+import ilustracao from '../../assets/doarIlustration.png'
 function Doar() {
   const token = localStorage.getItem("token");
   const { userInfo, setUserInfo } = useContext(AuthContext);
