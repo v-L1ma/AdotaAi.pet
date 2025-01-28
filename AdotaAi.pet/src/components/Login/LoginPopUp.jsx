@@ -12,7 +12,7 @@ function LoginPopUp({onClick}){
     const senhaRef = useRef()
 
     const {setUserInfo} = useContext(AuthContext)
-    const [showPassword, setShowPassword] = useState("text")
+    const [showPassword, setShowPassword] = useState("password")
 
     async function handleSubmit(e){
         e.preventDefault()
