@@ -112,4 +112,8 @@
       border-radius: 50%;
     }
 
+    .button p{
+      color: #000000;                             
+    }    
+
   }

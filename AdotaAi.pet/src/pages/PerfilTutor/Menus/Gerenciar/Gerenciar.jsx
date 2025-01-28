@@ -1,7 +1,7 @@
 import { useContext, useEffect, useState } from "react";
 import AuthContext from "../../../../context/AuthContext";
 import api from "../../../../sevices/api";
-import CardPet from "../../../../components/CardPet";
+import CardPet from "../../../../components/CardPet/CardPet";
 import styles from './Gerenciar.module.css'
 import Loader from '../../../../components/Loader/Loader'
 
