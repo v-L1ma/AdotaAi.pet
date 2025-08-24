@@ -1,82 +1,44 @@
-import { Image, StyleSheet, Text, View } from "react-native";
+import { StyleSheet, Text, View } from "react-native";
 
 export default function Index() {
   return (
     <View
       style={style.fundo}
     >
-     <View style={style.banner}>
+     <div style={style.banner}>
       <Text>Adote um amigo de quatro patas</Text>
-     </View>
+     </div>
 
-     <View style={style.filtros}>
+     <div style={style.filtros}>
 
-      <View style={style.opcao}>
-        <Image 
-        style={style.icone}
-        source={require("../assets/images/animal-shelter.png")}
-        />
-        <Text>Cachorro</Text>
-      </View>
+      <div>
+        <p>Cachorro</p>
+      </div>
 
-      <View style={style.opcao}>
-        <Text>Gato</Text>
-      </View>
+      <div>
+        <p>Gato</p>
+      </div>
 
-      <View style={style.opcao}>
-        <Text>Passáro</Text>
-      </View>
-
-     </View>
+     </div>
     </View>
   );
 }
 
 const style = StyleSheet.create({
   fundo:{
-    backgroundColor:'rgb(231, 231, 231)',
-    fontFamily:"Sans",
     display:"flex",
     alignItems:"center",
     height:"100%",
-    padding:20,
-    gap:20
+    padding:10
   },
   banner:{
     backgroundColor:"orange",
-    width:"95%",
-    borderRadius:5,
-    padding: 20,
-    maxWidth:"100%",
-    fontSize:44,
-    fontWeight:"bold",
-    color:"white"
+    width:"100%",
+    height:100
   },
   filtros:{
     display:"flex",
     flexDirection:"row",
-    justifyContent:"space-between",
-    width:"100%",
-    gap:20
-  },
-  opcao:{
-    backgroundColor:"white",
-    width:"100%",
-    textAlign:"center",
-    borderRadius:5,
-    boxShadow:"2px 2px 5px rgba(105, 105, 105, 0.05)",
-    borderStyle:"solid",
-    borderWidth:1,
-    borderColor:"rgba(0, 0, 0, 0.05)",
-    cursor:"pointer",
-    fontWeight:"bold",
-    color:"#6e6b65",
-    display:"flex",
-    justifyContent:"center",
-    alignItems:"center"
-  },
-  icone:{
-    width:32,
-    height:32
+    gap:10
   }
 })
