@@ -1,44 +1,30 @@
-import { StyleSheet, Text, View } from "react-native";
+import React from "react";
+import { View, TouchableOpacity, Text } from "react-native";
+import { useRouter } from "expo-router";
+import styles from "../styles/AppStyles";
 
-export default function Index() {
+export default function HomeScreen() {
+  const router = useRouter();
+
   return (
-    <View
-      style={style.fundo}
-    >
-     <div style={style.banner}>
-      <Text>Adote um amigo de quatro patas</Text>
-     </div>
+    <View style={styles.container}>
+      <View style={styles.bottomCircle} />
+      <Text style={styles.title}>Adotaí</Text>
+      <Text style={styles.subtitle}>Entre e encontre seu pet!</Text>
 
-     <div style={style.filtros}>
+      <TouchableOpacity
+        style={styles.buttonArea}
+        onPress={() => alert("Em desenvolvimento!")}
+      >
+        <Text style={styles.buttonText}>Entre</Text>
+      </TouchableOpacity>
 
-      <div>
-        <p>Cachorro</p>
-      </div>
-
-      <div>
-        <p>Gato</p>
-      </div>
-
-     </div>
+      <TouchableOpacity
+        style={styles.buttonArea2}
+        onPress={() => router.push("/cadastro")}
+      >
+        <Text style={styles.buttonText}>Crie sua conta</Text>
+      </TouchableOpacity>
     </View>
   );
 }
-
-const style = StyleSheet.create({
-  fundo:{
-    display:"flex",
-    alignItems:"center",
-    height:"100%",
-    padding:10
-  },
-  banner:{
-    backgroundColor:"orange",
-    width:"100%",
-    height:100
-  },
-  filtros:{
-    display:"flex",
-    flexDirection:"row",
-    gap:10
-  }
-})
