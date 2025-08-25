@@ -1,13 +1,38 @@
-import { Image, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { FlatList, Image, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { colors } from "@/styles/variables";
 import CardPet from "@/components/CardPet";
 import NavBar from "@/components/NavBar";
 
+type animal = {
+    nome:string,
+    imagem:string
+}
+
 export default function Home() {
+
+  const pets :animal[] = [
+    {
+    nome:"Alfredo",
+    imagem:"https://img.freepik.com/fotos-gratis/fotografia-vertical-de-foco-superficial-de-um-bonito-cachorro-de-golden-retriever-sentado-em-um-chao-de-grama_181624-27259.jpg?w=360",
+
+    },
+    {
+    nome:"Bob",
+    imagem:"https://img.freepik.com/fotos-gratis/fotografia-vertical-de-foco-superficial-de-um-bonito-cachorro-de-golden-retriever-sentado-em-um-chao-de-grama_181624-27259.jpg?w=360",
+
+    },
+    {
+    nome:"Lucky",
+    imagem:"https://img.freepik.com/fotos-gratis/fotografia-vertical-de-foco-superficial-de-um-bonito-cachorro-de-golden-retriever-sentado-em-um-chao-de-grama_181624-27259.jpg?w=360",
+    }
+  ]
   return (
-    <View
-      style={style.fundo}
-    >
+    <View style={style.fundo}>
+
+    <View style={{flexDirection:"row"}}>
+      <Text style={style.titulo}>Seja bem-vindo</Text>
+    </View>
+
      <View style={style.banner}>
       <Text style={style.textoBanner}>O amigo que você busca está aqui</Text>
 
@@ -40,12 +65,18 @@ export default function Home() {
 
      <View style={style.gallery}>
 
-        <CardPet></CardPet>
+      <FlatList
+      data={pets}
+      renderItem={({ item, index })=>(
+        <CardPet  animal={item} index={index}></CardPet>
+      )}
+      horizontal
+      showsHorizontalScrollIndicator={false}
+      >
 
-        <CardPet></CardPet>
+      </FlatList>
 
      </View>
-
 
      <NavBar></NavBar>
      
@@ -59,12 +90,11 @@ const style = StyleSheet.create({
     backgroundColor:'rgba(255, 255, 255, 0.18)',
     fontFamily:"Sans",
     display:"flex",
-    flexDirection:"column",
-    alignItems:"center",
     justifyContent:"space-between",
+    height:"93%",
+    flexDirection:"column",
     width:"100%",
-    padding:25,
-    gap:25
+    padding:25
   },
   banner:{
     backgroundColor: colors.primary,
@@ -130,7 +160,6 @@ const style = StyleSheet.create({
   gallery:{
     display:"flex",
     flexDirection:"row",
-    justifyContent:"space-between",
     width:"100%",
     gap:20
   }

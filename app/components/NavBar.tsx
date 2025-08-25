@@ -9,7 +9,8 @@ export default function NavBar(){
             <Icon style={styles.icon} name="home" size={30} color={colors.primary}></Icon>
             <IconMat style={styles.icon} name="cards-heart-outline" size={30} color={colors.primary}></IconMat>
             
-            <IconMat style={styles.icon} name="cards-heart-outline" size={30} color={colors.primary}></IconMat>
+            <IconMat style={styles.icon} name="heart-plus-outline" size={30} color={colors.primary}></IconMat>
+            <IconMat style={styles.icon} name="menu" size={30} color={colors.primary}></IconMat>
         </View>
     );
 }
@@ -23,7 +24,8 @@ const styles = StyleSheet.create({
         borderRadius:20,
         display:"flex",
         flexDirection:"row",
-        justifyContent:"space-around"
+        justifyContent:"space-around",
+        position:"fixed"
     },
     icon:{
         borderRadius:"100%"
