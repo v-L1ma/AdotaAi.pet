@@ -68,7 +68,9 @@ export default function Home() {
       <FlatList
       data={pets}
       renderItem={({ item, index })=>(
-        <CardPet  animal={item} index={index}></CardPet>
+        <View style={{height:290,width:250}}>
+          <CardPet animal={item} index={index} onlyPicture={false}></CardPet>
+        </View>
       )}
       horizontal
       showsHorizontalScrollIndicator={false}
