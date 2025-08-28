@@ -1,7 +1,7 @@
 import CardPet from "@/components/CardPet";
 import NavBar from "@/components/NavBar";
 import { useState } from "react";
-import { FlatList, ScrollView } from "react-native";
+import { Dimensions, FlatList, ScrollView } from "react-native";
 import { StyleSheet, Text, TextInput, View } from "react-native";
 
 type animal = {
@@ -70,13 +70,22 @@ export default function ListagemPets(){
 
                 <FlatList
                     data={pets}
-                    numColumns={2}
                     style={{marginBottom:160}}
+                    contentContainerStyle={{
+                        display:"flex",
+                        flexDirection:"row",
+                        justifyContent:"space-between",
+                        paddingBottom:150,
+                        gap:"1%",
+                        flexWrap:"wrap"
+                    }}
+
                     renderItem={({item,index}) => (
-                        <View style={{height:220,width:185, display:"flex",flexDirection:"row",marginRight:10}}>
+                        <View style={{height:200,width:180, display:"flex",flexDirection:"row"}}>
                             <CardPet animal={item} index={index} onlyPicture={true}></CardPet>
                         </View>
                     )}
+                
                     />
 
                     <View style={{position:"fixed",bottom:195}}>
