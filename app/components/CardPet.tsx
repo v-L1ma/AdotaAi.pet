@@ -43,6 +43,7 @@ const styles = StyleSheet.create({
         padding:15,
         borderRadius:25,
         display:"flex",
+        height:"100%",
         gap:10
     },
     image:{

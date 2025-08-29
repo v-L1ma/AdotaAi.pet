@@ -67,8 +67,9 @@ export default function Home() {
 
       <FlatList
       data={pets}
+      contentContainerStyle={style.gallery}
       renderItem={({ item, index })=>(
-        <View style={{height:290,width:250}}>
+        <View style={{height:250,width:250}}>
           <CardPet animal={item} index={index} onlyPicture={false}></CardPet>
         </View>
       )}

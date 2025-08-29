@@ -11,7 +11,7 @@ export default function NavBar(){
 
     return(
         <View style={styles.wrapper}>
-            <BlurView style={styles.container}  intensity={60} tint="light" >
+            <BlurView style={styles.container}  intensity={80} tint="light" >
                 <Icon onPress={()=>router.push("/Home")}  style={styles.icon} name="home" size={30} color={colors.primary}></Icon>
                 <IconMat onPress={()=>router.push("/listagemPets")} style={styles.icon} name="cards-heart-outline" size={30} color={colors.primary}></IconMat>
                 
@@ -46,6 +46,8 @@ const styles = StyleSheet.create({
         display:"flex",
         flexDirection:"row",
         justifyContent:"space-around",
+        borderWidth:2,
+        borderColor:"white"
     },
     icon:{
         borderRadius:"100%"
