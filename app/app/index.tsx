@@ -1,6 +1,6 @@
-import React from "react";
-import { View, TouchableOpacity, Text } from "react-native";
 import { useRouter } from "expo-router";
+import React from "react";
+import { Text, TouchableOpacity, View } from "react-native";
 import styles from "../styles/AppStyles";
 
 export default function HomeScreen() {
@@ -10,11 +10,11 @@ export default function HomeScreen() {
     <View style={styles.container}>
       <View style={styles.bottomCircle} />
       <Text style={styles.title}>Adotaí</Text>
-      <Text style={styles.subtitle}>Entre e encontre seu pet!</Text>
+      <Text style={styles.subtitle}>Encontre seu melhor amigo aqui!</Text>
 
       <TouchableOpacity
         style={styles.buttonArea}
-        onPress={() => alert("Em desenvolvimento!")}
+        onPress={() => router.push("/login")}
       >
         <Text style={styles.buttonText}>Entre</Text>
       </TouchableOpacity>
