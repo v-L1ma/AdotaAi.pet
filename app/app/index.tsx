@@ -14,7 +14,7 @@ export default function HomeScreen() {
 
       <TouchableOpacity
         style={styles.buttonArea}
-        onPress={() => alert("Em desenvolvimento!")}
+        onPress={() => router.push("/Home")}
       >
         <Text style={styles.buttonText}>Entre</Text>
       </TouchableOpacity>
