@@ -110,8 +110,8 @@ const style = StyleSheet.create({
         position:"absolute",
         top:0,
         left:"-15%",
-        borderBottomRightRadius:"50%",
-        borderBottomLeftRadius:"50%"
+        borderBottomRightRadius:300,
+        borderBottomLeftRadius:300
     },
     infos:{
         paddingHorizontal:25,

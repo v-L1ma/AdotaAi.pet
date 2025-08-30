@@ -20,7 +20,7 @@ export default function LoginScreen() {
         <Text style={{ marginLeft: 150}}>Esqueceu a senha?</Text>
         </TouchableOpacity>
 
-        <TouchableOpacity style={styles.buttonLogin} onPress={() => alert("Em desenvolvimento!")}>
+        <TouchableOpacity style={styles.buttonLogin} onPress={() => router.push("/Home")}>
           <Text style={styles.buttonText}>Entrar</Text>
         </TouchableOpacity>
 
