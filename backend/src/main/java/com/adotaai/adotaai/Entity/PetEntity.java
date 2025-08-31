@@ -1,7 +1,6 @@
 package com.adotaai.adotaai.Entity;
 
 import com.adotaai.adotaai.DTO.PetDTO;
-import com.adotaai.adotaai.DTO.UsuarioDTO;
 import jakarta.persistence.*;
 import org.springframework.beans.BeanUtils;
 
