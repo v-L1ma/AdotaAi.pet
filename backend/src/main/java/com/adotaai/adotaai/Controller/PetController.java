@@ -37,5 +37,6 @@ public class PetController {
     {
         petService.excluir(id);
         return  ResponseEntity.ok().build();
+
     }
 }
