@@ -12,8 +12,8 @@ export default function NavBar(){
     return(
         <View style={styles.wrapper}>
             <BlurView style={styles.container}  intensity={80} tint="light" >
-                <Icon onPress={()=>router.push("/Home")}  style={styles.icon} name="home" size={30} color={colors.primary}></Icon>
-                <IconMat onPress={()=>router.push("/listagemPets")} style={styles.icon} name="cards-heart-outline" size={30} color={colors.primary}></IconMat>
+                <Icon onPress={()=>router.replace("/Home")}  style={styles.icon} name="home" size={30} color={colors.primary}></Icon>
+                <Icon onPress={()=>router.push("/listagemPets")} style={styles.icon} name="search" size={30} color={colors.primary}></Icon>
                 
                 <IconMat style={styles.icon} name="heart-plus-outline" size={30} color={colors.primary}></IconMat>
                 <IconMat style={styles.icon} name="menu" size={30} color={colors.primary}></IconMat>
@@ -32,9 +32,9 @@ const styles = StyleSheet.create({
         borderRadius:20, 
         overflow:"hidden",
         position:"fixed",
-        width:"90%",
+        width:"100%",
         bottom:10,
-        left:20
+        left:0
 
     },
     container:{

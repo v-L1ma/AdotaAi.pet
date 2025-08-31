@@ -69,7 +69,7 @@ export default function Home() {
       data={pets}
       contentContainerStyle={style.gallery}
       renderItem={({ item, index })=>(
-        <View style={{height:250,width:250}}>
+        <View style={{height:240,width:230}}>
           <CardPet animal={item} index={index} onlyPicture={false}></CardPet>
         </View>
       )}
@@ -161,9 +161,6 @@ const style = StyleSheet.create({
     height:32,
   },
   gallery:{
-    display:"flex",
-    flexDirection:"row",
-    width:"100%",
     gap:20
   }
 })
