@@ -33,7 +33,10 @@ public class UsuarioEntity {
     private String moradia;
 
     @Column(nullable = false)
-    private String metragem;
+    private int metragemMin;
+
+    @Column(nullable = false)
+    private int metragemMax;
 
     public UsuarioEntity (UsuarioDTO usuario)
     {
@@ -100,12 +103,20 @@ public class UsuarioEntity {
         this.moradia = moradia;
     }
 
-    public String getMetragem() {
-        return metragem;
+    public int getMetragemMin() {
+        return metragemMin;
     }
 
-    public void setMetragem(String metragem) {
-        this.metragem = metragem;
+    public void setMetragemMin(int metragemMin) {
+        this.metragemMin = metragemMin;
+    }
+
+    public int getMetragemMax() {
+        return metragemMax;
+    }
+
+    public void setMetragemMax(int metragemMax) {
+        this.metragemMax = metragemMax;
     }
 
     @Override

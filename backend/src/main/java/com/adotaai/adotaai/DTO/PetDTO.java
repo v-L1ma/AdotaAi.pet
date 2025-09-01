@@ -6,6 +6,8 @@ import org.springframework.beans.BeanUtils;
 public class PetDTO {
 
     private Long id;
+    private String tipo;
+    private Boolean adotado = false;
     private String nome;
     private String idade;
     private String porte;
@@ -56,5 +58,21 @@ public class PetDTO {
 
     public void setRaca(String raca) {
         this.raca = raca;
+    }
+
+    public String getTipo() {
+        return tipo;
+    }
+
+    public void setTipo(String tipo) {
+        this.tipo = tipo;
+    }
+
+    public Boolean getAdotado() {
+        return adotado;
+    }
+
+    public void setAdotado(Boolean adotado) {
+        this.adotado = adotado;
     }
 }

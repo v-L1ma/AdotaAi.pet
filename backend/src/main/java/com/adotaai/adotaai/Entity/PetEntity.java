@@ -21,6 +21,12 @@ public class PetEntity {
     private String idade;
 
     @Column(nullable = false)
+    private String tipo;
+
+    @Column(nullable = false)
+    private Boolean adotado = false;
+
+    @Column(nullable = false)
     private String porte;
 
     @Column(nullable = false)
@@ -72,6 +78,22 @@ public class PetEntity {
 
     public void setRaca(String raca) {
         this.raca = raca;
+    }
+
+    public String getTipo() {
+        return tipo;
+    }
+
+    public void setTipo(String tipo) {
+        this.tipo = tipo;
+    }
+
+    public Boolean getAdotado() {
+        return adotado;
+    }
+
+    public void setAdotado(Boolean adotado) {
+        this.adotado = adotado;
     }
 
     @Override

@@ -12,7 +12,10 @@ public class UsuarioDTO {
     private String telefone;
     private String senha;
     private String moradia;
-    private String metragem;
+    private int metragemMin;
+    private int metragemMax;
+
+
 
     public UsuarioDTO(UsuarioEntity usuario){
         BeanUtils.copyProperties(usuario, this);
@@ -29,13 +32,6 @@ public class UsuarioDTO {
         this.id = id;
     }
 
-    public String getMetragem() {
-        return metragem;
-    }
-
-    public void setMetragem(String metragem) {
-        this.metragem = metragem;
-    }
 
     public String getMoradia() {
         return moradia;
@@ -43,6 +39,22 @@ public class UsuarioDTO {
 
     public void setMoradia(String moradia) {
         this.moradia = moradia;
+    }
+
+    public int getMetragemMin() {
+        return metragemMin;
+    }
+
+    public void setMetragemMin(int metragemMin) {
+        this.metragemMin = metragemMin;
+    }
+
+    public int getMetragemMax() {
+        return metragemMax;
+    }
+
+    public void setMetragemMax(int metragemMax) {
+        this.metragemMax = metragemMax;
     }
 
     public String getTelefone() {
