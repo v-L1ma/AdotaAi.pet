@@ -1,8 +1,10 @@
 import CardPet from "@/components/CardPet";
 import NavBar from "@/components/NavBar";
+import { colors } from "@/styles/variables";
 import { useState } from "react";
-import { Dimensions, FlatList, ScrollView } from "react-native";
+import { Alert, FlatList, Pressable } from "react-native";
 import { StyleSheet, Text, TextInput, View } from "react-native";
+import Icon from "react-native-vector-icons/FontAwesome5"
 
 type animal = {
     nome:string,
@@ -67,7 +69,6 @@ export default function ListagemPets(){
            >
             </TextInput> 
 
-
                 <FlatList
                     data={pets}
                     style={{marginBottom:160}}
@@ -88,9 +89,13 @@ export default function ListagemPets(){
                 
                     />
 
-                    <View style={{position:"fixed",bottom:195}}>
-                        <NavBar></NavBar>
-                    </View>
+            <Pressable style={styles.filterButton} onPress={()=> Alert.alert("Em desenvolvimento")}>
+                <Icon name="filter" size={20} color={"white"}></Icon>
+            </Pressable>
+
+            <View style={{position:"fixed",bottom:195}}>
+                <NavBar></NavBar>
+            </View>
         </View>
     )
 }
@@ -102,18 +107,37 @@ const styles = StyleSheet.create({
         gap:25,
     },
     input:{
-        borderRadius: 50,
+        borderRadius: 25,
         padding:25,
         backgroundColor:"white",
         color:"rgba(187, 33, 33, 1)",
         shadowColor: "#000",
-        shadowOpacity: 0.01,
-        shadowOffset: { width: 0, height: 2 },
-        shadowRadius: 10,
+        shadowOpacity: 0.1,
+        shadowOffset: { width: 2, height: 2 },
+        shadowRadius: 15,
     },
     galery:{
         display:"flex",
         flexWrap:"wrap",
         flexDirection:"row"
+    },
+    filterButton:{
+        zIndex:5,
+        backgroundColor:colors.primary,
+        position:"absolute",
+        bottom: "31%",
+        padding:20,
+        right:35,
+        borderRadius:60,
+        borderWidth:2,
+        borderColor:colors.secondary,
+        display:"flex",
+        justifyContent:"center",
+        alignItems:"center",
+
+        shadowColor: "#000",
+        shadowOpacity: 0.3,
+        shadowOffset: { width: 2, height: 2 },
+        shadowRadius: 15,
     }
 });

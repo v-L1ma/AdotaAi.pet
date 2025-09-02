@@ -23,7 +23,7 @@ export default function CardPet({animal,index, onlyPicture}:Props){
                 {
                     pathname:"/perfil-pet",
                     params:{
-                        nome:animal.nome,
+                        nome: animal.nome,
                         imagem: animal.imagem
                     }
                 })
