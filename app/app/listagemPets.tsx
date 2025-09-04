@@ -2,9 +2,9 @@ import CardPet from "@/components/CardPet";
 import NavBar from "@/components/NavBar";
 import { colors } from "@/styles/variables";
 import { useState } from "react";
-import { Alert, FlatList, Pressable, ScrollView } from "react-native";
+import { FlatList, Pressable, TouchableOpacity } from "react-native";
 import { StyleSheet, Text, TextInput, View } from "react-native";
-import Icon from "react-native-vector-icons/FontAwesome5"
+import Icon from "react-native-vector-icons/FontAwesome5";
 
 type animal = {
     nome:string,
@@ -13,6 +13,10 @@ type animal = {
 
 export default function ListagemPets(){
     const [inputText, setInputText] = useState('');
+    const [isPopUpOpen, setIsPopUpOpen] = useState<boolean>(false);
+    const [genero, setGenero] = useState<"M" | "F" | null>(null);
+    const [especie, setEspecie] = useState<"cachorro" | "gato" | null>(null);
+    const [porte, setPorte] = useState<"pequeno" | "medio" | "grande" | null>(null);
 
     const pets :animal[] = [
     {
@@ -59,6 +63,12 @@ export default function ListagemPets(){
     }
   ]
 
+    function closePopUp():void{
+        setIsPopUpOpen(false)
+        setEspecie(null)
+        setGenero(null)
+    }
+
     return(
         <View style={styles.main}>
            <TextInput 
@@ -89,9 +99,84 @@ export default function ListagemPets(){
                 />
                 
 
-            <Pressable style={styles.filterButton} onPress={()=> Alert.alert("Em desenvolvimento")}>
+            <Pressable style={styles.filterButton} onPress={()=> setIsPopUpOpen(true)}>
                 <Icon name="filter" size={20} color={"white"}></Icon>
             </Pressable>
+
+            {
+                isPopUpOpen && (
+                    <View style={styles.popupFiltro} >
+                        <Pressable  onPress={()=>setIsPopUpOpen(false)}>
+
+                        </Pressable>
+                        <View style={styles.container}>
+
+                            <View style={{flexDirection:"row", justifyContent:"space-between", alignItems:"center"}}>
+                                <Text style={{fontSize:22, fontWeight:"bold"}}>Filtros</Text>
+                                <Pressable onPress={()=> closePopUp()} ><Text style={{color:colors.primary, fontWeight:"bold"}}>Limpar</Text></Pressable>
+                            </View>
+
+                            <Text style={{fontSize:18, fontWeight:"600"}}>Espécie</Text>
+
+                            <View style={{flexDirection:"row", justifyContent:"space-between", alignItems:"center"}}>
+                                <TouchableOpacity 
+                                style={[styles.button,  especie === "cachorro" && styles.selected]}
+                                onPress={() => setEspecie("cachorro")}>
+                                    <Text style={{textAlign:"center"}}>Cachorro</Text>
+                                </TouchableOpacity>
+
+                                <TouchableOpacity 
+                                style={[styles.button,  especie === "gato" && styles.selected]}
+                                onPress={() => setEspecie("gato")}>
+                                    <Text style={{textAlign:"center"}}>Gato</Text>
+                                </TouchableOpacity>
+                            </View>
+
+                            <Text style={{fontSize:18, fontWeight:"600"}}>Gênero</Text>
+
+                            <View style={{flexDirection:"row", justifyContent:"space-between", alignItems:"center"}}>
+                                <TouchableOpacity 
+                                style={[styles.button,  genero === "M" && styles.selected]} 
+                                onPress={() => setGenero("M")}>
+                                    <Text style={{textAlign:"center"}}>Macho</Text>
+                                </TouchableOpacity>
+
+                                <TouchableOpacity 
+                                style={[styles.button,  genero === "F" && styles.selected]} 
+                                onPress={() => setGenero("F")}>
+                                    <Text style={{textAlign:"center"}}>Fêmea</Text>
+                                </TouchableOpacity>
+                            </View>
+
+                            <Text style={{fontSize:18, fontWeight:"600"}}>Porte</Text>
+
+                            <View style={{flexDirection:"row", justifyContent:"space-between", alignItems:"center"}}>
+                                <TouchableOpacity 
+                                style={[styles.button, {width:"32%"},  porte === "pequeno" && styles.selected]} 
+                                onPress={() => setPorte("pequeno")}>
+                                    <Text style={{textAlign:"center"}}>Pequeno</Text>
+                                </TouchableOpacity>
+
+                                <TouchableOpacity 
+                                style={[styles.button, {width:"32%"},  porte === "medio" && styles.selected]} 
+                                onPress={() => setPorte("medio")}>
+                                    <Text style={{textAlign:"center"}}>Médio</Text>
+                                </TouchableOpacity>
+
+                                <TouchableOpacity 
+                                style={[styles.button, {width:"32%"},  porte === "grande" && styles.selected]} 
+                                onPress={() => setPorte("grande")}>
+                                    <Text style={{textAlign:"center"}}>Grande</Text>
+                                </TouchableOpacity>
+                            </View>
+                            
+                            <TouchableOpacity style={styles.submit}>
+                                <Text style={{textAlign:"center", color:"white", fontWeight:"bold"}}>Aplicar filtro</Text>
+                            </TouchableOpacity>
+                        </View>
+                    </View>
+                )
+            }
 
             <View style={{position:"fixed",bottom:50}}>
                 <NavBar></NavBar>
@@ -105,7 +190,8 @@ const styles = StyleSheet.create({
         marginTop:40,
         padding:25,
         gap:25,
-        height:"100%"
+        height:"100%",
+        position:"relative"
     },
     input:{
         borderRadius: 25,
@@ -123,7 +209,7 @@ const styles = StyleSheet.create({
         flexDirection:"row"
     },
     filterButton:{
-        zIndex:5,
+        zIndex:1,
         backgroundColor:colors.primary,
         position:"absolute",
         bottom:"20%",
@@ -140,5 +226,49 @@ const styles = StyleSheet.create({
         shadowOpacity: 0.3,
         shadowOffset: { width: 2, height: 2 },
         shadowRadius: 15,
+    },
+    popupFiltro:{
+        zIndex:2,
+        position:"absolute",
+        left:0,
+        top:10,
+        backgroundColor:"rgba(0, 0, 0, 0.25)", 
+        height:"100%",
+        width:"113%",
+        display:"flex",
+        justifyContent:"flex-end",
+        alignItems:"center",
+    },
+    container:{
+        backgroundColor:"white",
+        height:"80%",
+        width:"100%",
+        borderRadius:40,
+        padding:25,
+        paddingTop:40,
+        gap:20,
+    },
+    button:{
+        borderWidth:1,
+        borderColor:"rgba(0, 0, 0, 0.31)",
+        width:"49%",
+        padding:15,
+        borderRadius:10
+    },
+    selected:{
+        borderColor:colors.primary,
+        backgroundColor:colors.primary,
+        color:"white",
+        fontWeight:"bold"
+    },
+    submit:{
+        width:"100%",
+        backgroundColor:colors.primary,
+        display:"flex",
+        justifyContent:"center",
+        padding:20,
+        borderRadius:15,
+        marginTop:"auto",
+        marginBottom:20,
     }
 });
