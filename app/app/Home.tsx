@@ -48,7 +48,7 @@ export default function Home() {
       <View style={style.opcao}>
         <Image 
         style={style.icone}
-        source={require("../assets/images/animal-shelter.png")}
+        source={require("../assets/images/pets.png")}
         />
         <Text>Cachorro</Text>
       </View>
@@ -58,7 +58,7 @@ export default function Home() {
         style={style.icone}
         source={require("../assets/images/animal-shelter.png")}
         />
-        <Text>Cachorro</Text>
+        <Text>Gato</Text>
       </View>
 
      </View>

@@ -2,7 +2,7 @@ import CardPet from "@/components/CardPet";
 import NavBar from "@/components/NavBar";
 import { colors } from "@/styles/variables";
 import { useState } from "react";
-import { Alert, FlatList, Pressable } from "react-native";
+import { Alert, FlatList, Pressable, ScrollView } from "react-native";
 import { StyleSheet, Text, TextInput, View } from "react-native";
 import Icon from "react-native-vector-icons/FontAwesome5"
 
@@ -69,31 +69,31 @@ export default function ListagemPets(){
            >
             </TextInput> 
 
-                <FlatList
-                    data={pets}
-                    style={{marginBottom:160}}
-                    contentContainerStyle={{
-                        display:"flex",
-                        flexDirection:"row",
-                        justifyContent:"space-between",
-                        paddingBottom:150,
-                        gap:"1%",
-                        flexWrap:"wrap"
-                    }}
+            <FlatList
+                data={pets}
+                contentContainerStyle={{
+                    display:"flex",
+                    flexDirection:"row",
+                    justifyContent:"space-between",
+                    paddingBottom:150,
+                    gap:"1%",
+                    flexWrap:"wrap"
+                }}
 
-                    renderItem={({item,index}) => (
-                        <View style={{height:200,width:180, display:"flex",flexDirection:"row"}}>
-                            <CardPet animal={item} index={index} onlyPicture={true}></CardPet>
-                        </View>
-                    )}
+                renderItem={({item,index}) => (
+                    <View style={{height:200,width:180, display:"flex",flexDirection:"row"}}>
+                        <CardPet animal={item} index={index} onlyPicture={true}></CardPet>
+                    </View>
+                )}
+            
+                />
                 
-                    />
 
             <Pressable style={styles.filterButton} onPress={()=> Alert.alert("Em desenvolvimento")}>
                 <Icon name="filter" size={20} color={"white"}></Icon>
             </Pressable>
 
-            <View style={{position:"fixed",bottom:195}}>
+            <View style={{position:"fixed",bottom:50}}>
                 <NavBar></NavBar>
             </View>
         </View>
@@ -105,6 +105,7 @@ const styles = StyleSheet.create({
         marginTop:40,
         padding:25,
         gap:25,
+        height:"100%"
     },
     input:{
         borderRadius: 25,
@@ -125,7 +126,7 @@ const styles = StyleSheet.create({
         zIndex:5,
         backgroundColor:colors.primary,
         position:"absolute",
-        bottom: "31%",
+        bottom:"20%",
         padding:20,
         right:35,
         borderRadius:60,
