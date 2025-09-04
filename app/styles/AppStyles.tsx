@@ -84,7 +84,7 @@ const styles = StyleSheet.create<Styles>({
     borderRadius: 40,
     padding: 20,
     width: "100%",
-    height: "60%",
+    height: "65%",
     justifyContent: "center",
     alignItems: "center",
   },
@@ -103,7 +103,7 @@ const styles = StyleSheet.create<Styles>({
     height: "12%",
     justifyContent: "center",
     alignItems: "center",
-    marginVertical: 8,
+    marginVertical: 15,
   },
   buttonLogin2: {
     backgroundColor: "#dbdbdbff",
