@@ -1,18 +1,11 @@
 import CardPet from "@/components/CardPet";
 import NavBar from "@/components/NavBar";
 import { colors } from "@/styles/variables";
+import { animal } from "@/types/TAnimal";
 import { useState } from "react";
 import { Dimensions, FlatList, Image, Pressable, TouchableOpacity } from "react-native";
 import { StyleSheet, Text, TextInput, View } from "react-native";
 import Icon from "react-native-vector-icons/FontAwesome5";
-
-type animal = {
-    nome:string,
-    imagem:string,
-    genero:"M" | "F" | null,
-    porte:"pequeno" | "medio" | "grande" | null,
-    especie:"cachorro" | "gato" | null
-}
 
 const width = Dimensions.get("window").width
 

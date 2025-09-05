@@ -50,7 +50,7 @@ export default function PerfilPet(){
             <View style={style.image}>
                 <View style={{height:60}}></View>
             
-                <Image style={{height:"100%", width:"80%", margin:"auto"}} resizeMode="stretch" source={{uri:imagem}}></Image>
+                <Image style={{height:"100%", width:"80%", margin:"auto"}} resizeMode="stretch" source={{uri:imagem.toString()}}></Image>
 
             </View>
         

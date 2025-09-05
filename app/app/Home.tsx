@@ -2,29 +2,91 @@ import { FlatList, Image, ScrollView, StyleSheet, Text, TouchableOpacity, View }
 import { colors } from "@/styles/variables";
 import CardPet from "@/components/CardPet";
 import NavBar from "@/components/NavBar";
-
-type animal = {
-    nome:string,
-    imagem:string
-}
+import { animal } from "@/types/TAnimal";
 
 export default function Home() {
 
   const pets :animal[] = [
     {
-    nome:"Alfredo",
-    imagem:"https://img.freepik.com/fotos-gratis/fotografia-vertical-de-foco-superficial-de-um-bonito-cachorro-de-golden-retriever-sentado-em-um-chao-de-grama_181624-27259.jpg?w=360",
-
-    },
-    {
-    nome:"Bob",
-    imagem:"https://img.freepik.com/fotos-gratis/fotografia-vertical-de-foco-superficial-de-um-bonito-cachorro-de-golden-retriever-sentado-em-um-chao-de-grama_181624-27259.jpg?w=360",
-
-    },
-    {
-    nome:"Lucky",
-    imagem:"https://img.freepik.com/fotos-gratis/fotografia-vertical-de-foco-superficial-de-um-bonito-cachorro-de-golden-retriever-sentado-em-um-chao-de-grama_181624-27259.jpg?w=360",
-    }
+      nome: "Alfredo",
+      imagem:
+      "https://img.freepik.com/fotos-gratis/fotografia-vertical-de-foco-superficial-de-um-bonito-cachorro-de-golden-retriever-sentado-em-um-chao-de-grama_181624-27259.jpg?w=360",
+      genero: "M",
+      especie: "cachorro",
+      porte: "medio",
+  },
+  {
+      nome: "Luna",
+      imagem:
+      "https://www.petz.com.br/blog/wp-content/uploads/2019/07/vida-de-gato.jpg",
+      genero: "F",
+      especie: "gato",
+      porte: "pequeno",
+  },
+  {
+      nome: "Thor",
+      imagem:
+      "https://img.freepik.com/fotos-gratis/fotografia-vertical-de-foco-superficial-de-um-bonito-cachorro-de-golden-retriever-sentado-em-um-chao-de-grama_181624-27259.jpg?w=360",
+      genero: "M",
+      especie: "cachorro",
+      porte: "grande",
+  },
+  {
+      nome: "Mimi",
+      imagem:
+      "https://www.petz.com.br/blog/wp-content/uploads/2019/07/vida-de-gato.jpg",
+      genero: "F",
+      especie: "gato",
+      porte: "pequeno",
+  },
+  {
+      nome: "Rex",
+      imagem:
+      "https://img.freepik.com/fotos-gratis/fotografia-vertical-de-foco-superficial-de-um-bonito-cachorro-de-golden-retriever-sentado-em-um-chao-de-grama_181624-27259.jpg?w=360",
+      genero: "M",
+      especie: "cachorro",
+      porte: "medio",
+  },
+  {
+      nome: "Mel",
+      imagem:
+      "https://img.freepik.com/fotos-gratis/fotografia-vertical-de-foco-superficial-de-um-bonito-cachorro-de-golden-retriever-sentado-em-um-chao-de-grama_181624-27259.jpg?w=360",
+      genero: "F",
+      especie: "cachorro",
+      porte: "pequeno",
+  },
+  {
+      nome: "Simba",
+      imagem:
+      "https://www.petz.com.br/blog/wp-content/uploads/2019/07/vida-de-gato.jpg",
+      genero: "M",
+      especie: "gato",
+      porte: "medio",
+  },
+  {
+      nome: "Bela",
+      imagem:
+      "https://img.freepik.com/fotos-gratis/fotografia-vertical-de-foco-superficial-de-um-bonito-cachorro-de-golden-retriever-sentado-em-um-chao-de-grama_181624-27259.jpg?w=360",
+      genero: "F",
+      especie: "cachorro",
+      porte: "grande",
+  },
+  {
+      nome: "Nina",
+      imagem:
+      "https://www.petz.com.br/blog/wp-content/uploads/2019/07/vida-de-gato.jpg",
+      genero: "F",
+      especie: "gato",
+      porte: "pequeno",
+  },
+  {
+      nome: "Max",
+      imagem:
+      "https://img.freepik.com/fotos-gratis/fotografia-vertical-de-foco-superficial-de-um-bonito-cachorro-de-golden-retriever-sentado-em-um-chao-de-grama_181624-27259.jpg?w=360",
+      genero: "M",
+      especie: "cachorro",
+      porte: "medio",
+  }
   ]
   return (
     <View style={style.fundo}>
@@ -66,7 +128,7 @@ export default function Home() {
      <View style={style.gallery}>
 
       <FlatList
-      data={pets}
+      data={pets.slice(0,5)}
       contentContainerStyle={style.gallery}
       renderItem={({ item, index })=>(
         <View style={{height:240,width:230}}>

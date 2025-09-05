@@ -1,11 +1,7 @@
+import { animal } from "@/types/TAnimal";
 import { useRouter } from "expo-router";
 import { navigate } from "expo-router/build/global-state/routing";
 import { Image, StyleSheet, Text, Touchable, TouchableOpacity, View } from "react-native";
-
-type animal = {
-    nome:string,
-    imagem:string
-}
 
 type Props = {
     animal:animal,
