@@ -41,13 +41,18 @@ export default function PerfilPet(){
     return(
         <View style={style.container}>
             <View style={style.header}>
-                <HeaderBackButton onPress={router.back}></HeaderBackButton>
+                <HeaderBackButton onPress={router.back} style={{backgroundColor:"white"}}></HeaderBackButton>
                 <Pressable onPress={()=>favoritePet()}>
                     <IconMat name={heartIcon} size={35} color={heartColor}></IconMat>
                 </Pressable>
             </View>
 
-            <Image style={style.image} source={{uri:imagem}}></Image>
+            <View style={style.image}>
+                <View style={{height:60}}></View>
+            
+                <Image style={{height:"100%", width:"80%", margin:"auto"}} resizeMode="stretch" source={{uri:imagem}}></Image>
+
+            </View>
         
             <View  style={style.infos}>
                 
@@ -97,7 +102,7 @@ export default function PerfilPet(){
 
 const style = StyleSheet.create({
     container:{
-        paddingTop:60,
+        paddingTop:80,
         backgroundColor:colors.primary,
         height:"100%",
         position:"relative",
@@ -119,6 +124,7 @@ const style = StyleSheet.create({
         left:"-15%",
         borderBottomRightRadius:300,
         borderBottomLeftRadius:300,
+        overflow:"hidden",
     },
     location:{
         fontSize:18,

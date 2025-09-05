@@ -161,6 +161,7 @@ const style = StyleSheet.create({
     height:32,
   },
   gallery:{
-    gap:20
+    gap:20,
+    marginBottom:50
   }
 })
