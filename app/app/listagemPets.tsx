@@ -2,13 +2,16 @@ import CardPet from "@/components/CardPet";
 import NavBar from "@/components/NavBar";
 import { colors } from "@/styles/variables";
 import { useState } from "react";
-import { FlatList, Pressable, TouchableOpacity } from "react-native";
+import { FlatList, Image, Pressable, TouchableOpacity } from "react-native";
 import { StyleSheet, Text, TextInput, View } from "react-native";
 import Icon from "react-native-vector-icons/FontAwesome5";
 
 type animal = {
     nome:string,
-    imagem:string
+    imagem:string,
+    genero:"M" | "F" | null,
+    porte:"pequeno" | "medio" | "grande" | null,
+    especie:"cachorro" | "gato" | null
 }
 
 export default function ListagemPets(){
@@ -18,55 +21,101 @@ export default function ListagemPets(){
     const [especie, setEspecie] = useState<"cachorro" | "gato" | null>(null);
     const [porte, setPorte] = useState<"pequeno" | "medio" | "grande" | null>(null);
 
-    const pets :animal[] = [
+    const pets: animal[] = [
     {
-    nome:"Alfredo",
-    imagem:"https://img.freepik.com/fotos-gratis/fotografia-vertical-de-foco-superficial-de-um-bonito-cachorro-de-golden-retriever-sentado-em-um-chao-de-grama_181624-27259.jpg?w=360",
-
+        nome: "Alfredo",
+        imagem:
+        "https://img.freepik.com/fotos-gratis/fotografia-vertical-de-foco-superficial-de-um-bonito-cachorro-de-golden-retriever-sentado-em-um-chao-de-grama_181624-27259.jpg?w=360",
+        genero: "M",
+        especie: "cachorro",
+        porte: "medio",
     },
     {
-    nome:"Bob",
-    imagem:"https://img.freepik.com/fotos-gratis/fotografia-vertical-de-foco-superficial-de-um-bonito-cachorro-de-golden-retriever-sentado-em-um-chao-de-grama_181624-27259.jpg?w=360",
-
+        nome: "Luna",
+        imagem:
+        "https://www.petz.com.br/blog/wp-content/uploads/2019/07/vida-de-gato.jpg",
+        genero: "F",
+        especie: "gato",
+        porte: "pequeno",
     },
     {
-    nome:"Lucky",
-    imagem:"https://img.freepik.com/fotos-gratis/fotografia-vertical-de-foco-superficial-de-um-bonito-cachorro-de-golden-retriever-sentado-em-um-chao-de-grama_181624-27259.jpg?w=360",
+        nome: "Thor",
+        imagem:
+        "https://img.freepik.com/fotos-gratis/fotografia-vertical-de-foco-superficial-de-um-bonito-cachorro-de-golden-retriever-sentado-em-um-chao-de-grama_181624-27259.jpg?w=360",
+        genero: "M",
+        especie: "cachorro",
+        porte: "grande",
     },
     {
-    nome:"Lucky",
-    imagem:"https://img.freepik.com/fotos-gratis/fotografia-vertical-de-foco-superficial-de-um-bonito-cachorro-de-golden-retriever-sentado-em-um-chao-de-grama_181624-27259.jpg?w=360",
+        nome: "Mimi",
+        imagem:
+        "https://www.petz.com.br/blog/wp-content/uploads/2019/07/vida-de-gato.jpg",
+        genero: "F",
+        especie: "gato",
+        porte: "pequeno",
     },
     {
-    nome:"Lucky",
-    imagem:"https://img.freepik.com/fotos-gratis/fotografia-vertical-de-foco-superficial-de-um-bonito-cachorro-de-golden-retriever-sentado-em-um-chao-de-grama_181624-27259.jpg?w=360",
+        nome: "Rex",
+        imagem:
+        "https://img.freepik.com/fotos-gratis/fotografia-vertical-de-foco-superficial-de-um-bonito-cachorro-de-golden-retriever-sentado-em-um-chao-de-grama_181624-27259.jpg?w=360",
+        genero: "M",
+        especie: "cachorro",
+        porte: "medio",
     },
     {
-    nome:"Lucky",
-    imagem:"https://img.freepik.com/fotos-gratis/fotografia-vertical-de-foco-superficial-de-um-bonito-cachorro-de-golden-retriever-sentado-em-um-chao-de-grama_181624-27259.jpg?w=360",
+        nome: "Mel",
+        imagem:
+        "https://img.freepik.com/fotos-gratis/fotografia-vertical-de-foco-superficial-de-um-bonito-cachorro-de-golden-retriever-sentado-em-um-chao-de-grama_181624-27259.jpg?w=360",
+        genero: "F",
+        especie: "cachorro",
+        porte: "pequeno",
     },
     {
-    nome:"Lucky",
-    imagem:"https://img.freepik.com/fotos-gratis/fotografia-vertical-de-foco-superficial-de-um-bonito-cachorro-de-golden-retriever-sentado-em-um-chao-de-grama_181624-27259.jpg?w=360",
+        nome: "Simba",
+        imagem:
+        "https://www.petz.com.br/blog/wp-content/uploads/2019/07/vida-de-gato.jpg",
+        genero: "M",
+        especie: "gato",
+        porte: "medio",
     },
     {
-    nome:"Lucky",
-    imagem:"https://img.freepik.com/fotos-gratis/fotografia-vertical-de-foco-superficial-de-um-bonito-cachorro-de-golden-retriever-sentado-em-um-chao-de-grama_181624-27259.jpg?w=360",
+        nome: "Bela",
+        imagem:
+        "https://img.freepik.com/fotos-gratis/fotografia-vertical-de-foco-superficial-de-um-bonito-cachorro-de-golden-retriever-sentado-em-um-chao-de-grama_181624-27259.jpg?w=360",
+        genero: "F",
+        especie: "cachorro",
+        porte: "grande",
     },
     {
-    nome:"Lucky",
-    imagem:"https://img.freepik.com/fotos-gratis/fotografia-vertical-de-foco-superficial-de-um-bonito-cachorro-de-golden-retriever-sentado-em-um-chao-de-grama_181624-27259.jpg?w=360",
+        nome: "Nina",
+        imagem:
+        "https://www.petz.com.br/blog/wp-content/uploads/2019/07/vida-de-gato.jpg",
+        genero: "F",
+        especie: "gato",
+        porte: "pequeno",
     },
     {
-    nome:"Lucky",
-    imagem:"https://img.freepik.com/fotos-gratis/fotografia-vertical-de-foco-superficial-de-um-bonito-cachorro-de-golden-retriever-sentado-em-um-chao-de-grama_181624-27259.jpg?w=360",
-    }
-  ]
+        nome: "Max",
+        imagem:
+        "https://img.freepik.com/fotos-gratis/fotografia-vertical-de-foco-superficial-de-um-bonito-cachorro-de-golden-retriever-sentado-em-um-chao-de-grama_181624-27259.jpg?w=360",
+        genero: "M",
+        especie: "cachorro",
+        porte: "medio",
+    },
+    ];
 
     function closePopUp():void{
-        setIsPopUpOpen(false)
         setEspecie(null)
         setGenero(null)
+        setPorte(null)
+    }
+
+    function filter():animal[]{
+        return pets.filter((animal)=>
+           (especie ? animal.especie===especie : true) &&
+           (genero ? animal.genero===genero : true) &&
+           (porte ? animal.porte===porte : true) 
+        )
     }
 
     return(
@@ -80,7 +129,7 @@ export default function ListagemPets(){
             </TextInput> 
 
             <FlatList
-                data={pets}
+                data={filter()}
                 contentContainerStyle={{
                     display:"flex",
                     flexDirection:"row",
@@ -95,9 +144,14 @@ export default function ListagemPets(){
                         <CardPet animal={item} index={index} onlyPicture={true}></CardPet>
                     </View>
                 )}
-            
+                ListEmptyComponent={
+                    <View style={{height:200, margin:"auto", marginTop:"10%"}}>
+                        <Image source={require("../assets/images/nothingfound.png")} style={{height:250,width:250}}></Image>
+                        <Text> Não encontramos nenhum animal no momento...</Text>
+                    </View>
+                }
+           
                 />
-                
 
             <Pressable style={styles.filterButton} onPress={()=> setIsPopUpOpen(true)}>
                 <Icon name="filter" size={20} color={"white"}></Icon>
@@ -170,7 +224,7 @@ export default function ListagemPets(){
                                 </TouchableOpacity>
                             </View>
                             
-                            <TouchableOpacity style={styles.submit}>
+                            <TouchableOpacity style={styles.submit} onPress={()=>{setIsPopUpOpen(false)}}>
                                 <Text style={{textAlign:"center", color:"white", fontWeight:"bold"}}>Aplicar filtro</Text>
                             </TouchableOpacity>
                         </View>
