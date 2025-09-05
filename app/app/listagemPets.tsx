@@ -2,7 +2,7 @@ import CardPet from "@/components/CardPet";
 import NavBar from "@/components/NavBar";
 import { colors } from "@/styles/variables";
 import { useState } from "react";
-import { FlatList, Image, Pressable, TouchableOpacity } from "react-native";
+import { Dimensions, FlatList, Image, Pressable, TouchableOpacity } from "react-native";
 import { StyleSheet, Text, TextInput, View } from "react-native";
 import Icon from "react-native-vector-icons/FontAwesome5";
 
@@ -14,12 +14,14 @@ type animal = {
     especie:"cachorro" | "gato" | null
 }
 
+const width = Dimensions.get("window").width
+
 export default function ListagemPets(){
-    const [inputText, setInputText] = useState('');
     const [isPopUpOpen, setIsPopUpOpen] = useState<boolean>(false);
     const [genero, setGenero] = useState<"M" | "F" | null>(null);
     const [especie, setEspecie] = useState<"cachorro" | "gato" | null>(null);
     const [porte, setPorte] = useState<"pequeno" | "medio" | "grande" | null>(null);
+    const [searchText, setSearchText] = useState<string>("")
 
     const pets: animal[] = [
     {
@@ -112,6 +114,7 @@ export default function ListagemPets(){
 
     function filter():animal[]{
         return pets.filter((animal)=>
+           (searchText ? animal.nome.toLowerCase().includes(searchText.toLowerCase()) : true) &&
            (especie ? animal.especie===especie : true) &&
            (genero ? animal.genero===genero : true) &&
            (porte ? animal.porte===porte : true) 
@@ -123,8 +126,8 @@ export default function ListagemPets(){
            <TextInput 
            style={styles.input}
            placeholder="Pesquise aqui"
-           value={inputText}
-           onChangeText={setInputText}
+           value={searchText}
+           onChangeText={setSearchText}
            >
             </TextInput> 
 
@@ -288,7 +291,7 @@ const styles = StyleSheet.create({
         top:10,
         backgroundColor:"rgba(0, 0, 0, 0.25)", 
         height:"100%",
-        width:"113%",
+        width:width,
         display:"flex",
         justifyContent:"flex-end",
         alignItems:"center",
