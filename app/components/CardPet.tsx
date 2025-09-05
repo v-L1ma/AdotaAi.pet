@@ -38,7 +38,15 @@ export default function CardPet({animal,index, onlyPicture}:Props){
         );
     } else {
         return(
-            <TouchableOpacity style={styles.image} onPress={()=>(router.push("/perfil-pet"))}>
+            <TouchableOpacity style={styles.image} onPress={()=>(router.push(
+                {
+                    pathname:"/perfil-pet",
+                    params:{
+                        nome: animal.nome,
+                        imagem: animal.imagem
+                    }
+                })
+            )}>
                 <Image style={styles.image} source={{uri:animal.imagem}}></Image>
             </TouchableOpacity>
         )
