@@ -1,5 +1,5 @@
 import React, { useEffect, useRef } from "react";
-import { SafeAreaView, Text, TextInput, TouchableOpacity, View } from "react-native";
+import { SafeAreaView, Text, TextInput, TouchableOpacity, View, KeyboardAvoidingView, Platform } from "react-native";
 import { useRouter } from "expo-router";
 import { Image } from "react-native";
 import { Animated, Easing } from "react-native";
@@ -13,7 +13,7 @@ export default function LoginScreen() {
 
   useEffect(() => {
     Animated.timing(slideAnim, {
-      toValue: 130,
+      toValue: 60,
       duration: 800,
       easing: Easing.out(Easing.exp),
       useNativeDriver: true,
@@ -22,13 +22,19 @@ export default function LoginScreen() {
 
 
   return (
+
+    <KeyboardAvoidingView
+          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+          style={{ flex: 1 }}
+        >
+
     <SafeAreaView style={styles.container}>
       <Animated.View style={{ flex: 1, width: "100%", transform: [{ translateY: slideAnim }], }}>
         {/* <Icon2 name="pets" size={30} color="rgba(255, 255, 255, 1)" style={{ position: "absolute", top: "30%", left: "90%", transform: [{ rotate: "-20deg" }]}}/>*/}
 
         <Image
           source={require("../assets/images/cat1.png")}
-          style={{ width: "100%", height: "21%", alignSelf: "center", top: 50, zIndex: 10 }}
+          style={{ width: "100%", height: "21%", alignSelf: "center", aspectRatio: 2.0, top: "6%", zIndex: 10 }}
         />
 
         <View style={styles.square}>
@@ -58,5 +64,6 @@ export default function LoginScreen() {
         </View>
       </Animated.View>
     </SafeAreaView>
+    </KeyboardAvoidingView>
   );
 }

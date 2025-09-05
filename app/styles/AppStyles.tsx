@@ -1,4 +1,4 @@
-import { StyleSheet, TextStyle, ViewStyle } from "react-native";
+import { ImageStyle, StyleSheet, TextStyle, ViewStyle } from "react-native";
 
 type Styles = {
   container: ViewStyle;
@@ -11,8 +11,14 @@ type Styles = {
   buttonLogin: ViewStyle;
   buttonLogin2: ViewStyle;
   square: ViewStyle;
+  square2: ViewStyle;
   input: TextStyle;
   inputText: TextStyle,
+  safeArea: ViewStyle,
+  animatedContainer: ViewStyle,
+  imageContainer: ViewStyle,
+  dogImage: ImageStyle,
+  keyboardAvoidingView: ViewStyle,
 };
 
 const styles = StyleSheet.create<Styles>({
@@ -84,6 +90,15 @@ const styles = StyleSheet.create<Styles>({
     borderRadius: 40,
     padding: 20,
     width: "100%",
+    height: "80%",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  square2: {
+    backgroundColor: "#e7e4e3ff",
+    borderRadius: 40,
+    padding: 0,
+    width: "100%",
     height: "65%",
     justifyContent: "center",
     alignItems: "center",
@@ -103,18 +118,47 @@ const styles = StyleSheet.create<Styles>({
     height: "12%",
     justifyContent: "center",
     alignItems: "center",
-    marginVertical: 15,
+    marginVertical: 10,
   },
   buttonLogin2: {
     backgroundColor: "#dbdbdbff",
     borderRadius: 10,
     width: "17%",
-    height: "12%",
+    height: "10%",
     justifyContent: "center",
     alignItems: "center",
     marginVertical: 8,
   },
-
+  // --- Novos estilos de layout ---
+  safeArea: {
+    flex: 1,
+    backgroundColor: '#fff', 
+  },
+  animatedContainer: {
+    flex: 1,
+    width: '100%',
+    justifyContent: 'flex-start',
+  },
+  imageContainer: {
+    height: '35%', 
+    width: '100%',
+    justifyContent: 'center',
+    alignItems: 'center',
+    position: 'absolute',
+    top: 0,
+    zIndex: 10,
+  },
+  dogImage: {
+    width: '100%',
+    height: '100%',
+    resizeMode: 'contain',
+  },
+  keyboardAvoidingView: {
+    flex: 1,
+    width: '100%',
+    marginTop: '30%',
+    justifyContent: 'flex-end',
+  },
 });
 
 export default styles;
