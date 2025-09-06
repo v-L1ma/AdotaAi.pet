@@ -1,11 +1,7 @@
+import { animal } from "@/types/TAnimal";
 import { useRouter } from "expo-router";
 import { navigate } from "expo-router/build/global-state/routing";
 import { Image, StyleSheet, Text, Touchable, TouchableOpacity, View } from "react-native";
-
-type animal = {
-    nome:string,
-    imagem:string
-}
 
 type Props = {
     animal:animal,
@@ -19,10 +15,18 @@ export default function CardPet({animal,index, onlyPicture}:Props){
 
     if(!onlyPicture){
         return(
-            <TouchableOpacity style={styles.container} onPress={()=>(router.push("/perfil-pet"))}>
+            <TouchableOpacity style={styles.container} onPress={()=>(router.push(
+                {
+                    pathname:"/perfil-pet",
+                    params:{
+                        nome: animal.nome,
+                        imagem: animal.imagem
+                    }
+                })
+                )}>
                 <Image style={styles.image} source={{uri:animal.imagem}}></Image>
 
-                <View>
+                <View style={styles.info}>
                     <Text style={styles.name}>{animal.nome}</Text>
                     <Text style={styles.location}>Santos</Text>
                 </View>
@@ -30,7 +34,15 @@ export default function CardPet({animal,index, onlyPicture}:Props){
         );
     } else {
         return(
-            <TouchableOpacity style={styles.image} onPress={()=>(router.push("/perfil-pet"))}>
+            <TouchableOpacity style={styles.image} onPress={()=>(router.push(
+                {
+                    pathname:"/perfil-pet",
+                    params:{
+                        nome: animal.nome,
+                        imagem: animal.imagem
+                    }
+                })
+            )}>
                 <Image style={styles.image} source={{uri:animal.imagem}}></Image>
             </TouchableOpacity>
         )
@@ -52,10 +64,24 @@ const styles = StyleSheet.create({
         borderRadius:15
     },
     name:{
-        fontSize:18
+        fontSize:18,
+        color:"white",
+        fontWeight:"bold"
     },
     location:{
-        color:"gray",
-        marginTop:5
+        color:"white",
+        marginTop:5,
+        fontWeight:"700"
+    },
+    info:{
+        position:"absolute",
+        bottom:15,
+        left:15,
+        width:"100%",
+        backgroundColor:"rgba(0, 0, 0, 0.3)",
+        borderBottomLeftRadius:15,
+        borderBottomRightRadius:15,
+        paddingHorizontal:15,
+        paddingBottom:10
     }
 });
