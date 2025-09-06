@@ -49,6 +49,6 @@ const styles = StyleSheet.create({
         justifyContent:"space-around",
     },
     icon:{
-        borderRadius:"100%"
+        borderRadius:100
     }
 });
