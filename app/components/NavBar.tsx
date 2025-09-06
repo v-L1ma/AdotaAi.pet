@@ -50,6 +50,6 @@ const styles = StyleSheet.create({
         borderColor:"white"
     },
     icon:{
-        borderRadius:"100%"
+        borderRadius:100
     }
 });
