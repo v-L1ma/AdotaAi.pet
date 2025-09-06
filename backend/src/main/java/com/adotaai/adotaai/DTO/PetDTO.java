@@ -2,34 +2,48 @@ package com.adotaai.adotaai.DTO;
 
 import com.adotaai.adotaai.Entity.PetEntity;
 import com.adotaai.adotaai.Entity.UsuarioEntity;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import org.springframework.beans.BeanUtils;
 
 public class PetDTO {
 
-    private int id;
+    private Long id;
     private String tipo;
-    private Boolean adotado = false;
+    private boolean adotado = false;
     private String nome;
     private String idade;
     private String porte;
     private String raca;
     private String descricao;
-    private Boolean vacinado;
-    private int user_id;
+    private boolean vacinado;
 
+    @JsonProperty("user_id")
+    private Long user_id;
 
     public PetDTO(PetEntity pet) {
-        BeanUtils.copyProperties(pet, this);
+        this.id = pet.getId();
+        this.tipo = pet.getTipo();
+        this.adotado = pet.getAdotado();
+        this.nome = pet.getNome();
+        this.idade = pet.getIdade();
+        this.porte = pet.getPorte();
+        this.raca = pet.getRaca();
+        this.descricao = pet.getDescricao();
+        this.vacinado = pet.getVacinado();
+
+        if (pet.getUser() != null) {
+            this.user_id = pet.getUser().getId();
+        }
     }
 
     public PetDTO() {
     }
 
-    public int getId() {
+    public Long getId() {
         return id;
     }
 
-    public void setId(int id) {
+    public void setId(Long id) {
         this.id = id;
     }
 
@@ -73,7 +87,7 @@ public class PetDTO {
         this.tipo = tipo;
     }
 
-    public Boolean getAdotado() {
+    public boolean getAdotado() {
         return adotado;
     }
 
@@ -81,11 +95,11 @@ public class PetDTO {
         this.adotado = adotado;
     }
 
-    public int getUser_id() {
+    public Long getUser_id() {
         return user_id;
     }
 
-    public void setUser_id(int user_id) {
+    public void setUser_id(Long user_id) {
         this.user_id = user_id;
     }
 
@@ -97,7 +111,7 @@ public class PetDTO {
         this.descricao = descricao;
     }
 
-    public Boolean getVacinado() {
+    public boolean getVacinado() {
         return vacinado;
     }
 

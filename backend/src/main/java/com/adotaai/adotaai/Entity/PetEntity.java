@@ -1,6 +1,7 @@
 package com.adotaai.adotaai.Entity;
 
 import com.adotaai.adotaai.DTO.PetDTO;
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import org.springframework.beans.BeanUtils;
@@ -13,7 +14,7 @@ public class PetEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int id;
+    private Long id;
 
     @Column(nullable = false)
     private String nome;
@@ -25,10 +26,10 @@ public class PetEntity {
     private String tipo;
 
     @Column(nullable = false)
-    private Boolean adotado = false;
+    private boolean adotado = false;
 
     @Column(nullable = false)
-    private Boolean vacinado;
+    private boolean vacinado;
 
     @Column(nullable = false)
     private String porte;
@@ -40,23 +41,24 @@ public class PetEntity {
     private String descricao;
 
     @ManyToOne
-    @JoinColumn(name = "user_id")
+    @JoinColumn(name = "user_id", nullable = false, foreignKey = @ForeignKey(name = "user_id",
+            foreignKeyDefinition = "FOREIGN KEY (user_id) REFERENCES usuario_entity(id) ON DELETE CASCADE"))
     private UsuarioEntity user;
 
 
-    public PetEntity (PetDTO petDTO)
-    {
-        BeanUtils.copyProperties(petDTO,this);
+    public PetEntity(PetDTO petDTO, UsuarioEntity usuario) {
+        BeanUtils.copyProperties(petDTO, this, "user"); // ignora o campo 'user'
+        this.user = usuario; // associa o usuário
     }
 
     public PetEntity() {
     }
 
-    public int getId() {
+    public Long getId() {
         return id;
     }
 
-    public void setId(int id) {
+    public void setId(Long id) {
         this.id = id;
     }
 
@@ -92,11 +94,11 @@ public class PetEntity {
         this.raca = raca;
     }
 
-    public Boolean getVacinado() {
+    public boolean getVacinado() {
         return vacinado;
     }
 
-    public void setVacinado(Boolean vacinado) {
+    public void setVacinado(boolean vacinado) {
         this.vacinado = vacinado;
     }
 

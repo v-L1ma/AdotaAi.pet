@@ -8,16 +8,15 @@ import java.util.List;
 
 public class UsuarioDTO {
 
-    private int id;
+    private Long id;
     private String nome;
     private String cpf;
     private String email;
     private String telefone;
     private String senha;
     private String moradia;
-    private int metragemMin;
-    private int metragemMax;
-    private List<PetEntity> pets;
+    private String metragem;
+
 
     public UsuarioDTO(UsuarioEntity usuario){
         BeanUtils.copyProperties(usuario, this);
@@ -26,11 +25,11 @@ public class UsuarioDTO {
     public UsuarioDTO() {
     }
 
-    public int getId() {
+    public Long getId() {
         return id;
     }
 
-    public void setId(int id) {
+    public void setId(Long id) {
         this.id = id;
     }
 
@@ -43,20 +42,12 @@ public class UsuarioDTO {
         this.moradia = moradia;
     }
 
-    public int getMetragemMin() {
-        return metragemMin;
+    public String getMetragem() {
+        return metragem;
     }
 
-    public void setMetragemMin(int metragemMin) {
-        this.metragemMin = metragemMin;
-    }
-
-    public int getMetragemMax() {
-        return metragemMax;
-    }
-
-    public void setMetragemMax(int metragemMax) {
-        this.metragemMax = metragemMax;
+    public void setMetragem(String metragem) {
+        this.metragem = metragem;
     }
 
     public String getTelefone() {
@@ -99,11 +90,4 @@ public class UsuarioDTO {
         this.cpf = cpf;
     }
 
-    public List<PetEntity> getPets() {
-        return pets;
-    }
-
-    public void setPets(List<PetEntity> pets) {
-        this.pets = pets;
-    }
 }
