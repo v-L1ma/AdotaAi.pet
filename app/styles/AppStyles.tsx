@@ -19,6 +19,7 @@ type Styles = {
   imageContainer: ViewStyle,
   dogImage: ImageStyle,
   keyboardAvoidingView: ViewStyle,
+  settingsButton: ViewStyle,
 };
 
 const styles = StyleSheet.create<Styles>({
@@ -154,6 +155,14 @@ bottomCircle: {
     width: '100%',
     marginTop: '30%',
     justifyContent: 'flex-end',
+  },
+  settingsButton:{
+    alignItems: "baseline",
+    justifyContent: "center",
+    width: "100%",
+    borderRadius: 20,
+    paddingHorizontal: 30,
+    paddingVertical: 10
   },
 });
 

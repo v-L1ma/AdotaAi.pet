@@ -4,7 +4,6 @@ import { useRouter } from "expo-router";
 import { Image } from "react-native";
 import { Animated, Easing } from "react-native";
 import Icon1 from "react-native-vector-icons/AntDesign";
-//import Icon2 from "react-native-vector-icons/MaterialIcons";
 import styles from "../styles/AppStyles";
 
 export default function LoginScreen() {
