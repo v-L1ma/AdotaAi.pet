@@ -1,11 +1,14 @@
 package com.adotaai.adotaai.DTO;
 
+import com.adotaai.adotaai.Entity.PetEntity;
 import com.adotaai.adotaai.Entity.UsuarioEntity;
 import org.springframework.beans.BeanUtils;
 
+import java.util.List;
+
 public class UsuarioDTO {
 
-    private Long id;
+    private int id;
     private String nome;
     private String cpf;
     private String email;
@@ -14,8 +17,7 @@ public class UsuarioDTO {
     private String moradia;
     private int metragemMin;
     private int metragemMax;
-
-
+    private List<PetEntity> pets;
 
     public UsuarioDTO(UsuarioEntity usuario){
         BeanUtils.copyProperties(usuario, this);
@@ -24,11 +26,11 @@ public class UsuarioDTO {
     public UsuarioDTO() {
     }
 
-    public Long getId() {
+    public int getId() {
         return id;
     }
 
-    public void setId(Long id) {
+    public void setId(int id) {
         this.id = id;
     }
 
@@ -97,5 +99,11 @@ public class UsuarioDTO {
         this.cpf = cpf;
     }
 
+    public List<PetEntity> getPets() {
+        return pets;
+    }
 
+    public void setPets(List<PetEntity> pets) {
+        this.pets = pets;
+    }
 }

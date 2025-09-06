@@ -1,17 +1,22 @@
 package com.adotaai.adotaai.DTO;
 
 import com.adotaai.adotaai.Entity.PetEntity;
+import com.adotaai.adotaai.Entity.UsuarioEntity;
 import org.springframework.beans.BeanUtils;
 
 public class PetDTO {
 
-    private Long id;
+    private int id;
     private String tipo;
     private Boolean adotado = false;
     private String nome;
     private String idade;
     private String porte;
     private String raca;
+    private String descricao;
+    private Boolean vacinado;
+    private int user_id;
+
 
     public PetDTO(PetEntity pet) {
         BeanUtils.copyProperties(pet, this);
@@ -20,11 +25,11 @@ public class PetDTO {
     public PetDTO() {
     }
 
-    public Long getId() {
+    public int getId() {
         return id;
     }
 
-    public void setId(Long id) {
+    public void setId(int id) {
         this.id = id;
     }
 
@@ -74,5 +79,29 @@ public class PetDTO {
 
     public void setAdotado(Boolean adotado) {
         this.adotado = adotado;
+    }
+
+    public int getUser_id() {
+        return user_id;
+    }
+
+    public void setUser_id(int user_id) {
+        this.user_id = user_id;
+    }
+
+    public String getDescricao() {
+        return descricao;
+    }
+
+    public void setDescricao(String descricao) {
+        this.descricao = descricao;
+    }
+
+    public Boolean getVacinado() {
+        return vacinado;
+    }
+
+    public void setVacinado(Boolean vacinado) {
+        this.vacinado = vacinado;
     }
 }

@@ -23,14 +23,10 @@ public class PetController {
     @PostMapping
     public void criarPet(@RequestBody PetDTO pet)
     {
-        petService.inserir(pet);
+        petService.createPet(pet);
     }
 
-    @PutMapping
-    public void alterar(@RequestBody PetDTO pet)
-    {
-        petService.alterar(pet);
-    }
+
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> excluir(@PathVariable("id") Long id)

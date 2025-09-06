@@ -1,6 +1,7 @@
 package com.adotaai.adotaai.Entity;
 
 import com.adotaai.adotaai.DTO.PetDTO;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import org.springframework.beans.BeanUtils;
 
@@ -12,7 +13,7 @@ public class PetEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private int id;
 
     @Column(nullable = false)
     private String nome;
@@ -27,24 +28,35 @@ public class PetEntity {
     private Boolean adotado = false;
 
     @Column(nullable = false)
+    private Boolean vacinado;
+
+    @Column(nullable = false)
     private String porte;
 
     @Column(nullable = false)
     private String raca;
 
-    public PetEntity (PetDTO pet)
+    @Column(nullable = false)
+    private String descricao;
+
+    @ManyToOne
+    @JoinColumn(name = "user_id")
+    private UsuarioEntity user;
+
+
+    public PetEntity (PetDTO petDTO)
     {
-        BeanUtils.copyProperties(pet,this);
+        BeanUtils.copyProperties(petDTO,this);
     }
 
     public PetEntity() {
     }
 
-    public Long getId() {
+    public int getId() {
         return id;
     }
 
-    public void setId(Long id) {
+    public void setId(int id) {
         this.id = id;
     }
 
@@ -80,6 +92,14 @@ public class PetEntity {
         this.raca = raca;
     }
 
+    public Boolean getVacinado() {
+        return vacinado;
+    }
+
+    public void setVacinado(Boolean vacinado) {
+        this.vacinado = vacinado;
+    }
+
     public String getTipo() {
         return tipo;
     }
@@ -96,6 +116,14 @@ public class PetEntity {
         this.adotado = adotado;
     }
 
+    public String getDescricao() {
+        return descricao;
+    }
+
+    public void setDescricao(String descricao) {
+        this.descricao = descricao;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (o == null || getClass() != o.getClass()) return false;
@@ -106,5 +134,13 @@ public class PetEntity {
     @Override
     public int hashCode() {
         return Objects.hashCode(id);
+    }
+
+    public UsuarioEntity getUser() {
+        return user;
+    }
+
+    public void setUser(UsuarioEntity user) {
+        this.user = user;
     }
 }

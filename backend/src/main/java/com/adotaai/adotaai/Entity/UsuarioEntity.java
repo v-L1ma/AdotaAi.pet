@@ -4,6 +4,7 @@ import com.adotaai.adotaai.DTO.UsuarioDTO;
 import jakarta.persistence.*;
 import org.springframework.beans.BeanUtils;
 
+import java.util.List;
 import java.util.Objects;
 
 @Entity
@@ -12,7 +13,8 @@ public class UsuarioEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    @Column(nullable = false)
+    private int id;
 
     @Column(nullable = false)
     private String nome;
@@ -33,10 +35,12 @@ public class UsuarioEntity {
     private String moradia;
 
     @Column(nullable = false)
-    private int metragemMin;
+    private String metragem;
 
-    @Column(nullable = false)
-    private int metragemMax;
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<PetEntity> pets;
+
 
     public UsuarioEntity (UsuarioDTO usuario)
     {
@@ -47,11 +51,11 @@ public class UsuarioEntity {
 
     }
 
-    public Long getId() {
+    public int getId() {
         return id;
     }
 
-    public void setId(Long id) {
+    public void setId(int id) {
         this.id = id;
     }
 
@@ -103,20 +107,20 @@ public class UsuarioEntity {
         this.moradia = moradia;
     }
 
-    public int getMetragemMin() {
-        return metragemMin;
+    public String getMetragem() {
+        return metragem;
     }
 
-    public void setMetragemMin(int metragemMin) {
-        this.metragemMin = metragemMin;
+    public void setMetragem(String metragem) {
+        this.metragem = metragem;
     }
 
-    public int getMetragemMax() {
-        return metragemMax;
+    public List<PetEntity> getPets() {
+        return pets;
     }
 
-    public void setMetragemMax(int metragemMax) {
-        this.metragemMax = metragemMax;
+    public void setPets(List<PetEntity> pets) {
+        this.pets = pets;
     }
 
     @Override
