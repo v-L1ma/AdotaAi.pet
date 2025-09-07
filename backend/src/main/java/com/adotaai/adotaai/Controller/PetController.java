@@ -9,14 +9,14 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping (value= "/pet")
+@RequestMapping (value= "/pets")
 public class PetController {
 
     @Autowired
     private PetService petService;
 
     @GetMapping
-    public List<PetDTO> listarTodos() {
+    public List<PetDTO> listarTodosPets() {
         return petService.listarTodos();
     }
 
@@ -26,8 +26,14 @@ public class PetController {
         petService.criarPet(pet);
     }
 
+    @PutMapping("/{id}")
+    public ResponseEntity<PetDTO> atualizarPet(@PathVariable Long id, @RequestBody PetDTO petDTO) {
+        PetDTO atualizado = petService.atualizarPet(id, petDTO);
+        return ResponseEntity.ok(atualizado);
+    }
+
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> excluir(@PathVariable("id") Long id)
+    public ResponseEntity<Void> excluirPet(@PathVariable("id") Long id)
     {
         petService.excluir(id);
         return  ResponseEntity.ok().build();

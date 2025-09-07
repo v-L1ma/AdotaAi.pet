@@ -26,14 +26,14 @@ public class UsuarioController {
         usuarioService.inserir(usuario);
     }
 
-    @PutMapping
-    public void alterar(@RequestBody UsuarioDTO usuario)
+    @PutMapping("/{id}")
+    public void alterarUsuario(@PathVariable Long id,@RequestBody UsuarioDTO usuario)
     {
-        usuarioService.alterar(usuario);
+        usuarioService.atualizarUsuario(id, usuario);
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> excluir(@PathVariable("id") Long id)
+    public ResponseEntity<Void> excluirUsuario(@PathVariable("id") Long id)
     {
         usuarioService.excluir(id);
         return  ResponseEntity.ok().build();

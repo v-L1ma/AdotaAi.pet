@@ -5,6 +5,7 @@ import com.adotaai.adotaai.Entity.PetEntity;
 import com.adotaai.adotaai.Entity.UsuarioEntity;
 import com.adotaai.adotaai.Repository.PetRepository;
 import com.adotaai.adotaai.Repository.UsuarioRepository;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -35,10 +36,8 @@ public class PetService {
     public PetDTO criarPet(PetDTO petDTO) {
         PetEntity pet = new PetEntity();
         BeanUtils.copyProperties(petDTO, pet);
-
-        // associa o usuário
         UsuarioEntity usuario = usuarioRepository.findById(petDTO.getUser_id())
-                .orElseThrow(() -> new RuntimeException("Usuário não encontrado com ID: " + petDTO.getUser_id()));
+                .orElseThrow(() -> new RuntimeException("Usuário não existe "));
         pet.setUser(usuario);
 
         pet = petRepository.save(pet);
@@ -50,14 +49,22 @@ public class PetService {
         return dto;
     }
 
-//    // READ ALL
-//    public List<PetDTO> listarTodos() {
-//        return petRepository.findAll().stream().map(pet -> {
-//            PetDTO dto = new PetDTO();
-//            BeanUtils.copyProperties(pet, dto);
-//            dto.setUser_id(pet.getUser().getId());
-//            return dto;
-//        }).collect(Collectors.toList());
-//    }
+    @Transactional
+    public PetDTO atualizarPet(Long id, PetDTO petDto){
+        PetEntity pet = petRepository.findById(id).orElseThrow(() -> new RuntimeException("Pet não encontrado com ID: " + id));
+        pet.setNome(petDto.getNome());
+        pet.setAdotado(petDto.getAdotado());
+        pet.setDescricao(petDto.getDescricao());
+        pet.setTipo(petDto.getTipo());
+        pet.setRaca(petDto.getRaca());
+        pet.setPorte(petDto.getPorte());
+        pet.setIdade(petDto.getIdade());
+        pet.setVacinado(petDto.getVacinado());
+
+        PetEntity petatualizado= petRepository.save(pet);
+
+        return  new PetDTO(petatualizado);
+
+    }
 
 }

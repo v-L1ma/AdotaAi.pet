@@ -1,6 +1,8 @@
 package com.adotaai.adotaai.Service;
 
+import com.adotaai.adotaai.DTO.PetDTO;
 import com.adotaai.adotaai.DTO.UsuarioDTO;
+import com.adotaai.adotaai.Entity.PetEntity;
 import com.adotaai.adotaai.Entity.UsuarioEntity;
 import com.adotaai.adotaai.Repository.PetRepository;
 import com.adotaai.adotaai.Repository.UsuarioRepository;
@@ -36,10 +38,19 @@ public class UsuarioService {
         usuarioRepository.save(usuarioEntity);
     }
 
-    public void alterar(UsuarioDTO usuario)
-    {
-        UsuarioEntity usuarioEntity = new UsuarioEntity(usuario);
-        new UsuarioDTO(usuarioRepository.save(usuarioEntity));
+    @Transactional
+    public UsuarioDTO atualizarUsuario(Long id, UsuarioDTO userDto){
+        UsuarioEntity user = usuarioRepository.findById(id).orElseThrow(() -> new RuntimeException("Usuario não encontrado com ID: "));
+        user.setNome(userDto.getNome());
+        user.setTelefone(userDto.getTelefone());
+        user.setSenha(userDto.getSenha());
+        user.setMoradia(userDto.getMoradia());
+        user.setMetragem(userDto.getMetragem());
+
+        UsuarioEntity useratualizado= usuarioRepository.save(user);
+
+        return  new UsuarioDTO(useratualizado);
+
     }
 
     @Transactional
