@@ -33,7 +33,6 @@ public class UsuarioDTO {
         this.id = id;
     }
 
-
     public String getMoradia() {
         return moradia;
     }
