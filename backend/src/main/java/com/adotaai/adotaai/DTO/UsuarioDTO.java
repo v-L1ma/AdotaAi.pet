@@ -17,7 +17,6 @@ public class UsuarioDTO {
     private String moradia;
     private String metragem;
 
-
     public UsuarioDTO(UsuarioEntity usuario){
         BeanUtils.copyProperties(usuario, this);
     }
