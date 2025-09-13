@@ -5,6 +5,7 @@ import { Image, Pressable, StyleSheet, Text, TouchableOpacity, View } from "reac
 import IconMat from "react-native-vector-icons/MaterialCommunityIcons";
 import IconIonic from "react-native-vector-icons/Ionicons";
 import { colors } from "@/styles/variables";
+import React from "react";
 
 export default function PerfilPet(){
 

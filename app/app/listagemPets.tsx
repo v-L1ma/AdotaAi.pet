@@ -2,6 +2,7 @@ import CardPet from "@/components/CardPet";
 import NavBar from "@/components/NavBar";
 import { colors } from "@/styles/variables";
 import { animal } from "@/types/TAnimal";
+import React from "react";
 import { useState } from "react";
 import { Dimensions, FlatList, Image, Pressable, TouchableOpacity } from "react-native";
 import { StyleSheet, Text, TextInput, View } from "react-native";
