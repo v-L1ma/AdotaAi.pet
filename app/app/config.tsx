@@ -15,7 +15,7 @@ export default function ConfigScreen() {
             <View style={{ alignItems: "center", height: "100%", gap: 15 }}>
                 <Text style={{ fontSize: 20, fontWeight: "bold", marginTop: 20 }}>Configurações</Text>
                 
-                <TouchableOpacity style={styles.settingsButton} onPress={() => router.push("/login")} >
+                <TouchableOpacity style={styles.settingsButton} onPress={() => router.push("/perfil-user")} >
                     <View style={{flexDirection: "row", alignItems: "center"}}>
                     <Icon2 name="person-circle-outline" size={30} color="#000000ff"></Icon2>
                     <Text style={{ fontSize: 20, fontWeight: "bold", justifyContent: "space-between", width: "80%", paddingHorizontal: 10}}>Conta</Text>

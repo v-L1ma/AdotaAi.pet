@@ -15,7 +15,7 @@ export default function NavBar(){
                 <Icon onPress={()=>router.replace("/Home")}  style={styles.icon} name="home" size={30} color={colors.primary}></Icon>
                 <Icon onPress={()=>router.push("/listagemPets")} style={styles.icon} name="search" size={30} color={colors.primary}></Icon>
                 
-                <IconMat style={styles.icon} name="heart-plus-outline" size={30} color={colors.primary}></IconMat>
+                <IconMat onPress={()=>router.push("/criarAnuncio")} style={styles.icon} name="heart-plus-outline" size={30} color={colors.primary}></IconMat>
                 <IconMat onPress={()=>router.push("/config")} style={styles.icon} name="menu" size={30} color={colors.primary}></IconMat>
             </BlurView>
         </View>
