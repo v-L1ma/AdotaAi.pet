@@ -23,7 +23,7 @@ export default function ConfigScreen() {
                     </View>
                 </TouchableOpacity>
 
-                <TouchableOpacity style={styles.settingsButton} onPress={() => router.push("/login")} >
+                <TouchableOpacity style={styles.settingsButton} onPress={() => router.push("/listagemPets")} >
                     <View style={{flexDirection: "row", alignItems: "center"}}>
                     <Icon3 name="pets" size={30} color="#000000ff"></Icon3>
                     <Text style={{ fontSize: 20, fontWeight: "bold", justifyContent: "space-between", width: "80%", paddingHorizontal: 10}}>Meus pet's</Text>
@@ -31,7 +31,7 @@ export default function ConfigScreen() {
                     </View>
                 </TouchableOpacity>
 
-                <TouchableOpacity style={styles.settingsButton} onPress={() => router.push("/login")} >
+                <TouchableOpacity style={styles.settingsButton} onPress={() => router.push("/solicitacoes")} >
                     <View style={{flexDirection: "row", alignItems: "center"}}>
                     <Icon2 name="notifications" size={30} color="#000000ff"></Icon2>
                     <Text style={{ fontSize: 20, fontWeight: "bold", justifyContent: "space-between", width: "80%", paddingHorizontal: 10}}>Solicitações</Text>

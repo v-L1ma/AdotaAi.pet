@@ -37,7 +37,7 @@ bottomCircle: {
   position: 'absolute',
   bottom: -150,
   left: '0%',
-  width: 400,
+  width: "100%",
   height: 500,
   borderRadius: 100,
   backgroundColor: '#ffffffff',
