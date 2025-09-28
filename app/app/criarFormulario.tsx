@@ -1,11 +1,15 @@
 import { colors } from "@/styles/variables";
 import React, { useState } from "react";
-import { Text, View, FlatList, Pressable, StyleSheet, TouchableOpacity } from "react-native";
+import { Text, View, FlatList, Pressable, StyleSheet, TouchableOpacity, Dimensions } from "react-native";
+import * as Progress from 'react-native-progress';
+
 
 interface Pergunta{
     id:number;
     conteudo:string
 }
+
+const width = Dimensions.get("screen").width;
 
 export default function CriarFormulario(){
 
@@ -40,16 +44,25 @@ export default function CriarFormulario(){
     ];
 
     const [perguntasSelecionadas,setPerguntasSelecionadas]=useState<Pergunta[]>([]);
+    const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
 
     function selecionarPergunta(pergunta: Pergunta) {
         // já está selecionada? remove
         if (perguntasSelecionadas.find((p) => p.id === pergunta.id)) {
-        setPerguntasSelecionadas((prev) => prev.filter((p) => p.id !== pergunta.id));
-        } else {
+            setPerguntasSelecionadas((prev) => prev.filter((p) => p.id !== pergunta.id));
+            return;
+        } 
+        if(perguntasSelecionadas.length<=20){
         // senão, adiciona
-        setPerguntasSelecionadas((prev) => [...prev, pergunta]);
+            setPerguntasSelecionadas((prev) => [...prev, pergunta]);
         }
     }
+
+    function isPerguntaSelecionada(idRecebido:number):boolean{
+        return perguntasSelecionadas.find((pergunta) => pergunta.id === idRecebido) ? true : false;
+    }
+
+
 
     return(
         <View style={style.main}>
@@ -57,22 +70,29 @@ export default function CriarFormulario(){
             <Text>Esse formulario sera usado para triar solicitacoes dos animais que voce doar.</Text>
                 
 
-            <View style={{height:"65%", marginVertical:20}}>
+            <View style={{height:"63%", marginVertical:20}}>
                 <FlatList
                 data={perguntasFrequentes}
                 contentContainerStyle={{
                     gap:15
                 }}
                 renderItem={({item})=>(
-                    <Pressable style={ perguntasSelecionadas.find((pergunta) => pergunta.id === item.id) ? style.cardSelected : style.card} onPress={()=>selecionarPergunta(item)}>
-                        <Pressable style={ perguntasSelecionadas.find((pergunta) => pergunta.id === item.id) ? style.checkedButton : style.checkButton}>
+                    <Pressable style={ isPerguntaSelecionada(item.id) ? style.cardSelected : style.card} onPress={()=>selecionarPergunta(item)}>
+                        <Pressable style={style.checkButton}>
                         </Pressable>
-                        <Text>{item.conteudo}</Text>
+                    <Text style={ isPerguntaSelecionada(item.id) ? {color:"white", fontWeight:"bold"} : {color:"rgba(0,0,0,0.8)"}}>{item.conteudo}</Text>
                         
                     </Pressable>
                 )}
                 >
                 </FlatList>
+            </View>
+
+            <View>
+                <Progress.Bar progress={perguntasSelecionadas.length/20} color={colors.primary} width={width/1.13} />
+                <View>
+                    <Text>{perguntasSelecionadas.length}/20</Text>
+                </View>
             </View>
 
             <TouchableOpacity style={[style.button, style.secondaryButton]}>
@@ -82,6 +102,7 @@ export default function CriarFormulario(){
                 <Text style={style.primaryButton}>Salvar</Text>
             </TouchableOpacity>
         </View>
+
     )
 }
 
@@ -89,6 +110,7 @@ const style = StyleSheet.create({
     main:{
         padding:25,
         marginTop:60,
+        backgroundColor:"white"
     },
     title:{
         fontSize:24,
@@ -97,7 +119,8 @@ const style = StyleSheet.create({
     },
     card:{
         borderWidth:1,
-        borderColor:"rgba(190, 190, 190, 1)",
+        borderColor:"rgba(190, 190, 190, 0.89)",
+        backgroundColor:"rgba(255, 255, 255, 0.69)",
         padding:10,
         borderRadius:15,
         display:"flex",
@@ -121,7 +144,8 @@ const style = StyleSheet.create({
         height:20,
         borderRadius:20,
         borderWidth:1,
-        borderColor:colors.primary
+        borderColor:colors.primary,
+        backgroundColor:"white",
     },
     checkedButton:{
         width:20,
@@ -129,7 +153,7 @@ const style = StyleSheet.create({
         borderRadius:20,
         borderWidth:1,
         backgroundColor:"white",
-        borderColor:"white"
+        borderColor:colors.primary
     },
     button:{
         padding:15,
@@ -149,5 +173,8 @@ const style = StyleSheet.create({
         borderColor:colors.primary,
         textAlign:"center",
         fontWeight:"bold"
-    }
+    },
+    // progressbar:{
+    //     color:"white"
+    // },
 });
