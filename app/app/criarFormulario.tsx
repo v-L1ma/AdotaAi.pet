@@ -14,6 +14,8 @@ const screen = Dimensions.get("screen");
 
 export default function CriarFormulario(){
 
+    const height = Dimensions.get("window").height
+
     const [perguntasFrequentes,setPerguntasFrequentes]=useState<Pergunta[]>([
         { id: 1, conteudo: "Qual seu endereço completo? Com nome da rua, número e cidade" },
         { id: 2, conteudo: "Você mora em casa ou apto? É totalmente telada (o), incluindo todas as janelas, os cômodos e sacada? (Essa pergunta é primordial na Adoção de Gatos e alguns Cachorros específicos)." },
@@ -111,7 +113,7 @@ export default function CriarFormulario(){
             <Text>Esse formulario sera usado para triar solicitacoes dos animais que voce doar.</Text>
                 
 
-            <View style={{height:"63%", marginVertical:20}}>
+            <View style={{height:height*.50, marginVertical:20}}>
                 <FlatList
                 data={perguntasFrequentes.toReversed()}
                 contentContainerStyle={{
@@ -121,7 +123,7 @@ export default function CriarFormulario(){
                     <Pressable style={ isPerguntaSelecionada(item.id) ? style.cardSelected : style.card} onPress={()=>selecionarPergunta(item)}>
                         <Pressable style={style.checkButton}>
                         </Pressable>
-                    <Text style={ isPerguntaSelecionada(item.id) ? {color:"white", fontWeight:"bold"} : {color:"rgba(0,0,0,0.8)"}}>{item.conteudo}</Text>
+                    <Text style={ isPerguntaSelecionada(item.id) ? {color:"white", fontWeight:"bold", width:"90%" } : {color:"rgba(0,0,0,0.8)", width:"90%"}}>{item.conteudo}</Text>
                         
                     </Pressable>
                 )}
@@ -183,7 +185,7 @@ const style = StyleSheet.create({
         display:"flex",
         flexDirection:"row",
         alignItems:"center",
-        gap:10
+        gap:10,
     },
     cardSelected:{
         borderWidth:1,
