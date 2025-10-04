@@ -42,8 +42,8 @@ export default function PerfilPet(){
     return(
         <View style={style.container}>
             <View style={style.header}>
-                <HeaderBackButton onPress={router.back} style={{backgroundColor:"white"}}></HeaderBackButton>
-                <Pressable onPress={()=>favoritePet()}>
+                <HeaderBackButton onPress={router.back} style={style.headerButtons}></HeaderBackButton>
+                <Pressable onPress={()=>favoritePet()} style={style.headerButtons}>
                     <IconMat name={heartIcon} size={35} color={heartColor}></IconMat>
                 </Pressable>
             </View>
@@ -174,5 +174,14 @@ const style = StyleSheet.create({
         fontFamily:"sans",
         height:60,
         marginTop:"auto"
+    },
+    headerButtons:{
+        backgroundColor:"white",
+        width:50,
+        height:50,
+        display:"flex",
+        justifyContent:"center",
+        alignItems:"center",
+        borderRadius:100
     }
 });
