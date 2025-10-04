@@ -297,7 +297,7 @@ const styles = StyleSheet.create({
         width:"100%",
         borderRadius:40,
         padding:25,
-        paddingTop:40,
+        paddingVertical:50,
         gap:20,
     },
     button:{
