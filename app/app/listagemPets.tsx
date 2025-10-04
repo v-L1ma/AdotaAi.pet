@@ -2,6 +2,7 @@ import CardPet from "@/components/CardPet";
 import NavBar from "@/components/NavBar";
 import { colors } from "@/styles/variables";
 import { animal } from "@/types/TAnimal";
+import React from "react";
 import { useState } from "react";
 import { Dimensions, FlatList, Image, Pressable, TouchableOpacity } from "react-native";
 import { StyleSheet, Text, TextInput, View } from "react-native";
@@ -15,6 +16,7 @@ export default function ListagemPets(){
     const [especie, setEspecie] = useState<"cachorro" | "gato" | null>(null);
     const [porte, setPorte] = useState<"pequeno" | "medio" | "grande" | null>(null);
     const [searchText, setSearchText] = useState<string>("")
+    const width = Dimensions.get(`window`).width;
 
     const pets: animal[] = [
     {
@@ -136,7 +138,7 @@ export default function ListagemPets(){
                 }}
 
                 renderItem={({item,index}) => (
-                    <View style={{height:200,width:180, display:"flex",flexDirection:"row"}}>
+                    <View style={{height:200,width:width/2.5, display:"flex",flexDirection:"row"}}>
                         <CardPet animal={item} index={index} onlyPicture={true}></CardPet>
                     </View>
                 )}
@@ -295,7 +297,7 @@ const styles = StyleSheet.create({
         width:"100%",
         borderRadius:40,
         padding:25,
-        paddingTop:40,
+        paddingVertical:50,
         gap:20,
     },
     button:{
