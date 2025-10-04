@@ -1,6 +1,8 @@
+import * as ImagePicker from "expo-image-picker";
 import React, { useState } from "react";
-import { SafeAreaView, Text, TextInput, TouchableOpacity, View } from "react-native";
+import { Image, SafeAreaView, Text, TextInput, TouchableOpacity, Pressable, View, TouchableHighlight } from "react-native";
 import styles from "../styles/AppStyles";
+import Icon1 from "react-native-vector-icons/Ionicons";
 
 export default function UserScreen() {
     const [username, setUsername] = useState("");
@@ -9,27 +11,49 @@ export default function UserScreen() {
     const [senha, setSenha] = useState("");
     const [moradia, setMoradia] = useState("");
     const [metragem, setMetragem] = useState("");
+    const [image, setImage] = useState<string | undefined>(undefined);
 
     const handleSave = () => {
         alert("Dados salvos!");
     };
+    const pickImage = async () => {
+        const result = await ImagePicker.launchCameraAsync({
+            mediaTypes: ImagePicker.MediaTypeOptions.Images,
+            allowsEditing: true,
+            aspect: [1, 1],
+            quality: 1,
+        });
+        if (!result.canceled && result.assets && result.assets.length > 0) {
+            setImage(result.assets[0].uri);
+        }
+    };
 
     return (
         <SafeAreaView style={styles.container}>
-            <View style={[styles.square, { position: "relative", alignItems: "center" }]}>
-                <View
-                    style={{
-                        width: "32%",
-                        height: "17%",
-                        backgroundColor: "#b3b2b2ff",
-                        borderRadius: 100,
-                        position: "absolute",
-                        top: -50,
-                        borderWidth: 2,
-                        borderColor: "#fff",
-                    }}
-                />
-                <View style={{ marginTop: 20, width: "90%", alignItems: "center" }}>
+            <View style={[styles.square, { position: "relative", alignItems: "center" }]}> 
+                <View style={{ alignItems: "center", marginTop: -50, marginBottom: 0 }}>
+                    <Pressable
+                        style={{
+                            width: 120,
+                            height: 120,
+                            borderRadius: 60,
+                            backgroundColor: "#ebeaeaff",
+                            alignItems: "center",
+                            justifyContent: "center",
+                            borderWidth: 5,
+                            borderColor: "#fff",
+                            overflow: "hidden",
+                        }}
+                        onPress={pickImage}
+                    >
+                        {image ? (
+                            <Image source={{ uri: image }} style={{ width: 100, height: 100, borderRadius: 60 }} />
+                        ) : (
+                            <Icon1 name="image" size={40} color="#868585ff" />
+                        )}
+                    </Pressable>
+                </View>
+                <View style={{ marginTop: 5, width: "90%", alignItems: "center" }}>
                     <Text style={styles.inputText2}>Usuário</Text>
                     <TextInput
                         style={styles.inputPerfil}

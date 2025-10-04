@@ -12,6 +12,7 @@ type Styles = {
   buttonLogin2: ViewStyle;
   buttonSave: ViewStyle;
   selectButton: ViewStyle;
+  buttonCreateAd: ViewStyle;
   square: ViewStyle;
   square2: ViewStyle;
   input: TextStyle;
@@ -95,7 +96,7 @@ bottomCircle: {
     width: "100%",
   },
   square: {
-    backgroundColor: "#e7e4e3ff",
+    backgroundColor: "#ffffffff",
     borderRadius: 40,
     padding: 20,
     width: "100%",
@@ -133,7 +134,7 @@ bottomCircle: {
     borderRadius: 20,
   },
   inputPerfil: {
-    backgroundColor: "#dbdbdbff",
+    backgroundColor: "#f3f2f2ff",
     width: "105%",
     height: "8%",
     margin: 10,
@@ -145,6 +146,15 @@ bottomCircle: {
     borderRadius: 20,
     width: "85%",
     height: "8%",
+    justifyContent: "center",
+    alignItems: "center",
+    marginVertical: 10,
+  },
+  buttonCreateAd: {
+    backgroundColor: "#ffafa8ff",
+    borderRadius: 20,
+    width: "85%",
+    height: 40,
     justifyContent: "center",
     alignItems: "center",
     marginVertical: 10,

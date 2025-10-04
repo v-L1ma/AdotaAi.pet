@@ -1,7 +1,8 @@
 import * as ImagePicker from "expo-image-picker";
 import React, { useState } from "react";
-import { Image, SafeAreaView, Text, TextInput, TouchableOpacity, View } from "react-native";
+import { Image, SafeAreaView, Text, TextInput, TouchableOpacity, Pressable, View } from "react-native";
 import styles from "../styles/AppStyles";
+import Icon1 from "react-native-vector-icons/Ionicons";
 
 export default function CriarAnuncioScreen() {
     const [nome, setNome] = useState("");
@@ -28,96 +29,104 @@ export default function CriarAnuncioScreen() {
 
     return (
         <SafeAreaView style={styles.container}>
-            <View style={[styles.square, { alignItems: "center", paddingBottom: 100 }]}> 
-                <TouchableOpacity
-                    style={{
-                        width: 140,
-                        height: 140,
-                        borderRadius: 70,
-                        backgroundColor: "#dbdbdbff",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        borderWidth: 2,
-                        borderColor: "#bbb",
-                        overflow: "hidden",
-                    }}
-                    onPress={pickImage}
-                    activeOpacity={0.7}
-                >
-                    {image ? (
-                        <Image source={{ uri: image }} style={{ width: 140, height: 140, borderRadius: 70 }} />
-                    ) : (
-                        <Text style={{ color: "#888", fontSize: 40 }}>📷</Text>
-                    )}
-                </TouchableOpacity>
+            <View style={[styles.square, { position: "absolute", top: 175, left: 0, right: 0, bottom: 0, zIndex: 0 }]} />
 
-                <Text style={styles.inputText2}>Nome</Text>
-                <TextInput
-                    style={styles.inputPerfil}
-                    value={nome}
-                    onChangeText={setNome}
-                    placeholder="Nome do animal"
-                />
+            <View style={{ flex: 1, justifyContent: "flex-start", alignItems: "center", width: "100%", zIndex: 1 }}>
 
-                <Text style={styles.inputText2}>Idade</Text>
-                <TextInput
-                    style={styles.inputPerfil}
-                    value={idade}
-                    onChangeText={setIdade}
-                    placeholder="Idade do animal"
-                    keyboardType="numeric"
-                />
-
-                <Text style={styles.inputText2}>Espécie</Text>
-                <View style={{ flexDirection: "row", width: "105%", marginBottom: 12, justifyContent: "flex-start" }}>
-                    <TouchableOpacity
-                        style={[styles.selectButton, especie === "gato" && { backgroundColor: "#bbb" }]}
-                        onPress={() => setEspecie("gato")}
+                <View style={{ marginTop: 120, marginBottom: 20, alignItems: "center", width: "100%" }}>
+                    <Pressable
+                        style={{
+                            width: 120,
+                            height: 120,
+                            borderRadius: 70,
+                            backgroundColor: "#dbdbdbff",
+                            alignItems: "center",
+                            justifyContent: "center",
+                            borderWidth: 5,
+                            borderColor: "#ffffffff",
+                            overflow: "hidden",
+                        }}
+                        onPress={pickImage}
                     >
-                        <Text style={styles.buttonText}>Gato</Text>
-                    </TouchableOpacity>
-                    <TouchableOpacity
-                        style={[styles.selectButton, especie === "cachorro" && { backgroundColor: "#bbb" }]}
-                        onPress={() => setEspecie("cachorro")}
-                    >
-                        <Text style={styles.buttonText}>Cachorro</Text>
-                    </TouchableOpacity>
+                        {image ? (
+                            <Image source={{ uri: image }} style={{ width: 140, height: 140, borderRadius: 70 }} />
+                        ) : (
+                            <Icon1 name="image" size={40} color="#888" />
+                        )}
+                    </Pressable>
                 </View>
 
-                <Text style={styles.inputText2}>Porte</Text>
-                <View style={{ flexDirection: "row", width: "105%", marginBottom: 12, justifyContent: "flex-start" }}>
-                    <TouchableOpacity
-                        style={[styles.selectButton, porte === "pequeno" && { backgroundColor: "#bbb" }]}
-                        onPress={() => setPorte("pequeno")}
-                    >
-                        <Text style={styles.buttonText}>Pequeno</Text>
-                    </TouchableOpacity>
-                    <TouchableOpacity
-                        style={[styles.selectButton, porte === "medio" && { backgroundColor: "#bbb" }]}
-                        onPress={() => setPorte("medio")}
-                    >
-                        <Text style={styles.buttonText}>Médio</Text>
-                    </TouchableOpacity>
-                    <TouchableOpacity
-                        style={[styles.selectButton, porte === "grande" && { backgroundColor: "#bbb" }]}
-                        onPress={() => setPorte("grande")}
-                    >
-                        <Text style={styles.buttonText}>Grande</Text>
-                    </TouchableOpacity>
+                <View style={{ width: "85%", alignItems: "center" }}>
+                    <Text style={styles.inputText2}>Nome</Text>
+                    <TextInput
+                        style={styles.inputPerfil}
+                        value={nome}
+                        onChangeText={setNome}
+                        placeholder="Nome do animal"
+                    />
+
+                    <Text style={styles.inputText2}>Idade</Text>
+                    <TextInput
+                        style={styles.inputPerfil}
+                        value={idade}
+                        onChangeText={setIdade}
+                        placeholder="Idade do animal"
+                        keyboardType="numeric"
+                    />
+
+                    <Text style={styles.inputText2}>Espécie</Text>
+                    <View style={{ flexDirection: "row", width: "100%", marginBottom: 12, justifyContent: "flex-start" }}>
+                        <TouchableOpacity
+                            style={[styles.selectButton, especie === "gato" && { backgroundColor: "#ffafa8ff" }]}
+                            onPress={() => setEspecie("gato")}
+                        >
+                            <Text style={styles.buttonText}>Gato</Text>
+                        </TouchableOpacity>
+                        <TouchableOpacity
+                            style={[styles.selectButton, especie === "cachorro" && { backgroundColor: "#ffafa8ff" }]}
+                            onPress={() => setEspecie("cachorro")}
+                        >
+                            <Text style={styles.buttonText}>Cachorro</Text>
+                        </TouchableOpacity>
+                    </View>
+
+                    <Text style={styles.inputText2}>Porte</Text>
+                    <View style={{ flexDirection: "row", width: "100%", marginBottom: 12, justifyContent: "center" }}>
+                        <TouchableOpacity
+                            style={[styles.selectButton, porte === "pequeno" && { backgroundColor: "#ffafa8ff" }]}
+                            onPress={() => setPorte("pequeno")}
+                        >
+                            <Text style={styles.buttonText}>Pequeno</Text>
+                        </TouchableOpacity>
+                        <TouchableOpacity
+                            style={[styles.selectButton, porte === "medio" && { backgroundColor: "#ffafa8ff" }]}
+                            onPress={() => setPorte("medio")}
+                        >
+                            <Text style={styles.buttonText}>Médio</Text>
+                        </TouchableOpacity>
+                        <TouchableOpacity
+                            style={[styles.selectButton, porte === "grande" && { backgroundColor: "#ffafa8ff" }]}
+                            onPress={() => setPorte("grande")}
+                        >
+                            <Text style={styles.buttonText}>Grande</Text>
+                        </TouchableOpacity>
+                    </View>
+
+                    <Text style={styles.inputText2}>Descrição</Text>
+                    <TextInput
+                        style={[styles.inputPerfil, { height: 130, textAlignVertical: "top" }]}
+                        value={descricao}
+                        onChangeText={setDescricao}
+                        placeholder="Descreva o animal..."
+                        multiline
+                    />
                 </View>
 
-                <Text style={styles.inputText2}>Descrição</Text>
-                <TextInput
-                    style={[styles.inputPerfil, { height: 150, textAlignVertical: "top" }]}
-                    value={descricao}
-                    onChangeText={setDescricao}
-                    placeholder="Descreva o animal..."
-                    multiline
-                />
-
-                <TouchableOpacity style={styles.buttonLogin} onPress={handleSave}>
-                    <Text style={styles.buttonText}>Criar anúncio</Text>
-                </TouchableOpacity>
+                <View style={{ width: "100%", alignItems: "center", marginTop: 20, position: "absolute", bottom: 20, left: 0 }}>
+                    <TouchableOpacity style={styles.buttonCreateAd} onPress={handleSave}>
+                        <Text style={styles.buttonText}>Criar anúncio</Text>
+                    </TouchableOpacity>
+                </View>
             </View>
         </SafeAreaView>
     );
