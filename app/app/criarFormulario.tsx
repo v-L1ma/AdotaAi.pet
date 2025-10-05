@@ -168,8 +168,12 @@ export default function CriarFormulario(){
 const style = StyleSheet.create({
     main:{
         padding:25,
-        marginTop:60,
-        backgroundColor:"white"
+        paddingTop:60,
+        backgroundColor:"white",
+        height: "100%",
+        display:"flex",
+        flexDirection:"column",
+        justifyContent:"space-between"
     },
     title:{
         fontSize:24,
@@ -241,7 +245,8 @@ const style = StyleSheet.create({
         width:screen.width,
         height:screen.height,
         padding:25,
-        margin:"auto"
+        margin:"auto",
+        paddingTop:65
     },
     container:{
         backgroundColor:"white", 
