@@ -6,7 +6,6 @@ import {
   FlatList,
   StyleSheet,
   TouchableOpacity,
-  Platform,
   Pressable,
   Dimensions,
 } from "react-native";
@@ -14,8 +13,10 @@ import { CardEvento } from "../components/CardEvento";
 import NavBar from "@/components/NavBar";
 import { colors } from "@/styles/variables";
 import Icon from "react-native-vector-icons/FontAwesome5";
+import {Picker} from "@react-native-picker/picker"
 
 const width = Dimensions.get("window").width
+const height = Dimensions.get("window").height
 
 export default function ListagemEventos() {
 
@@ -103,6 +104,7 @@ export default function ListagemEventos() {
   const [categoryFilter, setCategoryFilter] = useState("all");
   const [searchText, setSearchText] = useState<string>("")
   const [isPopUpOpen, setIsPopUpOpen] = useState<boolean>(false);
+  const [selectedValue, setSelectedValue] = useState("");
 
   function closePopUp():void{
     }
@@ -156,67 +158,70 @@ export default function ListagemEventos() {
           <Pressable  onPress={()=>setIsPopUpOpen(false)}>
 
           </Pressable>
-          <View style={styles.container}>
+          <View style={styles.popUpContainer}>
 
               <View style={{flexDirection:"row", justifyContent:"space-between", alignItems:"center"}}>
                   <Text style={{fontSize:22, fontWeight:"bold"}}>Filtros</Text>
                   <Pressable onPress={()=> closePopUp()} ><Text style={{color:colors.primary, fontWeight:"bold"}}>Limpar</Text></Pressable>
               </View>
 
-              <Text style={{fontSize:18, fontWeight:"600"}}>Espécie</Text>
-
-              {/* <View style={{flexDirection:"row", justifyContent:"space-between", alignItems:"center"}}>
+              <Text style={{fontSize:18, fontWeight:"600"}}>Data</Text>
+              
+              <View style={{flexDirection:"row", justifyContent:"space-between", alignItems:"center"}}>
                   <TouchableOpacity 
-                  style={[styles.button,  especie === "cachorro" && styles.selected]}
-                  onPress={() => setEspecie("cachorro")}>
+                  style={[styles.button]}>
                       <Text style={{textAlign:"center"}}>Cachorro</Text>
                   </TouchableOpacity>
 
                   <TouchableOpacity 
-                  style={[styles.button,  especie === "gato" && styles.selected]}
-                  onPress={() => setEspecie("gato")}>
+                  style={[styles.button]}>
                       <Text style={{textAlign:"center"}}>Gato</Text>
                   </TouchableOpacity>
-              </View>
+                </View>
 
-              <Text style={{fontSize:18, fontWeight:"600"}}>Gênero</Text>
+                <Text style={{fontSize:18, fontWeight:"600"}}>Periodo</Text>
 
-              <View style={{flexDirection:"row", justifyContent:"space-between", alignItems:"center"}}>
+                <View style={{flexDirection:"row", justifyContent:"space-between", alignItems:"center"}}>
                   <TouchableOpacity 
-                  style={[styles.button,  genero === "M" && styles.selected]} 
-                  onPress={() => setGenero("M")}>
-                      <Text style={{textAlign:"center"}}>Macho</Text>
+                  style={[styles.button]}>
+                      <Text style={{textAlign:"center"}}>Cachorro</Text>
                   </TouchableOpacity>
 
                   <TouchableOpacity 
-                  style={[styles.button,  genero === "F" && styles.selected]} 
-                  onPress={() => setGenero("F")}>
-                      <Text style={{textAlign:"center"}}>Fêmea</Text>
+                  style={[styles.button]}>
+                      <Text style={{textAlign:"center"}}>Gato</Text>
                   </TouchableOpacity>
-              </View>
+                </View>
 
-              <Text style={{fontSize:18, fontWeight:"600"}}>Porte</Text>
+                <Text style={{fontSize:18, fontWeight:"600"}}>Estado</Text>
 
-              <View style={{flexDirection:"row", justifyContent:"space-between", alignItems:"center"}}>
+                <View style={{flexDirection:"row", justifyContent:"space-between", alignItems:"center"}}>
                   <TouchableOpacity 
-                  style={[styles.button, {width:"32%"},  porte === "pequeno" && styles.selected]} 
-                  onPress={() => setPorte("pequeno")}>
-                      <Text style={{textAlign:"center"}}>Pequeno</Text>
+                  style={[styles.button]}>
+                      <Text style={{textAlign:"center"}}>Gato</Text>
+                  </TouchableOpacity>
+                  
+                  <TouchableOpacity 
+                  style={[styles.button]}>
+                      <Text style={{textAlign:"center"}}>Gato</Text>
+                  </TouchableOpacity>
+
+                </View>
+
+                <Text style={{fontSize:18, fontWeight:"600"}}>Cidade</Text>
+
+                <View style={{flexDirection:"row", justifyContent:"space-between", alignItems:"center"}}>
+                  <TouchableOpacity 
+                  style={[styles.button]}>
+                      <Text style={{textAlign:"center"}}>Cachorro</Text>
                   </TouchableOpacity>
 
                   <TouchableOpacity 
-                  style={[styles.button, {width:"32%"},  porte === "medio" && styles.selected]} 
-                  onPress={() => setPorte("medio")}>
-                      <Text style={{textAlign:"center"}}>Médio</Text>
+                  style={[styles.button]}>
+                      <Text style={{textAlign:"center"}}>Gato</Text>
                   </TouchableOpacity>
-
-                  <TouchableOpacity 
-                  style={[styles.button, {width:"32%"},  porte === "grande" && styles.selected]} 
-                  onPress={() => setPorte("grande")}>
-                      <Text style={{textAlign:"center"}}>Grande</Text>
-                  </TouchableOpacity>
-              </View> */}
-              
+                </View>
+                          
               <TouchableOpacity style={styles.submit} onPress={()=>{setIsPopUpOpen(false)}}>
                   <Text style={{textAlign:"center", color:"white", fontWeight:"bold"}}>Aplicar filtro</Text>
               </TouchableOpacity>
@@ -225,7 +230,7 @@ export default function ListagemEventos() {
         )
     }
 
-      <View style={{position:"fixed",bottom:50}}>
+      <View style={{position:"fixed",bottom:20}}>
           <NavBar></NavBar>
       </View>
     </View>
@@ -237,6 +242,7 @@ const styles = StyleSheet.create({
         flex: 1,
         backgroundColor: "#F9FAFB", // background
         padding: 25,
+        width:width,
         paddingTop:60
     },
     heroSection: {
@@ -251,7 +257,7 @@ const styles = StyleSheet.create({
     },
     input:{
         borderRadius: 25,
-        padding:15,
+        padding:25,
         marginBottom:10,
         backgroundColor:"white",
         color:"rgba(187, 33, 33, 1)",
@@ -323,11 +329,27 @@ const styles = StyleSheet.create({
         left:0,
         top:10,
         backgroundColor:"rgba(0, 0, 0, 0.25)", 
-        height:"100%",
+        height:height,
         width:width,
         display:"flex",
         justifyContent:"flex-end",
         alignItems:"center",
+    },
+    popUpContainer:{
+        backgroundColor:"white",
+        height:"70%",
+        width:width,
+        borderRadius:40,
+        padding:25,
+        paddingVertical:50,
+        gap:20,
+    },
+    button:{
+        borderWidth:1,
+        borderColor:"rgba(0, 0, 0, 0.31)",
+        width:"49%",
+        padding:15,
+        borderRadius:10
     },
     submit:{
         width:"100%",

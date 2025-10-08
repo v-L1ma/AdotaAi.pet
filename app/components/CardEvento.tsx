@@ -50,9 +50,6 @@ export const CardEvento = ({ event }: EventCardProps) => {
           style={styles.image}
           resizeMode="cover"
         />
-        <View style={styles.badge}>
-          <Text style={styles.badgeText}>{event.category}</Text>
-        </View>
       </View>
 
       <View style={styles.content}>
@@ -110,20 +107,6 @@ const styles = StyleSheet.create({
   image: {
     width: "100%",
     height: "100%",
-  },
-  badge: {
-    position: "absolute",
-    top: 12,
-    right: 12,
-    backgroundColor: colors.primary, // primary color
-    paddingVertical: 4,
-    paddingHorizontal: 10,
-    borderRadius: 20,
-    elevation: 3,
-    shadowColor: "#000",
-    shadowOpacity: 0.2,
-    shadowRadius: 4,
-    shadowOffset: { width: 0, height: 2 },
   },
   badgeText: {
     color: "#fff",

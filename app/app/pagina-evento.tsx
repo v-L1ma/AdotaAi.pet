@@ -152,9 +152,6 @@ const paginaEvento = () => {
       </View>
 
       <View style={styles.content}>
-        <View style={styles.badge}>
-          <Text style={styles.badgeText}>{event.category}</Text>
-        </View>
 
         <Text style={styles.title}>{event.title}</Text>
 
@@ -247,14 +244,6 @@ const styles = StyleSheet.create({
   content: {
     paddingHorizontal: 20,
     paddingTop: 20,
-  },
-  badge: {
-    alignSelf: "flex-start",
-    backgroundColor: colors.primary,
-    borderRadius: 20,
-    paddingVertical: 6,
-    paddingHorizontal: 16,
-    marginBottom: 12,
   },
   badgeText: {
     color: "#fff",
