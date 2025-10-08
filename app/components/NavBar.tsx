@@ -15,8 +15,9 @@ export default function NavBar(){
             <BlurView style={styles.container}  intensity={60} tint="light" >
                 <Icon onPress={()=>router.replace("/Home")}  style={styles.icon} name="home" size={30} color={colors.primary}></Icon>
                 <Icon onPress={()=>router.push("/listagemPets")} style={styles.icon} name="search" size={30} color={colors.primary}></Icon>
-                <IconMat onPress={()=>router.push("/criarFormulario")} style={styles.icon} name="heart-plus-outline" size={30} color={colors.primary}></IconMat>
-                <IconMat style={styles.icon} name="menu" size={30} color={colors.primary}></IconMat>
+                
+                <IconMat onPress={()=>router.push("/criarAnuncio")} style={styles.icon} name="heart-plus-outline" size={30} color={colors.primary}></IconMat>
+                <IconMat onPress={()=>router.push("/config")} style={styles.icon} name="menu" size={30} color={colors.primary}></IconMat>
             </BlurView>
         </View>
     );

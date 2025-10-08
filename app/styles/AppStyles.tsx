@@ -10,15 +10,21 @@ type Styles = {
   buttonText: TextStyle;
   buttonLogin: ViewStyle;
   buttonLogin2: ViewStyle;
+  buttonSave: ViewStyle;
+  selectButton: ViewStyle;
+  buttonCreateAd: ViewStyle;
   square: ViewStyle;
   square2: ViewStyle;
   input: TextStyle;
-  inputText: TextStyle,
-  safeArea: ViewStyle,
-  animatedContainer: ViewStyle,
-  imageContainer: ViewStyle,
+  inputPerfil: TextStyle;
+  inputText: TextStyle;
+  inputText2: TextStyle;
+  safeArea: ViewStyle;
+  animatedContainer: ViewStyle;
+  imageContainer: ViewStyle;
   dogImage: ImageStyle,
   keyboardAvoidingView: ViewStyle,
+  settingsButton: ViewStyle,
 };
 
 const styles = StyleSheet.create<Styles>({
@@ -32,7 +38,7 @@ bottomCircle: {
   position: 'absolute',
   bottom: -150,
   left: '0%',
-  width: 400,
+  width: "100%",
   height: 500,
   borderRadius: 100,
   backgroundColor: '#ffffffff',
@@ -82,8 +88,15 @@ bottomCircle: {
     textAlign: "left",
     width: "80%",
   },
+  inputText2: {
+    color: "#7a4f4bff",
+    fontSize: 13,
+    fontWeight: "bold",
+    textAlign: "left",
+    width: "100%",
+  },
   square: {
-    backgroundColor: "#e7e4e3ff",
+    backgroundColor: "#ffffffff",
     borderRadius: 40,
     padding: 20,
     width: "100%",
@@ -96,23 +109,52 @@ bottomCircle: {
     borderRadius: 40,
     padding: 0,
     width: "100%",
-    height: "65%",
+    height: "55%",
     justifyContent: "center",
     alignItems: "center",
+  },
+  selectButton: {
+    borderWidth: 1,
+    borderColor: "#bbb",
+    backgroundColor: "#fff",
+    borderRadius: 15,
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    marginHorizontal: 5,
+    alignItems: "center",
+    justifyContent: "center",
+    minWidth: 80,
   },
   input: {
     backgroundColor: "#dbdbdbff",
     width: "85%",
-    height: "12%",
+    height: "8%",
     margin: 12,
     padding: 10,
     borderRadius: 20,
   },
+  inputPerfil: {
+    backgroundColor: "#f3f2f2ff",
+    width: "105%",
+    height: "8%",
+    margin: 10,
+    padding: 10,
+    borderRadius: 20,
+},
   buttonLogin: {
     backgroundColor: "#ffafa8ff",
     borderRadius: 20,
     width: "85%",
-    height: "12%",
+    height: "8%",
+    justifyContent: "center",
+    alignItems: "center",
+    marginVertical: 10,
+  },
+  buttonCreateAd: {
+    backgroundColor: "#ffafa8ff",
+    borderRadius: 20,
+    width: "85%",
+    height: 40,
     justifyContent: "center",
     alignItems: "center",
     marginVertical: 10,
@@ -125,6 +167,15 @@ bottomCircle: {
     justifyContent: "center",
     alignItems: "center",
     marginVertical: 8,
+  },
+  buttonSave: {
+    backgroundColor: "#ffafa8ff",
+    borderRadius: 20,
+    width: "105%",
+    height: "8%",
+    justifyContent: "center",
+    alignItems: "center",
+    marginVertical: 10,
   },
   safeArea: {
     flex: 1,
@@ -154,6 +205,14 @@ bottomCircle: {
     width: '100%',
     marginTop: '30%',
     justifyContent: 'flex-end',
+  },
+  settingsButton:{
+    alignItems: "baseline",
+    justifyContent: "center",
+    width: "100%",
+    borderRadius: 20,
+    paddingHorizontal: 30,
+    paddingVertical: 10
   },
 });
 

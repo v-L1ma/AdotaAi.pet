@@ -21,11 +21,11 @@ export default function CadastroScreen() {
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       style={{ flex: 1 }}
     >
-      <SafeAreaView style={styles.container}> 
-        <Animated.View style={{ flex: 1, width: "100%", transform: [{ translateY: slideAnim }] }}>
+      <SafeAreaView style={styles.container}>
+        <Animated.View style={{ flex: 1, width: "100%", transform: [{ translateY: slideAnim }], marginTop: 0 }}>
           <Image
             source={require("../assets/images/dog1.png")}
-            style={{ width: "100%", height: "35%", alignSelf: "center", aspectRatio: 1.1, top: "5%", zIndex: 10 }}
+            style={{ width: "100%", height: "36%", alignSelf: "center", aspectRatio: 1.1, top: "5%", zIndex: 10 }}
           />
           <View style={styles.square2}>
             <Text style={styles.inputText}>E-mail</Text>

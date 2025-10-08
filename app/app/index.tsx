@@ -18,8 +18,7 @@ export default function HomeScreen() {
 
       <View style={styles.bottomCircle} />
 
-      {/* <Text style={styles.subtitle}>Encontre seu melhor amigo aqui!</Text> */}
-      <View style={{ marginBottom: 50, alignItems: "center" }}>
+      <View style={{ marginBottom: 50, alignItems: "center"}}>
         <TouchableOpacity
           style={styles.buttonArea}
           onPress={() => router.push("/login")}
