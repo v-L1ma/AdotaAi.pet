@@ -5,6 +5,7 @@ import { Image, Pressable, StyleSheet, Text, TouchableOpacity, View } from "reac
 import IconMat from "react-native-vector-icons/MaterialCommunityIcons";
 import IconIonic from "react-native-vector-icons/Ionicons";
 import { colors } from "@/styles/variables";
+import React from "react";
 
 export default function PerfilPet(){
 
@@ -41,14 +42,13 @@ export default function PerfilPet(){
     return(
         <View style={style.container}>
             <View style={style.header}>
-                <HeaderBackButton onPress={router.back} style={{backgroundColor:"white"}}></HeaderBackButton>
-                <Pressable onPress={()=>favoritePet()}>
+                <HeaderBackButton onPress={router.back} style={style.headerButtons}></HeaderBackButton>
+                <Pressable onPress={()=>favoritePet()} style={style.headerButtons}>
                     <IconMat name={heartIcon} size={35} color={heartColor}></IconMat>
                 </Pressable>
             </View>
 
             <View style={style.image}>
-                <View style={{height:60}}></View>
             
                 <Image style={{height:"100%", width:"80%", margin:"auto"}} resizeMode="stretch" source={{uri:imagem.toString()}}></Image>
 
@@ -57,9 +57,9 @@ export default function PerfilPet(){
             <View  style={style.infos}>
                 
             <View style={{marginTop:-20}}>
-                <Text style={{fontSize:26, fontWeight:"bold",color:"white"}}>{nome}</Text>
+                <Text style={{fontSize:26, fontWeight:"bold",color:colors.primary}}>{nome}</Text>
                 <View style={style.location}>
-                    <IconIonic name="location-outline" size={26} color={"white"}></IconIonic>
+                    <IconIonic name="location-outline" size={26} color={colors.primary}></IconIonic>
                     <Text style={style.location}> Marapé, Santos - SP</Text>
                 </View>
             </View>
@@ -82,8 +82,8 @@ export default function PerfilPet(){
             </View>
 
             <View>
-                <Text style={{fontSize:26, fontWeight:"bold",color:"white"}}>Sobre</Text>
-                <Text style={{fontSize:18, display:"flex", flexDirection:"column", alignItems:"center", color:"rgba(236, 236, 236, 1)"}}>
+                <Text style={{fontSize:26, fontWeight:"bold",color:colors.primary}}>Sobre</Text>
+                <Text style={{fontSize:18, display:"flex", flexDirection:"column", alignItems:"center", color:"rgba(0, 0, 0, 0.53)"}}>
                     {
                         description
                     }
@@ -91,7 +91,7 @@ export default function PerfilPet(){
             </View>
         
             <TouchableOpacity style={style.button}>
-               <Text style={{textAlign:"center", fontWeight:"bold", fontSize:20, color:colors.primary}}>Adotar!</Text>
+               <Text style={{textAlign:"center", fontWeight:"bold", fontSize:20, color:"white"}}>Adotar!</Text>
             </TouchableOpacity>
         </View>
 
@@ -103,7 +103,7 @@ export default function PerfilPet(){
 const style = StyleSheet.create({
     container:{
         paddingTop:80,
-        backgroundColor:colors.primary,
+        backgroundColor:"white",
         height:"100%",
         position:"relative",
         overflow:"hidden"
@@ -112,9 +112,9 @@ const style = StyleSheet.create({
         flexDirection:"row",
         justifyContent:"space-between",
         alignItems:"flex-start",
-        height:"50%",
+        height:"45%",
         zIndex:2,
-        paddingHorizontal:25
+        paddingHorizontal:25,
     },
     image:{
         height:"50%",
@@ -131,12 +131,14 @@ const style = StyleSheet.create({
         display:"flex",
         flexDirection:"row",
         alignItems:"center", 
-        color:"rgba(236, 236, 236, 1)",
+        color:"rgba(0, 0, 0, 0.53)",
     },
     infos:{
         paddingHorizontal:25,
         display:"flex",
         flexDirection:"column",
+        alignContent:"space-between",
+        height:"55%",
         gap:20
         
     },
@@ -147,29 +149,39 @@ const style = StyleSheet.create({
         gap:10
     },
     caracteristicasCard:{
-        backgroundColor:"white",
+        backgroundColor:colors.primary,
         width:"30%",
         paddingVertical:"5%",
         borderRadius:15,
     },
     textoCard:{
         textAlign:"center",
-        color:colors.primary,
+        color:"white",
         fontWeight:"500"
     },
     tituloCard:{
         textAlign:"center",
-        color:colors.primary,
+        color:"white",
         fontWeight:"900"
     },
     button:{
         margin:"auto",
-        backgroundColor:"white",
-        width:"60%",
+        backgroundColor:colors.primary,
+        width:"100%",
         padding:"5%",
         borderRadius:15,
         fontWeight:"bold",
         fontFamily:"sans",
-        height:60
+        height:60,
+        marginTop:"auto"
+    },
+    headerButtons:{
+        backgroundColor:"white",
+        width:50,
+        height:50,
+        display:"flex",
+        justifyContent:"center",
+        alignItems:"center",
+        borderRadius:100
     }
 });

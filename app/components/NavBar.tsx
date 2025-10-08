@@ -4,6 +4,7 @@ import IconMat from 'react-native-vector-icons/MaterialCommunityIcons';
 import { colors } from "@/styles/variables";
 import { useRouter } from "expo-router";
 import { BlurView } from "expo-blur";
+import React from "react";
 
 export default function NavBar(){
 
