@@ -1,7 +1,11 @@
 
+
+import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from "expo-router";
 import React, { useState } from "react";
-import { Image, SafeAreaView, ScrollView, Text, TouchableOpacity, View } from "react-native";
+import { Image, ScrollView, Text, TouchableOpacity, View } from "react-native";
+import { SafeAreaView } from 'react-native-safe-area-context';
+import colors from '../styles/colors';
 
 const Solicitacoes = () => {
   const router = useRouter();
@@ -237,39 +241,61 @@ const Solicitacoes = () => {
   }
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: '#f5f5f5' }}>
-      {/* Header fixo no topo */}
-      <View style={{ width: "100%", backgroundColor: '#fff', borderRadius: 0, paddingTop: 50, paddingBottom: 20, shadowColor: '#000', shadowOpacity: 0.06, shadowRadius: 4, elevation: 2 }}>
-        <Text style={{ fontSize: 28, fontWeight: 'bold', textAlign: 'center', marginBottom: 10 }}>Solicitações</Text>
-        <View style={{ flexDirection: 'row', justifyContent: 'center' }}>
-          <TouchableOpacity
-            style={{
-              backgroundColor: tab === 'recebidos' ? '#fda49cff' : '#fff',
-              paddingVertical: 8,
-              paddingHorizontal: 24,
-              borderRadius: 20,
-              borderWidth: tab === 'recebidos' ? 0 : 1,
-              borderColor: '#fda49cff',
-              marginRight: 10,
-            }}
-            onPress={() => setTab('recebidos')}
-          >
-            <Text style={{ color: tab === 'recebidos' ? '#fff' : '#fda49cff', fontWeight: 'bold', fontSize: 16 }}>Recebidos</Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={{
-              backgroundColor: tab === 'enviados' ? '#fda49cff' : '#fff',
-              paddingVertical: 8,
-              paddingHorizontal: 24,
-              borderRadius: 20,
-              borderWidth: tab === 'enviados' ? 0 : 1,
-              borderColor: '#fda49cff',
-            }}
-            onPress={() => setTab('enviados')}
-          >
-            <Text style={{ color: tab === 'enviados' ? '#fff' : '#fda49cff', fontWeight: 'bold', fontSize: 16 }}>Enviados</Text>
-          </TouchableOpacity>
+    <>
+      {/* Safe area do topo branca */}
+      <SafeAreaView edges={['top']} style={{ backgroundColor: '#fff' }} />
+      {/* Header customizado padrão do app */}
+      <View style={{
+        width: "100%",
+        backgroundColor: '#fff',
+        borderBottomLeftRadius: 30,
+        borderBottomRightRadius: 30,
+        paddingTop: 50,
+        paddingBottom: 20,
+        shadowColor: '#000',
+        shadowOpacity: 0.06,
+        shadowRadius: 4,
+        elevation: 2,
+        flexDirection: 'row',
+        alignItems: 'center',
+        paddingHorizontal: 16,
+      }}>
+        <TouchableOpacity onPress={() => router.back()} style={{ position: 'absolute', left: 16, top: 52, zIndex: 2 }} hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
+          <Ionicons name="arrow-back" size={28} color={colors.primary} />
+        </TouchableOpacity>
+        <View style={{ flex: 1, alignItems: 'center' }}>
+          <Text style={{ fontSize: 28, fontWeight: 'bold', color: '#e74c3c', textAlign: 'center', marginBottom: 0 }}>Solicitações</Text>
         </View>
+      </View>
+      {/* Tabs e cards */}
+      <View style={{ flexDirection: 'row', justifyContent: 'center', backgroundColor: 'transparent', marginTop: 16 }}>
+        <TouchableOpacity
+          style={{
+            backgroundColor: tab === 'recebidos' ? colors.secondary : '#fff',
+            paddingVertical: 8,
+            paddingHorizontal: 24,
+            borderRadius: 20,
+            borderWidth: tab === 'recebidos' ? 0 : 1,
+            borderColor: colors.secondary,
+            marginRight: 10,
+          }}
+          onPress={() => setTab('recebidos')}
+        >
+          <Text style={{ color: tab === 'recebidos' ? '#fff' : colors.secondary, fontWeight: 'bold', fontSize: 16 }}>Recebidos</Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={{
+            backgroundColor: tab === 'enviados' ? colors.secondary : '#fff',
+            paddingVertical: 8,
+            paddingHorizontal: 24,
+            borderRadius: 20,
+            borderWidth: tab === 'enviados' ? 0 : 1,
+            borderColor: colors.secondary,
+          }}
+          onPress={() => setTab('enviados')}
+        >
+          <Text style={{ color: tab === 'enviados' ? '#fff' : colors.secondary, fontWeight: 'bold', fontSize: 16 }}>Enviados</Text>
+        </TouchableOpacity>
       </View>
       {/* Cards roláveis */}
       <ScrollView style={{ flex: 1 }} contentContainerStyle={{ paddingTop: 30 }}>
@@ -285,7 +311,7 @@ const Solicitacoes = () => {
           ))}
         </View>
       </ScrollView>
-    </SafeAreaView>
+    </>
   );
 }
 
