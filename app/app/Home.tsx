@@ -3,6 +3,7 @@ import { colors } from "@/styles/variables";
 import CardPet from "@/components/CardPet";
 import NavBar from "@/components/NavBar";
 import { animal } from "@/types/TAnimal";
+import React from "react";
 
 export default function Home() {
 
