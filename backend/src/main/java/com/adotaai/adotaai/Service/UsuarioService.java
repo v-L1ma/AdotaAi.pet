@@ -35,6 +35,7 @@ public class UsuarioService {
     {
         UsuarioEntity usuarioEntity= new UsuarioEntity(usuario);
 
+
         usuarioRepository.save(usuarioEntity);
     }
 
@@ -42,10 +43,17 @@ public class UsuarioService {
     public UsuarioDTO atualizarUsuario(Long id, UsuarioDTO userDto){
         UsuarioEntity user = usuarioRepository.findById(id).orElseThrow(() -> new RuntimeException("Usuario não encontrado com ID: "));
         user.setNome(userDto.getNome());
-        user.setTelefone(userDto.getTelefone());
+        user.setCpf_cnpj(user.getCpf_cnpj());
+        user.setEmail(userDto.getEmail());
         user.setSenha(userDto.getSenha());
-        user.setMoradia(userDto.getMoradia());
-        user.setMetragem(userDto.getMetragem());
+        user.setTelefone(userDto.getTelefone());
+        user.setCargo(userDto.getCargo());
+        user.setLink_foto(userDto.getLink_foto());
+        user.setEndereco(userDto.getEndereco());
+        user.setCep(userDto.getCep());
+        user.setBairro(userDto.getBairro());
+        user.setCidade(userDto.getCidade());
+        user.setSg_estado(user.getSg_estado());
 
         UsuarioEntity useratualizado= usuarioRepository.save(user);
 

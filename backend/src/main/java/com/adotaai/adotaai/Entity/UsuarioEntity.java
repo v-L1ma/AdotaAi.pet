@@ -21,22 +21,37 @@ public class UsuarioEntity {
     private String nome;
 
     @Column(nullable = false, unique = true)
-    private String cpf;
+    private String cpf_cnpj;
 
     @Column(nullable = false, unique = true)
     private String email;
 
     @Column(nullable = false)
-    private String telefone;
-
-    @Column(nullable = false)
     private String senha;
 
     @Column(nullable = false)
-    private String moradia;
+    private String telefone;
+
+    @Column
+    private String cargo;
 
     @Column(nullable = false)
-    private String metragem;
+    private String link_foto;
+
+    @Column(nullable = false)
+    private String endereco;
+
+    @Column(nullable = false)
+    private String cep;
+
+    @Column(nullable = false)
+    private String bairro;
+
+    @Column(nullable = false)
+    private String cidade;
+
+    @Column(nullable = false)
+    private String sg_estado;
 
     public UsuarioEntity (UsuarioDTO usuario)
     {
@@ -44,6 +59,7 @@ public class UsuarioEntity {
     }
 
     public UsuarioEntity(){
+
 
     }
 
@@ -63,12 +79,12 @@ public class UsuarioEntity {
         this.nome = nome;
     }
 
-    public String getCpf() {
-        return cpf;
+    public String getCpf_cnpj() {
+        return cpf_cnpj;
     }
 
-    public void setCpf(String cpf) {
-        this.cpf = cpf;
+    public void setCpf_cnpj(String cpf_cnpj) {
+        this.cpf_cnpj = cpf_cnpj;
     }
 
     public String getEmail() {
@@ -79,14 +95,6 @@ public class UsuarioEntity {
         this.email = email;
     }
 
-    public String getTelefone() {
-        return telefone;
-    }
-
-    public void setTelefone(String telefone) {
-        this.telefone = telefone;
-    }
-
     public String getSenha() {
         return senha;
     }
@@ -95,22 +103,69 @@ public class UsuarioEntity {
         this.senha = senha;
     }
 
-    public String getMoradia() {
-        return moradia;
+    public String getTelefone() {
+        return telefone;
     }
 
-    public void setMoradia(String moradia) {
-        this.moradia = moradia;
+    public void setTelefone(String telefone) {
+        this.telefone = telefone;
     }
 
-    public String getMetragem() {
-        return metragem;
+    public String getCargo() {
+        return cargo;
     }
 
-    public void setMetragem(String metragem) {
-        this.metragem = metragem;
+    public void setCargo(String cargo) {
+        this.cargo = cargo;
     }
 
+    public String getLink_foto() {
+        return link_foto;
+    }
+
+    public void setLink_foto(String link_foto) {
+        this.link_foto = link_foto;
+    }
+
+    public String getEndereco() {
+        return endereco;
+    }
+
+    public void setEndereco(String endereco) {
+        this.endereco = endereco;
+    }
+
+    public String getCep() {
+        return cep;
+    }
+
+    public void setCep(String cep) {
+        this.cep = cep;
+    }
+
+    public String getBairro() {
+        return bairro;
+    }
+
+    public void setBairro(String bairro) {
+        this.bairro = bairro;
+    }
+
+    public String getCidade() {
+        return cidade;
+    }
+
+    public void setCidade(String cidade) {
+        this.cidade = cidade;
+    }
+
+    public String getSg_estado() {
+        return sg_estado;
+    }
+
+    public void setSg_estado(String sg_estado) {
+        this.sg_estado = sg_estado;
+    }
 
     @Override
     public boolean equals(Object o) {
