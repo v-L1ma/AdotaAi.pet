@@ -59,6 +59,11 @@ export const SelectInput: React.FC<Props> = ({
           <View style={styles.modalContent}>
             <FlatList
               data={options}
+              ListEmptyComponent={
+                <View style={{padding:10}}>
+                  <Text>Nenhuma opcao disponivel</Text>
+                </View>
+              }
               keyExtractor={(item) => item.value.toString()}
               renderItem={({ item }) => (
                 <TouchableOpacity
@@ -79,7 +84,7 @@ export const SelectInput: React.FC<Props> = ({
 const styles = StyleSheet.create({
   selectBox: {
     borderColor: '#999',
-    backgroundColor:"white",
+    backgroundColor:"#f3f2f2ff",
     padding: 12,
     borderRadius: 40,
   },

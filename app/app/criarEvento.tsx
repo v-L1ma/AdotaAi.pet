@@ -4,12 +4,17 @@ import { Image, SafeAreaView, Text, TextInput, TouchableOpacity, Pressable, View
 import Icon1 from "react-native-vector-icons/Ionicons";
 import { SelectInput, SelectOption } from "@/components/SelectInput";
 import { buscarCidadesPorEstado, buscarEstados, Cidade, Estado } from "@/services/ibgeService";
+import { Ionicons } from "@expo/vector-icons";
+import { useNavigation } from "@react-navigation/native";
+import { colors } from "@/styles/variables";
 
 export default function CriarAnuncioScreen() {
+    
+    const navigation = useNavigation();
     const [titulo, setTitulo] = useState("");
+    const [endereco, setEndereco] = useState("");
     const [data, setData] = useState("");
-    const [especie, setEspecie] = useState<"gato" | "cachorro" | null>(null);
-    const [porte, setPorte] = useState<"pequeno" | "medio" | "grande" | null>(null);
+    const [organizador, setOrganizador] = useState("");
     const [descricao, setDescricao] = useState("");
     const [image, setImage] = useState<string | undefined>(undefined);
     const [selectedEstado, setSelectedEstado] = useState<SelectOption | null>(null);
@@ -64,6 +69,14 @@ export default function CriarAnuncioScreen() {
 
     return (
         <SafeAreaView style={styles.container}>
+             <TouchableOpacity
+                style={styles.backButton}
+                onPress={() => navigation.goBack()}
+                activeOpacity={0.8}
+                >
+                <Ionicons name="arrow-back" size={24} color="#fda49cff" />
+                <Text style={styles.backButtonText}>Voltar</Text>
+            </TouchableOpacity>
             <View style={[styles.square, { position: "absolute", top: 100, left: 0, right: 0, bottom: 0, zIndex: 0 }]} />
 
             <View style={{ flex: 1, justifyContent: "flex-start", alignItems: "center", width: "100%", zIndex: 1 }}>
@@ -97,7 +110,7 @@ export default function CriarAnuncioScreen() {
                         style={styles.inputPerfil}
                         value={titulo}
                         onChangeText={setTitulo}
-                        placeholder="Nome do animal"
+                        placeholder="Nome do evento"
                     />
 
                     <Text style={styles.inputText2}>Data</Text>
@@ -105,24 +118,16 @@ export default function CriarAnuncioScreen() {
                         style={styles.inputPerfil}
                         value={data}
                         onChangeText={setData}
-                        placeholder="Data de nascimento"
+                        placeholder="dd/mm/aaaa"
                         keyboardType="numeric"
                     />
 
                     <Text style={styles.inputText2}>Endereco</Text>
                     <TextInput
                         style={styles.inputPerfil}
-                        value={data}
-                        onChangeText={setData}
+                        value={endereco}
+                        onChangeText={setEndereco}
                         placeholder="Rua XXX N0"
-                    />
-
-                    <Text style={styles.inputText2}>Cidade</Text>
-                    <SelectInput
-                        options={CidadesParaOptions(cidades)}
-                        selected={selectedCidade}
-                        onSelect={setSelectedCidade}
-                        placeholder="Escolha uma cidade"
                     />
 
                     <Text style={styles.inputText2}>Estado</Text>
@@ -133,11 +138,19 @@ export default function CriarAnuncioScreen() {
                         placeholder="Escolha um estado"
                     />
 
+                    <Text style={styles.inputText2}>Cidade</Text>
+                    <SelectInput
+                        options={CidadesParaOptions(cidades)}
+                        selected={selectedCidade}
+                        onSelect={setSelectedCidade}
+                        placeholder="Escolha uma cidade"
+                    />
+
                     <Text style={styles.inputText2}>Organizado por:</Text>
                     <TextInput
                         style={styles.inputPerfil}
-                        value={data}
-                        onChangeText={setData}
+                        value={organizador}
+                        onChangeText={setOrganizador}
                         placeholder="Organizador do evento"
                     />
 
@@ -162,6 +175,25 @@ export default function CriarAnuncioScreen() {
 }
 
 const styles = StyleSheet.create({
+    backButton: {
+        position: "absolute",
+        top: 20,
+        left: 20,
+        backgroundColor: "#e7e4e3ff",
+        flexDirection: "row",
+        alignItems: "center",
+        paddingVertical: 8,
+        paddingHorizontal: 14,
+        borderRadius: 30,
+        cursor:"pointer",
+        zIndex:3
+    },
+    backButtonText: {
+        color: "#fda49cff",
+        fontSize: 16,
+        marginLeft: 8,
+        fontWeight: "600",
+    },
    container: {
     flex: 1,
     backgroundColor: "#fda49cff",
