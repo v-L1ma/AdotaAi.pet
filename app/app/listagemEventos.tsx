@@ -13,7 +13,6 @@ import { CardEvento } from "../components/CardEvento";
 import NavBar from "@/components/NavBar";
 import { colors } from "@/styles/variables";
 import Icon from "react-native-vector-icons/FontAwesome5";
-import {Picker} from "@react-native-picker/picker"
 
 const width = Dimensions.get("window").width
 const height = Dimensions.get("window").height
