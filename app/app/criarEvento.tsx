@@ -1,12 +1,14 @@
 import * as ImagePicker from "expo-image-picker";
 import React, { useEffect, useState } from "react";
-import { Image, SafeAreaView, Text, TextInput, TouchableOpacity, Pressable, View, StyleSheet, ScrollView } from "react-native";
+import { Image, SafeAreaView, Text, TextInput, TouchableOpacity, Pressable, View, StyleSheet, ScrollView, Dimensions } from "react-native";
 import Icon1 from "react-native-vector-icons/Ionicons";
 import { SelectInput, SelectOption } from "@/components/SelectInput";
 import { buscarCidadesPorEstado, buscarEstados, Cidade, Estado } from "@/services/ibgeService";
 import { Ionicons } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
 import { colors } from "@/styles/variables";
+
+const tela = Dimensions.get("window")
 
 export default function CriarAnuncioScreen() {
     
@@ -77,11 +79,8 @@ export default function CriarAnuncioScreen() {
                 <Ionicons name="arrow-back" size={24} color="#fda49cff" />
                 <Text style={styles.backButtonText}>Voltar</Text>
             </TouchableOpacity>
-            <View style={[styles.square, { position: "absolute", top: 100, left: 0, right: 0, bottom: 0, zIndex: 0 }]} />
 
-            <View style={{ flex: 1, justifyContent: "flex-start", alignItems: "center", width: "100%", zIndex: 1 }}>
-
-                <View style={{ marginTop: 40, marginBottom: 20, alignItems: "center", width: "100%" }}>
+            <View style={{ position:"absolute", top:tela.height*.1, marginBottom: 20, alignItems: "center", zIndex:3 }}>
                     <Pressable
                         style={{
                             width: 120,
@@ -91,7 +90,7 @@ export default function CriarAnuncioScreen() {
                             alignItems: "center",
                             justifyContent: "center",
                             borderWidth: 5,
-                            borderColor: "#ffffffff",
+                            borderColor: "rgba(245, 245, 245, 1)",
                             overflow: "hidden",
                         }}
                         onPress={pickImage}
@@ -102,9 +101,12 @@ export default function CriarAnuncioScreen() {
                             <Icon1 name="image" size={40} color="#888" />
                         )}
                     </Pressable>
-                </View>
+            </View>
+            <View style={[styles.square, { position: "absolute", top: tela.height*.2, left: 0, right: 0, bottom: 0, zIndex: 0, paddingTop:tela.height*.08 }]}>
 
-                <ScrollView contentContainerStyle={{ width: "100%", alignItems: "center", paddingBottom:80}} showsVerticalScrollIndicator={false}>
+            <View style={{ flex: 1, justifyContent: "flex-start", alignItems: "center", width: "100%", zIndex: 1 }}>          
+
+                <ScrollView contentContainerStyle={{width:tela.width*.8, alignItems: "center", paddingBottom:tela.height*.2}} showsVerticalScrollIndicator={false}>
                     <Text style={styles.inputText2}>Titulo</Text>
                     <TextInput
                         style={styles.inputPerfil}
@@ -164,11 +166,13 @@ export default function CriarAnuncioScreen() {
                     />
                 </ScrollView>
 
-                <View style={{ width: "100%", alignItems: "center", marginTop: 20, position: "absolute", bottom: 20, left: 0 }}>
+                <View style={{ width: "100%", alignItems: "center", marginTop: 20, position: "absolute", bottom:30, left: 0 }}>
                     <TouchableOpacity style={styles.buttonCreateAd} onPress={handleSave}>
                         <Text style={styles.buttonText}>Criar anúncio</Text>
                     </TouchableOpacity>
                 </View>
+            </View>
+
             </View>
         </SafeAreaView>
     );
@@ -179,7 +183,7 @@ const styles = StyleSheet.create({
         position: "absolute",
         top: 20,
         left: 20,
-        backgroundColor: "#e7e4e3ff",
+        backgroundColor: "rgba(245, 245, 245, 1)",
         flexDirection: "row",
         alignItems: "center",
         paddingVertical: 8,
@@ -199,6 +203,8 @@ const styles = StyleSheet.create({
     backgroundColor: "#fda49cff",
     justifyContent: "flex-end",
     alignItems: "center",
+    paddingTop:60,
+    marginTop:60
   },
   inputText2: {
     color: "#7a4f4bff",
@@ -208,10 +214,10 @@ const styles = StyleSheet.create({
     width: "100%",
   },
   square: {
-    backgroundColor: "#e7e4e3ff",
+    backgroundColor: "rgba(245, 245, 245, 1)",
     borderTopRightRadius: 40,
     borderTopLeftRadius:40,
-    width: "100%",
+    width: tela.width,
   },
   selectButton: {
     borderWidth: 1,
@@ -231,7 +237,7 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
   },
   inputPerfil: {
-    backgroundColor: "#f3f2f2ff",
+    backgroundColor: "#e9e9e9ff",
     width: "100%",
     height: "8%",
     margin: 10,
@@ -242,7 +248,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#ffafa8ff",
     borderRadius: 20,
     width: "85%",
-    height: 40,
+    height: 60,
     justifyContent: "center",
     alignItems: "center",
     marginVertical: 10,

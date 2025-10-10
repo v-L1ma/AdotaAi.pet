@@ -84,7 +84,7 @@ export const SelectInput: React.FC<Props> = ({
 const styles = StyleSheet.create({
   selectBox: {
     borderColor: '#999',
-    backgroundColor:"#f3f2f2ff",
+    backgroundColor:"#e9e9e9ff",
     padding: 12,
     borderRadius: 40,
   },
