@@ -132,7 +132,7 @@ export default function ConfigScreen() {
                                     borderWidth: 2,
                                     borderColor: '#ececec',
                                 }}>
-                                    <TouchableOpacity style={{ flex: 1 }} onPress={() => router.push("/login") } activeOpacity={0.7}>
+                                    <TouchableOpacity style={{ flex: 1 }} onPress={() => router.push("/meus-favoritos") } activeOpacity={0.7}>
                                         <View style={{ flexDirection: "row", alignItems: "center" }}>
                                             <Icon2 name="heart" size={30} color="#000000ff" />
                                             <Text style={{ fontSize: 20, fontWeight: "bold", justifyContent: "space-between", width: "80%", paddingHorizontal: 10 }}>Meus favoritos</Text>
