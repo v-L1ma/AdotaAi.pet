@@ -25,22 +25,25 @@ export default function NavBar(){
 const styles = StyleSheet.create({
 
     wrapper:{
+        width:"100%",
+        margin:"auto",
         display:"flex", 
         flexDirection:"row", 
+        alignSelf:"center",
         alignItems:"center",
         justifyContent:"center", 
         borderRadius:20, 
         overflow:"hidden",
         position:"fixed",
-        width:"100%",
         bottom:10,
         left:0,
         borderWidth:2,
         borderColor:"white"
     },
     container:{
-        backgroundColor:"rgba(255, 255, 255, 0.74)",
         width:"100%",
+        margin:"auto",
+        backgroundColor:"rgba(255, 255, 255, 0.74)",
         paddingTop:20,
         paddingBottom:20,
         borderRadius:20,
