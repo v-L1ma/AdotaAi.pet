@@ -112,9 +112,6 @@ export default function meusEventos() {
 
   return (
     <>
-      {/* Safe area do topo branca */}
-      <SafeAreaView edges={['top']} style={{ backgroundColor: '#fff' }} />
-      {/* Conteúdo principal */}
   <SafeAreaView style={{ flex: 1, backgroundColor: '#f3f3f3' }} edges={['left', 'right', 'bottom']}>
         <Header titulo='Gerenciar eventos'></Header>
        

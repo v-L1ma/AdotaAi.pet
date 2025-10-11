@@ -4,6 +4,7 @@ import CardPet from "@/components/CardPet";
 import NavBar from "@/components/NavBar";
 import { animal } from "@/types/TAnimal";
 import React from "react";
+import Header from "@/components/Header";
 
 export default function Home() {
   const pets: animal[] = [
@@ -80,7 +81,8 @@ export default function Home() {
   ];
 
   return (
-    <View style={{ flex: 1 }}>
+    <View style={{ flex: 1}}>
+      <Header titulo="Seja bem-vindo"></Header>
       {/* Conteúdo rolável */}
       <ScrollView contentContainerStyle={style.fundo}>
         <View style={style.bannerBox}>
@@ -138,7 +140,7 @@ export default function Home() {
 
 const style = StyleSheet.create({
   fundo: {
-    paddingTop: 60,
+    paddingTop: 30,
     paddingBottom: 100, // espaço extra para navbar fixa
     backgroundColor: 'rgba(255, 255, 255, 0.18)',
     fontFamily: "Sans",
@@ -159,15 +161,11 @@ const style = StyleSheet.create({
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.15,
-    shadowRadius: 8,
-    padding: 20,
+    shadowRadius: 8
   },
   bannerImage: {
     width: '100%',
     height: '100%',
-    position: 'absolute',
-    top: 0,
-    left: 0,
     opacity: 0.45,
   },
   bannerOverlay: {
@@ -252,6 +250,8 @@ const style = StyleSheet.create({
   navbarWrapper: {
   position: 'absolute',
   zIndex: 3,
+  bottom:20,
+  paddingHorizontal:20
 },
 
 });

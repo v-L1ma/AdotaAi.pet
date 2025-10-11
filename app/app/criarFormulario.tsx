@@ -54,13 +54,11 @@ export default function CriarFormulario(){
 
 
     function selecionarPergunta(pergunta: Pergunta) {
-        // já está selecionada? remove
         if (perguntasSelecionadas.find((p) => p.id === pergunta.id)) {
             setPerguntasSelecionadas((prev) => prev.filter((p) => p.id !== pergunta.id));
             return;
         } 
-        if(perguntasSelecionadas.length<=20){
-        // senão, adiciona
+        if(perguntasSelecionadas.length<20){
             setPerguntasSelecionadas((prev) => [...prev, pergunta]);
         }
     }
@@ -117,12 +115,14 @@ export default function CriarFormulario(){
             <Text>Esse formulario sera usado para triar solicitacoes dos animais que voce doar.</Text>
                 
 
-            <View style={{height:height*.50, marginVertical:20}}>
                 <FlatList
                 data={perguntasFrequentes.toReversed()}
                 contentContainerStyle={{
-                    gap:15
+                    gap:15,
+                    marginVertical:20
+                    
                 }}
+                scrollEnabled={false}
                 renderItem={({item})=>(
                     <Pressable style={ isPerguntaSelecionada(item.id) ? style.cardSelected : style.card} onPress={()=>selecionarPergunta(item)}>
                         <Pressable style={style.checkButton}>
@@ -133,7 +133,6 @@ export default function CriarFormulario(){
                 )}
                 >
                 </FlatList>
-            </View>
 
             <View>
                 <Progress.Bar progress={perguntasSelecionadas.length/20} color={colors.primary} width={tela.width/1.13} />
@@ -142,7 +141,11 @@ export default function CriarFormulario(){
                 </View>
             </View>
 
-            <TouchableOpacity style={[style.button, style.secondaryButton]} onPress={()=>abrirFecharPopUp()}>
+            <TouchableOpacity
+            style={[style.button, style.secondaryButton, perguntasSelecionadas.length >= 20 && {opacity: 0.5}]}
+            onPress={abrirFecharPopUp}
+            disabled={perguntasSelecionadas.length >= 20}
+            >
                 <Text style={style.secondaryButton}>Criar pergunta personalizada</Text>
             </TouchableOpacity>
             <TouchableOpacity style={[style.button, style.primaryButton]}>
@@ -179,7 +182,7 @@ const style = StyleSheet.create({
         justifyContent:"space-between",
         marginTop:20,
         borderTopLeftRadius:30,
-        borderTopRightRadius:30,
+        borderTopRightRadius:30
     },
     title:{
         fontSize:20,

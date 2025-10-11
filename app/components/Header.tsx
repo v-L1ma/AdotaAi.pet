@@ -16,7 +16,7 @@ export default function Header({titulo}:props){
           backgroundColor: '#fff',
           borderBottomLeftRadius: 30,
           borderBottomRightRadius: 30,
-          paddingTop: 50,
+          paddingTop: 65,
           paddingBottom: 20,
           shadowColor: '#000',
           shadowOpacity: 0.06,
@@ -25,8 +25,9 @@ export default function Header({titulo}:props){
           flexDirection: 'row',
           alignItems: 'center',
           paddingHorizontal: 16,
+          zIndex:5
         }}>
-          <TouchableOpacity onPress={() => router.back()} style={{ position: 'absolute', left: 16, top: 52, zIndex: 2 }} hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
+          <TouchableOpacity onPress={() => router.back()} hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
             <Ionicons name="arrow-back" size={28} color={colors.primary} />
           </TouchableOpacity>
           <View style={{ flex: 1, alignItems: 'center' }}>

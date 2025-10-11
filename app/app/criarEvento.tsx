@@ -4,10 +4,9 @@ import { Image, SafeAreaView, Text, TextInput, TouchableOpacity, Pressable, View
 import Icon1 from "react-native-vector-icons/Ionicons";
 import { SelectInput, SelectOption } from "@/components/SelectInput";
 import { buscarCidadesPorEstado, buscarEstados, Cidade, Estado } from "@/services/ibgeService";
-import { Ionicons } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
-import { colors } from "@/styles/variables";
 import { useLocalSearchParams } from "expo-router";
+import Header from "@/components/Header";
 
 const tela = Dimensions.get("window")
 
@@ -72,15 +71,9 @@ export default function CriarAnuncioScreen() {
     };
 
     return (
+    <>
+        <Header titulo="Criar evento"></Header>
         <SafeAreaView style={styles.container}>
-             <TouchableOpacity
-                style={styles.backButton}
-                onPress={() => navigation.goBack()}
-                activeOpacity={0.8}
-                >
-                <Ionicons name="arrow-back" size={24} color="#fda49cff" />
-                <Text style={styles.backButtonText}>Voltar</Text>
-            </TouchableOpacity>
 
             <View style={{ position:"absolute", top:tela.height*.1, marginBottom: 20, alignItems: "center", zIndex:3 }}>
                     <Pressable
@@ -104,7 +97,7 @@ export default function CriarAnuncioScreen() {
                         )}
                     </Pressable>
             </View>
-            <View style={[styles.square, { position: "absolute", top: tela.height*.2, left: 0, right: 0, bottom: 0, zIndex: 0, paddingTop:tela.height*.08 }]}>
+            <View style={[styles.square, { position: "absolute", top: tela.height*.16, left: 0, right: 0, bottom: 0, zIndex: 0, paddingTop:tela.height*.08 }]}>
 
             <View style={{ flex: 1, justifyContent: "flex-start", alignItems: "center", width: "100%", zIndex: 1 }}>          
 
@@ -177,6 +170,7 @@ export default function CriarAnuncioScreen() {
 
             </View>
         </SafeAreaView>
+    </>
     );
 }
 
@@ -205,8 +199,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#fda49cff",
     justifyContent: "flex-end",
     alignItems: "center",
-    paddingTop:60,
-    marginTop:60
+    marginTop:-30
   },
   inputText2: {
     color: "#7a4f4bff",
