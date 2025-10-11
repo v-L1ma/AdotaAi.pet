@@ -90,7 +90,7 @@ export default function PerfilPet(){
                 </Text>
             </View>
         
-            <TouchableOpacity style={style.button}>
+            <TouchableOpacity style={style.button} onPress={()=>router.navigate("/responderFormulario")}>
                <Text style={{textAlign:"center", fontWeight:"bold", fontSize:20, color:"white"}}>Adotar!</Text>
             </TouchableOpacity>
         </View>
