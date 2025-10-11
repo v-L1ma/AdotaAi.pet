@@ -1,7 +1,7 @@
 import { HeaderBackButton } from "@react-navigation/elements";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useState } from "react";
-import { Image, Pressable, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { Image, Pressable, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import IconMat from "react-native-vector-icons/MaterialCommunityIcons";
 import IconIonic from "react-native-vector-icons/Ionicons";
 import { colors } from "@/styles/variables";
@@ -40,7 +40,7 @@ export default function PerfilPet(){
 
 
     return(
-        <View style={style.container}>
+        <ScrollView style={style.container}>
             <View style={style.header}>
                 <HeaderBackButton onPress={router.back} style={style.headerButtons}></HeaderBackButton>
                 <Pressable onPress={()=>favoritePet()} style={style.headerButtons}>
@@ -50,7 +50,7 @@ export default function PerfilPet(){
 
             <View style={style.image}>
             
-                <Image style={{height:"100%", width:"80%", margin:"auto"}} resizeMode="stretch" source={{uri:imagem.toString()}}></Image>
+                <Image style={{height:"100%", width:"80%", margin:"auto"}} resizeMode="cover" source={{uri:imagem.toString()}}></Image>
 
             </View>
         
@@ -96,13 +96,13 @@ export default function PerfilPet(){
         </View>
 
 
-        </View>
+        </ScrollView>
     )
 }
 
 const style = StyleSheet.create({
     container:{
-        paddingTop:80,
+        paddingTop:60,
         backgroundColor:"white",
         height:"100%",
         position:"relative",
@@ -112,9 +112,10 @@ const style = StyleSheet.create({
         flexDirection:"row",
         justifyContent:"space-between",
         alignItems:"flex-start",
-        height:"45%",
+        height:"50%",
         zIndex:2,
         paddingHorizontal:25,
+        marginTop:20
     },
     image:{
         height:"50%",
@@ -138,7 +139,7 @@ const style = StyleSheet.create({
         display:"flex",
         flexDirection:"column",
         alignContent:"space-between",
-        height:"55%",
+        height:"45%",
         gap:20
         
     },
