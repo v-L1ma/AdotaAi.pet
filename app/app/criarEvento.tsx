@@ -7,11 +7,13 @@ import { buscarCidadesPorEstado, buscarEstados, Cidade, Estado } from "@/service
 import { Ionicons } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
 import { colors } from "@/styles/variables";
+import { useLocalSearchParams } from "expo-router";
 
 const tela = Dimensions.get("window")
 
 export default function CriarAnuncioScreen() {
     
+    const {id} = useLocalSearchParams();
     const navigation = useNavigation();
     const [titulo, setTitulo] = useState("");
     const [endereco, setEndereco] = useState("");

@@ -1,7 +1,8 @@
+import Header from "@/components/Header";
 import { colors } from "@/styles/variables";
 import React from "react";
 import { useState } from "react";
-import { Text, View, FlatList, Pressable, StyleSheet, TouchableOpacity, Dimensions, TextInput } from "react-native";
+import { Text, View, FlatList, Pressable, StyleSheet, TouchableOpacity, Dimensions, TextInput, ScrollView } from "react-native";
 import * as Progress from 'react-native-progress';
 
 
@@ -10,7 +11,7 @@ interface Pergunta{
     conteudo:string
 }
 
-const screen = Dimensions.get("screen");
+const tela = Dimensions.get("window");
 
 export default function CriarFormulario(){
 
@@ -108,7 +109,10 @@ export default function CriarFormulario(){
     }
 
     return(
-        <View style={style.main}>
+        <>
+        <Header titulo="Questionario"></Header>
+        
+        <ScrollView contentContainerStyle={style.main} showsVerticalScrollIndicator={false}>
             <Text style={style.title}>Selecione as perguntas para criar seu formulario</Text>
             <Text>Esse formulario sera usado para triar solicitacoes dos animais que voce doar.</Text>
                 
@@ -132,7 +136,7 @@ export default function CriarFormulario(){
             </View>
 
             <View>
-                <Progress.Bar progress={perguntasSelecionadas.length/20} color={colors.primary} width={screen.width/1.13} />
+                <Progress.Bar progress={perguntasSelecionadas.length/20} color={colors.primary} width={tela.width/1.13} />
                 <View>
                     <Text>{perguntasSelecionadas.length}/20</Text>
                 </View>
@@ -144,8 +148,9 @@ export default function CriarFormulario(){
             <TouchableOpacity style={[style.button, style.primaryButton]}>
                 <Text style={style.primaryButton}>Salvar</Text>
             </TouchableOpacity>
+        </ScrollView>
 
-            {
+        {
                 isModalOpen &&
                 <Pressable style={style.popup} onPress={()=>abrirFecharPopUp()}>
                     <View style={style.container}>
@@ -161,22 +166,23 @@ export default function CriarFormulario(){
                     </View> 
                 </Pressable>
             }
-        </View>
+        </>
     )
 }
 
 const style = StyleSheet.create({
     main:{
-        padding:25,
-        paddingTop:60,
+        padding:25, 
         backgroundColor:"white",
-        height: "100%",
         display:"flex",
         flexDirection:"column",
-        justifyContent:"space-between"
+        justifyContent:"space-between",
+        marginTop:20,
+        borderTopLeftRadius:30,
+        borderTopRightRadius:30,
     },
     title:{
-        fontSize:24,
+        fontSize:20,
         color:colors.primary,
         fontWeight:"bold"
     },
@@ -229,7 +235,7 @@ const style = StyleSheet.create({
         borderColor:colors.primary,
         color:"white",
         textAlign:"center",
-        fontWeight:"bold"
+        fontWeight:"bold",
     },
     secondaryButton:{
         color:colors.primary,
@@ -242,11 +248,11 @@ const style = StyleSheet.create({
         position:"absolute",
         top:0,
         left:0,
-        width:screen.width,
-        height:screen.height,
+        width:tela.width,
+        height:tela.height,
         padding:25,
         margin:"auto",
-        paddingTop:65
+        paddingTop:65,
     },
     container:{
         backgroundColor:"white", 

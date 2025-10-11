@@ -6,6 +6,7 @@ import { Alert, Dimensions, FlatList, Image, ScrollView, StyleSheet, Text, Touch
 import { SafeAreaView } from "react-native-safe-area-context";
 import colors from '../styles/colors';
 import { CardEvento } from '@/components/CardEvento';
+import Header from '@/components/Header';
 
 export default function meusEventos() {
   const router = useRouter(); 
@@ -115,28 +116,7 @@ export default function meusEventos() {
       <SafeAreaView edges={['top']} style={{ backgroundColor: '#fff' }} />
       {/* Conteúdo principal */}
   <SafeAreaView style={{ flex: 1, backgroundColor: '#f3f3f3' }} edges={['left', 'right', 'bottom']}>
-        <View style={{
-          width: "100%",
-          backgroundColor: '#fff',
-          borderBottomLeftRadius: 30,
-          borderBottomRightRadius: 30,
-          paddingTop: 50,
-          paddingBottom: 20,
-          shadowColor: '#000',
-          shadowOpacity: 0.06,
-          shadowRadius: 4,
-          elevation: 2,
-          flexDirection: 'row',
-          alignItems: 'center',
-          paddingHorizontal: 16,
-        }}>
-          <TouchableOpacity onPress={() => router.back()} style={{ position: 'absolute', left: 16, top: 52, zIndex: 2 }} hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
-            <Ionicons name="arrow-back" size={28} color={colors.primary} />
-          </TouchableOpacity>
-          <View style={{ flex: 1, alignItems: 'center' }}>
-            <Text style={{ fontSize: 28, fontWeight: 'bold', color: '#e74c3c', textAlign: 'center', marginBottom: 0 }}>Gerenciar eventos</Text>
-          </View>
-        </View>
+        <Header titulo='Gerenciar eventos'></Header>
        
         <ScrollView contentContainerStyle={{ paddingVertical: 24, alignItems: 'center' }}>
           {eventos.map((evento, idx) => (
