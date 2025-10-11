@@ -90,19 +90,23 @@ export default function Home() {
   }
   ]
   return (
-    <View style={style.fundo}>
+    <ScrollView contentContainerStyle={style.fundo}>
 
-    <View style={{flexDirection:"row"}}>
-      <Text style={style.titulo}>Seja bem-vindo</Text>
-    </View>
-
-     <View style={style.banner}>
-      <Text style={style.textoBanner}>O amigo que você busca está aqui</Text>
-
-      <TouchableOpacity style={style.botaoBanner} >
-        <Text style={style.buttonText}>Ver Pets</Text>
-      </TouchableOpacity>
-     </View>
+     <View style={style.bannerBox}>
+        <Image
+          source={require("../assets/images/pets.png")}
+          style={style.bannerImage}
+          resizeMode="cover"
+        />
+        <View style={style.bannerOverlay} />
+        <View style={style.bannerContent}>
+          <Text style={style.bannerTitle}>Adote amor, adote um amigo!</Text>
+          <Text style={style.bannerSubtitle}>O amigo que você busca está aqui</Text>
+          <TouchableOpacity style={style.bannerButton} activeOpacity={0.85}>
+            <Text style={style.bannerButtonText}>Ver Pets</Text>
+          </TouchableOpacity>
+        </View>
+      </View>
 
       <Text style={style.titulo}>Categorias</Text>
 
@@ -144,9 +148,11 @@ export default function Home() {
 
      </View>
 
-     <NavBar></NavBar>
+     <View style={{position:"absolute", top:10}}>
+       <NavBar></NavBar>
+     </View>
      
-    </View>
+    </ScrollView>
   );
 }
 
@@ -217,7 +223,8 @@ const style = StyleSheet.create({
     justifyContent:"space-evenly",
     alignItems:"center",
     width:"48%",
-    padding:15
+    padding:15,
+    marginBottom:20
   },
   icone:{
     width:32,
@@ -226,5 +233,75 @@ const style = StyleSheet.create({
   gallery:{
     gap:20,
     marginBottom:50
+  },
+  bannerBox: {
+    width: '100%',
+    height: 180,
+    borderRadius: 18,
+    overflow: 'hidden',
+    marginBottom: 24,
+    position: 'relative',
+    elevation: 4,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.15,
+    shadowRadius: 8,
+    padding:20
+  },
+  bannerImage: {
+    width: '100%',
+    height: '100%',
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    opacity: 0.45,
+  },
+  bannerOverlay: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: colors.primary,
+    opacity: 0.55,
+  },
+  bannerContent: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    width: '100%',
+    height: '100%',
+    justifyContent: 'center',
+    alignItems: 'flex-start',
+    padding: 28,
+  },
+  bannerTitle: {
+    color: 'white',
+    fontSize: 26,
+    fontWeight: 'bold',
+    marginBottom: 4,
+    textShadowColor: 'rgba(0,0,0,0.18)',
+    textShadowOffset: { width: 1, height: 2 },
+    textShadowRadius: 4,
+  },
+  bannerSubtitle: {
+    color: 'white',
+    fontSize: 18,
+    fontWeight: '500',
+    marginBottom: 12,
+  },
+  bannerButton: {
+    backgroundColor: '#fff',
+    paddingVertical: 10,
+    paddingHorizontal: 28,
+    borderRadius: 12,
+    elevation: 2,
+    shadowColor: colors.primary,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.18,
+    shadowRadius: 4,
+  },
+  bannerButtonText: {
+    color: colors.primary,
+    fontWeight: 'bold',
+    fontSize: 20,
+    textAlign: 'center',
+    letterSpacing: 0.5,
   }
 })
