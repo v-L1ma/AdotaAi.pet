@@ -6,6 +6,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import org.springframework.beans.BeanUtils;
 
+import java.util.Date;
 import java.util.Objects;
 
 @Entity
@@ -20,16 +21,13 @@ public class PetEntity {
     private String nome;
 
     @Column(nullable = false)
-    private String idade;
+    private String status;
 
     @Column(nullable = false)
-    private String tipo;
+    private String descricao;
 
     @Column(nullable = false)
-    private boolean adotado = false;
-
-    @Column(nullable = false)
-    private boolean vacinado;
+    private Date dt_nasc;
 
     @Column(nullable = false)
     private String porte;
@@ -38,7 +36,10 @@ public class PetEntity {
     private String raca;
 
     @Column(nullable = false)
-    private String descricao;
+    private String especie;
+
+    @Column(nullable = false)
+    private String link_foto;
 
     @ManyToOne
     @JoinColumn(name = "user_id", nullable = false, foreignKey = @ForeignKey(name = "user_id",
@@ -47,8 +48,8 @@ public class PetEntity {
 
 
     public PetEntity(PetDTO petDTO, UsuarioEntity usuario) {
-        BeanUtils.copyProperties(petDTO, this, "user"); // ignora o campo 'user'
-        this.user = usuario; // associa o usuário
+        BeanUtils.copyProperties(petDTO, this, "user");
+        this.user = usuario;
     }
 
     public PetEntity() {
@@ -70,12 +71,28 @@ public class PetEntity {
         this.nome = nome;
     }
 
-    public String getIdade() {
-        return idade;
+    public String getStatus() {
+        return status;
     }
 
-    public void setIdade(String idade) {
-        this.idade = idade;
+    public void setStatus(String status) {
+        this.status = status;
+    }
+
+    public String getDescricao() {
+        return descricao;
+    }
+
+    public void setDescricao(String descricao) {
+        this.descricao = descricao;
+    }
+
+    public Date getDt_nasc() {
+        return dt_nasc;
+    }
+
+    public void setDt_nasc(Date dt_nasc) {
+        this.dt_nasc = dt_nasc;
     }
 
     public String getPorte() {
@@ -94,36 +111,20 @@ public class PetEntity {
         this.raca = raca;
     }
 
-    public boolean getVacinado() {
-        return vacinado;
+    public String getEspecie() {
+        return especie;
     }
 
-    public void setVacinado(boolean vacinado) {
-        this.vacinado = vacinado;
+    public void setEspecie(String especie) {
+        this.especie = especie;
     }
 
-    public String getTipo() {
-        return tipo;
+    public String getLink_foto() {
+        return link_foto;
     }
 
-    public void setTipo(String tipo) {
-        this.tipo = tipo;
-    }
-
-    public Boolean getAdotado() {
-        return adotado;
-    }
-
-    public void setAdotado(Boolean adotado) {
-        this.adotado = adotado;
-    }
-
-    public String getDescricao() {
-        return descricao;
-    }
-
-    public void setDescricao(String descricao) {
-        this.descricao = descricao;
+    public void setLink_foto(String link_foto) {
+        this.link_foto = link_foto;
     }
 
     @Override

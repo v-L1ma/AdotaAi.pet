@@ -10,7 +10,7 @@ public class UsuarioDTO {
 
     private Long id;
     private String nome;
-    private String cpf_cnpj;
+    private String cpfcnpj;
     private String email;
     private String senha;
     private String telefone;
@@ -21,6 +21,7 @@ public class UsuarioDTO {
     private String bairro;
     private String cidade;
     private String sg_estado;
+    private String status = "ATIVO";
 
     public UsuarioDTO(UsuarioEntity usuario){
         BeanUtils.copyProperties(usuario, this);
@@ -45,12 +46,12 @@ public class UsuarioDTO {
         this.nome = nome;
     }
 
-    public String getCpf_cnpj() {
-        return cpf_cnpj;
+    public String getCpfcnpj() {
+        return cpfcnpj;
     }
 
-    public void setCpf_cnpj(String cpf_cnpj) {
-        this.cpf_cnpj = cpf_cnpj;
+    public void setCpfcnpj(String cpfcnpj) {
+        this.cpfcnpj = cpfcnpj;
     }
 
     public String getEmail() {
@@ -131,5 +132,13 @@ public class UsuarioDTO {
 
     public void setSg_estado(String sg_estado) {
         this.sg_estado = sg_estado;
+    }
+
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
     }
 }

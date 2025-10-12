@@ -1,8 +1,6 @@
 package com.adotaai.adotaai.Service;
 
-import com.adotaai.adotaai.DTO.PetDTO;
 import com.adotaai.adotaai.DTO.UsuarioDTO;
-import com.adotaai.adotaai.Entity.PetEntity;
 import com.adotaai.adotaai.Entity.UsuarioEntity;
 import com.adotaai.adotaai.Repository.PetRepository;
 import com.adotaai.adotaai.Repository.UsuarioRepository;
@@ -11,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class UsuarioService {
@@ -31,19 +30,28 @@ public class UsuarioService {
         return usuario.stream().map(UsuarioDTO::new).toList();
     }
 
-    public void inserir(UsuarioDTO usuario)
-    {
-        UsuarioEntity usuarioEntity= new UsuarioEntity(usuario);
+    public String inserir(UsuarioDTO usuarioDTO) {
+        UsuarioEntity usuarioEntity = new UsuarioEntity(usuarioDTO);
 
+        boolean emailExiste = usuarioRepository.findByEmail(usuarioEntity.getEmail()).isPresent();
+        boolean cpfcnpjExiste = usuarioRepository.findBycpfcnpj(usuarioEntity.getCpfcnpj()).isPresent();
+
+        if (emailExiste || cpfcnpjExiste) {
+            return "Erro: Usuário já cadastrado com este e-mail ou CPF/CNPJ.";
+        }
 
         usuarioRepository.save(usuarioEntity);
+        return "Usuário cadastrado com sucesso.";
     }
+
 
     @Transactional
     public UsuarioDTO atualizarUsuario(Long id, UsuarioDTO userDto){
+
         UsuarioEntity user = usuarioRepository.findById(id).orElseThrow(() -> new RuntimeException("Usuario não encontrado com ID: "));
+
         user.setNome(userDto.getNome());
-        user.setCpf_cnpj(user.getCpf_cnpj());
+        user.setCpfcnpj(user.getCpfcnpj());
         user.setEmail(userDto.getEmail());
         user.setSenha(userDto.getSenha());
         user.setTelefone(userDto.getTelefone());
@@ -53,7 +61,8 @@ public class UsuarioService {
         user.setCep(userDto.getCep());
         user.setBairro(userDto.getBairro());
         user.setCidade(userDto.getCidade());
-        user.setSg_estado(user.getSg_estado());
+        user.setSg_estado(userDto.getSg_estado());
+        user.setStatus(userDto.getStatus());
 
         UsuarioEntity useratualizado= usuarioRepository.save(user);
 

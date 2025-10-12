@@ -1,11 +1,9 @@
 package com.adotaai.adotaai.Entity;
 
 import com.adotaai.adotaai.DTO.UsuarioDTO;
-import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import org.springframework.beans.BeanUtils;
 
-import java.util.List;
 import java.util.Objects;
 
 @Entity
@@ -21,7 +19,7 @@ public class UsuarioEntity {
     private String nome;
 
     @Column(nullable = false, unique = true)
-    private String cpf_cnpj;
+    private String cpfcnpj;
 
     @Column(nullable = false, unique = true)
     private String email;
@@ -32,7 +30,7 @@ public class UsuarioEntity {
     @Column(nullable = false)
     private String telefone;
 
-    @Column
+    @Column(nullable = false)
     private String cargo;
 
     @Column(nullable = false)
@@ -53,13 +51,15 @@ public class UsuarioEntity {
     @Column(nullable = false)
     private String sg_estado;
 
+    @Column(nullable = false)
+    private String status;
+
     public UsuarioEntity (UsuarioDTO usuario)
     {
         BeanUtils.copyProperties(usuario,this);
     }
 
     public UsuarioEntity(){
-
 
     }
 
@@ -79,12 +79,12 @@ public class UsuarioEntity {
         this.nome = nome;
     }
 
-    public String getCpf_cnpj() {
-        return cpf_cnpj;
+    public String getCpfcnpj() {
+        return cpfcnpj;
     }
 
-    public void setCpf_cnpj(String cpf_cnpj) {
-        this.cpf_cnpj = cpf_cnpj;
+    public void setCpfcnpj(String cpfcnpj) {
+        this.cpfcnpj = cpfcnpj;
     }
 
     public String getEmail() {
@@ -165,6 +165,14 @@ public class UsuarioEntity {
 
     public void setSg_estado(String sg_estado) {
         this.sg_estado = sg_estado;
+    }
+
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
     }
 
     @Override

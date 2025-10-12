@@ -1,40 +1,41 @@
 package com.adotaai.adotaai.DTO;
 
 import com.adotaai.adotaai.Entity.PetEntity;
-import com.adotaai.adotaai.Entity.UsuarioEntity;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import org.springframework.beans.BeanUtils;
+
+import java.util.Date;
 
 public class PetDTO {
 
     private Long id;
-    private String tipo;
-    private boolean adotado = false;
+    private String status = "PENDENTE";
+    private String descricao;
+    private Date dt_nasc;
     private String nome;
-    private String idade;
     private String porte;
     private String raca;
-    private String descricao;
-    private boolean vacinado;
+    private String especie;
+    private String link_foto;
 
     @JsonProperty("user_id")
     private Long user_id;
 
     public PetDTO(PetEntity pet) {
         this.id = pet.getId();
-        this.tipo = pet.getTipo();
-        this.adotado = pet.getAdotado();
+        this.status = pet.getStatus();
+        this.descricao = pet.getDescricao();
+        this.dt_nasc = pet.getDt_nasc();
         this.nome = pet.getNome();
-        this.idade = pet.getIdade();
         this.porte = pet.getPorte();
         this.raca = pet.getRaca();
-        this.descricao = pet.getDescricao();
-        this.vacinado = pet.getVacinado();
+        this.especie = pet.getEspecie();
+        this.link_foto = pet.getLink_foto();
 
         if (pet.getUser() != null) {
             this.user_id = pet.getUser().getId();
         }
     }
+
 
     public PetDTO() {
     }
@@ -47,20 +48,36 @@ public class PetDTO {
         this.id = id;
     }
 
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
+    }
+
+    public String getDescricao() {
+        return descricao;
+    }
+
+    public void setDescricao(String descricao) {
+        this.descricao = descricao;
+    }
+
+    public Date getDt_nasc() {
+        return dt_nasc;
+    }
+
+    public void setDt_nasc(Date dt_nasc) {
+        this.dt_nasc = dt_nasc;
+    }
+
     public String getNome() {
         return nome;
     }
 
     public void setNome(String nome) {
         this.nome = nome;
-    }
-
-    public String getIdade() {
-        return idade;
-    }
-
-    public void setIdade(String idade) {
-        this.idade = idade;
     }
 
     public String getPorte() {
@@ -79,20 +96,20 @@ public class PetDTO {
         this.raca = raca;
     }
 
-    public String getTipo() {
-        return tipo;
+    public String getEspecie() {
+        return especie;
     }
 
-    public void setTipo(String tipo) {
-        this.tipo = tipo;
+    public void setEspecie(String especie) {
+        this.especie = especie;
     }
 
-    public boolean getAdotado() {
-        return adotado;
+    public String getLink_foto() {
+        return link_foto;
     }
 
-    public void setAdotado(Boolean adotado) {
-        this.adotado = adotado;
+    public void setLink_foto(String link_foto) {
+        this.link_foto = link_foto;
     }
 
     public Long getUser_id() {
@@ -101,21 +118,5 @@ public class PetDTO {
 
     public void setUser_id(Long user_id) {
         this.user_id = user_id;
-    }
-
-    public String getDescricao() {
-        return descricao;
-    }
-
-    public void setDescricao(String descricao) {
-        this.descricao = descricao;
-    }
-
-    public boolean getVacinado() {
-        return vacinado;
-    }
-
-    public void setVacinado(Boolean vacinado) {
-        this.vacinado = vacinado;
     }
 }

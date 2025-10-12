@@ -45,7 +45,6 @@ public class PetService {
         PetDTO dto = new PetDTO();
         BeanUtils.copyProperties(pet, dto);
         dto.setUser_id(pet.getUser().getId());
-
         return dto;
     }
 
@@ -53,13 +52,13 @@ public class PetService {
     public PetDTO atualizarPet(Long id, PetDTO petDto){
         PetEntity pet = petRepository.findById(id).orElseThrow(() -> new RuntimeException("Pet não encontrado com ID: " + id));
         pet.setNome(petDto.getNome());
-        pet.setAdotado(petDto.getAdotado());
+        pet.setStatus(petDto.getStatus());
         pet.setDescricao(petDto.getDescricao());
-        pet.setTipo(petDto.getTipo());
-        pet.setRaca(petDto.getRaca());
+        pet.setDt_nasc(petDto.getDt_nasc());
         pet.setPorte(petDto.getPorte());
-        pet.setIdade(petDto.getIdade());
-        pet.setVacinado(petDto.getVacinado());
+        pet.setRaca(petDto.getRaca());
+        pet.setEspecie(petDto.getEspecie());
+        pet.setLink_foto(petDto.getLink_foto());
 
         PetEntity petatualizado= petRepository.save(pet);
 
