@@ -107,6 +107,7 @@ public class UsuarioDTO {
         return cep;
     }
 
+
     public void setCep(String cep) {
         this.cep = cep;
     }
