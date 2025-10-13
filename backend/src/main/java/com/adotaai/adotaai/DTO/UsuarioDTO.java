@@ -23,6 +23,7 @@ public class UsuarioDTO {
     private String sg_estado;
     private String status = "ATIVO";
 
+
     public UsuarioDTO(UsuarioEntity usuario){
         BeanUtils.copyProperties(usuario, this);
     }
