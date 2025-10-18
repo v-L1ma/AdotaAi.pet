@@ -1,8 +1,9 @@
 import * as ImagePicker from "expo-image-picker";
 import React, { useState } from "react";
-import { Image, SafeAreaView, Text, TextInput, TouchableOpacity, Pressable, View } from "react-native";
-import styles from "../styles/AppStyles";
+import { Image, Pressable, SafeAreaView, Text, TextInput, TouchableOpacity, View } from "react-native";
 import Icon1 from "react-native-vector-icons/Ionicons";
+import AppHeader from '../components/AppHeader';
+import styles from "../styles/AppStyles";
 
 export default function CriarAnuncioScreen() {
     const [nome, setNome] = useState("");
@@ -27,11 +28,14 @@ export default function CriarAnuncioScreen() {
         }
     };
 
-    return (
-        <SafeAreaView style={styles.container}>
-            <View style={[styles.square, { position: "absolute", top: 175, left: 0, right: 0, bottom: 0, zIndex: 0 }]} />
+        return (
+                <>
+                    <AppHeader title="Criar Anúncio" />
 
-            <View style={{ flex: 1, justifyContent: "flex-start", alignItems: "center", width: "100%", zIndex: 1 }}>
+                    <SafeAreaView style={styles.container}>
+                        <View style={[styles.square, { position: "absolute", top: 175, left: 0, right: 0, bottom: 0, zIndex: 0 }]} />
+
+                        <View style={{ flex: 1, justifyContent: "flex-start", alignItems: "center", width: "100%", zIndex: 1 }}>
 
                 <View style={{ marginTop: 120, marginBottom: 20, alignItems: "center", width: "100%" }}>
                     <Pressable
@@ -129,5 +133,6 @@ export default function CriarAnuncioScreen() {
                 </View>
             </View>
         </SafeAreaView>
+        </>
     );
 }

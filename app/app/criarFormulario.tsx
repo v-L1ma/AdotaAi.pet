@@ -1,8 +1,8 @@
-import { colors } from "@/styles/variables";
-import React from "react";
-import { useState } from "react";
-import { Text, View, FlatList, Pressable, StyleSheet, TouchableOpacity, Dimensions, TextInput } from "react-native";
+import React, { useState } from "react";
+import { Dimensions, FlatList, Pressable, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
 import * as Progress from 'react-native-progress';
+import AppHeader from '../components/AppHeader';
+import colors from '../styles/colors';
 
 
 interface Pergunta{
@@ -107,8 +107,11 @@ export default function CriarFormulario(){
         abrirFecharPopUp()
     }
 
-    return(
-        <View style={style.main}>
+        return(
+                <>
+                  <AppHeader title="Criar Formulário" />
+
+                  <View style={style.main}>
             <Text style={style.title}>Selecione as perguntas para criar seu formulario</Text>
             <Text>Esse formulario sera usado para triar solicitacoes dos animais que voce doar.</Text>
                 
@@ -162,6 +165,7 @@ export default function CriarFormulario(){
                 </Pressable>
             }
         </View>
+        </>
     )
 }
 

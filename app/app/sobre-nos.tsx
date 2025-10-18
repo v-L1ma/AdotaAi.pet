@@ -1,38 +1,13 @@
 import { Ionicons } from '@expo/vector-icons';
 import React from "react";
 import { Image, Linking, ScrollView, Text, TouchableOpacity, View } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
+import AppHeader from '../components/AppHeader';
 import colors from '../styles/colors';
 
 export default function SobreNos() {
-  const router = require('expo-router').useRouter();
   return (
     <>
-      {/* Safe area do topo branca */}
-      <SafeAreaView edges={['top']} style={{ backgroundColor: '#fff' }} />
-      {/* Header customizado padrão do app */}
-      <View style={{
-        width: "100%",
-        backgroundColor: '#fff',
-        borderBottomLeftRadius: 30,
-        borderBottomRightRadius: 30,
-        paddingTop: 50,
-        paddingBottom: 20,
-        shadowColor: '#000',
-        shadowOpacity: 0.06,
-        shadowRadius: 4,
-        elevation: 2,
-        flexDirection: 'row',
-        alignItems: 'center',
-        paddingHorizontal: 16,
-      }}>
-        <TouchableOpacity onPress={() => router.back()} style={{ position: 'absolute', left: 16, top: 52, zIndex: 2 }} hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
-          <Ionicons name="arrow-back" size={28} color={colors.primary} />
-        </TouchableOpacity>
-        <View style={{ flex: 1, alignItems: 'center' }}>
-          <Text style={{ fontSize: 28, fontWeight: 'bold', color: '#e74c3c', textAlign: 'center', marginBottom: 0 }}>Sobre</Text>
-        </View>
-      </View>
+      <AppHeader title="Sobre" />
       {/* Conteúdo dinâmico */}
       <ScrollView style={{ flex: 1, backgroundColor: '#f3f3f3' }} contentContainerStyle={{ alignItems: 'center', padding: 24, paddingBottom: 64 }}>
         <View style={{

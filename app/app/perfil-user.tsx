@@ -1,10 +1,13 @@
 import * as ImagePicker from "expo-image-picker";
 import React, { useState } from "react";
-import { Image, SafeAreaView, Text, TextInput, TouchableOpacity, Pressable, View, TouchableHighlight } from "react-native";
-import styles from "../styles/AppStyles";
+import { Image, Pressable, Text, TextInput, TouchableOpacity, View } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 import Icon1 from "react-native-vector-icons/Ionicons";
+import AppHeader from '../components/AppHeader';
+import styles from "../styles/AppStyles";
 
 export default function UserScreen() {
+    
     const [username, setUsername] = useState("");
     const [email, setEmail] = useState("");
     const [telefone, setTelefone] = useState("");
@@ -28,9 +31,12 @@ export default function UserScreen() {
         }
     };
 
-    return (
-        <SafeAreaView style={styles.container}>
-            <View style={[styles.square, { position: "relative", alignItems: "center" }]}> 
+        return (
+                <>
+            <AppHeader title="Perfil" />
+
+                    <SafeAreaView style={styles.container}>
+                        <View style={[styles.square, { position: "relative", alignItems: "center" }]}> 
                 <View style={{ alignItems: "center", marginTop: -50, marginBottom: 0 }}>
                     <Pressable
                         style={{
@@ -105,6 +111,7 @@ export default function UserScreen() {
                     </TouchableOpacity>
                 </View>
             </View>
-        </SafeAreaView>
-    );
+                </SafeAreaView>
+                    </>
+        );
 }
