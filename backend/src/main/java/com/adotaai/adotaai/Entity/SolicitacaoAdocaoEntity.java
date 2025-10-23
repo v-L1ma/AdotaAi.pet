@@ -22,6 +22,11 @@ public class SolicitacaoAdocaoEntity {
     @JoinColumn(name = "anunciante_id", nullable = false)
     private UsuarioEntity anunciante;
 
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "formulario_id", nullable = false)
+    private FormularioEntity formulario;
+
     @JsonManagedReference("solicitacao-respostas")
     @OneToMany(mappedBy = "solicitacao", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<RespostaEntity> respostas = new ArrayList<>();
@@ -37,6 +42,7 @@ public class SolicitacaoAdocaoEntity {
         this.status = StatusSolicitacao.PENDENTE;
         this.dataSolicitacao = LocalDateTime.now();
     }
+
 
     public Long getId() {
         return id;
@@ -60,6 +66,15 @@ public class SolicitacaoAdocaoEntity {
 
     public void setAnunciante(UsuarioEntity anunciante) {
         this.anunciante = anunciante;
+    }
+
+
+    public FormularioEntity getFormulario() {
+        return formulario;
+    }
+
+    public void setFormulario(FormularioEntity formulario) {
+        this.formulario = formulario;
     }
 
     public List<RespostaEntity> getRespostas() {

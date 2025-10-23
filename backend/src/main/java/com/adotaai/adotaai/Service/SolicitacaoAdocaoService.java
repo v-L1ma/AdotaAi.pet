@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class SolicitacaoAdocaoService {
@@ -37,9 +38,18 @@ public class SolicitacaoAdocaoService {
                 .orElseThrow(() -> new RuntimeException("Formulário não encontrado"));
         UsuarioEntity anunciante = formulario.getUsuarioCriador();
 
+        Optional<SolicitacaoAdocaoEntity> solicitacaoExistente =
+                solicitacaoRepository.findByAdotanteIdAndFormularioId(adotante.getId(), formulario.getId());
+
+        if (solicitacaoExistente.isPresent()) {
+            throw new RuntimeException("Você já enviou uma solicitação para este formulário.");
+        }
+
+
         SolicitacaoAdocaoEntity novaSolicitacao = new SolicitacaoAdocaoEntity();
         novaSolicitacao.setAdotante(adotante);
         novaSolicitacao.setAnunciante(anunciante);
+        novaSolicitacao.setFormulario(formulario); // <-- MUDANÇA AQUI (Salvando o formulário)
 
         SolicitacaoAdocaoEntity solicitacaoSalva = solicitacaoRepository.save(novaSolicitacao);
         return new SolicitacaoResponseDTO(solicitacaoSalva);
@@ -66,25 +76,13 @@ public class SolicitacaoAdocaoService {
         SolicitacaoAdocaoEntity solicitacao = solicitacaoRepository.findById(solicitacaoId)
                 .orElseThrow(() -> new RuntimeException("Solicitação não encontrada"));
 
-        // Descobre o formulário original através da primeira resposta/pergunta
-        // Esta lógica assume que as perguntas de uma solicitação vêm de um único formulário.
-        PerguntaEntity primeiraPergunta = solicitacao.getRespostas().stream()
-                .findFirst()
-                .map(RespostaEntity::getPergunta)
-                .orElseGet(() -> {
-                    // Se não houver respostas ainda, precisamos encontrar o formulário de outra forma.
-                    // Esta parte do código assume que você pode encontrar o formulário pelo anunciante.
-                    // ATENÇÃO: Se um anunciante puder ter múltiplos formulários, esta lógica precisa ser refinada.
-                    return formularioRepository.findByUsuarioCriadorId(solicitacao.getAnunciante().getId())
-                            .flatMap(f -> f.getPerguntas().stream().findFirst())
-                            .orElse(null);
-                });
 
-        FormularioEntity formularioOriginal = (primeiraPergunta != null) ? primeiraPergunta.getFormulario() : null;
+        FormularioEntity formularioOriginal = solicitacao.getFormulario();
 
         if (formularioOriginal == null) {
-            throw new RuntimeException("Não foi possível determinar o formulário original para esta solicitação.");
+            throw new RuntimeException("Não foi possível encontrar o formulário associado a esta solicitação.");
         }
+
 
 
         List<PerguntaRespostaDTO> perguntasRespostas = formularioOriginal.getPerguntas().stream()
