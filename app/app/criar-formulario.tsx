@@ -247,6 +247,7 @@ const style = StyleSheet.create({
         fontWeight:"bold"
     },
     popup:{
+        zIndex:100,
         backgroundColor:"rgba(0, 0, 0, 0.38)",
         position:"absolute",
         top:0,

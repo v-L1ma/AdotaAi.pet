@@ -10,7 +10,7 @@ import Icon from "react-native-vector-icons/FontAwesome5";
 
 const width = Dimensions.get("window").width
 
-export default function ListagemPets(){
+export default function ListarPets(){
     const [isPopUpOpen, setIsPopUpOpen] = useState<boolean>(false);
     const [genero, setGenero] = useState<"M" | "F" | null>(null);
     const [especie, setEspecie] = useState<"cachorro" | "gato" | null>(null);

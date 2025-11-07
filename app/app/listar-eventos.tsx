@@ -17,7 +17,7 @@ import Icon from "react-native-vector-icons/FontAwesome5";
 const width = Dimensions.get("window").width
 const height = Dimensions.get("window").height
 
-export default function ListagemEventos() {
+export default function ListarEventos() {
 
  const events = [
   {

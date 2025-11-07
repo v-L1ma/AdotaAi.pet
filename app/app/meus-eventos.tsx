@@ -132,7 +132,7 @@ export default function meusEventos() {
                   </View>
                   <View style={styles.buttonsRow}>    
                       <TouchableOpacity
-                        onPress={() => router.push({ pathname: '/criarEvento', params: { id: evento.id } })}
+                        onPress={() => router.push({ pathname: '/criar-evento', params: { id: evento.id } })}
                         style={{ padding: 8, backgroundColor: colors.secondary + '55', borderRadius: 50, marginRight: 8 }}
                         hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
                       >
