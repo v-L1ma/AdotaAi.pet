@@ -5,23 +5,24 @@ import com.adotaai.adotaai.Entity.UsuarioEntity;
 import com.adotaai.adotaai.Repository.PetRepository;
 import com.adotaai.adotaai.Repository.UsuarioRepository;
 import jakarta.transaction.Transactional;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Optional;
 
 @Service
 public class UsuarioService {
 
-    @Autowired
-    private UsuarioRepository usuarioRepository;
-    @Autowired
-    private  PetRepository petRepository;
+    private final UsuarioRepository usuarioRepository;
+    private final PetRepository petRepository;
+    private final PasswordEncoder passwordEncoder;
 
-    public UsuarioService(UsuarioRepository usuarioRepository, PetRepository petRepository) {
+    public UsuarioService(UsuarioRepository usuarioRepository,
+                          PetRepository petRepository,
+                          PasswordEncoder passwordEncoder) {
         this.usuarioRepository = usuarioRepository;
         this.petRepository = petRepository;
+        this.passwordEncoder = passwordEncoder;
     }
 
     public List<UsuarioDTO> listarTodos()
@@ -40,6 +41,7 @@ public class UsuarioService {
             return "Erro: Usuário já cadastrado com este e-mail ou CPF/CNPJ.";
         }
 
+        usuarioEntity.setSenha(passwordEncoder.encode(usuarioDTO.getSenha()));
         usuarioRepository.save(usuarioEntity);
         return "Usuário cadastrado com sucesso.";
     }
@@ -51,9 +53,11 @@ public class UsuarioService {
         UsuarioEntity user = usuarioRepository.findById(id).orElseThrow(() -> new RuntimeException("Usuario não encontrado com ID: "));
 
         user.setNome(userDto.getNome());
-        user.setCpfcnpj(user.getCpfcnpj());
+        user.setCpfcnpj(userDto.getCpfcnpj());
         user.setEmail(userDto.getEmail());
-        user.setSenha(userDto.getSenha());
+        if (userDto.getSenha() != null && !userDto.getSenha().isBlank()) {
+            user.setSenha(passwordEncoder.encode(userDto.getSenha()));
+        }
         user.setTelefone(userDto.getTelefone());
         user.setCargo(userDto.getCargo());
         user.setLink_foto(userDto.getLink_foto());
