@@ -1,15 +1,19 @@
 import { HeaderBackButton } from "@react-navigation/elements";
-import { useRouter } from "expo-router";
+import { useLocalSearchParams, useRouter } from "expo-router";
 import { useState } from "react";
 import { Image, Pressable, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import IconMat from "react-native-vector-icons/MaterialCommunityIcons";
 import IconIonic from "react-native-vector-icons/Ionicons";
+import { colors } from "@/styles/variables";
+import React from "react";
 
 export default function PerfilPet(){
 
     const router = useRouter();
     const [heartColor, setHeartColor]=useState<string>("black")
     const [heartIcon, setHeartIcon]=useState<string>("heart-outline")
+
+    const {nome,imagem} = useLocalSearchParams();
 
     // const [descriptionLength, setDescriptionLength] = useState<number>(60)
     // const [verMaisText, setVerMaisText]= useState<string>("Ver mais")
@@ -38,41 +42,48 @@ export default function PerfilPet(){
     return(
         <View style={style.container}>
             <View style={style.header}>
-                <HeaderBackButton onPress={router.back}></HeaderBackButton>
-                <Pressable onPress={()=>favoritePet()}>
-                    <IconMat name={heartIcon} size={40} color={heartColor}></IconMat>
+                <HeaderBackButton onPress={router.back} style={style.headerButtons}></HeaderBackButton>
+                <Pressable onPress={()=>favoritePet()} style={style.headerButtons}>
+                    <IconMat name={heartIcon} size={35} color={heartColor}></IconMat>
                 </Pressable>
             </View>
 
-            <Image style={style.image} source={{uri:"https://www.whiskas.com.br/sites/g/files/fnmzdf2156/files/2024-08/idade-dos-gatos-01.jpg"}}></Image>
+            <View style={style.image}>
+            
+                <Image style={{height:"100%", width:"80%", margin:"auto"}} resizeMode="stretch" source={{uri:imagem.toString()}}></Image>
+
+            </View>
         
             <View  style={style.infos}>
                 
-            <View>
-                <Text style={{fontSize:26, fontWeight:"semibold"}}>Juninho Ruindade Pura</Text>
-                <Text style={{fontSize:20, display:"flex",alignItems:"center", color:"rgb(34, 34, 34)"}}><IconIonic name="location-outline" size={26}></IconIonic> Marapé, Santos - SP</Text>
+            <View style={{marginTop:-20}}>
+                <Text style={{fontSize:26, fontWeight:"bold",color:colors.primary}}>{nome}</Text>
+                <View style={style.location}>
+                    <IconIonic name="location-outline" size={26} color={colors.primary}></IconIonic>
+                    <Text style={style.location}> Marapé, Santos - SP</Text>
+                </View>
             </View>
 
             <View style={style.caracteristicasContainer}>
                 <View style={style.caracteristicasCard}>
-                    <Text style={style.texto}>9 meses</Text>
-                    <Text style={style.texto}>Idade</Text>
+                    <Text style={style.tituloCard}>9 meses</Text>
+                    <Text style={style.textoCard}>Idade</Text>
                 </View>
 
                 <View style={style.caracteristicasCard}>
-                    <Text style={style.texto}>Macho</Text>
-                    <Text style={style.texto}>Gênero</Text>
+                    <Text style={style.tituloCard}>Macho</Text>
+                    <Text style={style.textoCard}>Gênero</Text>
                 </View>
 
                 <View style={style.caracteristicasCard}>
-                    <Text style={style.texto}>3.5kg</Text>
-                    <Text style={style.texto}>Peso</Text>
+                    <Text style={style.tituloCard}>3.5kg</Text>
+                    <Text style={style.textoCard}>Peso</Text>
                 </View>
             </View>
 
             <View>
-                <Text style={{fontSize:26, fontWeight:"semibold"}}>Sobre</Text>
-                <Text style={{fontSize:20, display:"flex", flexDirection:"column", alignItems:"center", color:"rgb(34, 34, 34)"}}>
+                <Text style={{fontSize:26, fontWeight:"bold",color:colors.primary}}>Sobre</Text>
+                <Text style={{fontSize:18, display:"flex", flexDirection:"column", alignItems:"center", color:"rgba(0, 0, 0, 0.53)"}}>
                     {
                         description
                     }
@@ -80,7 +91,7 @@ export default function PerfilPet(){
             </View>
         
             <TouchableOpacity style={style.button}>
-                Adotar!
+               <Text style={{textAlign:"center", fontWeight:"bold", fontSize:20, color:"white"}}>Adotar!</Text>
             </TouchableOpacity>
         </View>
 
@@ -91,18 +102,19 @@ export default function PerfilPet(){
 
 const style = StyleSheet.create({
     container:{
-        paddingTop:60,
-        backgroundColor:"#FFC7C2",
+        paddingTop:80,
+        backgroundColor:"white",
         height:"100%",
         position:"relative",
+        overflow:"hidden"
     },
     header:{
         flexDirection:"row",
         justifyContent:"space-between",
         alignItems:"flex-start",
-        height:"50%",
+        height:"45%",
         zIndex:2,
-        paddingHorizontal:25
+        paddingHorizontal:25,
     },
     image:{
         height:"50%",
@@ -110,36 +122,66 @@ const style = StyleSheet.create({
         position:"absolute",
         top:0,
         left:"-15%",
-        borderBottomRightRadius:"50%",
-        borderBottomLeftRadius:"50%"
+        borderBottomRightRadius:300,
+        borderBottomLeftRadius:300,
+        overflow:"hidden",
+    },
+    location:{
+        fontSize:18,
+        display:"flex",
+        flexDirection:"row",
+        alignItems:"center", 
+        color:"rgba(0, 0, 0, 0.53)",
     },
     infos:{
         paddingHorizontal:25,
         display:"flex",
         flexDirection:"column",
+        alignContent:"space-between",
+        height:"55%",
         gap:20
         
-    },
-    texto:{
-        textAlign:"center"
     },
     caracteristicasContainer:{
         display:"flex",
         flexDirection:"row",
-        justifyContent:"space-between"
+        justifyContent:"space-between",
+        gap:10
     },
     caracteristicasCard:{
-        backgroundColor:"#FFC38B",
-        paddingHorizontal:"10%",
+        backgroundColor:colors.primary,
+        width:"30%",
         paddingVertical:"5%",
         borderRadius:15,
     },
-    button:{
-        backgroundColor:"white",
+    textoCard:{
         textAlign:"center",
+        color:"white",
+        fontWeight:"500"
+    },
+    tituloCard:{
+        textAlign:"center",
+        color:"white",
+        fontWeight:"900"
+    },
+    button:{
+        margin:"auto",
+        backgroundColor:colors.primary,
+        width:"100%",
         padding:"5%",
         borderRadius:15,
         fontWeight:"bold",
-        fontFamily:"sans"
+        fontFamily:"sans",
+        height:60,
+        marginTop:"auto"
+    },
+    headerButtons:{
+        backgroundColor:"white",
+        width:50,
+        height:50,
+        display:"flex",
+        justifyContent:"center",
+        alignItems:"center",
+        borderRadius:100
     }
 });
