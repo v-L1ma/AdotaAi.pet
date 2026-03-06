@@ -9,5 +9,6 @@ public interface UsuarioRepository extends JpaRepository<UsuarioEntity,Long> {
 
     Optional<UsuarioEntity> findByEmail(String email);
     Optional<UsuarioEntity> findBycpfcnpj(String cpfcnpj);
+    Optional<UsuarioEntity> findByResetToken(String resetToken);
 
 }
