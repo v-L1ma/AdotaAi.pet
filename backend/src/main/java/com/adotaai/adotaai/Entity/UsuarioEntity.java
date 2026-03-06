@@ -4,6 +4,7 @@ import com.adotaai.adotaai.DTO.UsuarioDTO;
 import jakarta.persistence.*;
 import org.springframework.beans.BeanUtils;
 
+import java.time.LocalDateTime;
 import java.util.Objects;
 
 @Entity
@@ -53,6 +54,11 @@ public class UsuarioEntity {
 
     @Column(nullable = false)
     private String status;
+
+    @Column(unique = true)
+    private String resetToken;
+
+    private LocalDateTime resetTokenExpiry;
 
     public UsuarioEntity (UsuarioDTO usuario)
     {
@@ -173,6 +179,22 @@ public class UsuarioEntity {
 
     public void setStatus(String status) {
         this.status = status;
+    }
+
+    public String getResetToken() {
+        return resetToken;
+    }
+
+    public void setResetToken(String resetToken) {
+        this.resetToken = resetToken;
+    }
+
+    public LocalDateTime getResetTokenExpiry() {
+        return resetTokenExpiry;
+    }
+
+    public void setResetTokenExpiry(LocalDateTime resetTokenExpiry) {
+        this.resetTokenExpiry = resetTokenExpiry;
     }
 
     @Override
