@@ -2,17 +2,21 @@ package com.adotaai.adotaai.Application.Service;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.UUID;
 
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import com.adotaai.adotaai.Application.DTO.CadastrarUsuarioReponseDTO;
-import com.adotaai.adotaai.Application.DTO.UsuarioDTO;
+import com.adotaai.adotaai.Application.DTO.AtualizarUsuarioDTO;
+import com.adotaai.adotaai.Application.DTO.CadastrarUsuarioDTO;
+import com.adotaai.adotaai.Application.DTO.UsuarioReponseDTO;
+import com.adotaai.adotaai.Application.DTO.UsuarioPublicoDTO;
 import com.adotaai.adotaai.Application.Util.BaseResponse;
 import com.adotaai.adotaai.Application.Util.CnpjValidator;
 import com.adotaai.adotaai.Application.Util.CpfValidator;
+import com.adotaai.adotaai.Domain.Entity.Roles;
 import com.adotaai.adotaai.Domain.Entity.UsuarioEntity;
 import com.adotaai.adotaai.Infraestructure.Repository.PetRepository;
 import com.adotaai.adotaai.Infraestructure.Repository.UsuarioRepository;
@@ -34,19 +38,49 @@ public class UsuarioService {
         this.passwordEncoder = passwordEncoder;
     }
 
-    public BaseResponse<UsuarioDTO> listarTodos() {
+    public BaseResponse<UsuarioReponseDTO> listarTodos() {
         List<UsuarioEntity> usuario = usuarioRepository.findAll();
-        List<UsuarioDTO> dtos = usuario.stream().map(UsuarioDTO::new).toList();
+        List<UsuarioReponseDTO> dtos = usuario.stream().map(UsuarioReponseDTO::new).toList();
         return new BaseResponse<>("Sucesso", dtos, null);
     }
 
-    public BaseResponse<CadastrarUsuarioReponseDTO> inserir(UsuarioDTO usuarioDTO) {
+    public BaseResponse<UsuarioReponseDTO> buscarUsuarioLogado() {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        if (auth == null || !auth.isAuthenticated() || auth.getName().equals("anonymousUser")) {
+            throw new RuntimeException("Usuário não autenticado.");
+        }
+
+        UsuarioEntity usuario = usuarioRepository.findByEmailIgnoreCase(auth.getName())
+                .orElseThrow(() -> new RuntimeException("Usuário não encontrado para o email: " + auth.getName()));
+
+        return new BaseResponse<>("Sucesso", List.of(new UsuarioReponseDTO(usuario)), null);
+    }
+
+    public BaseResponse<UsuarioPublicoDTO> buscarPublicoPorId(UUID id) {
+        UsuarioEntity usuario = usuarioRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Usuário não encontrado."));
+
+        return new BaseResponse<>("Sucesso", List.of(new UsuarioPublicoDTO(usuario)), null);
+    }
+
+    public BaseResponse<UsuarioReponseDTO> inserir(CadastrarUsuarioDTO usuarioDTO) {
         if (usuarioDTO.getNome() == null || usuarioDTO.getNome().trim().isEmpty()
                 || usuarioDTO.getEmail() == null || usuarioDTO.getEmail().trim().isEmpty()
                 || usuarioDTO.getSenha() == null || usuarioDTO.getSenha().trim().isEmpty()
+                || usuarioDTO.getConfirmarSenha() == null || usuarioDTO.getConfirmarSenha().trim().isEmpty()
                 || usuarioDTO.getCpfcnpj() == null || usuarioDTO.getCpfcnpj().trim().isEmpty()) {
             throw new RuntimeException("Campos obrigatórios não podem estar vazios.");
         }
+
+        if (!usuarioDTO.getSenha().equals(usuarioDTO.getConfirmarSenha())) {
+            throw new RuntimeException("Senha e confirmar senha não conferem.");
+        }
+
+        String emailNormalizado = usuarioDTO.getEmail().trim().toLowerCase();
+        usuarioDTO.setEmail(emailNormalizado);
+
+        String cpfcnpjNormalizado = usuarioDTO.getCpfcnpj().replaceAll("[^0-9]", "");
+        usuarioDTO.setCpfcnpj(cpfcnpjNormalizado);
 
         if (usuarioDTO.getCpfcnpj() != null) {
             String cpfcnpjLimpo = usuarioDTO.getCpfcnpj().replaceAll("[^0-9]", "");
@@ -59,8 +93,8 @@ public class UsuarioService {
             }
         }
 
-        boolean emailExiste = usuarioDTO.getEmail() != null && usuarioRepository.findByEmail(usuarioDTO.getEmail()).isPresent();
-        boolean cpfcnpjExiste = usuarioDTO.getCpfcnpj() != null && usuarioRepository.findBycpfcnpj(usuarioDTO.getCpfcnpj()).isPresent();
+        boolean emailExiste = usuarioDTO.getEmail() != null && usuarioRepository.findByEmailIgnoreCase(usuarioDTO.getEmail()).isPresent();
+        boolean cpfcnpjExiste = usuarioDTO.getCpfcnpj() != null && usuarioRepository.findByCpfcnpj(usuarioDTO.getCpfcnpj()).isPresent();
 
         if (emailExiste) {
             throw new RuntimeException("Usuário já cadastrado com este e-mail.");
@@ -72,21 +106,28 @@ public class UsuarioService {
 
         UsuarioEntity usuarioEntity = new UsuarioEntity(usuarioDTO);
         usuarioEntity.setSenha(passwordEncoder.encode(usuarioDTO.getSenha()));
+        usuarioEntity.setTelefone(null);
+        usuarioEntity.setLink_foto(null);
+        usuarioEntity.setEndereco(null);
+        usuarioEntity.setCep(null);
+        usuarioEntity.setBairro(null);
+        usuarioEntity.setCidade(null);
+        usuarioEntity.setSg_estado(null);
         usuarioEntity.setFl_ativo(true);
         usuarioEntity.setCreated_at(LocalDateTime.now());
         usuarioEntity.setCreated_by(usuarioEntity.getId());
         usuarioRepository.save(usuarioEntity);
-        return new BaseResponse<>("Usuário cadastrado com sucesso.", List.of(new CadastrarUsuarioReponseDTO(usuarioEntity)), null);
+        return new BaseResponse<>("Usuário cadastrado com sucesso.", List.of(new UsuarioReponseDTO(usuarioEntity)), null);
     }
 
     @Transactional
-    public BaseResponse<UsuarioDTO> atualizarUsuario(UsuarioDTO userDto) {
+    public BaseResponse<UsuarioReponseDTO> atualizarUsuario(AtualizarUsuarioDTO userDto) {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         if (auth == null || !auth.isAuthenticated() || auth.getName().equals("anonymousUser")) {
             throw new RuntimeException("Usuário não autenticado.");
         }
 
-        var optUser = usuarioRepository.findByEmail(auth.getName());
+        var optUser = usuarioRepository.findByEmailIgnoreCase(auth.getName());
         if (optUser.isEmpty()) {
             throw new RuntimeException("Usuário não encontrado para o email: " + auth.getName());
         }
@@ -95,33 +136,66 @@ public class UsuarioService {
 
         user.setNome(userDto.getNome());
         user.setCpfcnpj(userDto.getCpfcnpj());
-        user.setEmail(userDto.getEmail());
+        String novoEmailNormalizado = userDto.getEmail() == null ? null : userDto.getEmail().trim().toLowerCase();
+        if (novoEmailNormalizado == null || novoEmailNormalizado.isBlank()) {
+            throw new RuntimeException("E-mail é obrigatório.");
+        }
+
+        if (!user.getEmail().equalsIgnoreCase(novoEmailNormalizado)
+                && usuarioRepository.findByEmailIgnoreCase(novoEmailNormalizado).isPresent()) {
+            throw new RuntimeException("Usuário já cadastrado com este e-mail.");
+        }
+
+        String novoCpfCnpjNormalizado = userDto.getCpfcnpj() == null ? null : userDto.getCpfcnpj().replaceAll("[^0-9]", "");
+        if (novoCpfCnpjNormalizado == null || novoCpfCnpjNormalizado.isBlank()) {
+            throw new RuntimeException("CPF/CNPJ é obrigatório.");
+        }
+
+        if (!user.getCpfcnpj().equals(novoCpfCnpjNormalizado)
+                && usuarioRepository.findByCpfcnpj(novoCpfCnpjNormalizado).isPresent()) {
+            throw new RuntimeException("Usuário já cadastrado com este CPF/CNPJ.");
+        }
+
+        user.setCpfcnpj(novoCpfCnpjNormalizado);
+        user.setEmail(novoEmailNormalizado);
         if (userDto.getSenha() != null && !userDto.getSenha().isBlank()) {
+            if (userDto.getConfirmarSenha() == null || userDto.getConfirmarSenha().isBlank()) {
+                throw new RuntimeException("Confirmação de senha é obrigatória ao alterar a senha.");
+            }
+
+            if (!userDto.getSenha().equals(userDto.getConfirmarSenha())) {
+                throw new RuntimeException("Senha e confirmar senha não conferem.");
+            }
+
             user.setSenha(passwordEncoder.encode(userDto.getSenha()));
         }
         user.setTelefone(userDto.getTelefone());
-        user.setLink_foto(userDto.getLink_foto());
+        user.setLink_foto("TODO:ARRUMAR O UPLOAD");
         user.setEndereco(userDto.getEndereco());
         user.setCep(userDto.getCep());
         user.setBairro(userDto.getBairro());
         user.setCidade(userDto.getCidade());
         user.setSg_estado(userDto.getSg_estado());
+        user.setFl_ativo(true);
+        user.setCargo(Roles.USUARIO);
         user.setLast_modified_at(LocalDateTime.now());
         user.setLast_modified_by(user.getId());
 
         UsuarioEntity useratualizado = usuarioRepository.save(user);
 
-        return new BaseResponse<>("Usuário atualizado com sucesso.", List.of(new UsuarioDTO(useratualizado)), null);
+        UsuarioReponseDTO responseDTO = new UsuarioReponseDTO(useratualizado);
+
+        return new BaseResponse<>("Usuário atualizado com sucesso.", List.of(responseDTO), null);
     }
 
     @Transactional
-    public BaseResponse<UsuarioDTO> excluir() {
+    public BaseResponse<AtualizarUsuarioDTO> excluir() {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         if (auth == null || !auth.isAuthenticated() || auth.getName().equals("anonymousUser")) {
             throw new RuntimeException("Usuário não autenticado.");
         }
 
-        var optUser = usuarioRepository.findByEmail(auth.getName());
+        var optUser = usuarioRepository.findByEmailIgnoreCase(auth.getName());
         if (optUser.isEmpty()) {
             throw new RuntimeException("Usuário não encontrado para o email: " + auth.getName());
         }
