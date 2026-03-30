@@ -1,13 +1,22 @@
 package com.adotaai.adotaai.WebApi.Controller;
 
-import com.adotaai.adotaai.Application.DTO.PetDTO;
-import com.adotaai.adotaai.Application.Service.PetService;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
-
 import java.util.List;
 import java.util.UUID;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+import com.adotaai.adotaai.Application.DTO.PetDTO;
+import com.adotaai.adotaai.Application.Service.PetService;
+import com.adotaai.adotaai.Application.Util.BaseResponse;
 
 @RestController
 @RequestMapping(value = "/pets")
@@ -22,8 +31,9 @@ public class PetController {
     }
 
     @PostMapping
-    public void criarPet(@RequestBody PetDTO pet) {
-        petService.criarPet(pet);
+    public ResponseEntity<PetDTO> criarPet(@RequestBody PetDTO pet) {
+        PetDTO criado = petService.criarPet(pet);
+        return ResponseEntity.ok(criado);
     }
 
     @PutMapping("/{id}")
@@ -36,5 +46,30 @@ public class PetController {
     public ResponseEntity<Void> excluirPet(@PathVariable("id") UUID id) {
         petService.excluir(id);
         return ResponseEntity.ok().build();
+    }
+
+    @PostMapping("/{id}/favoritar")
+    public ResponseEntity<BaseResponse<String>> favoritarPet(@PathVariable("id") UUID id) {
+        petService.favoritar(id);
+        BaseResponse<String> response = new BaseResponse<>();
+        response.setMessage("Pet favoritado com sucesso.");
+        return ResponseEntity.ok(response);
+    }
+
+    @DeleteMapping("/{id}/favoritar")
+    public ResponseEntity<BaseResponse<String>> desfavoritarPet(@PathVariable("id") UUID id) {
+        petService.desfavoritar(id);
+        BaseResponse<String> response = new BaseResponse<>();
+        response.setMessage("Pet removido dos favoritos com sucesso.");
+        return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/favoritos")
+    public ResponseEntity<BaseResponse<PetDTO>> listarFavoritosUsuarioLogado() {
+        List<PetDTO> favoritos = petService.listarFavoritosUsuarioLogado();
+        BaseResponse<PetDTO> response = new BaseResponse<>();
+        response.setMessage("Favoritos listados com sucesso.");
+        response.setData(favoritos);
+        return ResponseEntity.ok(response);
     }
 }

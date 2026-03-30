@@ -1,7 +1,7 @@
 package com.adotaai.adotaai.WebApi.Controller;
 
 import com.adotaai.adotaai.Application.DTO.FormularioDTO;
-import com.adotaai.adotaai.Application.DTO.FormularioTemplateDTO; // <-- Importação adicionada
+import com.adotaai.adotaai.Application.DTO.FormularioTemplateDTO;
 import com.adotaai.adotaai.Domain.Entity.FormularioEntity;
 import com.adotaai.adotaai.Application.Service.FormularioService;
 import org.springframework.http.HttpStatus;
@@ -27,7 +27,6 @@ public class FormularioController {
         return new ResponseEntity<>(formularioCriado, HttpStatus.CREATED);
     }
 
-    // --- MUDANÇA APLICADA AQUI ---
     @GetMapping("/{id}")
     public ResponseEntity<FormularioTemplateDTO> buscarFormularioPorId(@PathVariable UUID id) {
         FormularioTemplateDTO dto = formularioService.buscarFormularioPorId(id);
@@ -41,9 +40,8 @@ public class FormularioController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deletarFormulario(@PathVariable UUID id,
-            @RequestParam UUID usuarioCriadorId) {
-        formularioService.deletarFormulario(id, usuarioCriadorId);
+    public ResponseEntity<Void> deletarFormulario(@PathVariable UUID id) {
+        formularioService.deletarFormulario(id);
         return ResponseEntity.noContent().build();
     }
 }

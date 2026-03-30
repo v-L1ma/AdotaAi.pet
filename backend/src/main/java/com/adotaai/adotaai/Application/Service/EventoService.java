@@ -1,16 +1,15 @@
 package com.adotaai.adotaai.Application.Service;
 
 import com.adotaai.adotaai.Application.DTO.EventoDTO;
-import com.adotaai.adotaai.Application.DTO.PetDTO;
 import com.adotaai.adotaai.Domain.Entity.EventoEntity;
-import com.adotaai.adotaai.Domain.Entity.PetEntity;
 import com.adotaai.adotaai.Domain.Entity.UsuarioEntity;
 import com.adotaai.adotaai.Infraestructure.Repository.EventoRepository;
-import com.adotaai.adotaai.Infraestructure.Repository.PetRepository;
 import com.adotaai.adotaai.Infraestructure.Repository.UsuarioRepository;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import java.util.UUID;
 
@@ -39,8 +38,7 @@ public class EventoService {
     public EventoDTO criarEvento(EventoDTO eventoDTO) {
         EventoEntity evento = new EventoEntity();
         BeanUtils.copyProperties(eventoDTO, evento);
-        UsuarioEntity usuario = usuarioRepository.findById(eventoDTO.getUser_id())
-                .orElseThrow(() -> new RuntimeException("Usuário não existe "));
+        UsuarioEntity usuario = obterUsuarioAutenticado();
         evento.setUser(usuario);
 
         evento = eventoRepository.save(evento);
@@ -70,5 +68,15 @@ public class EventoService {
 
         return new EventoDTO(eventoatualizado);
 
+    }
+
+    private UsuarioEntity obterUsuarioAutenticado() {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        if (auth == null || !auth.isAuthenticated() || "anonymousUser".equals(auth.getName())) {
+            throw new RuntimeException("Usuário não autenticado.");
+        }
+
+        return usuarioRepository.findByEmail(auth.getName())
+                .orElseThrow(() -> new RuntimeException("Usuário não encontrado para o email: " + auth.getName()));
     }
 }

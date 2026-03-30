@@ -1,17 +1,23 @@
 package com.adotaai.adotaai.Application.Service;
 
-import com.adotaai.adotaai.Application.DTO.PetDTO;
-import com.adotaai.adotaai.Domain.Entity.PetEntity;
-import com.adotaai.adotaai.Domain.Entity.UsuarioEntity;
-import com.adotaai.adotaai.Infraestructure.Repository.PetRepository;
-import com.adotaai.adotaai.Infraestructure.Repository.UsuarioRepository;
-import jakarta.transaction.Transactional;
-import org.springframework.beans.BeanUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
 import java.util.List;
 import java.util.UUID;
+
+import org.springframework.beans.BeanUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.stereotype.Service;
+
+import com.adotaai.adotaai.Application.DTO.PetDTO;
+import com.adotaai.adotaai.Domain.Entity.FavoritoPetEntity;
+import com.adotaai.adotaai.Domain.Entity.PetEntity;
+import com.adotaai.adotaai.Domain.Entity.UsuarioEntity;
+import com.adotaai.adotaai.Infraestructure.Repository.FavoritoPetRepository;
+import com.adotaai.adotaai.Infraestructure.Repository.PetRepository;
+import com.adotaai.adotaai.Infraestructure.Repository.UsuarioRepository;
+
+import jakarta.transaction.Transactional;
 
 @Service
 public class PetService {
@@ -21,6 +27,9 @@ public class PetService {
 
     @Autowired
     private UsuarioRepository usuarioRepository;
+
+    @Autowired
+    private FavoritoPetRepository favoritoPetRepository;
 
     public List<PetDTO> listarTodos() {
         List<PetEntity> pet = petRepository.findAll();
@@ -36,9 +45,9 @@ public class PetService {
     public PetDTO criarPet(PetDTO petDTO) {
         PetEntity pet = new PetEntity();
         BeanUtils.copyProperties(petDTO, pet);
-        UsuarioEntity usuario = usuarioRepository.findById(petDTO.getUser_id())
-                .orElseThrow(() -> new RuntimeException("Usuário não existe "));
+        UsuarioEntity usuario = obterUsuarioAutenticado();
         pet.setUser(usuario);
+        pet.setLink_foto("Testedelink");
 
         pet = petRepository.save(pet);
 
@@ -64,6 +73,72 @@ public class PetService {
 
         return new PetDTO(petatualizado);
 
+    }
+
+    @Transactional
+    public void favoritar(UUID petId) {
+        UsuarioEntity usuarioAutenticado = obterUsuarioAutenticado();
+
+        PetEntity pet = petRepository.findById(petId)
+                .orElseThrow(() -> new RuntimeException("Pet não encontrado"));
+
+        boolean jaFavorito = favoritoPetRepository.existsByUsuarioIdAndPetId(usuarioAutenticado.getId(), pet.getId());
+        if (jaFavorito) {
+            throw new RuntimeException("Pet já está favoritado para este usuário");
+        }
+
+        FavoritoPetEntity favorito = new FavoritoPetEntity();
+        favorito.setUsuario(usuarioAutenticado);
+        favorito.setPet(pet);
+        favoritoPetRepository.save(favorito);
+    }
+
+    @Transactional
+    public void desfavoritar(UUID petId) {
+        UsuarioEntity usuarioAutenticado = obterUsuarioAutenticado();
+
+        FavoritoPetEntity favorito = favoritoPetRepository
+                .findByUsuarioIdAndPetId(usuarioAutenticado.getId(), petId)
+                .orElseThrow(() -> new RuntimeException("Pet não está favoritado para este usuário"));
+
+        favoritoPetRepository.delete(favorito);
+    }
+
+    public List<PetDTO> listarFavoritosUsuarioLogado() {
+        UsuarioEntity usuarioAutenticado = obterUsuarioAutenticado();
+
+        List<FavoritoPetEntity> favoritos = favoritoPetRepository.findAllByUsuarioId(usuarioAutenticado.getId());
+
+        return favoritos.stream()
+                .map(FavoritoPetEntity::getPet)
+                .map(PetDTO::new)
+                .toList();
+    }
+
+    private UsuarioEntity obterUsuarioAutenticado() {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        if (auth == null || !auth.isAuthenticated() || "anonymousUser".equals(auth.getName())) {
+            throw new RuntimeException("Usuário não autenticado.");
+        }
+
+        Object details = auth.getDetails();
+        if (details instanceof UUID userId) {
+            return usuarioRepository.findById(userId)
+                    .orElseThrow(() -> new RuntimeException("Usuário não encontrado para o id: " + userId));
+        }
+
+        if (details instanceof String userIdStr) {
+            try {
+                UUID userId = UUID.fromString(userIdStr);
+                return usuarioRepository.findById(userId)
+                        .orElseThrow(() -> new RuntimeException("Usuário não encontrado para o id: " + userId));
+            } catch (IllegalArgumentException ignored) {
+                // Fallback para autenticações antigas baseadas em email.
+            }
+        }
+
+        return usuarioRepository.findByEmail(auth.getName())
+                .orElseThrow(() -> new RuntimeException("Usuário não encontrado para o email: " + auth.getName()));
     }
 
 }
