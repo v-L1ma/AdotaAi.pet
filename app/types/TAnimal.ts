@@ -1,4 +1,5 @@
 export type animal = {
+    id?: string,
     nome:string,
     imagem:string,
     genero:"M" | "F" | null,

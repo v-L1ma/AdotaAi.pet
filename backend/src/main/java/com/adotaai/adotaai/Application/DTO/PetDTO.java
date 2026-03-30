@@ -18,7 +18,7 @@ public class PetDTO {
     private String especie;
     private String link_foto;
 
-    @JsonProperty("user_id")
+    @JsonProperty(value = "user_id", access = JsonProperty.Access.READ_ONLY)
     private UUID user_id;
 
     public PetDTO(PetEntity pet) {
