@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Dimensions, FlatList, Pressable, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
+import { FlatList, Pressable, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
 import * as Progress from 'react-native-progress';
 import AppHeader from '../components/AppHeader';
 import colors from '../styles/colors';
@@ -10,11 +10,7 @@ interface Pergunta{
     conteudo:string
 }
 
-const screen = Dimensions.get("screen");
-
 export default function CriarFormulario(){
-
-    const height = Dimensions.get("window").height
 
     const [perguntasFrequentes,setPerguntasFrequentes]=useState<Pergunta[]>([
         { id: 1, conteudo: "Qual seu endereço completo? Com nome da rua, número e cidade" },
@@ -69,9 +65,7 @@ export default function CriarFormulario(){
     }
 
     function handleChange(text:string){
-
-        perguntaInput.length>50 ? setErroMessage("A pergunta pode ter no máximo 50 caracteres.") : setErroMessage(null);
-
+        setErroMessage(text.length > 120 ? "A pergunta pode ter no máximo 120 caracteres." : null);
         setPerguntaInput(text)
     }
 
@@ -89,8 +83,8 @@ export default function CriarFormulario(){
             return;
         }
 
-        if(perguntasSelecionadas.find((pergunta)=>pergunta.conteudo.toLocaleUpperCase() == perguntaInput.toLocaleUpperCase())
-        || perguntasFrequentes.find((pergunta)=>pergunta.conteudo.toLocaleUpperCase() == perguntaInput.toLocaleUpperCase())){
+        if(perguntasSelecionadas.find((pergunta)=>pergunta.conteudo.toLocaleUpperCase() === perguntaInput.toLocaleUpperCase())
+        || perguntasFrequentes.find((pergunta)=>pergunta.conteudo.toLocaleUpperCase() === perguntaInput.toLocaleUpperCase())){
             setErroMessage("Essa pergunta já existe ou já está selecionada");
             return;
         }
@@ -107,100 +101,126 @@ export default function CriarFormulario(){
         abrirFecharPopUp()
     }
 
-        return(
-                <>
-                  <AppHeader title="Criar Formulário" />
+    return(
+        <View style={style.screen}>
+            <AppHeader title="Criar Formulário" titleFontSize={20} />
 
-                  <View style={style.main}>
-            <Text style={style.title}>Selecione as perguntas para criar seu formulario</Text>
-            <Text>Esse formulario sera usado para triar solicitacoes dos animais que voce doar.</Text>
-                
+            <View style={style.main}>
+                <Text style={style.heroSubtitle}>Selecione até 20 perguntas para avaliar os adotantes de forma segura.</Text>
 
-            <View style={{height:height*.50, marginVertical:20}}>
                 <FlatList
-                data={perguntasFrequentes.toReversed()}
-                contentContainerStyle={{
-                    gap:15
-                }}
-                renderItem={({item})=>(
-                    <Pressable style={ isPerguntaSelecionada(item.id) ? style.cardSelected : style.card} onPress={()=>selecionarPergunta(item)}>
-                        <Pressable style={style.checkButton}>
+                    data={[...perguntasFrequentes].reverse()}
+                    contentContainerStyle={style.listContent}
+                    style={style.list}
+                    showsVerticalScrollIndicator={false}
+                    renderItem={({item})=>(
+                        <Pressable style={ isPerguntaSelecionada(item.id) ? style.cardSelected : style.card} onPress={()=>selecionarPergunta(item)}>
+                            <View style={[style.checkButton, isPerguntaSelecionada(item.id) && style.checkButtonSelected]}></View>
+                            <Text style={ isPerguntaSelecionada(item.id) ? style.selectedText : style.cardText}>{item.conteudo}</Text>
                         </Pressable>
-                    <Text style={ isPerguntaSelecionada(item.id) ? {color:"white", fontWeight:"bold", width:"90%" } : {color:"rgba(0,0,0,0.8)", width:"90%"}}>{item.conteudo}</Text>
-                        
-                    </Pressable>
-                )}
-                >
-                </FlatList>
-            </View>
+                    )}
+                />
 
-            <View>
-                <Progress.Bar progress={perguntasSelecionadas.length/20} color={colors.primary} width={screen.width/1.13} />
-                <View>
-                    <Text>{perguntasSelecionadas.length}/20</Text>
+                <View style={style.bottomPanel}>
+                    <View style={style.progressWrap}>
+                        <Progress.Bar
+                            progress={perguntasSelecionadas.length/20}
+                            color={colors.primary}
+                            width={null}
+                            height={8}
+                            borderWidth={0}
+                            unfilledColor="#EFEFEF"
+                        />
+                        <Text style={style.progressLabel}>{perguntasSelecionadas.length}/20 selecionadas</Text>
+                    </View>
+
+                    <TouchableOpacity style={[style.button, style.secondaryButton]} onPress={()=>abrirFecharPopUp()}>
+                        <Text style={style.secondaryButtonText}>Criar pergunta personalizada</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity style={[style.button, style.primaryButton]}>
+                        <Text style={style.primaryButtonText}>Salvar questionário</Text>
+                    </TouchableOpacity>
                 </View>
             </View>
-
-            <TouchableOpacity style={[style.button, style.secondaryButton]} onPress={()=>abrirFecharPopUp()}>
-                <Text style={style.secondaryButton}>Criar pergunta personalizada</Text>
-            </TouchableOpacity>
-            <TouchableOpacity style={[style.button, style.primaryButton]}>
-                <Text style={style.primaryButton}>Salvar</Text>
-            </TouchableOpacity>
 
             {
                 isModalOpen &&
                 <Pressable style={style.popup} onPress={()=>abrirFecharPopUp()}>
-                    <View style={style.container}>
-                        <Text style={style.title}>Criar pergunta personalizada</Text>
-                        <Text>Digite sua pergunta:</Text>
-                        <TextInput placeholder="Digite a sua pergunta." style={style.input} value={perguntaInput} onChangeText={(text)=>handleChange(text)}></TextInput>
+                    <Pressable style={style.container} onPress={(event) => event.stopPropagation()}>
+                        <Text style={style.modalTitle}>Nova pergunta personalizada</Text>
+                        <Text style={style.modalSubtitle}>Digite a pergunta que deseja incluir no formulário.</Text>
+                        <TextInput placeholder="Digite a sua pergunta." placeholderTextColor="#8C8C8C" style={style.input} value={perguntaInput} onChangeText={(text)=>handleChange(text)}></TextInput>
                         {
-                            erroMessage && <Text style={{color:"red"}}>{erroMessage}</Text>
+                            erroMessage && <Text style={style.errorText}>{erroMessage}</Text>
                         }
                         <TouchableOpacity style={[style.button, style.primaryButton]} onPress={()=>criarNovaPergunta()}>
-                            <Text style={style.primaryButton}>Salvar</Text>
+                            <Text style={style.primaryButtonText}>Salvar pergunta</Text>
                         </TouchableOpacity>
-                    </View> 
+                    </Pressable>
                 </Pressable>
             }
         </View>
-        </>
     )
 }
 
 const style = StyleSheet.create({
-    main:{
-        padding:25,
-        marginTop:60,
-        backgroundColor:"white"
+    screen: {
+        flex: 1,
+        backgroundColor: "#f8f9fa",
     },
-    title:{
-        fontSize:24,
+    main:{
+        flex: 1,
+        paddingHorizontal:14,
+        paddingBottom:14,
+        marginTop:108,
+        backgroundColor:"#f8f9fa"
+    },
+    heroSubtitle: {
+        width: '100%',
+        color: "#666",
+        marginTop: 2,
+        fontSize: 13,
+        lineHeight: 18,
+    },
+    modalTitle:{
+        fontSize:22,
+        lineHeight:28,
         color:colors.primary,
-        fontWeight:"bold"
+        fontWeight:"700",
+    },
+    modalSubtitle: {
+        color: "#666",
+        marginTop: 4,
+        fontSize: 13,
+        lineHeight: 18,
+    },
+    list: {
+        marginTop: 10,
+        flex: 1,
+    },
+    listContent: {
+        gap: 8,
+        paddingBottom: 8,
     },
     card:{
         borderWidth:1,
         borderColor:"rgba(190, 190, 190, 0.89)",
-        backgroundColor:"rgba(255, 255, 255, 0.69)",
+        backgroundColor:"#fff",
         padding:10,
-        borderRadius:15,
-        display:"flex",
+        borderRadius:14,
         flexDirection:"row",
         alignItems:"center",
-        gap:10,
+        gap:8,
     },
     cardSelected:{
         borderWidth:1,
         borderColor:colors.primary,
         backgroundColor:colors.primary,
         padding:10,
-        borderRadius:15,
-        display:"flex",
+        borderRadius:14,
         flexDirection:"row",
         alignItems:"center",
-        gap:10
+        gap:8
     },
     checkButton:{
         width:20,
@@ -210,49 +230,80 @@ const style = StyleSheet.create({
         borderColor:colors.primary,
         backgroundColor:"white",
     },
-    checkedButton:{
-        width:20,
-        height:20,
-        borderRadius:20,
-        borderWidth:1,
-        backgroundColor:"white",
-        borderColor:colors.primary
+    checkButtonSelected:{
+        backgroundColor:"#ffd7d3",
+        borderColor:"#fff",
+    },
+    cardText: {
+        color:"rgba(0,0,0,0.8)",
+        flex:1,
+    },
+    selectedText: {
+        color:"white",
+        fontWeight:"bold",
+        flex:1,
+    },
+    bottomPanel: {
+        marginTop: 8,
+        paddingTop: 8,
+        borderTopWidth: 1,
+        borderTopColor: '#ececec',
+    },
+    progressWrap: {
+        marginBottom: 8,
+        width: '100%',
+    },
+    progressLabel: {
+        marginTop: 4,
+        color: '#666',
+        fontWeight: '700',
+        fontSize: 12,
     },
     button:{
-        padding:15,
+        paddingVertical:12,
+        paddingHorizontal:10,
         borderWidth:2,
-        borderRadius:10,
-        marginTop:10,
+        borderRadius:14,
+        marginTop:8,
+        alignItems: 'center',
+        justifyContent: 'center',
     },
     primaryButton:{
         backgroundColor:colors.primary,
         borderColor:colors.primary,
+    },
+    primaryButtonText:{
         color:"white",
-        textAlign:"center",
-        fontWeight:"bold"
+        fontWeight:"bold",
+        fontSize: 15,
     },
     secondaryButton:{
-        color:colors.primary,
         borderColor:colors.primary,
-        textAlign:"center",
-        fontWeight:"bold"
+    },
+    secondaryButtonText:{
+        color:colors.primary,
+        fontWeight:"bold",
+        fontSize: 14,
     },
     popup:{
         backgroundColor:"rgba(0, 0, 0, 0.38)",
         position:"absolute",
         top:0,
         left:0,
-        width:screen.width,
-        height:screen.height,
-        padding:25,
-        margin:"auto"
+        right:0,
+        bottom:0,
+        width:"100%",
+        height:"100%",
+        paddingHorizontal:16,
+        justifyContent: 'center',
     },
     container:{
         backgroundColor:"white", 
-        padding:25, 
-        borderRadius:15, 
+        width: '100%',
+        maxWidth: '100%',
+        padding:16, 
+        borderRadius:20,
         zIndex:2,
-        display:"flex",
         flexDirection:"column",
         gap:15
     },
@@ -261,4 +312,8 @@ const style = StyleSheet.create({
         padding: 15,
         borderRadius: 10,
     },
+    errorText: {
+        color:"red",
+        fontSize: 13,
+    }
 });

@@ -4,7 +4,14 @@ import React from 'react';
 import { SafeAreaView, Text, TouchableOpacity, View } from 'react-native';
 import colors from '../styles/colors';
 
-export default function AppHeader({ title }: { title: string }) {
+type AppHeaderProps = {
+  title: string;
+  onBackPress?: () => void;
+  titleFontSize?: number;
+  titleNumberOfLines?: number;
+};
+
+export default function AppHeader({ title, onBackPress, titleFontSize = 28, titleNumberOfLines = 1 }: AppHeaderProps) {
   const router = useRouter();
 
   return (
@@ -40,15 +47,31 @@ export default function AppHeader({ title }: { title: string }) {
           }}
         >
           <TouchableOpacity
-            onPress={() => router.back()}
-            style={{ position: 'absolute', left: 16, top: 48, zIndex: 12 }}
+            onPress={() => (onBackPress ? onBackPress() : router.back())}
+            style={{ width: 34, height: 34, alignItems: 'center', justifyContent: 'center' }}
             hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
           >
-            <Ionicons name="arrow-back" size={32} color={colors.primary} />
+            <Ionicons name="arrow-back" size={26} color={colors.primary} />
           </TouchableOpacity>
           <View style={{ flex: 1, alignItems: 'center' }}>
-            <Text style={{ fontSize: 28, fontWeight: 'bold', color: '#e74c3c', textAlign: 'center', marginBottom: 0 }}>{title}</Text>
+            <Text
+              numberOfLines={titleNumberOfLines}
+              adjustsFontSizeToFit
+              minimumFontScale={0.8}
+              style={{
+                fontSize: titleFontSize,
+                fontWeight: 'bold',
+                color: '#e74c3c',
+                textAlign: 'center',
+                marginBottom: 0,
+                includeFontPadding: false,
+                lineHeight: titleFontSize + 2,
+              }}
+            >
+              {title}
+            </Text>
           </View>
+          <View style={{ width: 34, height: 34 }} />
         </View>
       </View>
     </>

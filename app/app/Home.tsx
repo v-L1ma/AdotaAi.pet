@@ -1,11 +1,17 @@
-import { FlatList, Image, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { Ionicons } from "@expo/vector-icons";
+import { useRouter } from "expo-router";
+import { FlatList, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { colors } from "@/styles/variables";
 import CardPet from "@/components/CardPet";
 import NavBar from "@/components/NavBar";
 import { animal } from "@/types/TAnimal";
 import React from "react";
+import Svg, { Circle, Ellipse } from "react-native-svg";
+import { useTabNavigation } from "@/hooks/useTabNavigation";
 
 export default function Home() {
+  const router = useRouter();
+  const { navigateToTab } = useTabNavigation();
 
   const pets :animal[] = [
     {
@@ -90,141 +96,236 @@ export default function Home() {
   }
   ]
   return (
-    <View style={style.fundo}>
-
-    <View style={{flexDirection:"row"}}>
-      <Text style={style.titulo}>Seja bem-vindo</Text>
-    </View>
-
-     <View style={style.banner}>
-      <Text style={style.textoBanner}>O amigo que você busca está aqui</Text>
-
-      <TouchableOpacity style={style.botaoBanner} >
-        <Text style={style.buttonText}>Ver Pets</Text>
-      </TouchableOpacity>
-     </View>
-
-      <Text style={style.titulo}>Categorias</Text>
-
-     <View style={style.filtros}>
-
-      <View style={style.opcao}>
-        <Image 
-        style={style.icone}
-        source={require("../assets/images/pets.png")}
-        />
-        <Text>Cachorro</Text>
-      </View>
-
-      <View style={style.opcao}>
-        <Image 
-        style={style.icone}
-        source={require("../assets/images/animal-shelter.png")}
-        />
-        <Text>Gato</Text>
-      </View>
-
-     </View>
-
-     <View style={style.gallery}>
-
-      <FlatList
-      data={pets.slice(0,5)}
-      contentContainerStyle={style.gallery}
-      renderItem={({ item, index })=>(
-        <View style={{height:240,width:230}}>
-          <CardPet animal={item} index={index} onlyPicture={false}></CardPet>
+    <View style={style.screen}>
+      <ScrollView contentContainerStyle={style.content} showsVerticalScrollIndicator={false}>
+        <View style={style.topBar}>
+          <View style={style.titleBlock}>
+            <View style={style.titleRow}>
+              <Text style={style.title}>Encontre seu novo companheiro!</Text>
+              <View style={style.pawWrap}>
+                <PawIcon />
+              </View>
+            </View>
+          </View>
         </View>
-      )}
-      horizontal
-      showsHorizontalScrollIndicator={false}
-      >
 
-      </FlatList>
+        <TouchableOpacity style={style.searchButton} onPress={() => navigateToTab("/listagem-pets") }>
+          <Ionicons name="search" size={18} color={colors.primary} />
+          <Text style={style.searchText} numberOfLines={1} ellipsizeMode="tail">Buscar por raça, idade ou cidade</Text>
+        </TouchableOpacity>
 
-     </View>
+        <View style={style.banner}>
+          <Text style={style.bannerTitle}>O amigo que você busca está aqui</Text>
+          <Text style={style.bannerDescription}>Adoção responsável com triagem, apoio e muito carinho.</Text>
+          <TouchableOpacity style={style.bannerButton} onPress={() => navigateToTab("/listagem-pets") }>
+            <Text style={style.bannerButtonText}>Ver pets disponíveis</Text>
+          </TouchableOpacity>
+        </View>
 
-     <NavBar></NavBar>
-     
+        <View style={style.chipRow}>
+          <TouchableOpacity style={[style.chip, style.chipActive]} onPress={() => navigateToTab("/listagem-pets") }>
+            <Text style={style.chipActiveText}>Todos</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={style.chip} onPress={() => navigateToTab("/listagem-pets") }>
+            <Text style={style.chipText}>Cachorros</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={style.chip} onPress={() => navigateToTab("/listagem-pets") }>
+            <Text style={style.chipText}>Gatos</Text>
+          </TouchableOpacity>
+        </View>
+
+        <View style={style.sectionHeader}>
+          <Text style={style.sectionTitle}>Destaques</Text>
+          <TouchableOpacity onPress={() => navigateToTab("/listagem-pets") }>
+            <Text style={style.sectionLink}>Ver todos</Text>
+          </TouchableOpacity>
+        </View>
+
+        <FlatList
+          data={pets.slice(0, 6)}
+          contentContainerStyle={style.gallery}
+          renderItem={({ item, index }) => (
+            <View style={style.cardWrap}>
+              <CardPet animal={item} index={index} onlyPicture={false}></CardPet>
+            </View>
+          )}
+          horizontal
+          showsHorizontalScrollIndicator={false}
+        />
+
+        <TouchableOpacity style={style.secondaryCta} onPress={() => router.push("/inicio-eventos") }>
+          <Ionicons name="calendar-outline" size={18} color={colors.primary} />
+          <Text style={style.secondaryCtaText}>Ver eventos de adoção</Text>
+        </TouchableOpacity>
+      </ScrollView>
+
+      <NavBar></NavBar>
     </View>
   );
 }
 
+function PawIcon() {
+  return (
+    <Svg width={35} height={35} viewBox="0 0 24 24">
+      <Circle cx="7.2" cy="7.5" r="2" fill={colors.primary} />
+      <Circle cx="11.8" cy="5.9" r="2" fill={colors.primary} />
+      <Circle cx="16.4" cy="7.6" r="2" fill={colors.primary} />
+      <Circle cx="18.1" cy="12.1" r="2" fill={colors.primary} />
+      <Ellipse cx="11.9" cy="14.4" rx="4.4" ry="3.5" fill={colors.primary} />
+    </Svg>
+  );
+}
+
 const style = StyleSheet.create({
-  fundo:{
-    marginTop:60,
-    backgroundColor:'rgba(255, 255, 255, 0.18)',
-    fontFamily:"Sans",
-    display:"flex",
-    justifyContent:"space-between",
-    height:"93%",
-    flexDirection:"column",
-    width:"100%",
-    padding:25
+  screen: {
+    flex: 1,
+    backgroundColor: "#F8F9FA",
   },
-  banner:{
+  content: {
+    paddingTop: 62,
+    paddingHorizontal: 20,
+    paddingBottom: 120,
+    gap: 16,
+  },
+  topBar: {
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  titleBlock: {
+    flex: 1,
+    marginRight: 10,
+  },
+  titleRow: {
+    position: "relative",
+    minHeight: 70,
+    justifyContent: "flex-end",
+  },
+  title: {
+    marginTop: 2,
+    color: "#202020",
+    fontSize: 23,
+    fontWeight: "800",
+    fontFamily: "Manrope_800ExtraBold",
+    paddingRight: 34,
+  },
+  pawWrap: {
+    position: "absolute",
+    right: 0,
+    bottom: 6,
+  },
+  searchButton: {
+    marginTop: 4,
+    backgroundColor: "#fff",
+    borderRadius: 18,
+    paddingHorizontal: 14,
+    minHeight: 46,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+    borderWidth: 1,
+    borderColor: "#E9E9E9",
+  },
+  searchText: {
+    flex: 1,
+    color: "#8C8C8C",
+    fontSize: 14,
+    fontFamily: "Manrope_400Regular",
+  },
+  banner: {
     backgroundColor: colors.primary,
-    width:"100%",
-    borderRadius:15,
-    padding: 25,
-    maxWidth:"100%",
-    gap:20
+    borderRadius: 22,
+    padding: 20,
+    marginTop: 2,
+    gap: 10,
   },
-  textoBanner:{
-    fontWeight:"semibold",
-    color:"white",
-    fontSize:22,
-    width:"65%",
-    marginTop:10
+  bannerTitle: {
+    color: "#fff",
+    fontSize: 24,
+    fontWeight: "800",
+    fontFamily: "Manrope_800ExtraBold",
+    width: "78%",
   },
-  botaoBanner:{
-    backgroundColor:"white",
-    width:"55%",
-    padding:10,
-    borderRadius:10
+  bannerDescription: {
+    color: "#FDEDEC",
+    fontSize: 14,
+    fontFamily: "Manrope_400Regular",
   },
-  buttonText:{
-    color:colors.primary,
-    fontWeight:"light",
-    textAlign:"center",
-    fontSize:22,
+  bannerButton: {
+    alignSelf: "flex-start",
+    marginTop: 4,
+    backgroundColor: "#fff",
+    borderRadius: 12,
+    paddingHorizontal: 14,
+    paddingVertical: 10,
   },
-  titulo:{
-    fontSize:24,
-    width:"100%",
-    marginTop:12
+  bannerButtonText: {
+    color: colors.primary,
+    fontWeight: "700",
+    fontFamily: "Manrope_700Bold",
   },
-  filtros:{
-    display:"flex",
-    flexDirection:"row",
-    justifyContent:"space-between",
-    width:"100%",
-    gap:10
+  chipRow: {
+    flexDirection: "row",
+    gap: 8,
   },
-  opcao:{
-    backgroundColor:"white",
-    textAlign:"center",
-    borderRadius:15,
-    boxShadow:"2px 2px 5px rgba(105, 105, 105, 0.05)",
-    borderStyle:"solid",
-    borderWidth:1,
-    borderColor:"rgba(0, 0, 0, 0.05)",
-    cursor:"pointer",
-    fontWeight:"bold",
-    color:"#6e6b65",
-    display:"flex",
-    flexDirection:"row",
-    justifyContent:"space-evenly",
-    alignItems:"center",
-    width:"48%",
-    padding:15
+  chip: {
+    backgroundColor: "#EFEFEF",
+    borderRadius: 999,
+    paddingHorizontal: 14,
+    paddingVertical: 8,
   },
-  icone:{
-    width:32,
-    height:32,
+  chipActive: {
+    backgroundColor: colors.primary,
   },
-  gallery:{
-    gap:20,
-    marginBottom:50
+  chipText: {
+    color: "#5F5F5F",
+    fontWeight: "600",
+    fontFamily: "Manrope_600SemiBold",
+  },
+  chipActiveText: {
+    color: "white",
+    fontWeight: "700",
+    fontFamily: "Manrope_700Bold",
+  },
+  sectionHeader: {
+    marginTop: 6,
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+  },
+  sectionTitle: {
+    fontSize: 22,
+    color: "#222",
+    fontWeight: "800",
+    fontFamily: "Manrope_800ExtraBold",
+  },
+  sectionLink: {
+    color: colors.primary,
+    fontWeight: "700",
+    fontFamily: "Manrope_700Bold",
+  },
+  gallery: {
+    gap: 14,
+    paddingBottom: 4,
+  },
+  cardWrap: {
+    width: 210,
+    height: 248,
+  },
+  secondaryCta: {
+    marginTop: 6,
+    backgroundColor: "#FFE9E6",
+    borderRadius: 14,
+    borderWidth: 1,
+    borderColor: "#FFD2CD",
+    paddingVertical: 14,
+    justifyContent: "center",
+    alignItems: "center",
+    flexDirection: "row",
+    gap: 8,
+  },
+  secondaryCtaText: {
+    color: colors.primary,
+    fontWeight: "700",
+    fontFamily: "Manrope_700Bold",
   }
 })

@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+
+<html lang="pt-br"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&amp;family=Manrope:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "on-tertiary-fixed": "#002113",
+              "on-secondary-container": "#646464",
+              "tertiary": "#006c48",
+              "surface-dim": "#d9dadb",
+              "error": "#ba1a1a",
+              "on-tertiary-fixed-variant": "#005236",
+              "on-secondary-fixed": "#1b1c1c",
+              "background": "#f8f9fa",
+              "tertiary-fixed-dim": "#52dea2",
+              "surface-container-high": "#e7e8e9",
+              "on-background": "#191c1d",
+              "surface-container": "#edeeef",
+              "primary-container": "#ff6b6b",
+              "on-error-container": "#93000a",
+              "on-surface": "#191c1d",
+              "inverse-on-surface": "#f0f1f2",
+              "primary": "#ae2f34",
+              "surface-tint": "#ae2f34",
+              "on-tertiary-container": "#003b26",
+              "on-primary-fixed": "#410006",
+              "surface-container-lowest": "#ffffff",
+              "surface-bright": "#f8f9fa",
+              "secondary": "#5e5e5e",
+              "primary-fixed": "#ffdad8",
+              "on-primary": "#ffffff",
+              "on-primary-fixed-variant": "#8c1520",
+              "inverse-surface": "#2e3132",
+              "inverse-primary": "#ffb3b0",
+              "secondary-fixed-dim": "#c8c6c6",
+              "surface-container-low": "#f3f4f5",
+              "on-surface-variant": "#584140",
+              "secondary-fixed": "#e4e2e2",
+              "on-primary-container": "#6d0010",
+              "surface-variant": "#e1e3e4",
+              "outline-variant": "#e0bfbd",
+              "on-tertiary": "#ffffff",
+              "secondary-container": "#e4e2e2",
+              "on-secondary-fixed-variant": "#474747",
+              "surface-container-highest": "#e1e3e4",
+              "surface": "#f8f9fa",
+              "on-secondary": "#ffffff",
+              "tertiary-container": "#00b179",
+              "primary-fixed-dim": "#ffb3b0",
+              "on-error": "#ffffff",
+              "tertiary-fixed": "#72fbbc",
+              "outline": "#8c706f",
+              "error-container": "#ffdad6"
+            },
+            fontFamily: {
+              "headline": ["Plus Jakarta Sans"],
+              "body": ["Manrope"],
+              "label": ["Manrope"]
+            },
+            borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+          },
+        },
+      }
+    </script>
+<style>
+      .material-symbols-outlined {
+        font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+      }
+      .asymmetric-clip-1 {
+        border-top-left-radius: 48px;
+        border-bottom-right-radius: 24px;
+        border-top-right-radius: 12px;
+        border-bottom-left-radius: 12px;
+      }
+      .asymmetric-clip-2 {
+        border-top-left-radius: 12px;
+        border-bottom-right-radius: 48px;
+        border-top-right-radius: 24px;
+        border-bottom-left-radius: 24px;
+      }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background text-on-background font-body selection:bg-primary-container selection:text-on-primary-container min-h-screen pb-32">
+<!-- TopAppBar -->
+<header class="bg-[#f8f9fa] dark:bg-slate-900/80 backdrop-blur-xl docked full-width top-0 z-50 fixed w-full">
+<div class="flex justify-between items-center w-full px-6 h-16">
+<div class="flex items-center gap-4">
+<button class="text-[#ae2f34] dark:text-[#ff6b6b] active:scale-95 transition-transform duration-200">
+<span class="material-symbols-outlined" data-icon="arrow_back">arrow_back</span>
+</button>
+<h1 class="font-['Plus_Jakarta_Sans'] font-bold text-lg tracking-tight text-on-background">Meus Pets</h1>
+</div>
+<div class="text-[#ae2f34] dark:text-[#ff6b6b] font-extrabold tracking-tighter text-xl">
+                Editorial Empathy
+            </div>
+</div>
+</header>
+<main class="pt-24 px-6 max-w-2xl mx-auto">
+<!-- Hero Story Section -->
+<section class="mb-12">
+<div class="relative bg-surface-container-low rounded-[32px] overflow-hidden p-8 flex flex-col md:flex-row items-center gap-8">
+<div class="flex-1 space-y-4 text-left">
+<span class="font-label text-[10px] uppercase tracking-widest text-primary font-bold">Resumo da Família</span>
+<h2 class="font-headline text-3xl font-extrabold tracking-tight leading-tight">Você tem <span class="text-primary">3 companheiros</span> incríveis sob seu cuidado.</h2>
+</div>
+<div class="relative w-32 h-32 flex-shrink-0">
+<div class="absolute inset-0 bg-primary-container/20 rounded-full blur-2xl"></div>
+<div class="relative bg-white p-2 rounded-full shadow-xl">
+<img class="w-28 h-28 object-cover rounded-full" data-alt="Close up of a happy person with a dog" src="https://lh3.googleusercontent.com/aida-public/AB6AXuC6FBCy9XW4ebMsg1UZuseJ_JcrbNwPRl3GdZ3JeR2JEQsigZBEzP7qmonulubgWaJNIvwlke8sRrmITbmMD0c2hNFFtcRYyIkZ1slz1EwJdao2U-x46iFknIC3texKtzxQjRGcmkp9OeQfD3Il6VVM3B4JxloBDC9xlnJq7RYamLpWV0A3AKbSr_yqj8DJXd6Xx_8ssoBPUdvJT1FWLfjJyWEgdzaF8R4rGps75TBSGG1X03HvO7noJxC5q_CNc8OOj_YEnAusVh4"/>
+</div>
+</div>
+</div>
+</section>
+<!-- Pet List Grid -->
+<div class="grid gap-8">
+<!-- Pet Card 1 -->
+<div class="group relative bg-surface-container-low rounded-[32px] p-4 transition-all duration-300 hover:shadow-[0px_12px_32px_rgba(25,28,29,0.06)]">
+<div class="flex items-center gap-6">
+<div class="relative w-32 h-32 flex-shrink-0 overflow-hidden asymmetric-clip-1 bg-surface-container-high">
+<img class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" data-alt="Golden Retriever sitting proudly on grass" src="https://lh3.googleusercontent.com/aida-public/AB6AXuASzQpWWnSr5bKwpxcTfB1x4mJE3LusZsEFkzHHs8pizq9HCpHzd4acp4clcvspB2BZA2gCGSR9I_GfZTXbEyxpPqlxDODhzqxnIvn01Zhk5tPXDVodkjgpKb2f2JOBMZVgRojghznpD26gMXdg4qhKdp_4yiLaLuJnrqS9qqxnPYc9GffDo_lY_vs_mteJxA_BiPzH-LMyLhqtDJLsce80HKQGUbuhC-xiQH0OoUu06raFkD9dMWuzaULpaVUTK-RJg4KIhyHERpw"/>
+</div>
+<div class="flex-1">
+<div class="flex justify-between items-start">
+<div>
+<h3 class="font-headline text-2xl font-bold text-on-background leading-none mb-1">Max</h3>
+<p class="font-label text-sm text-secondary font-medium">Golden Retriever • 3 anos</p>
+</div>
+<div class="flex gap-1">
+<button class="p-2 text-on-surface-variant hover:bg-surface-container-highest rounded-full transition-all active:scale-90">
+<span class="material-symbols-outlined" data-icon="more_vert">more_vert</span>
+</button>
+<button class="p-2 text-error hover:bg-error-container/20 rounded-full transition-all active:scale-90">
+<span class="material-symbols-outlined" data-icon="delete">delete</span>
+</button>
+</div>
+</div>
+<div class="mt-4 flex gap-2">
+<span class="px-3 py-1 bg-white rounded-full text-[10px] font-label font-bold uppercase tracking-wider text-tertiary">Vacinação em dia</span>
+<span class="px-3 py-1 bg-white rounded-full text-[10px] font-label font-bold uppercase tracking-wider text-primary">Favorito</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Pet Card 2 -->
+<div class="group relative bg-surface-container-low rounded-[32px] p-4 transition-all duration-300 hover:shadow-[0px_12px_32px_rgba(25,28,29,0.06)]">
+<div class="flex items-center gap-6">
+<div class="relative w-32 h-32 flex-shrink-0 overflow-hidden asymmetric-clip-2 bg-surface-container-high">
+<img class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" data-alt="Calico cat looking curiously into camera" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAuxqKg-GWMlzm3SYFHLMPFSd9NduEZwyLy1SoENDb0Sr_67S--lz7c8zKlkWYcfIUVC2USYWx--xMZieGrp67qBs7K6pbvYXWNR9g8gxcQPNlpr3GBlR5gq1KLbUp9rfC7-7GFxjs1y9em5OOmUFQsbgE-She4eAOpnv6cb6cY9j1liSD06kPdu-K7uBKtDfTuMP7DcHc5W0pUXYxohjK4k2KhnC6Y0DCOYMgGilLYLZmQwD_x37M8JJNB4Bt7heiqp-SteDQ29i0"/>
+</div>
+<div class="flex-1">
+<div class="flex justify-between items-start">
+<div>
+<h3 class="font-headline text-2xl font-bold text-on-background leading-none mb-1">Luna</h3>
+<p class="font-label text-sm text-secondary font-medium">Persa Misto • 2 anos</p>
+</div>
+<div class="flex gap-1">
+<button class="p-2 text-on-surface-variant hover:bg-surface-container-highest rounded-full transition-all active:scale-90">
+<span class="material-symbols-outlined" data-icon="more_vert">more_vert</span>
+</button>
+<button class="p-2 text-error hover:bg-error-container/20 rounded-full transition-all active:scale-90">
+<span class="material-symbols-outlined" data-icon="delete">delete</span>
+</button>
+</div>
+</div>
+<div class="mt-4 flex gap-2">
+<span class="px-3 py-1 bg-white rounded-full text-[10px] font-label font-bold uppercase tracking-wider text-secondary">Aguardando Banho</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Pet Card 3 -->
+<div class="group relative bg-surface-container-low rounded-[32px] p-4 transition-all duration-300 hover:shadow-[0px_12px_32px_rgba(25,28,29,0.06)]">
+<div class="flex items-center gap-6">
+<div class="relative w-32 h-32 flex-shrink-0 overflow-hidden asymmetric-clip-1 bg-surface-container-high">
+<img class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" data-alt="Small white puppy playing on carpet" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDUxC7_AGjS5fFXriMtYzWfRpmQCRJ7TF72rGXq6GcocdbTmLXQYajZiopzekxzDkmHZsiog99oBEiKk1wst3XL2JFEGx25Ww8wljku9hGpsEy387AHfxMYnOi9G8TX8I729djX9xtFR6WpL8A0VbSVziXr7HCV6e9uJAvIgw2bzUf1i0cr9u-icoE_NQL2_xM0UbJhFU8OHQH4qX17JoSgnYn7r3P5d5CHNp6uv3AMalRzSwyrDwCGXrHBVVIFZykjQPqewRQ7NYI"/>
+</div>
+<div class="flex-1">
+<div class="flex justify-between items-start">
+<div>
+<h3 class="font-headline text-2xl font-bold text-on-background leading-none mb-1">Bento</h3>
+<p class="font-label text-sm text-secondary font-medium">Beagle • 8 meses</p>
+</div>
+<div class="flex gap-1">
+<button class="p-2 text-on-surface-variant hover:bg-surface-container-highest rounded-full transition-all active:scale-90">
+<span class="material-symbols-outlined" data-icon="more_vert">more_vert</span>
+</button>
+<button class="p-2 text-error hover:bg-error-container/20 rounded-full transition-all active:scale-90">
+<span class="material-symbols-outlined" data-icon="delete">delete</span>
+</button>
+</div>
+</div>
+<div class="mt-4 flex gap-2">
+<span class="px-3 py-1 bg-primary-container/10 rounded-full text-[10px] font-label font-bold uppercase tracking-wider text-primary">Filhote</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Add New Pet Button (Bento Style) -->
+<button class="w-full group relative bg-surface-container-lowest border-2 border-dashed border-outline-variant/30 rounded-[32px] p-12 flex flex-col items-center justify-center transition-all duration-300 hover:bg-surface-container hover:border-primary-container">
+<div class="w-16 h-16 bg-primary-container text-white rounded-2xl flex items-center justify-center shadow-lg shadow-primary-container/20 mb-4 group-hover:scale-110 transition-transform duration-300">
+<span class="material-symbols-outlined text-3xl" data-icon="add">add</span>
+</div>
+<span class="font-headline font-bold text-on-background">Adicionar Novo Pet</span>
+<span class="font-label text-xs text-secondary mt-1">Compartilhe uma nova história</span>
+</button>
+</div>
+</main>
+<!-- BottomNavBar -->
+<nav class="fixed bottom-0 left-0 w-full z-50">
+<div class="bg-[#f8f9fa]/80 dark:bg-slate-900/80 backdrop-blur-xl shadow-[0px_-12px_32px_rgba(25,28,29,0.06)] fixed bottom-0 left-0 w-full flex justify-around items-center px-8 pb-8 pt-4 rounded-t-[32px]">
+<a class="flex items-center justify-center text-slate-400 dark:text-slate-500 p-3 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-2xl transition-all active:scale-90" href="#">
+<span class="material-symbols-outlined" data-icon="home">home</span>
+</a>
+<a class="flex items-center justify-center text-slate-400 dark:text-slate-500 p-3 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-2xl transition-all active:scale-90" href="#">
+<span class="material-symbols-outlined" data-icon="search">search</span>
+</a>
+<a class="flex items-center justify-center text-slate-400 dark:text-slate-500 p-3 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-2xl transition-all active:scale-90" href="#">
+<span class="material-symbols-outlined" data-icon="favorite">favorite</span>
+</a>
+<a class="flex items-center justify-center bg-[#ff6b6b] dark:bg-[#ae2f34] text-white rounded-2xl p-3 shadow-lg shadow-[#ff6b6b]/20 active:scale-90 transition-all duration-300" href="#">
+<span class="material-symbols-outlined" data-icon="person" style="font-variation-settings: 'FILL' 1;">person</span>
+</a>
+</div>
+</nav>
+</body></html>

@@ -53,12 +53,15 @@ export default function MeusFavoritos() {
   const renderItem = ({ item }: { item: Favorito }) => (
     <View style={styles.card}>
       <Image source={item.imagem} style={styles.petImage} />
-      <View style={{ flex: 1, marginLeft: 16 }}>
+      <View style={styles.content}>
         <Text style={styles.petName}>{item.nome}</Text>
         <Text style={styles.petInfo}>{item.especie} • {item.idade}</Text>
+        <Text style={styles.petDescription} numberOfLines={2}>
+          Pronto para encontrar um novo lar com carinho e segurança.
+        </Text>
       </View>
-      <TouchableOpacity onPress={() => confirmDesfavoritar(item)}>
-        <Ionicons name="heart" size={28} color={colors.primary} style={{ marginLeft: 8 }} />
+      <TouchableOpacity style={styles.favoriteButton} onPress={() => confirmDesfavoritar(item)}>
+        <Ionicons name="heart" size={22} color={colors.primary} />
       </TouchableOpacity>
     </View>
   );
@@ -92,65 +95,89 @@ const styles = StyleSheet.create({
   header: {
     width: "100%",
     backgroundColor: '#fff',
-    borderBottomLeftRadius: 30,
-    borderBottomRightRadius: 30,
-    paddingTop: 50,
-    paddingBottom: 30, // padding inferior maior
+    borderBottomLeftRadius: 20,
+    borderBottomRightRadius: 20,
+    paddingTop: 42,
+    paddingBottom: 16,
     shadowColor: '#000',
-    shadowOpacity: 0.06,
-    shadowRadius: 4,
-    elevation: 2,
+    shadowOpacity: 0.05,
+    shadowRadius: 6,
+    elevation: 1,
     flexDirection: 'row',
     alignItems: 'center',
-    paddingHorizontal: 24,
+    justifyContent: 'center',
+    paddingHorizontal: 16,
   },
   backButton: {
     position: 'absolute',
     left: 16,
-    top: 52,
+    top: 44,
     zIndex: 2,
   },
   headerTitle: {
-    fontSize: 28,
-    fontWeight: 'bold',
+    fontSize: 22,
+    fontWeight: '800',
     color: colors.primary,
     textAlign: 'center',
   },
   container: {
     flex: 1,
-    backgroundColor: '#f3f3f3',
-    paddingHorizontal: 20,
-    paddingTop: 32, // paddingTop maior
+    backgroundColor: '#f6f7f9',
+    paddingHorizontal: 16,
+    paddingTop: 12,
   },
   card: {
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: '#fff',
-    borderRadius: 22,
-    paddingVertical: 18,
-    paddingHorizontal: 22,
-    marginBottom: 18,
+    borderRadius: 16,
+    paddingVertical: 10,
+    paddingHorizontal: 10,
+    marginBottom: 12,
     shadowColor: '#000',
-    shadowOpacity: 0.08,
-    shadowRadius: 8,
-    elevation: 2,
-    width: '100%', // garantir largura total
+    shadowOpacity: 0.06,
+    shadowRadius: 6,
+    elevation: 1,
+    width: '100%',
+    borderWidth: 1,
+    borderColor: '#ebedf0',
+    position: 'relative',
   },
   petImage: {
-    width: 70,
-    height: 70,
-    borderRadius: 16,
+    width: 72,
+    height: 72,
+    borderRadius: 12,
     backgroundColor: '#eee',
   },
+  content: {
+    flex: 1,
+    marginLeft: 10,
+    marginRight: 36,
+  },
   petName: {
-    fontSize: 20,
-    fontWeight: 'bold',
+    fontSize: 22,
+    fontWeight: '800',
     color: colors.textPrimary,
   },
   petInfo: {
-    fontSize: 15,
+    fontSize: 14,
     color: '#888',
-    marginTop: 4,
+    marginTop: 1,
+  },
+  petDescription: {
+    marginTop: 5,
+    color: '#5f5f5f',
+    fontSize: 12,
+    lineHeight: 17,
+  },
+  favoriteButton: {
+    position: 'absolute',
+    top: 10,
+    right: 10,
+    width: 28,
+    height: 28,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   emptyText: {
     textAlign: 'center',

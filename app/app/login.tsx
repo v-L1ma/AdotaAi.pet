@@ -1,13 +1,13 @@
 import React, { useEffect, useRef } from "react";
 import { SafeAreaView, Text, TextInput, TouchableOpacity, View, KeyboardAvoidingView, Platform } from "react-native";
-import { useRouter } from "expo-router";
 import { Image } from "react-native";
 import { Animated, Easing } from "react-native";
 import Icon1 from "react-native-vector-icons/AntDesign";
 import styles from "../styles/AppStyles";
+import { useTabNavigation } from "@/hooks/useTabNavigation";
 
 export default function LoginScreen() {
-  const router = useRouter();
+  const { navigateToTab } = useTabNavigation();
   const slideAnim = useRef(new Animated.Value(1000)).current;
 
   useEffect(() => {
@@ -47,7 +47,7 @@ export default function LoginScreen() {
             <Text style={{ marginLeft: 150 }}>Esqueceu a senha?</Text>
           </TouchableOpacity>
 
-          <TouchableOpacity style={styles.buttonLogin} onPress={() => router.push("/Home")}>
+          <TouchableOpacity style={styles.buttonLogin} onPress={() => navigateToTab("/home")}>
             <Text style={styles.buttonText}>Entrar</Text>
           </TouchableOpacity>
 
@@ -57,7 +57,7 @@ export default function LoginScreen() {
             <Icon1 name="google" size={20} color="fff" />
           </TouchableOpacity>
 
-          <TouchableOpacity onPress={() => router.push("/cadastro")}>
+          <TouchableOpacity onPress={() => navigateToTab("/home")}>
             <Text style={{ marginVertical: 10 }}>Não possui uma conta?</Text>
           </TouchableOpacity>
         </View>

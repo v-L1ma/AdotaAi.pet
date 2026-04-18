@@ -1,196 +1,289 @@
-import { Ionicons } from '@expo/vector-icons';
+import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import React from "react";
-import { Text, TouchableOpacity, View } from "react-native";
+import { ScrollView, StyleSheet, Text, TouchableOpacity, View, useWindowDimensions } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import Icon1 from "react-native-vector-icons/EvilIcons";
-import Icon2 from "react-native-vector-icons/Ionicons";
-import Icon3 from "react-native-vector-icons/MaterialIcons";
-import colors from '../styles/colors';
+import { colors } from "@/styles/variables";
+
+type SettingItem = {
+    title: string;
+    icon: keyof typeof Ionicons.glyphMap;
+    route: string;
+    badge?: string;
+};
 
 export default function ConfigScreen() {
     const router = useRouter();
+    const { width } = useWindowDimensions();
+    const isTablet = width >= 768;
+
+    const accountItems: SettingItem[] = [
+        { title: "Conta", icon: "person-circle-outline", route: "/perfil-user" },
+        { title: "Meus pets", icon: "paw-outline", route: "/meus-pets" },
+        { title: "Solicitações", icon: "notifications-outline", route: "/solicitacoes", badge: "3" },
+        { title: "Meus favoritos", icon: "heart-outline", route: "/meus-favoritos" },
+        { title: "Formulários", icon: "document-text-outline", route: "/gerenciar-formularios" },
+        { title: "Eventos", icon: "calendar-outline", route: "/inicio-eventos" },
+    ];
+
+    const infoItems: SettingItem[] = [
+        { title: "Sobre nós", icon: "help-circle-outline", route: "/sobre-nos" },
+    ];
+
+    function renderItem(item: SettingItem) {
+        return (
+            <TouchableOpacity
+                key={item.title}
+                style={[styles.card, isTablet && styles.cardTablet]}
+                onPress={() => router.push(item.route as never)}
+                activeOpacity={0.8}
+            >
+                <View style={styles.cardRow}>
+                    <View style={styles.iconWrap}>
+                        <Ionicons name={item.icon} size={22} color={colors.primary} />
+                    </View>
+
+                    <View style={styles.cardTextWrap}>
+                        <Text style={styles.cardTitle}>{item.title}</Text>
+                    </View>
+
+                    <View style={styles.cardActions}>
+                        {item.badge ? (
+                            <View style={styles.badge}>
+                                <Text style={styles.badgeText}>{item.badge}</Text>
+                            </View>
+                        ) : null}
+                        <Ionicons name="chevron-forward" size={18} color="#6A5A59" />
+                    </View>
+                </View>
+            </TouchableOpacity>
+        );
+    }
 
     return (
-        <>
-            {/* Safe area do topo branca */}
-            <SafeAreaView edges={['top']} style={{ backgroundColor: '#fff' }} />
-            {/* Header customizado padrão do app */}
-            <View style={{
-                width: "100%",
-                backgroundColor: '#fff',
-                borderBottomLeftRadius: 30,
-                borderBottomRightRadius: 30,
-                paddingTop: 50,
-                paddingBottom: 20,
-                shadowColor: '#000',
-                shadowOpacity: 0.06,
-                shadowRadius: 4,
-                elevation: 2,
-                flexDirection: 'row',
-                alignItems: 'center',
-                paddingHorizontal: 16,
-            }}>
-                <TouchableOpacity onPress={() => router.back()} style={{ position: 'absolute', left: 16, top: 52, zIndex: 2 }} hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
+        <SafeAreaView style={styles.screen} edges={["top", "left", "right"]}>
+            <View style={styles.header}>
+                <TouchableOpacity
+                    onPress={() => router.back()}
+                    style={styles.backButton}
+                    hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+                >
                     <Ionicons name="arrow-back" size={28} color={colors.primary} />
                 </TouchableOpacity>
-                <View style={{ flex: 1, alignItems: 'center' }}>
-                      <Text style={{ fontSize: 28, fontWeight: 'bold', color: '#e74c3c', textAlign: 'center', marginBottom: 0 }}>Configurações</Text>
+
+                <View style={styles.headerContent}>
+                    <Text style={styles.headerTitle}></Text>
+                    <Text style={styles.headerSubtitle}></Text>
                 </View>
             </View>
-            {/* ...restante da tela... */}
-                        <View style={{ alignItems: "center", height: "100%", gap: 15, marginTop: 32 }}>
-                                {/* Card: Conta */}
-                                <View style={{
-                                    flexDirection: 'row',
-                                    alignItems: 'center',
-                                    backgroundColor: '#fff',
-                                    borderRadius: 22,
-                                    marginBottom: 10,
-                                    width: '92%',
-                                    minHeight: 64,
-                                    shadowColor: '#000',
-                                    shadowOpacity: 0.10,
-                                    shadowRadius: 8,
-                                    elevation: 3,
-                                    padding: 8,
-                                    borderWidth: 2,
-                                    borderColor: '#ececec',
-                                }}>
-                                    <TouchableOpacity style={{ flex: 1 }} onPress={() => router.push("/perfil-user") } activeOpacity={0.7}>
-                                        <View style={{ flexDirection: "row", alignItems: "center" }}>
-                                            <Icon2 name="person-circle-outline" size={30} color="#000000ff" />
-                                            <Text style={{ fontSize: 20, fontWeight: "bold", justifyContent: "space-between", width: "80%", paddingHorizontal: 10 }}>Conta</Text>
-                                            <Icon1 name="chevron-right" size={30} color="#000000ff" />
-                                        </View>
-                                    </TouchableOpacity>
-                                </View>
-                                {/* Card: Meus Pets */}
-                                <View style={{
-                                    flexDirection: 'row',
-                                    alignItems: 'center',
-                                    backgroundColor: '#fff',
-                                    borderRadius: 22,
-                                    marginBottom: 10,
-                                    width: '92%',
-                                    minHeight: 64,
-                                    shadowColor: '#000',
-                                    shadowOpacity: 0.10,
-                                    shadowRadius: 8,
-                                    elevation: 3,
-                                    padding: 8,
-                                    borderWidth: 2,
-                                    borderColor: '#ececec',
-                                }}>
-                                    <TouchableOpacity style={{ flex: 1 }} onPress={() => router.push("/MeusPets") } activeOpacity={0.7}>
-                                        <View style={{ flexDirection: "row", alignItems: "center" }}>
-                                            <Icon3 name="pets" size={30} color="#000000ff" />
-                                            <Text style={{ fontSize: 20, fontWeight: "bold", justifyContent: "space-between", width: "80%", paddingHorizontal: 10 }}>Meus pet's</Text>
-                                            <Icon1 name="chevron-right" size={30} color="#000000ff" />
-                                        </View>
-                                    </TouchableOpacity>
-                                </View>
-                                {/* Card: Solicitações */}
-                                <View style={{
-                                    flexDirection: 'row',
-                                    alignItems: 'center',
-                                    backgroundColor: '#fff',
-                                    borderRadius: 22,
-                                    marginBottom: 10,
-                                    width: '92%',
-                                    minHeight: 64,
-                                    shadowColor: '#000',
-                                    shadowOpacity: 0.10,
-                                    shadowRadius: 8,
-                                    elevation: 3,
-                                    padding: 8,
-                                    borderWidth: 2,
-                                    borderColor: '#ececec',
-                                }}>
-                                    <TouchableOpacity style={{ flex: 1 }} onPress={() => router.push("/solicitacoes") } activeOpacity={0.7}>
-                                        <View style={{ flexDirection: "row", alignItems: "center" }}>
-                                            <Icon2 name="notifications" size={30} color="#000000ff" />
-                                            <Text style={{ fontSize: 20, fontWeight: "bold", justifyContent: "space-between", width: "80%", paddingHorizontal: 10 }}>Solicitações</Text>
-                                            <Icon1 name="chevron-right" size={30} color="#000000ff" />
-                                        </View>
-                                    </TouchableOpacity>
-                                </View>
-                                {/* Card: Meus favoritos */}
-                                <View style={{
-                                    flexDirection: 'row',
-                                    alignItems: 'center',
-                                    backgroundColor: '#fff',
-                                    borderRadius: 22,
-                                    marginBottom: 10,
-                                    width: '92%',
-                                    minHeight: 64,
-                                    shadowColor: '#000',
-                                    shadowOpacity: 0.10,
-                                    shadowRadius: 8,
-                                    elevation: 3,
-                                    padding: 8,
-                                    borderWidth: 2,
-                                    borderColor: '#ececec',
-                                }}>
-                                    <TouchableOpacity style={{ flex: 1 }} onPress={() => router.push("/meus-favoritos") } activeOpacity={0.7}>
-                                        <View style={{ flexDirection: "row", alignItems: "center" }}>
-                                            <Icon2 name="heart" size={30} color="#000000ff" />
-                                            <Text style={{ fontSize: 20, fontWeight: "bold", justifyContent: "space-between", width: "80%", paddingHorizontal: 10 }}>Meus favoritos</Text>
-                                            <Icon1 name="chevron-right" size={30} color="#000000ff" />
-                                        </View>
-                                    </TouchableOpacity>
-                                </View>
-                                {/* Card: Sobre nós */}
-                                <View style={{
-                                    flexDirection: 'row',
-                                    alignItems: 'center',
-                                    backgroundColor: '#fff',
-                                    borderRadius: 22,
-                                    marginBottom: 10,
-                                    width: '92%',
-                                    minHeight: 64,
-                                    shadowColor: '#000',
-                                    shadowOpacity: 0.10,
-                                    shadowRadius: 8,
-                                    elevation: 3,
-                                    padding: 8,
-                                    borderWidth: 2,
-                                    borderColor: '#ececec',
-                                }}>
-                                    <TouchableOpacity style={{ flex: 1 }} onPress={() => router.push("/sobre-nos") } activeOpacity={0.7}>
-                                        <View style={{ flexDirection: "row", alignItems: "center" }}>
-                                            <Icon2 name="help-circle-outline" size={30} color="#000000ff" />
-                                            <Text style={{ fontSize: 20, fontWeight: "bold", justifyContent: "space-between", width: "80%", paddingHorizontal: 10 }}>Sobre nós</Text>
-                                            <Icon1 name="chevron-right" size={30} color="#000000ff" />
-                                        </View>
-                                    </TouchableOpacity>
-                                </View>
-                                {/* Card: Sair */}
-                                <View style={{
-                                    flexDirection: 'row',
-                                    alignItems: 'center',
-                                    backgroundColor: '#fff',
-                                    borderRadius: 22,
-                                    marginBottom: 10,
-                                    width: '92%',
-                                    minHeight: 64,
-                                    shadowColor: '#000',
-                                    shadowOpacity: 0.10,
-                                    shadowRadius: 8,
-                                    elevation: 3,
-                                    padding: 8,
-                                    borderWidth: 2,
-                                    borderColor: '#ececec',
-                                }}>
-                                    <TouchableOpacity style={{ flex: 1 }} onPress={() => router.push("/login") } activeOpacity={0.7}>
-                                        <View style={{ flexDirection: "row", alignItems: "center" }}>
-                                            <Icon2 name="exit-outline" size={30} color="#000000ff" />
-                                            <Text style={{ fontSize: 20, fontWeight: "bold", justifyContent: "space-between", width: "80%", paddingHorizontal: 10 }}>Sair</Text>
-                                            <Icon1 name="chevron-right" size={30} color="#000000ff" />
-                                        </View>
-                                    </TouchableOpacity>
-                                </View>
-                        </View>
-        </>
+
+            <ScrollView
+                style={styles.scroll}
+                contentContainerStyle={[styles.content, isTablet && styles.contentTablet]}
+                showsVerticalScrollIndicator={false}
+            >
+                <View style={styles.profileTeaser}>
+                    <View style={styles.avatar}>
+                        <Ionicons name="person" size={24} color={colors.primary} />
+                    </View>
+
+                    <View style={styles.profileTextWrap}>
+                        <Text style={styles.profileName}>Fulano</Text>
+                        <Text style={styles.profileSub}>Santos • São Paulo</Text>
+                    </View>
+                </View>
+
+                <Text style={styles.sectionLabel}>Preferências da conta</Text>
+                <View style={styles.cardsWrap}>{accountItems.map(renderItem)}</View>
+
+                <Text style={styles.sectionLabel}>Informações</Text>
+                <View style={styles.cardsWrap}>{infoItems.map(renderItem)}</View>
+
+                <TouchableOpacity style={styles.logout} onPress={() => router.replace("/login") }>
+                    <Ionicons name="exit-outline" size={20} color="#A31A14" />
+                    <Text style={styles.logoutText}>Sair da conta</Text>
+                </TouchableOpacity>
+            </ScrollView>
+        </SafeAreaView>
     );
 }
+
+const styles = StyleSheet.create({
+    screen: {
+        flex: 1,
+        backgroundColor: colors.surface,
+    },
+    scroll: {
+        flex: 1,
+    },
+    content: {
+        paddingHorizontal: 20,
+        paddingTop: 14,
+        paddingBottom: 30,
+        gap: 12,
+    },
+    contentTablet: {
+        alignSelf: "center",
+        width: "100%",
+        maxWidth: 980,
+    },
+    header: {
+        backgroundColor: colors.surfaceLowest,
+        borderBottomLeftRadius: 26,
+        borderBottomRightRadius: 26,
+        paddingTop: 10,
+        paddingBottom: 16,
+        paddingHorizontal: 16,
+        flexDirection: "row",
+        alignItems: "center",
+        shadowColor: "#000",
+        shadowOpacity: 0.06,
+        shadowRadius: 6,
+        elevation: 2,
+    },
+    backButton: {
+        width: 40,
+        height: 40,
+        borderRadius: 12,
+        alignItems: "center",
+        justifyContent: "center",
+        backgroundColor: colors.surface,
+    },
+    headerContent: {
+        flex: 1,
+        alignItems: "center",
+        paddingRight: 40,
+    },
+    headerTitle: {
+        fontSize: 26,
+        fontWeight: "900",
+        color: colors.primary,
+        textAlign: "center",
+    },
+    headerSubtitle: {
+        marginTop: 2,
+        fontSize: 13,
+        color: colors.textMuted,
+        textAlign: "center",
+    },
+    profileTeaser: {
+        marginTop: 4,
+        marginBottom: 4,
+        padding: 14,
+        borderRadius: 20,
+        backgroundColor: colors.surfaceLowest,
+        borderWidth: 1,
+        borderColor: "#ECECEC",
+        flexDirection: "row",
+        alignItems: "center",
+        gap: 12,
+    },
+    avatar: {
+        width: 58,
+        height: 58,
+        borderRadius: 18,
+        backgroundColor: "#FFE5E2",
+        alignItems: "center",
+        justifyContent: "center",
+    },
+    profileTextWrap: {
+        flex: 1,
+    },
+    profileName: {
+        fontSize: 18,
+        color: colors.text,
+        fontWeight: "800",
+    },
+    profileSub: {
+        fontSize: 13,
+        color: colors.textMuted,
+        marginTop: 2,
+    },
+    sectionLabel: {
+        marginTop: 10,
+        marginBottom: 4,
+        fontSize: 11,
+        textTransform: "uppercase",
+        letterSpacing: 1,
+        color: "#8A8A8A",
+        fontWeight: "800",
+        paddingHorizontal: 4,
+    },
+    cardsWrap: {
+        flexDirection: "row",
+        flexWrap: "wrap",
+        gap: 10,
+    },
+    card: {
+        width: "100%",
+        minHeight: 66,
+        borderRadius: 18,
+        backgroundColor: colors.surfaceLowest,
+        borderWidth: 1,
+        borderColor: "#ECECEC",
+        shadowColor: "#000",
+        shadowOpacity: 0.08,
+        shadowRadius: 8,
+        elevation: 3,
+    },
+    cardTablet: {
+        width: "49%",
+    },
+    cardRow: {
+        flexDirection: "row",
+        alignItems: "center",
+        minHeight: 66,
+        paddingHorizontal: 12,
+        gap: 10,
+    },
+    iconWrap: {
+        width: 38,
+        height: 38,
+        borderRadius: 12,
+        backgroundColor: "#FFF2F0",
+        alignItems: "center",
+        justifyContent: "center",
+    },
+    cardTextWrap: {
+        flex: 1,
+        minWidth: 0,
+    },
+    cardTitle: {
+        fontSize: 16,
+        fontWeight: "700",
+        color: colors.text,
+    },
+    cardActions: {
+        flexDirection: "row",
+        alignItems: "center",
+        gap: 8,
+    },
+    badge: {
+        backgroundColor: colors.primary,
+        borderRadius: 999,
+        paddingHorizontal: 8,
+        paddingVertical: 2,
+    },
+    badgeText: {
+        color: "#fff",
+        fontSize: 11,
+        fontWeight: "800",
+    },
+    logout: {
+        marginTop: 14,
+        backgroundColor: "#FFE7E5",
+        borderWidth: 1,
+        borderColor: "#FFCDC9",
+        borderRadius: 16,
+        minHeight: 56,
+        alignItems: "center",
+        justifyContent: "center",
+        flexDirection: "row",
+        gap: 8,
+    },
+    logoutText: {
+        color: "#A31A14",
+        fontSize: 16,
+        fontWeight: "800",
+    },
+});
