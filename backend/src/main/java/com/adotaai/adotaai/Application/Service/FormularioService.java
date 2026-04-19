@@ -16,17 +16,18 @@ import java.util.stream.Collectors;
 import java.util.UUID;
 
 @Service
-public class FormularioService {
+public class FormularioService implements IFormularioService {
 
     private final FormularioRepository formularioRepository;
     private final UsuarioRepository usuarioRepository;
 
     public FormularioService(FormularioRepository formularioRepository,
-            UsuarioRepository usuarioRepository) {
+                             UsuarioRepository usuarioRepository) {
         this.formularioRepository = formularioRepository;
         this.usuarioRepository = usuarioRepository;
     }
 
+    @Override
     @Transactional
     public FormularioEntity criarFormulario(FormularioDTO dto) {
         UsuarioEntity criador = usuarioRepository.findById(dto.getUsuarioCriadorId())
@@ -48,6 +49,7 @@ public class FormularioService {
         return formularioRepository.save(formulario);
     }
 
+    @Override
     public List<FormularioTemplateDTO> listarFormularios() {
         return formularioRepository.findAll()
                 .stream()
@@ -55,12 +57,14 @@ public class FormularioService {
                 .collect(Collectors.toList());
     }
 
+    @Override
     public FormularioTemplateDTO buscarFormularioPorId(UUID id) {
         return formularioRepository.findById(id)
                 .map(FormularioTemplateDTO::new)
                 .orElseThrow(() -> new RuntimeException("Formulário não encontrado"));
     }
 
+    @Override
     @Transactional
     public void deletarFormulario(UUID formularioId, UUID usuarioCriadorId) {
         FormularioEntity formulario = formularioRepository.findById(formularioId)
