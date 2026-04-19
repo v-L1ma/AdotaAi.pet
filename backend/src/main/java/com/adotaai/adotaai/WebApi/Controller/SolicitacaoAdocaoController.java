@@ -1,11 +1,8 @@
 package com.adotaai.adotaai.WebApi.Controller;
 
-import com.adotaai.adotaai.Application.DTO.FormularioDetalhadoDTO;
-import com.adotaai.adotaai.Application.DTO.RespostaDTO;
-import com.adotaai.adotaai.Application.DTO.RespostaResponseDTO;
-import com.adotaai.adotaai.Application.DTO.SolicitacaoAdocaoDTO;
-import com.adotaai.adotaai.Application.DTO.SolicitacaoResponseDTO;
-import com.adotaai.adotaai.Application.Service.SolicitacaoAdocaoService;
+import com.adotaai.adotaai.Application.DTO.*;
+import com.adotaai.adotaai.Application.Service.ISolicitacaoAdocaoService;
+import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -15,20 +12,20 @@ import java.util.UUID;
 @RequestMapping("/solicitacoes")
 public class SolicitacaoAdocaoController {
 
-    private final SolicitacaoAdocaoService solicitacaoService;
+    private final ISolicitacaoAdocaoService solicitacaoService;
 
-    public SolicitacaoAdocaoController(SolicitacaoAdocaoService solicitacaoService) {
+    public SolicitacaoAdocaoController(ISolicitacaoAdocaoService solicitacaoService) {
         this.solicitacaoService = solicitacaoService;
     }
 
     @PostMapping
-    public ResponseEntity<SolicitacaoResponseDTO> criarSolicitacao(@RequestBody SolicitacaoAdocaoDTO dto) {
+    public ResponseEntity<SolicitacaoResponseDTO> criarSolicitacao(@Valid @RequestBody SolicitacaoAdocaoDTO dto) {
         SolicitacaoResponseDTO novaSolicitacaoDTO = solicitacaoService.criarSolicitacao(dto);
         return new ResponseEntity<>(novaSolicitacaoDTO, HttpStatus.CREATED);
     }
 
     @PostMapping("/respostas")
-    public ResponseEntity<RespostaResponseDTO> salvarResposta(@RequestBody RespostaDTO dto) {
+    public ResponseEntity<RespostaResponseDTO> salvarResposta(@Valid @RequestBody RespostaDTO dto) {
         RespostaResponseDTO novaRespostaDTO = solicitacaoService.salvarResposta(dto);
         return new ResponseEntity<>(novaRespostaDTO, HttpStatus.CREATED);
     }

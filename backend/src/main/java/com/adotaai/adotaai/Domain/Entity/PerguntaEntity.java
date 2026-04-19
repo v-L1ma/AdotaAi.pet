@@ -9,9 +9,10 @@ import java.util.UUID;
 public class PerguntaEntity extends AuditableEntity {
 
     @Id
-    @GeneratedValue()
+    @GeneratedValue
     private UUID id;
 
+    @Column(length = 30, nullable = false)
     private String texto;
 
     @JsonBackReference("formulario-perguntas")
@@ -19,7 +20,6 @@ public class PerguntaEntity extends AuditableEntity {
     @JoinColumn(name = "formulario_id", nullable = false)
     private FormularioEntity formulario;
 
-    // Getters e Setters
     public UUID getId() {
         return id;
     }
@@ -33,6 +33,12 @@ public class PerguntaEntity extends AuditableEntity {
     }
 
     public void setTexto(String texto) {
+        if (texto == null || texto.trim().isEmpty()) {
+            throw new IllegalArgumentException("O texto da pergunta não pode estar vazio.");
+        }
+        if (texto.length() > 30) {
+            throw new IllegalArgumentException("O texto da pergunta deve conter no máximo 30 caracteres.");
+        }
         this.texto = texto;
     }
 

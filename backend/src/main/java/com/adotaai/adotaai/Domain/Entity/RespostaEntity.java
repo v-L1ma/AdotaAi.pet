@@ -9,9 +9,10 @@ import java.util.UUID;
 public class RespostaEntity extends AuditableEntity {
 
     @Id
-    @GeneratedValue()
+    @GeneratedValue
     private UUID id;
 
+    @Column(nullable = false)
     private String resposta;
 
     @JsonBackReference("solicitacao-respostas")
@@ -36,6 +37,9 @@ public class RespostaEntity extends AuditableEntity {
     }
 
     public void setResposta(String resposta) {
+        if (resposta == null || resposta.trim().isEmpty()) {
+            throw new IllegalArgumentException("A resposta não pode estar vazia.");
+        }
         this.resposta = resposta;
     }
 
