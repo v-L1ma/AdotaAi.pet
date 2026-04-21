@@ -1,14 +1,22 @@
 import CardPet from "@/components/CardPet";
 import NavBar from "@/components/NavBar";
+import apiService from "@/services/apiService";
 import { colors } from "@/styles/variables";
 import { animal } from "@/types/TAnimal";
-import React from "react";
-import { useState } from "react";
-import { Dimensions, FlatList, Image, Pressable, TouchableOpacity } from "react-native";
+import React, { useEffect, useState } from "react";
+import { ActivityIndicator, Dimensions, FlatList, Image, Pressable, TouchableOpacity } from "react-native";
 import { StyleSheet, Text, TextInput, View } from "react-native";
 import Icon from "react-native-vector-icons/FontAwesome5";
 
 const width = Dimensions.get("window").width
+
+type PetApiDTO = {
+    id: string;
+    nome: string;
+    especie: string;
+    porte: string;
+    link_foto: string;
+};
 
 export default function ListagemPets(){
     const [isPopUpOpen, setIsPopUpOpen] = useState<boolean>(false);
@@ -16,90 +24,49 @@ export default function ListagemPets(){
     const [especie, setEspecie] = useState<"cachorro" | "gato" | null>(null);
     const [porte, setPorte] = useState<"pequeno" | "medio" | "grande" | null>(null);
     const [searchText, setSearchText] = useState<string>("")
+    const [pets, setPets] = useState<animal[]>([]);
+    const [isLoadingPets, setIsLoadingPets] = useState<boolean>(true);
+    const [petsError, setPetsError] = useState<string | null>(null);
     const width = Dimensions.get(`window`).width;
 
-    const pets: animal[] = [
-    {
-        nome: "Alfredo",
-        imagem:
-        "https://img.freepik.com/fotos-gratis/fotografia-vertical-de-foco-superficial-de-um-bonito-cachorro-de-golden-retriever-sentado-em-um-chao-de-grama_181624-27259.jpg?w=360",
-        genero: "M",
-        especie: "cachorro",
-        porte: "medio",
-    },
-    {
-        nome: "Luna",
-        imagem:
-        "https://www.petz.com.br/blog/wp-content/uploads/2019/07/vida-de-gato.jpg",
-        genero: "F",
-        especie: "gato",
-        porte: "pequeno",
-    },
-    {
-        nome: "Thor",
-        imagem:
-        "https://img.freepik.com/fotos-gratis/fotografia-vertical-de-foco-superficial-de-um-bonito-cachorro-de-golden-retriever-sentado-em-um-chao-de-grama_181624-27259.jpg?w=360",
-        genero: "M",
-        especie: "cachorro",
-        porte: "grande",
-    },
-    {
-        nome: "Mimi",
-        imagem:
-        "https://www.petz.com.br/blog/wp-content/uploads/2019/07/vida-de-gato.jpg",
-        genero: "F",
-        especie: "gato",
-        porte: "pequeno",
-    },
-    {
-        nome: "Rex",
-        imagem:
-        "https://img.freepik.com/fotos-gratis/fotografia-vertical-de-foco-superficial-de-um-bonito-cachorro-de-golden-retriever-sentado-em-um-chao-de-grama_181624-27259.jpg?w=360",
-        genero: "M",
-        especie: "cachorro",
-        porte: "medio",
-    },
-    {
-        nome: "Mel",
-        imagem:
-        "https://img.freepik.com/fotos-gratis/fotografia-vertical-de-foco-superficial-de-um-bonito-cachorro-de-golden-retriever-sentado-em-um-chao-de-grama_181624-27259.jpg?w=360",
-        genero: "F",
-        especie: "cachorro",
-        porte: "pequeno",
-    },
-    {
-        nome: "Simba",
-        imagem:
-        "https://www.petz.com.br/blog/wp-content/uploads/2019/07/vida-de-gato.jpg",
-        genero: "M",
-        especie: "gato",
-        porte: "medio",
-    },
-    {
-        nome: "Bela",
-        imagem:
-        "https://img.freepik.com/fotos-gratis/fotografia-vertical-de-foco-superficial-de-um-bonito-cachorro-de-golden-retriever-sentado-em-um-chao-de-grama_181624-27259.jpg?w=360",
-        genero: "F",
-        especie: "cachorro",
-        porte: "grande",
-    },
-    {
-        nome: "Nina",
-        imagem:
-        "https://www.petz.com.br/blog/wp-content/uploads/2019/07/vida-de-gato.jpg",
-        genero: "F",
-        especie: "gato",
-        porte: "pequeno",
-    },
-    {
-        nome: "Max",
-        imagem:
-        "https://img.freepik.com/fotos-gratis/fotografia-vertical-de-foco-superficial-de-um-bonito-cachorro-de-golden-retriever-sentado-em-um-chao-de-grama_181624-27259.jpg?w=360",
-        genero: "M",
-        especie: "cachorro",
-        porte: "medio",
-    },
-    ];
+    useEffect(() => {
+        async function loadPets() {
+            setIsLoadingPets(true);
+            setPetsError(null);
+
+            try {
+                const response = await apiService.get<PetApiDTO[]>("/pets");
+                const parsedPets = response.data
+                    .map((pet): animal | null => {
+                        const especieNormalizada = pet.especie?.toLowerCase();
+                        const porteNormalizado = pet.porte?.toLowerCase();
+
+                        if ((especieNormalizada !== "cachorro" && especieNormalizada !== "gato") ||
+                            (porteNormalizado !== "pequeno" && porteNormalizado !== "medio" && porteNormalizado !== "grande")) {
+                            return null;
+                        }
+
+                        return {
+                            id: pet.id,
+                            nome: pet.nome,
+                            imagem: pet.link_foto,
+                            especie: especieNormalizada,
+                            porte: porteNormalizado,
+                            genero: null,
+                        };
+                    })
+                    .filter((pet): pet is animal => Boolean(pet));
+
+                setPets(parsedPets);
+            } catch {
+                setPetsError("Nao foi possivel carregar os pets.");
+            } finally {
+                setIsLoadingPets(false);
+            }
+        }
+
+        void loadPets();
+    }, []);
 
     function closePopUp():void{
         setEspecie(null)
@@ -111,7 +78,7 @@ export default function ListagemPets(){
         return pets.filter((animal)=>
            (searchText ? animal.nome.toLowerCase().includes(searchText.toLowerCase()) : true) &&
            (especie ? animal.especie===especie : true) &&
-           (genero ? animal.genero===genero : true) &&
+           (genero ? animal.genero===genero || animal.genero===null : true) &&
            (porte ? animal.porte===porte : true) 
         )
     }
@@ -128,6 +95,7 @@ export default function ListagemPets(){
 
             <FlatList
                 data={filter()}
+                keyExtractor={(item, index) => item.id ?? String(index)}
                 contentContainerStyle={{
                     display:"flex",
                     flexDirection:"row",
@@ -144,8 +112,14 @@ export default function ListagemPets(){
                 )}
                 ListEmptyComponent={
                     <View style={{height:200, margin:"auto", marginTop:"10%"}}>
-                        <Image source={require("../assets/images/nothingfound.png")} style={{height:250,width:250}}></Image>
-                        <Text> Não encontramos nenhum animal no momento...</Text>
+                        {isLoadingPets ? (
+                            <ActivityIndicator size="large" color={colors.primary}></ActivityIndicator>
+                        ) : (
+                            <>
+                                <Image source={require("../assets/images/nothingfound.png")} style={{height:250,width:250}}></Image>
+                                <Text>{petsError ?? "Nao encontramos nenhum animal no momento..."}</Text>
+                            </>
+                        )}
                     </View>
                 }
            
