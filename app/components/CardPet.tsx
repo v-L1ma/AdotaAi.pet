@@ -1,8 +1,7 @@
 import { animal } from "@/types/TAnimal";
 import { useRouter } from "expo-router";
-import { navigate } from "expo-router/build/global-state/routing";
 import React from "react";
-import { Image, StyleSheet, Text, Touchable, TouchableOpacity, View } from "react-native";
+import { Image, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 
 type Props = {
     animal:animal,
@@ -11,7 +10,6 @@ type Props = {
 }
 
 export default function CardPet({animal,index, onlyPicture}:Props){
-    const teste:string =""
     const router = useRouter();
 
     if(!onlyPicture){
@@ -20,8 +18,7 @@ export default function CardPet({animal,index, onlyPicture}:Props){
                 {
                     pathname:"/perfil-pet",
                     params:{
-                        nome: animal.nome,
-                        imagem: animal.imagem
+                        id: animal.id
                     }
                 })
                 )}>
@@ -39,8 +36,7 @@ export default function CardPet({animal,index, onlyPicture}:Props){
                 {
                     pathname:"/perfil-pet",
                     params:{
-                        nome: animal.nome,
-                        imagem: animal.imagem
+                        id: animal.id
                     }
                 })
             )}>

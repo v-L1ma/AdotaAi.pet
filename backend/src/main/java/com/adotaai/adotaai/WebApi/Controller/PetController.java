@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.adotaai.adotaai.Application.DTO.BuscarPetDTO;
 import com.adotaai.adotaai.Application.DTO.PetDTO;
 import com.adotaai.adotaai.Application.Service.PetService;
 import com.adotaai.adotaai.Application.Util.BaseResponse;
@@ -34,6 +35,12 @@ public class PetController {
     public ResponseEntity<PetDTO> criarPet(@RequestBody PetDTO pet) {
         PetDTO criado = petService.criarPet(pet);
         return ResponseEntity.ok(criado);
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<BuscarPetDTO> buscarPet(@PathVariable UUID id) {
+        BuscarPetDTO encontrado = petService.buscarPet(id);
+        return ResponseEntity.ok(encontrado);
     }
 
     @PutMapping("/{id}")

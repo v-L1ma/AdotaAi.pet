@@ -1,6 +1,7 @@
 package com.adotaai.adotaai.Application.Service;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 import org.springframework.beans.BeanUtils;
@@ -9,6 +10,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
+import com.adotaai.adotaai.Application.DTO.BuscarPetDTO;
 import com.adotaai.adotaai.Application.DTO.PetDTO;
 import com.adotaai.adotaai.Domain.Entity.FavoritoPetEntity;
 import com.adotaai.adotaai.Domain.Entity.PetEntity;
@@ -34,6 +36,37 @@ public class PetService {
     public List<PetDTO> listarTodos() {
         List<PetEntity> pet = petRepository.findAll();
         return pet.stream().map(PetDTO::new).toList();
+    }
+
+    public BuscarPetDTO buscarPet(UUID id) {
+        PetEntity pet = petRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Pet não encontrado com ID: " + id));
+
+        BuscarPetDTO.DonoDTO dono = null;
+        if (pet.getUser() != null) {
+            dono = new BuscarPetDTO.DonoDTO(pet.getUser().getId(), pet.getUser().getNome());
+        }
+
+        boolean isFavoritado = false;
+        Optional<UsuarioEntity> usuarioAutenticado = obterUsuarioAutenticadoOpcional();
+        if (usuarioAutenticado.isPresent()) {
+            isFavoritado = favoritoPetRepository.existsByUsuarioIdAndPetId(
+                usuarioAutenticado.get().getId(),
+                pet.getId());
+        }
+
+        return new BuscarPetDTO(
+                pet.getId(),
+                pet.getStatus(),
+                pet.getDescricao(),
+                pet.getDt_nasc(),
+                pet.getNome(),
+                pet.getPorte(),
+                pet.getRaca(),
+                pet.getEspecie(),
+                pet.getLink_foto(),
+                isFavoritado,
+                dono);
     }
 
     public void excluir(UUID id) {
@@ -116,29 +149,31 @@ public class PetService {
     }
 
     private UsuarioEntity obterUsuarioAutenticado() {
+        return obterUsuarioAutenticadoOpcional()
+                .orElseThrow(() -> new RuntimeException("Usuário não autenticado."));
+    }
+
+    private Optional<UsuarioEntity> obterUsuarioAutenticadoOpcional() {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         if (auth == null || !auth.isAuthenticated() || "anonymousUser".equals(auth.getName())) {
-            throw new RuntimeException("Usuário não autenticado.");
+            return Optional.empty();
         }
 
         Object details = auth.getDetails();
         if (details instanceof UUID userId) {
-            return usuarioRepository.findById(userId)
-                    .orElseThrow(() -> new RuntimeException("Usuário não encontrado para o id: " + userId));
+            return usuarioRepository.findById(userId);
         }
 
         if (details instanceof String userIdStr) {
             try {
                 UUID userId = UUID.fromString(userIdStr);
-                return usuarioRepository.findById(userId)
-                        .orElseThrow(() -> new RuntimeException("Usuário não encontrado para o id: " + userId));
+                return usuarioRepository.findById(userId);
             } catch (IllegalArgumentException ignored) {
                 // Fallback para autenticações antigas baseadas em email.
             }
         }
 
-        return usuarioRepository.findByEmail(auth.getName())
-                .orElseThrow(() -> new RuntimeException("Usuário não encontrado para o email: " + auth.getName()));
+        return usuarioRepository.findByEmail(auth.getName());
     }
 
 }
