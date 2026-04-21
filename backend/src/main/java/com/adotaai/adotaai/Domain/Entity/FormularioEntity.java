@@ -11,7 +11,7 @@ import java.util.UUID;
 public class FormularioEntity extends AuditableEntity {
 
     @Id
-    @GeneratedValue()
+    @GeneratedValue
     private UUID id;
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -35,6 +35,9 @@ public class FormularioEntity extends AuditableEntity {
     }
 
     public void setUsuarioCriador(UsuarioEntity usuarioCriador) {
+        if (usuarioCriador == null) {
+            throw new IllegalArgumentException("O usuário criador não pode ser nulo.");
+        }
         this.usuarioCriador = usuarioCriador;
     }
 
@@ -43,6 +46,10 @@ public class FormularioEntity extends AuditableEntity {
     }
 
     public void setPerguntas(List<PerguntaEntity> perguntas) {
-        this.perguntas = perguntas;
+        if (perguntas == null) {
+            this.perguntas = new ArrayList<>();
+        } else {
+            this.perguntas = perguntas;
+        }
     }
 }

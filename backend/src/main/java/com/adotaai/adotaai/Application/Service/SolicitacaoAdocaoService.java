@@ -7,26 +7,15 @@ import java.util.UUID;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.adotaai.adotaai.Application.DTO.FormularioDetalhadoDTO;
-import com.adotaai.adotaai.Application.DTO.PerguntaRespostaDTO;
-import com.adotaai.adotaai.Application.DTO.RespostaDTO;
-import com.adotaai.adotaai.Application.DTO.RespostaResponseDTO;
-import com.adotaai.adotaai.Application.DTO.SolicitacaoAdocaoDTO;
-import com.adotaai.adotaai.Application.DTO.SolicitacaoResponseDTO;
-import com.adotaai.adotaai.Domain.Entity.FormularioEntity;
-import com.adotaai.adotaai.Domain.Entity.PerguntaEntity;
-import com.adotaai.adotaai.Domain.Entity.RespostaEntity;
-import com.adotaai.adotaai.Domain.Entity.SolicitacaoAdocaoEntity;
-import com.adotaai.adotaai.Domain.Entity.UsuarioEntity;
+import com.adotaai.adotaai.Application.DTO.*;
+import com.adotaai.adotaai.Domain.Entity.*;
 import com.adotaai.adotaai.Domain.Enum.StatusSolicitacao;
-import com.adotaai.adotaai.Infraestructure.Repository.FormularioRepository;
-import com.adotaai.adotaai.Infraestructure.Repository.PerguntaRepository;
-import com.adotaai.adotaai.Infraestructure.Repository.RespostaRepository;
-import com.adotaai.adotaai.Infraestructure.Repository.SolicitacaoAdocaoRepository;
-import com.adotaai.adotaai.Infraestructure.Repository.UsuarioRepository;
+import com.adotaai.adotaai.Domain.Exception.RecursoNaoEncontradoException;
+import com.adotaai.adotaai.Domain.Exception.RegraDeNegocioException;
+import com.adotaai.adotaai.Infraestructure.Repository.*;
 
 @Service
-public class SolicitacaoAdocaoService {
+public class SolicitacaoAdocaoService implements ISolicitacaoAdocaoService {
 
     private final SolicitacaoAdocaoRepository solicitacaoRepository;
     private final UsuarioRepository usuarioRepository;
@@ -35,10 +24,10 @@ public class SolicitacaoAdocaoService {
     private final RespostaRepository respostaRepository;
 
     public SolicitacaoAdocaoService(SolicitacaoAdocaoRepository solicitacaoRepository,
-            UsuarioRepository usuarioRepository,
-            FormularioRepository formularioRepository,
-            PerguntaRepository perguntaRepository,
-            RespostaRepository respostaRepository) {
+                                    UsuarioRepository usuarioRepository,
+                                    FormularioRepository formularioRepository,
+                                    PerguntaRepository perguntaRepository,
+                                    RespostaRepository respostaRepository) {
         this.solicitacaoRepository = solicitacaoRepository;
         this.usuarioRepository = usuarioRepository;
         this.formularioRepository = formularioRepository;
@@ -46,36 +35,41 @@ public class SolicitacaoAdocaoService {
         this.respostaRepository = respostaRepository;
     }
 
+    @Override
     @Transactional
     public SolicitacaoResponseDTO criarSolicitacao(SolicitacaoAdocaoDTO dto) {
         UsuarioEntity adotante = usuarioRepository.findById(dto.getAdotanteId())
-                .orElseThrow(() -> new RuntimeException("Usuário adotante não encontrado"));
+                .orElseThrow(() -> new RecursoNaoEncontradoException("Usuário adotante não encontrado"));
+
         FormularioEntity formulario = formularioRepository.findById(dto.getFormularioId())
-                .orElseThrow(() -> new RuntimeException("Formulário não encontrado"));
+                .orElseThrow(() -> new RecursoNaoEncontradoException("Formulário não encontrado"));
+
         UsuarioEntity anunciante = formulario.getUsuarioCriador();
 
-        Optional<SolicitacaoAdocaoEntity> solicitacaoExistente
-                = solicitacaoRepository.findByAdotanteIdAndFormularioId(adotante.getId(), formulario.getId());
+        Optional<SolicitacaoAdocaoEntity> solicitacaoExistente =
+                solicitacaoRepository.findByAdotanteIdAndFormularioId(adotante.getId(), formulario.getId());
 
         if (solicitacaoExistente.isPresent()) {
-            throw new RuntimeException("Você já enviou uma solicitação para este formulário.");
+            throw new RegraDeNegocioException("Você já enviou uma solicitação para este formulário.");
         }
 
         SolicitacaoAdocaoEntity novaSolicitacao = new SolicitacaoAdocaoEntity();
         novaSolicitacao.setAdotante(adotante);
         novaSolicitacao.setAnunciante(anunciante);
-        novaSolicitacao.setFormulario(formulario); // <-- MUDANÇA AQUI (Salvando o formulário)
+        novaSolicitacao.setFormulario(formulario);
 
         SolicitacaoAdocaoEntity solicitacaoSalva = solicitacaoRepository.save(novaSolicitacao);
         return new SolicitacaoResponseDTO(solicitacaoSalva);
     }
 
+    @Override
     @Transactional
     public RespostaResponseDTO salvarResposta(RespostaDTO dto) {
         SolicitacaoAdocaoEntity solicitacao = solicitacaoRepository.findById(dto.getSolicitacaoId())
-                .orElseThrow(() -> new RuntimeException("Solicitação não encontrada"));
+                .orElseThrow(() -> new RecursoNaoEncontradoException("Solicitação não encontrada"));
+
         PerguntaEntity pergunta = perguntaRepository.findById(dto.getPerguntaId())
-                .orElseThrow(() -> new RuntimeException("Pergunta não encontrada"));
+                .orElseThrow(() -> new RecursoNaoEncontradoException("Pergunta não encontrada"));
 
         RespostaEntity resposta = new RespostaEntity();
         resposta.setSolicitacao(solicitacao);
@@ -86,15 +80,16 @@ public class SolicitacaoAdocaoService {
         return new RespostaResponseDTO(respostaSalva);
     }
 
+    @Override
     @Transactional(readOnly = true)
     public FormularioDetalhadoDTO buscarSolicitacaoDetalhada(UUID solicitacaoId) {
         SolicitacaoAdocaoEntity solicitacao = solicitacaoRepository.findById(solicitacaoId)
-                .orElseThrow(() -> new RuntimeException("Solicitação não encontrada"));
+                .orElseThrow(() -> new RecursoNaoEncontradoException("Solicitação não encontrada"));
 
         FormularioEntity formularioOriginal = solicitacao.getFormulario();
 
         if (formularioOriginal == null) {
-            throw new RuntimeException("Não foi possível encontrar o formulário associado a esta solicitação.");
+            throw new RegraDeNegocioException("Não foi possível encontrar o formulário associado a esta solicitação.");
         }
 
         List<PerguntaRespostaDTO> perguntasRespostas = formularioOriginal.getPerguntas().stream()
@@ -117,20 +112,22 @@ public class SolicitacaoAdocaoService {
         );
     }
 
+    @Override
     @Transactional
     public SolicitacaoResponseDTO aprovarSolicitacao(UUID solicitacaoId) {
         SolicitacaoAdocaoEntity solicitacao = solicitacaoRepository.findById(solicitacaoId)
-                .orElseThrow(() -> new RuntimeException("Solicitação não encontrada"));
+                .orElseThrow(() -> new RecursoNaoEncontradoException("Solicitação não encontrada"));
 
         solicitacao.setStatus(StatusSolicitacao.APROVADO);
         SolicitacaoAdocaoEntity solicitacaoSalva = solicitacaoRepository.save(solicitacao);
         return new SolicitacaoResponseDTO(solicitacaoSalva);
     }
 
+    @Override
     @Transactional
     public SolicitacaoResponseDTO recusarSolicitacao(UUID solicitacaoId) {
         SolicitacaoAdocaoEntity solicitacao = solicitacaoRepository.findById(solicitacaoId)
-                .orElseThrow(() -> new RuntimeException("Solicitação não encontrada"));
+                .orElseThrow(() -> new RecursoNaoEncontradoException("Solicitação não encontrada"));
 
         solicitacao.setStatus(StatusSolicitacao.RECUSADO);
         SolicitacaoAdocaoEntity solicitacaoSalva = solicitacaoRepository.save(solicitacao);
