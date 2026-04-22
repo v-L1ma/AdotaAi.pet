@@ -1,293 +1,356 @@
-
+import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from "expo-router";
-import React, { useState } from "react";
-import { Image, SafeAreaView, ScrollView, Text, TouchableOpacity, View } from "react-native";
+import React, { useMemo, useState } from "react";
+import { Image, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { SafeAreaView } from 'react-native-safe-area-context';
+import colors from '../styles/colors';
 
-const Solicitacoes = () => {
+type Solicitacao = {
+  id: number;
+  usuario: {
+    nome: string;
+    email: string;
+    telefone: string;
+  };
+  triagem: {
+    motivo: string;
+    experiencia: string;
+    ambiente: string;
+    outrosPets: string;
+    tempoDisponivel: string;
+  };
+  animal: {
+    nome: string;
+    imagem: any;
+    status: 'Nova' | 'Pendente';
+    tempo: string;
+  };
+  usuarioImagem: any;
+};
+
+const recebidos: Solicitacao[] = [
+  {
+    id: 1,
+    usuario: { nome: "João Silva", email: "joao@email.com", telefone: "(11) 91234-5678" },
+    triagem: {
+      motivo: "Quero adotar para companhia.",
+      experiencia: "Já tive cães antes.",
+      ambiente: "Casa com quintal fechado.",
+      outrosPets: "Sim, tenho um gato.",
+      tempoDisponivel: "Tarde e noite.",
+    },
+    animal: { nome: "Rex", imagem: require("../assets/images/dog1.png"), status: 'Nova', tempo: 'há 2 horas' },
+    usuarioImagem: require("../assets/images/icon.jpg"),
+  },
+  {
+    id: 3,
+    usuario: { nome: "Carlos Souza", email: "carlos@email.com", telefone: "(31) 99888-1234" },
+    triagem: {
+      motivo: "Quero adotar para companhia dos meus pais.",
+      experiencia: "Já tive gatos.",
+      ambiente: "Casa grande com jardim.",
+      outrosPets: "Não.",
+      tempoDisponivel: "Noite.",
+    },
+    animal: { nome: "Luna", imagem: require("../assets/images/cat1.png"), status: 'Pendente', tempo: 'ontem' },
+    usuarioImagem: require("../assets/images/icon.jpg"),
+  },
+];
+
+const enviados: Solicitacao[] = [
+  {
+    id: 2,
+    usuario: { nome: "Maria Oliveira", email: "maria@email.com", telefone: "(21) 99876-5432" },
+    triagem: {
+      motivo: "Quero adotar para meus filhos.",
+      experiencia: "Nunca tive pets.",
+      ambiente: "Apartamento médio.",
+      outrosPets: "Não.",
+      tempoDisponivel: "Manhã e fim de semana.",
+    },
+    animal: { nome: "Mimi", imagem: require("../assets/images/cat1.png"), status: 'Pendente', tempo: '2 dias' },
+    usuarioImagem: require("../assets/images/icon.jpg"),
+  },
+  {
+    id: 5,
+    usuario: { nome: "Bruno Lima", email: "bruno@email.com", telefone: "(51) 98765-4321" },
+    triagem: {
+      motivo: "Quero adotar para companhia.",
+      experiencia: "Já tive cachorros.",
+      ambiente: "Casa com quintal.",
+      outrosPets: "Sim, tenho um peixe.",
+      tempoDisponivel: "Tarde.",
+    },
+    animal: { nome: "Mel", imagem: require("../assets/images/dog1.png"), status: 'Pendente', tempo: '4 dias' },
+    usuarioImagem: require("../assets/images/icon.jpg"),
+  },
+];
+
+export default function Solicitacoes() {
   const router = useRouter();
-  const [formularioAberto, setFormularioAberto] = useState<null | number>(null);
   const [tab, setTab] = useState<'recebidos' | 'enviados'>('recebidos');
+  const [aberta, setAberta] = useState<number | null>(null);
 
-  // Mock de solicitações recebidas
-  const solicitacoesRecebidas = [
-    {
-      id: 1,
-      usuario: {
-        nome: "João Silva",
-        email: "joao@email.com",
-        telefone: "(11) 91234-5678",
-      },
-      triagem: {
-        motivo: "Quero adotar para companhia.",
-        experiencia: "Já tive cães antes.",
-        ambiente: "Casa com quintal fechado.",
-        outrosPets: "Sim, tenho um gato.",
-        tempoDisponivel: "Tarde e noite.",
-      },
-      animal: {
-        nome: "Rex",
-        imagem: require("../assets/images/dog1.png"),
-      },
-      usuarioImagem: require("../assets/images/icon.jpg"),
-    },
-    {
-      id: 3,
-      usuario: {
-        nome: "Carlos Souza",
-        email: "carlos@email.com",
-        telefone: "(31) 99888-1234",
-      },
-      triagem: {
-        motivo: "Quero adotar para companhia dos meus pais.",
-        experiencia: "Já tive gatos.",
-        ambiente: "Casa grande com jardim.",
-        outrosPets: "Não.",
-        tempoDisponivel: "Noite.",
-      },
-      animal: {
-        nome: "Luna",
-        imagem: require("../assets/images/cat1.png"),
-      },
-      usuarioImagem: require("../assets/images/icon.jpg"),
-    },
-    {
-      id: 4,
-      usuario: {
-        nome: "Ana Paula",
-        email: "ana@email.com",
-        telefone: "(41) 91234-5678",
-      },
-      triagem: {
-        motivo: "Quero adotar para meus filhos.",
-        experiencia: "Nunca tive pets.",
-        ambiente: "Apartamento pequeno.",
-        outrosPets: "Não.",
-        tempoDisponivel: "Manhã e tarde.",
-      },
-      animal: {
-        nome: "Toby",
-        imagem: require("../assets/images/dog1.png"),
-      },
-      usuarioImagem: require("../assets/images/icon.jpg"),
-    }
-  ];
+  const data = useMemo(() => (tab === 'recebidos' ? recebidos : enviados), [tab]);
+  const selecionada = data.find((item) => item.id === aberta) || null;
 
-  // Mock de solicitações enviadas
-  const solicitacoesEnviadas = [
-    {
-      id: 2,
-      usuario: {
-        nome: "Maria Oliveira",
-        email: "maria@email.com",
-        telefone: "(21) 99876-5432",
-      },
-      triagem: {
-        motivo: "Quero adotar para meus filhos.",
-        experiencia: "Nunca tive pets.",
-        ambiente: "Apartamento médio.",
-        outrosPets: "Não.",
-        tempoDisponivel: "Manhã e fim de semana.",
-      },
-      animal: {
-        nome: "Mimi",
-        imagem: require("../assets/images/cat1.png"),
-      },
-      usuarioImagem: require("../assets/images/icon.jpg"),
-    },
-    {
-      id: 5,
-      usuario: {
-        nome: "Bruno Lima",
-        email: "bruno@email.com",
-        telefone: "(51) 98765-4321",
-      },
-      triagem: {
-        motivo: "Quero adotar para companhia.",
-        experiencia: "Já tive cachorros.",
-        ambiente: "Casa com quintal.",
-        outrosPets: "Sim, tenho um peixe.",
-        tempoDisponivel: "Tarde.",
-      },
-      animal: {
-        nome: "Mel",
-        imagem: require("../assets/images/dog1.png"),
-      },
-      usuarioImagem: require("../assets/images/icon.jpg"),
-    },
-    {
-      id: 6,
-      usuario: {
-        nome: "Fernanda Costa",
-        email: "fernanda@email.com",
-        telefone: "(61) 91234-5678",
-      },
-      triagem: {
-        motivo: "Quero adotar para companhia do meu filho.",
-        experiencia: "Nunca tive pets.",
-        ambiente: "Apartamento grande.",
-        outrosPets: "Não.",
-        tempoDisponivel: "Noite e fim de semana.",
-      },
-      animal: {
-        nome: "Nina",
-        imagem: require("../assets/images/cat1.png"),
-      },
-      usuarioImagem: require("../assets/images/icon.jpg"),
-    }
-  ];
-
-  const CardSolicitacao = ({ usuario, animal, usuarioImagem, onVerFormulario }: any) => (
-    <View style={{
-      backgroundColor: '#fff',
-      borderRadius: 12,
-      paddingTop: 56,
-      paddingBottom: 16,
-      paddingHorizontal: 16,
-      marginBottom: 60,
-      shadowColor: '#000',
-      shadowOpacity: 0.1,
-      shadowRadius: 6,
-      elevation: 3,
-      minHeight: 120,
-      overflow: 'visible',
-      position: 'relative',
-    }}>
-      <View style={{ alignItems: 'center', justifyContent: 'center', marginTop: -40, marginBottom: 8 }}>
-        <Image
-          source={animal.imagem}
-          style={{
-            width: 80,
-            height: 80,
-            borderRadius: 40,
-            borderWidth: 2,
-            borderColor: '#fff',
-            backgroundColor: '#eee',
-          }}
-        />
-        <Text style={{ fontWeight: 'bold', fontSize: 17, marginTop: 8 }}>{animal.nome}</Text>
-      </View>
-      <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 8, marginTop: 8 }}>
-        <Image source={usuarioImagem} style={{ width: 50, height: 50, borderRadius: 25, marginRight: 12, alignSelf: 'flex-start' }} />
-        <View style={{ alignItems: 'flex-start', justifyContent: 'center', flex: 1 }}>
-          <Text style={{ textAlign: 'left' }}>Nome: {usuario.nome}</Text>
-          <Text style={{ textAlign: 'left' }}>Email: {usuario.email}</Text>
-          <Text style={{ textAlign: 'left' }}>Telefone: {usuario.telefone}</Text>
-        </View>
-      </View>
-      <TouchableOpacity
-        style={{
-          marginTop: 8,
-          backgroundColor: '#fda49cff',
-          padding: 10,
-          borderRadius: 8,
-          alignItems: 'center',
-        }}
-        onPress={onVerFormulario}
-      >
-        <Text style={{ color: '#fff', fontWeight: 'bold' }}>Ver Formulário</Text>
-      </TouchableOpacity>
-    </View>
-  );
-
-  const FormularioTriagem = ({ usuario, triagem, onVoltar }: any) => (
-    <View style={{
-      backgroundColor: '#fff',
-      borderRadius: 12,
-      padding: 20,
-      margin: 20,
-      shadowColor: '#000',
-      shadowOpacity: 0.1,
-      shadowRadius: 6,
-      elevation: 3,
-    }}>
-      <Text style={{ fontWeight: 'bold', fontSize: 17, marginBottom: 12 }}>Formulário de Triagem</Text>
-      <View>
-        <Text style={{ marginBottom: 6 }}>Usuário: {usuario.nome}</Text>
-        <Text>Motivo da adoção: {triagem.motivo}</Text>
-        <Text>Experiência com pets: {triagem.experiencia}</Text>
-        <Text>Ambiente: {triagem.ambiente}</Text>
-        <Text>Outros pets: {triagem.outrosPets}</Text>
-        <Text>Tempo disponível: {triagem.tempoDisponivel}</Text>
-      </View>
-      <TouchableOpacity
-        style={{
-          marginTop: 16,
-          backgroundColor: '#4F8EF7',
-          padding: 10,
-          borderRadius: 8,
-          alignItems: 'center',
-        }}
-        onPress={onVoltar}
-      >
-        <Text style={{ color: '#fff', fontWeight: 'bold' }}>Voltar</Text>
-      </TouchableOpacity>
-    </View>
-  );
-
-  if (formularioAberto !== null) {
-    const solicitacao = (tab === 'recebidos' ? solicitacoesRecebidas : solicitacoesEnviadas).find(s => s.id === formularioAberto);
-    if (!solicitacao) return null;
+  if (selecionada) {
     return (
-      <FormularioTriagem
-        usuario={solicitacao.usuario}
-        triagem={solicitacao.triagem}
-        onVoltar={() => setFormularioAberto(null)}
-      />
+      <SafeAreaView style={styles.screen} edges={['top', 'left', 'right', 'bottom']}>
+        <View style={styles.header}>
+          <TouchableOpacity onPress={() => setAberta(null)} style={styles.backButton}>
+            <Ionicons name="arrow-back" size={28} color={colors.primary} />
+          </TouchableOpacity>
+          <Text style={styles.headerTitle}>Formulário de Triagem</Text>
+        </View>
+
+        <ScrollView contentContainerStyle={styles.formContent}>
+          <View style={styles.formCard}>
+            <Text style={styles.formSectionTitle}>Solicitante</Text>
+            <Text style={styles.formText}>Nome: {selecionada.usuario.nome}</Text>
+            <Text style={styles.formText}>Email: {selecionada.usuario.email}</Text>
+            <Text style={styles.formText}>Telefone: {selecionada.usuario.telefone}</Text>
+          </View>
+
+          <View style={styles.formCard}>
+            <Text style={styles.formSectionTitle}>Respostas</Text>
+            <Text style={styles.formText}>Motivo: {selecionada.triagem.motivo}</Text>
+            <Text style={styles.formText}>Experiência: {selecionada.triagem.experiencia}</Text>
+            <Text style={styles.formText}>Ambiente: {selecionada.triagem.ambiente}</Text>
+            <Text style={styles.formText}>Outros pets: {selecionada.triagem.outrosPets}</Text>
+            <Text style={styles.formText}>Tempo disponível: {selecionada.triagem.tempoDisponivel}</Text>
+          </View>
+        </ScrollView>
+      </SafeAreaView>
     );
   }
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: '#f5f5f5' }}>
-      {/* Header fixo no topo */}
-      <View style={{ width: "100%", backgroundColor: '#fff', borderRadius: 0, paddingTop: 50, paddingBottom: 20, shadowColor: '#000', shadowOpacity: 0.06, shadowRadius: 4, elevation: 2 }}>
-        <Text style={{ fontSize: 28, fontWeight: 'bold', textAlign: 'center', marginBottom: 10 }}>Solicitações</Text>
-        <View style={{ flexDirection: 'row', justifyContent: 'center' }}>
-          <TouchableOpacity
-            style={{
-              backgroundColor: tab === 'recebidos' ? '#fda49cff' : '#fff',
-              paddingVertical: 8,
-              paddingHorizontal: 24,
-              borderRadius: 20,
-              borderWidth: tab === 'recebidos' ? 0 : 1,
-              borderColor: '#fda49cff',
-              marginRight: 10,
-            }}
-            onPress={() => setTab('recebidos')}
-          >
-            <Text style={{ color: tab === 'recebidos' ? '#fff' : '#fda49cff', fontWeight: 'bold', fontSize: 16 }}>Recebidos</Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={{
-              backgroundColor: tab === 'enviados' ? '#fda49cff' : '#fff',
-              paddingVertical: 8,
-              paddingHorizontal: 24,
-              borderRadius: 20,
-              borderWidth: tab === 'enviados' ? 0 : 1,
-              borderColor: '#fda49cff',
-            }}
-            onPress={() => setTab('enviados')}
-          >
-            <Text style={{ color: tab === 'enviados' ? '#fff' : '#fda49cff', fontWeight: 'bold', fontSize: 16 }}>Enviados</Text>
-          </TouchableOpacity>
-        </View>
+    <>
+      <SafeAreaView edges={['top']} style={{ backgroundColor: '#fff' }} />
+      <View style={styles.header}>
+        <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
+          <Ionicons name="arrow-back" size={28} color={colors.primary} />
+        </TouchableOpacity>
+        <Text style={styles.headerTitle}>Solicitações</Text>
       </View>
-      {/* Cards roláveis */}
-      <ScrollView style={{ flex: 1 }} contentContainerStyle={{ paddingTop: 30 }}>
-        <View style={{ paddingHorizontal: 20 }}>
-          {(tab === 'recebidos' ? solicitacoesRecebidas : solicitacoesEnviadas).map((s) => (
-            <CardSolicitacao
-              key={s.id}
-              usuario={s.usuario}
-              animal={s.animal}
-              usuarioImagem={s.usuarioImagem}
-              onVerFormulario={() => setFormularioAberto(s.id)}
-            />
-          ))}
+
+      <View style={styles.screen}>
+        <View style={styles.tabsWrap}>
+          <TouchableOpacity style={[styles.tab, tab === 'recebidos' && styles.tabActive]} onPress={() => setTab('recebidos')}>
+            <Text style={[styles.tabText, tab === 'recebidos' && styles.tabTextActive]}>Recebidos</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={[styles.tab, tab === 'enviados' && styles.tabActive]} onPress={() => setTab('enviados')}>
+            <Text style={[styles.tabText, tab === 'enviados' && styles.tabTextActive]}>Enviados</Text>
+          </TouchableOpacity>
         </View>
-      </ScrollView>
-    </SafeAreaView>
+
+        <ScrollView contentContainerStyle={styles.cardsContent} showsVerticalScrollIndicator={false}>
+          {data.map((item) => (
+            <View key={item.id} style={styles.card}>
+              <View style={styles.cardTop}>
+                <Image source={item.animal.imagem} style={styles.petImage} />
+                <View style={{ alignItems: 'flex-end' }}>
+                  <View style={[styles.statusBadge, item.animal.status === 'Nova' ? styles.statusNew : styles.statusPending]}>
+                    <Text style={styles.statusText}>{item.animal.status}</Text>
+                  </View>
+                  <Text style={styles.timeText}>{item.animal.tempo}</Text>
+                </View>
+              </View>
+
+              <Text style={styles.petName}>{item.animal.nome}</Text>
+              <Text style={styles.requesterLabel}>Dados do solicitante</Text>
+
+              <View style={styles.requesterRow}>
+                <Image source={item.usuarioImagem} style={styles.userImage} />
+                <View>
+                  <Text style={styles.requesterText}>{item.usuario.nome}</Text>
+                  <Text style={styles.requesterSub}>{item.usuario.email}</Text>
+                  <Text style={styles.requesterSub}>{item.usuario.telefone}</Text>
+                </View>
+              </View>
+
+              <TouchableOpacity style={styles.viewButton} onPress={() => setAberta(item.id)}>
+                <Text style={styles.viewButtonText}>Ver formulário</Text>
+              </TouchableOpacity>
+            </View>
+          ))}
+        </ScrollView>
+      </View>
+    </>
   );
 }
 
-
-export default Solicitacoes;
+const styles = StyleSheet.create({
+  screen: {
+    flex: 1,
+    backgroundColor: '#f6f7f9',
+    paddingHorizontal: 16,
+  },
+  header: {
+    width: '100%',
+    backgroundColor: '#fff',
+    borderBottomLeftRadius: 20,
+    borderBottomRightRadius: 20,
+    paddingTop: 42,
+    paddingBottom: 14,
+    shadowColor: '#000',
+    shadowOpacity: 0.05,
+    shadowRadius: 6,
+    elevation: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: 16,
+  },
+  backButton: {
+    position: 'absolute',
+    left: 16,
+    top: 44,
+    zIndex: 2,
+  },
+  headerTitle: {
+    fontSize: 22,
+    fontWeight: '800',
+    color: '#e74c3c',
+    textAlign: 'center',
+  },
+  tabsWrap: {
+    marginTop: 10,
+    alignSelf: 'center',
+    flexDirection: 'row',
+    backgroundColor: '#eceff3',
+    borderRadius: 14,
+    padding: 4,
+    gap: 4,
+  },
+  tab: {
+    borderRadius: 10,
+    paddingHorizontal: 14,
+    paddingVertical: 8,
+  },
+  tabActive: {
+    backgroundColor: '#fff',
+  },
+  tabText: {
+    color: '#777',
+    fontWeight: '700',
+  },
+  tabTextActive: {
+    color: colors.primary,
+  },
+  cardsContent: {
+    paddingTop: 12,
+    paddingBottom: 28,
+    gap: 10,
+  },
+  card: {
+    backgroundColor: '#fff',
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: '#ebedf0',
+    padding: 12,
+    marginBottom: 10,
+  },
+  cardTop: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: 8,
+  },
+  petImage: {
+    width: 72,
+    height: 72,
+    borderRadius: 14,
+  },
+  statusBadge: {
+    borderRadius: 999,
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+  },
+  statusNew: {
+    backgroundColor: '#d8f5df',
+  },
+  statusPending: {
+    backgroundColor: '#ececec',
+  },
+  statusText: {
+    fontSize: 10,
+    fontWeight: '800',
+    textTransform: 'uppercase',
+    color: '#334',
+  },
+  timeText: {
+    marginTop: 4,
+    fontSize: 11,
+    color: '#777',
+  },
+  petName: {
+    fontSize: 20,
+    fontWeight: '800',
+    color: '#202020',
+  },
+  requesterLabel: {
+    marginTop: 4,
+    fontSize: 10,
+    fontWeight: '700',
+    textTransform: 'uppercase',
+    letterSpacing: 0.6,
+    color: '#7a7a7a',
+  },
+  requesterRow: {
+    marginTop: 6,
+    flexDirection: 'row',
+    gap: 10,
+    alignItems: 'center',
+  },
+  userImage: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+  },
+  requesterText: {
+    color: '#222',
+    fontWeight: '700',
+    fontSize: 14,
+  },
+  requesterSub: {
+    color: '#666',
+    fontSize: 11,
+  },
+  viewButton: {
+    marginTop: 10,
+    backgroundColor: colors.primary,
+    borderRadius: 10,
+    minHeight: 40,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  viewButtonText: {
+    color: '#fff',
+    fontWeight: '700',
+    fontSize: 14,
+  },
+  formContent: {
+    padding: 16,
+    gap: 10,
+    paddingBottom: 30,
+  },
+  formCard: {
+    backgroundColor: '#fff',
+    borderRadius: 18,
+    borderWidth: 1,
+    borderColor: '#ececec',
+    padding: 14,
+    gap: 6,
+  },
+  formSectionTitle: {
+    color: '#202020',
+    fontWeight: '900',
+    fontSize: 18,
+    marginBottom: 4,
+  },
+  formText: {
+    color: '#555',
+    lineHeight: 20,
+  },
+});

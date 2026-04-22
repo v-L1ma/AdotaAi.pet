@@ -1,10 +1,10 @@
-import { useRouter } from "expo-router";
 import React, { useEffect, useRef } from "react";
 import { SafeAreaView, Text, TextInput, Image, TouchableOpacity, KeyboardAvoidingView, View, Platform, Animated, Easing } from "react-native";
 import styles from "../styles/AppStyles";
+import { useTabNavigation } from "@/hooks/useTabNavigation";
 
 export default function CadastroScreen() {
-  const router = useRouter();
+  const { navigateToTab } = useTabNavigation();
   const slideAnim = useRef(new Animated.Value(1000)).current;
 
   useEffect(() => {
@@ -37,7 +37,7 @@ export default function CadastroScreen() {
             <Text style={styles.inputText}>Confirmar senha</Text>
             <TextInput style={styles.input} secureTextEntry />
 
-            <TouchableOpacity style={styles.buttonLogin} onPress={() => router.push("/Home")}>
+            <TouchableOpacity style={styles.buttonLogin} onPress={() => navigateToTab("/home")}>
               <Text style={styles.buttonText}>Cadastrar</Text>
             </TouchableOpacity>
           </View>
