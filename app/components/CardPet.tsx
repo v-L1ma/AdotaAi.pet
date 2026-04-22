@@ -11,6 +11,7 @@ type Props = {
 
 export default function CardPet({animal,index, onlyPicture}:Props){
     const router = useRouter();
+    const locationText = animal.localizacao || [animal.bairro, animal.cidade, animal.uf].filter(Boolean).join(", ") || "Santos";
 
     if(!onlyPicture){
         return(
@@ -26,13 +27,13 @@ export default function CardPet({animal,index, onlyPicture}:Props){
 
                 <View style={styles.info}>
                     <Text style={styles.name}>{animal.nome}</Text>
-                    <Text style={styles.location}>Santos</Text>
+                    <Text style={styles.location}>{locationText}</Text>
                 </View>
             </TouchableOpacity>
         );
     } else {
         return(
-            <TouchableOpacity style={styles.image} onPress={()=>(router.push(
+            <TouchableOpacity style={styles.onlyPictureContainer} onPress={()=>(router.push(
                 {
                     pathname:"/perfil-pet",
                     params:{
@@ -40,7 +41,7 @@ export default function CardPet({animal,index, onlyPicture}:Props){
                     }
                 })
             )}>
-                <Image style={styles.image} source={{uri:animal.imagem}}></Image>
+                <Image style={styles.onlyPictureImage} resizeMode="cover" source={{uri:animal.imagem}}></Image>
             </TouchableOpacity>
         )
     }
@@ -49,16 +50,27 @@ export default function CardPet({animal,index, onlyPicture}:Props){
 const styles = StyleSheet.create({
     container:{
         backgroundColor:"white",
-        padding:15,
+        width: "100%",
+        padding:0,
         borderRadius:25,
-        display:"flex",
         height:"100%",
-        gap:10
+        overflow: "hidden",
     },
     image:{
         width:"100%",
         height:"100%",
-        borderRadius:15
+        borderRadius:15,
+    },
+    onlyPictureContainer: {
+        width: "100%",
+        height: "100%",
+        borderRadius: 18,
+        overflow: "hidden",
+        backgroundColor: "#FFFFFF",
+    },
+    onlyPictureImage: {
+        width: "100%",
+        height: "100%",
     },
     name:{
         fontSize:18,
@@ -72,12 +84,12 @@ const styles = StyleSheet.create({
     },
     info:{
         position:"absolute",
-        bottom:15,
-        left:15,
-        width:"100%",
+        bottom:0,
+        left:0,
+        right:0,
         backgroundColor:"rgba(0, 0, 0, 0.3)",
-        borderBottomLeftRadius:15,
-        borderBottomRightRadius:15,
+        borderBottomLeftRadius:25,
+        borderBottomRightRadius:25,
         paddingHorizontal:15,
         paddingBottom:10
     }

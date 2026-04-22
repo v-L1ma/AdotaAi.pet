@@ -1,14 +1,14 @@
 import React, { useEffect, useRef, useState } from "react";
 import { SafeAreaView, Text, TextInput, TouchableOpacity, View, KeyboardAvoidingView, Platform } from "react-native";
-import { useRouter } from "expo-router";
 import { Image } from "react-native";
 import { Animated, Easing } from "react-native";
 import Icon1 from "react-native-vector-icons/AntDesign";
 import styles from "../styles/AppStyles";
 import { useAuth } from "../hooks/useAuth";
+import { useTabNavigation } from "@/hooks/useTabNavigation";
+import { router } from "expo-router";
 
 export default function LoginScreen() {
-  const router = useRouter();
   const slideAnim = useRef(new Animated.Value(1000)).current;
   const { login, isLoading } = useAuth();
   const [email, setEmail] = useState("");
@@ -102,7 +102,7 @@ export default function LoginScreen() {
             <Icon1 name="google" size={20} color="fff" />
           </TouchableOpacity>
 
-          <TouchableOpacity onPress={() => router.push("/cadastro")}>
+          <TouchableOpacity onPress={() => router.replace("/cadastro")}>
             <Text style={{ marginVertical: 10 }}>Não possui uma conta?</Text>
           </TouchableOpacity>
         </View>

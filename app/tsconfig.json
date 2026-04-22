@@ -1,8 +1,9 @@
 {
-  "extends": "expo/tsconfig.base",
+  "extends": "expo/tsconfig.base.json",
   "compilerOptions": {
-    "jsx": "react",
     "strict": true,
+    "esModuleInterop": true,
+    "allowJs": true,
     "paths": {
       "@/*": [
         "./*"
@@ -12,7 +13,9 @@
   "include": [
     "**/*.ts",
     "**/*.tsx",
+    "**/*.js",
     ".expo/types/**/*.ts",
-    "expo-env.d.ts"
-, "styles/AppStyles.tsx"  ]
+    "expo-env.d.ts",
+    "styles/AppStyles.tsx"
+  ]
 }

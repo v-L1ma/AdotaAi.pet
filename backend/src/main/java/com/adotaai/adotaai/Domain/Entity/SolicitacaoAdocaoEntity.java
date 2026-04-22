@@ -8,25 +8,14 @@ import java.util.UUID;
 import com.adotaai.adotaai.Domain.Enum.StatusSolicitacao;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 
-import jakarta.persistence.CascadeType;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.OneToMany;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 
 @Entity
 @Table(name = "solicitacoes_adocao")
 public class SolicitacaoAdocaoEntity extends AuditableEntity {
 
     @Id
-    @GeneratedValue()
+    @GeneratedValue
     private UUID id;
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -70,6 +59,9 @@ public class SolicitacaoAdocaoEntity extends AuditableEntity {
     }
 
     public void setAdotante(UsuarioEntity adotante) {
+        if (adotante == null) {
+            throw new IllegalArgumentException("O adotante não pode ser nulo.");
+        }
         this.adotante = adotante;
     }
 
@@ -78,6 +70,9 @@ public class SolicitacaoAdocaoEntity extends AuditableEntity {
     }
 
     public void setAnunciante(UsuarioEntity anunciante) {
+        if (anunciante == null) {
+            throw new IllegalArgumentException("O anunciante não pode ser nulo.");
+        }
         this.anunciante = anunciante;
     }
 
@@ -86,6 +81,9 @@ public class SolicitacaoAdocaoEntity extends AuditableEntity {
     }
 
     public void setFormulario(FormularioEntity formulario) {
+        if (formulario == null) {
+            throw new IllegalArgumentException("O formulário não pode ser nulo.");
+        }
         this.formulario = formulario;
     }
 
@@ -94,7 +92,11 @@ public class SolicitacaoAdocaoEntity extends AuditableEntity {
     }
 
     public void setRespostas(List<RespostaEntity> respostas) {
-        this.respostas = respostas;
+        if (respostas == null) {
+            this.respostas = new ArrayList<>();
+        } else {
+            this.respostas = respostas;
+        }
     }
 
     public StatusSolicitacao getStatus() {
@@ -102,6 +104,9 @@ public class SolicitacaoAdocaoEntity extends AuditableEntity {
     }
 
     public void setStatus(StatusSolicitacao status) {
+        if (status == null) {
+            throw new IllegalArgumentException("O status não pode ser nulo.");
+        }
         this.status = status;
     }
 
@@ -110,6 +115,9 @@ public class SolicitacaoAdocaoEntity extends AuditableEntity {
     }
 
     public void setDataSolicitacao(LocalDateTime dataSolicitacao) {
+        if (dataSolicitacao == null) {
+            throw new IllegalArgumentException("A data da solicitação não pode ser nula.");
+        }
         this.dataSolicitacao = dataSolicitacao;
     }
 }

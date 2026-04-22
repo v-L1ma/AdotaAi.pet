@@ -1,3 +1,10 @@
+import { useFonts } from "expo-font";
+import {
+  Manrope_400Regular,
+  Manrope_600SemiBold,
+  Manrope_700Bold,
+  Manrope_800ExtraBold,
+} from "@expo-google-fonts/manrope";
 import { Stack, useRouter, useSegments } from "expo-router";
 import React, { useEffect, useMemo, useState } from "react";
 import { ActivityIndicator, View } from "react-native";
@@ -58,6 +65,15 @@ export default function RootLayout() {
       </View>
     );
   }
+
+  const [fontsLoaded] = useFonts({
+    Manrope_400Regular,
+    Manrope_600SemiBold,
+    Manrope_700Bold,
+    Manrope_800ExtraBold,
+  });
+
+  if (!fontsLoaded) return null;
 
   return (
     <Stack

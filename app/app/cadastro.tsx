@@ -1,11 +1,12 @@
-import { useRouter } from "expo-router";
+import { router } from "expo-router";
 import React, { useEffect, useRef, useState } from "react";
+import { useAuth } from "../hooks/useAuth";
 import { SafeAreaView, Text, TextInput, Image, TouchableOpacity, KeyboardAvoidingView, View, Platform, Animated, Easing } from "react-native";
 import styles from "../styles/AppStyles";
-import { useAuth } from "../hooks/useAuth";
+import { useTabNavigation } from "@/hooks/useTabNavigation";
 
 export default function CadastroScreen() {
-  const router = useRouter();
+  const { navigateToTab } = useTabNavigation();
   const slideAnim = useRef(new Animated.Value(1000)).current;
   const { register, isLoading } = useAuth();
   const [nome, setNome] = useState("");

@@ -3,7 +3,8 @@ package com.adotaai.adotaai.WebApi.Controller;
 import com.adotaai.adotaai.Application.DTO.FormularioDTO;
 import com.adotaai.adotaai.Application.DTO.FormularioTemplateDTO;
 import com.adotaai.adotaai.Domain.Entity.FormularioEntity;
-import com.adotaai.adotaai.Application.Service.FormularioService;
+import com.adotaai.adotaai.Application.Service.IFormularioService;
+import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -15,14 +16,14 @@ import java.util.UUID;
 @RequestMapping("/formularios")
 public class FormularioController {
 
-    private final FormularioService formularioService;
+    private final IFormularioService formularioService;
 
-    public FormularioController(FormularioService formularioService) {
+    public FormularioController(IFormularioService formularioService) {
         this.formularioService = formularioService;
     }
 
     @PostMapping
-    public ResponseEntity<FormularioEntity> criarFormulario(@RequestBody FormularioDTO dto) {
+    public ResponseEntity<FormularioEntity> criarFormulario(@Valid @RequestBody FormularioDTO dto) {
         FormularioEntity formularioCriado = formularioService.criarFormulario(dto);
         return new ResponseEntity<>(formularioCriado, HttpStatus.CREATED);
     }

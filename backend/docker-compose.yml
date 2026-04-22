@@ -1,0 +1,33 @@
+version: "3.9"
+
+services:
+
+  postgres:
+    image: postgres:16
+    container_name: adotaai-postgres
+    restart: always
+    environment:
+      POSTGRES_DB: adotaai_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: 1404
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  api:
+    build: .
+    container_name: adotaai-api
+    depends_on:
+      - postgres
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/adotaai_db
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: 1404
+      JWT_SECRET: bXlTZWNyZXRLZXlGb3JBZG90YUFpUGV0QXBwbGljYXRpb25TZWNyZXRLZXkyMDI0ITEyMzQ1Njc4OTA=
+    ports:
+      - "8080:8080"
+      - "5005:5005"
+
+volumes:
+  postgres_data:
