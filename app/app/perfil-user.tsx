@@ -121,6 +121,8 @@ export default function UserScreen() {
                     return;
                 }
 
+                setUserLogado(usuarioLogado);
+
                 reset({
                     nome: usuarioLogado.nome ?? "",
                     cpfcnpj: usuarioLogado.cpfcnpj ?? "",
@@ -266,8 +268,8 @@ export default function UserScreen() {
             <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
                 <View style={styles.heroCard}>
                     <Pressable style={styles.avatarWrap} onPress={pickImage}>
-                        {image ? (
-                            <Image source={{ uri: image }} style={styles.avatarImage} />
+                        {image || linkFoto ? (
+                            <Image source={{ uri: image ?? linkFoto ?? "" }} style={styles.avatarImage} />
                         ) : (
                             <Icon1 name="image" size={40} color="#868585ff" />
                         )}
@@ -294,6 +296,21 @@ export default function UserScreen() {
                         )}
                     />
                     {renderError(errors.nome?.message)}
+
+                    <Controller
+                        control={control}
+                        name="cpfcnpj"
+                        render={({ field: { onChange, onBlur, value } }) => (
+                            <Field
+                                label="CPF/CNPJ"
+                                value={value}
+                                onChangeText={onChange}
+                                onBlur={onBlur}
+                                placeholder="Digite seu CPF ou CNPJ"
+                            />
+                        )}
+                    />
+                    {renderError(errors.cpfcnpj?.message)}
 
                     <Controller
                         control={control}
@@ -360,6 +377,21 @@ export default function UserScreen() {
 
                     <Controller
                         control={control}
+                        name="link_foto"
+                        render={({ field: { onChange, onBlur, value } }) => (
+                            <Field
+                                label="Link da Foto"
+                                value={value || ""}
+                                onChangeText={onChange}
+                                onBlur={onBlur}
+                                placeholder="https://..."
+                            />
+                        )}
+                    />
+                    {renderError(errors.link_foto?.message)}
+
+                    <Controller
+                        control={control}
                         name="endereco"
                         render={({ field: { onChange, onBlur, value } }) => (
                             <Field
@@ -372,6 +404,66 @@ export default function UserScreen() {
                             />
                         )}
                     />
+
+                    <Controller
+                        control={control}
+                        name="cep"
+                        render={({ field: { onChange, onBlur, value } }) => (
+                            <Field
+                                label="CEP"
+                                value={value || ""}
+                                onChangeText={onChange}
+                                onBlur={onBlur}
+                                placeholder="00000-000"
+                            />
+                        )}
+                    />
+                    {renderError(errors.cep?.message)}
+
+                    <Controller
+                        control={control}
+                        name="bairro"
+                        render={({ field: { onChange, onBlur, value } }) => (
+                            <Field
+                                label="Bairro"
+                                value={value || ""}
+                                onChangeText={onChange}
+                                onBlur={onBlur}
+                                placeholder="Digite seu bairro"
+                            />
+                        )}
+                    />
+                    {renderError(errors.bairro?.message)}
+
+                    <Controller
+                        control={control}
+                        name="cidade"
+                        render={({ field: { onChange, onBlur, value } }) => (
+                            <Field
+                                label="Cidade"
+                                value={value || ""}
+                                onChangeText={onChange}
+                                onBlur={onBlur}
+                                placeholder="Digite sua cidade"
+                            />
+                        )}
+                    />
+                    {renderError(errors.cidade?.message)}
+
+                    <Controller
+                        control={control}
+                        name="sg_estado"
+                        render={({ field: { onChange, onBlur, value } }) => (
+                            <Field
+                                label="UF"
+                                value={value || ""}
+                                onChangeText={onChange}
+                                onBlur={onBlur}
+                                placeholder="Ex: SP"
+                            />
+                        )}
+                    />
+                    {renderError(errors.sg_estado?.message)}
                 </SafeAreaView>
 
                 <TouchableOpacity 
