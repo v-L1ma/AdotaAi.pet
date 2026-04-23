@@ -58,6 +58,13 @@ export default function RootLayout() {
     }
   }, [currentRoute, isAuthenticated, router]);
 
+  const [fontsLoaded] = useFonts({
+    Manrope_400Regular,
+    Manrope_600SemiBold,
+    Manrope_700Bold,
+    Manrope_800ExtraBold,
+  });
+
   if (isAuthenticated === null) {
     return (
       <View style={{ flex: 1, alignItems: "center", justifyContent: "center" }}>
@@ -65,13 +72,6 @@ export default function RootLayout() {
       </View>
     );
   }
-
-  const [fontsLoaded] = useFonts({
-    Manrope_400Regular,
-    Manrope_600SemiBold,
-    Manrope_700Bold,
-    Manrope_800ExtraBold,
-  });
 
   if (!fontsLoaded) return null;
 

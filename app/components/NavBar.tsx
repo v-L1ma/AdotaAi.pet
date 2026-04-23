@@ -17,7 +17,7 @@ export default function NavBar(){
 
     const normalizedPath = (pathname || "").toLowerCase();
 
-    const isHomeSelected = normalizedPath === "/" || normalizedPath === "/home";
+    const isHomeSelected = normalizedPath === "/" || normalizedPath === "/Home";
     const isListagemSelected = normalizedPath === "/listagem-pets" || normalizedPath === "/listagempets";
     const isCreateSelected = normalizedPath === "/criar-anuncio" || normalizedPath === "/criaranuncio";
     const isConfigSelected = normalizedPath === "/config";
@@ -36,7 +36,7 @@ export default function NavBar(){
                 intensity={60}
                 tint="light"
             >
-                <TouchableOpacity style={[styles.iconButton, isHomeSelected && styles.iconButtonSelected]} onPress={()=>navigateToTab("/home") }>
+                <TouchableOpacity style={[styles.iconButton, isHomeSelected && styles.iconButtonSelected]} onPress={()=>navigateToTab("/Home") }>
                     <Icon style={styles.icon} name="home" size={30} color={colors.primary}></Icon>
                 </TouchableOpacity>
 

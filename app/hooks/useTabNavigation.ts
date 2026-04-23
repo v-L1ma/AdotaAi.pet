@@ -1,6 +1,6 @@
 import { usePathname, useRouter } from "expo-router";
 
-type TabRoute = "/home" | "/listagem-pets" | "/criar-anuncio" | "/config" | "/meus-pets" | "/perfil-user";
+type TabRoute = "/Home" | "/listagem-pets" | "/criar-anuncio" | "/config" | "/meus-pets" | "/perfil-user";
 
 /**
  * Hook para gerenciar navegação entre as abas principais
@@ -22,7 +22,7 @@ export function useTabNavigation() {
   const navigateToTab = (route: TabRoute) => {
     // Verifica se já está na mesma aba
     const isOnSameTab =
-      (route === "/home" && (normalizedPath === "/" || normalizedPath === "/home")) ||
+      (route === "/Home" && (normalizedPath === "/" || normalizedPath === "/Home")) ||
       (route === "/listagem-pets" && (normalizedPath === "/listagem-pets" || normalizedPath === "/listagempets")) ||
       (route === "/criar-anuncio" && (normalizedPath === "/criar-anuncio" || normalizedPath === "/criaranuncio")) ||
       (route === "/config" && normalizedPath === "/config") ||

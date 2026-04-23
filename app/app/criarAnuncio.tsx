@@ -1,4 +1,4 @@
-import { z } from "zod";
+import { date, z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Controller, useForm } from "react-hook-form";
 import DateTimePicker, { DateTimePickerEvent } from "@react-native-community/datetimepicker";
@@ -44,7 +44,7 @@ export default function CriarAnuncioScreen() {
         resolver: zodResolver(criarAnuncioSchema),
         defaultValues: {
             nome: "",
-            dt_nasc: "",
+            dt_nasc: new Date().toISOString().slice(0, 10),
             especie: undefined,
             porte: undefined,
             raca: "",
