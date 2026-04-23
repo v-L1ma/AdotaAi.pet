@@ -4,6 +4,8 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -38,9 +40,7 @@ public class SolicitacaoAdocaoService implements ISolicitacaoAdocaoService {
     @Override
     @Transactional
     public SolicitacaoResponseDTO criarSolicitacao(SolicitacaoAdocaoDTO dto) {
-        UsuarioEntity adotante = usuarioRepository.findById(dto.getAdotanteId())
-                .orElseThrow(() -> new RecursoNaoEncontradoException("Usuário adotante não encontrado"));
-
+        UsuarioEntity adotante = obterUsuarioAutenticado();
         FormularioEntity formulario = formularioRepository.findById(dto.getFormularioId())
                 .orElseThrow(() -> new RecursoNaoEncontradoException("Formulário não encontrado"));
 
@@ -132,5 +132,15 @@ public class SolicitacaoAdocaoService implements ISolicitacaoAdocaoService {
         solicitacao.setStatus(StatusSolicitacao.RECUSADO);
         SolicitacaoAdocaoEntity solicitacaoSalva = solicitacaoRepository.save(solicitacao);
         return new SolicitacaoResponseDTO(solicitacaoSalva);
+    }
+
+    private UsuarioEntity obterUsuarioAutenticado() {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        if (auth == null || !auth.isAuthenticated() || "anonymousUser".equals(auth.getName())) {
+            throw new RuntimeException("Usuário não autenticado.");
+        }
+
+        return usuarioRepository.findByEmail(auth.getName())
+                .orElseThrow(() -> new RuntimeException("Usuário não encontrado para o email: " + auth.getName()));
     }
 }

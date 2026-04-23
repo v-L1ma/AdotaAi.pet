@@ -7,14 +7,16 @@ import com.adotaai.adotaai.Domain.Entity.Roles;
 public class LoginResponseDTO {
 
     private String token;
+    private String refreshToken;
     private String tipo = "Bearer";
     private UUID id;
     private String email;
     private String nome;
     private Roles cargo;
 
-    public LoginResponseDTO(String token, UUID id, String email, String nome, Roles cargo) {
+    public LoginResponseDTO(String token, String refreshToken, UUID id, String email, String nome, Roles cargo) {
         this.token = token;
+        this.refreshToken = refreshToken;
         this.id = id;
         this.email = email;
         this.nome = nome;
@@ -27,6 +29,14 @@ public class LoginResponseDTO {
 
     public void setToken(String token) {
         this.token = token;
+    }
+
+    public String getRefreshToken() {
+        return refreshToken;
+    }
+
+    public void setRefreshToken(String refreshToken) {
+        this.refreshToken = refreshToken;
     }
 
     public String getTipo() {

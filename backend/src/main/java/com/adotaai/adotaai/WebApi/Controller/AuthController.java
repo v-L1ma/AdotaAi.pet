@@ -3,6 +3,8 @@ package com.adotaai.adotaai.WebApi.Controller;
 import com.adotaai.adotaai.Application.DTO.EsqueciSenhaDTO;
 import com.adotaai.adotaai.Application.DTO.LoginRequestDTO;
 import com.adotaai.adotaai.Application.DTO.LoginResponseDTO;
+import com.adotaai.adotaai.Application.DTO.RefreshTokenRequestDTO;
+import com.adotaai.adotaai.Application.DTO.RefreshTokenResponseDTO;
 import com.adotaai.adotaai.Application.DTO.ResetarSenhaDTO;
 import com.adotaai.adotaai.Application.Service.AuthService;
 import org.springframework.http.ResponseEntity;
@@ -23,6 +25,12 @@ public class AuthController {
     @PostMapping("/login")
     public ResponseEntity<LoginResponseDTO> login(@RequestBody LoginRequestDTO loginRequest) {
         LoginResponseDTO response = authService.login(loginRequest);
+        return ResponseEntity.ok(response);
+    }
+
+    @PostMapping("/refresh")
+    public ResponseEntity<RefreshTokenResponseDTO> refresh(@RequestBody RefreshTokenRequestDTO request) {
+        RefreshTokenResponseDTO response = authService.refresh(request);
         return ResponseEntity.ok(response);
     }
 

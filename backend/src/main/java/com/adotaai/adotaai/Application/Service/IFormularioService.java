@@ -11,5 +11,5 @@ public interface IFormularioService {
     FormularioEntity criarFormulario(FormularioDTO dto);
     List<FormularioTemplateDTO> listarFormularios();
     FormularioTemplateDTO buscarFormularioPorId(UUID id);
-    void deletarFormulario(UUID formularioId, UUID usuarioCriadorId);
+    void deletarFormulario(UUID formularioId);
 }

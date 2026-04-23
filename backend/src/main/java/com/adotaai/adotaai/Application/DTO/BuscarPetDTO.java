@@ -1,15 +1,12 @@
 package com.adotaai.adotaai.Application.DTO;
 
-import com.adotaai.adotaai.Domain.Entity.PetEntity;
-import com.fasterxml.jackson.annotation.JsonProperty;
-
 import java.util.Date;
 import java.util.UUID;
 
-public class PetDTO {
+public class BuscarPetDTO {
 
     private UUID id;
-    private String status = "PENDENTE";
+    private String status;
     private String descricao;
     private Date dt_nasc;
     private String nome;
@@ -17,27 +14,26 @@ public class PetDTO {
     private String raca;
     private String especie;
     private String link_foto;
+    private boolean isFavoritado;
+    private DonoDTO dono;
 
-    @JsonProperty(value = "user_id", access = JsonProperty.Access.READ_ONLY)
-    private UUID user_id;
-
-    public PetDTO(PetEntity pet) {
-        this.id = pet.getId();
-        this.status = pet.getStatus();
-        this.descricao = pet.getDescricao();
-        this.dt_nasc = pet.getDt_nasc();
-        this.nome = pet.getNome();
-        this.porte = pet.getPorte();
-        this.raca = pet.getRaca();
-        this.especie = pet.getEspecie();
-        this.link_foto = pet.getLink_foto();
-
-        if (pet.getUser() != null) {
-            this.user_id = pet.getUser().getId();
-        }
+    public BuscarPetDTO() {
     }
 
-    public PetDTO() {
+    public BuscarPetDTO(UUID id, String status, String descricao,
+                        Date dataNascimento, String nome, String porte,
+                        String raca, String especie, String linkFoto, boolean isFavoritado, DonoDTO dono) {
+        this.id = id;
+        this.status = status;
+        this.descricao = descricao;
+        this.dt_nasc = dataNascimento;
+        this.nome = nome;
+        this.porte = porte;
+        this.raca = raca;
+        this.especie = especie;
+        this.link_foto = linkFoto;
+        this.isFavoritado = isFavoritado;
+        this.dono = dono;
     }
 
     public UUID getId() {
@@ -112,11 +108,48 @@ public class PetDTO {
         this.link_foto = link_foto;
     }
 
-    public UUID getUser_id() {
-        return user_id;
+    public boolean isFavoritado() {
+        return isFavoritado;
     }
 
-    public void setUser_id(UUID user_id) {
-        this.user_id = user_id;
+    public void setFavoritado(boolean isFavoritado) {
+        this.isFavoritado = isFavoritado;
+    }
+
+    public DonoDTO getDono() {
+        return dono;
+    }
+
+    public void setDono(DonoDTO dono) {
+        this.dono = dono;
+    }
+
+    public static class DonoDTO {
+        private UUID id;
+        private String nome;
+
+        public DonoDTO() {
+        }
+
+        public DonoDTO(UUID id, String nome) {
+            this.id = id;
+            this.nome = nome;
+        }
+
+        public UUID getId() {
+            return id;
+        }
+
+        public void setId(UUID id) {
+            this.id = id;
+        }
+
+        public String getNome() {
+            return nome;
+        }
+
+        public void setNome(String nome) {
+            this.nome = nome;
+        }
     }
 }

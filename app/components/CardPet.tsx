@@ -19,12 +19,7 @@ export default function CardPet({animal,index, onlyPicture}:Props){
                 {
                     pathname:"/perfil-pet",
                     params:{
-                        nome: animal.nome,
-                        imagem: animal.imagem,
-                        localizacao: locationText,
-                        bairro: animal.bairro,
-                        cidade: animal.cidade,
-                        uf: animal.uf,
+                        id: animal.id
                     }
                 })
                 )}>
@@ -42,12 +37,7 @@ export default function CardPet({animal,index, onlyPicture}:Props){
                 {
                     pathname:"/perfil-pet",
                     params:{
-                        nome: animal.nome,
-                        imagem: animal.imagem,
-                        localizacao: locationText,
-                        bairro: animal.bairro,
-                        cidade: animal.cidade,
-                        uf: animal.uf,
+                        id: animal.id
                     }
                 })
             )}>

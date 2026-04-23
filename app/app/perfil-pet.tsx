@@ -1,12 +1,31 @@
 import { LinearGradient } from "expo-linear-gradient";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import React, { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { ActivityIndicator, Image, Platform, Pressable, SafeAreaView, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { WebView } from "react-native-webview";
 import IconMat from "react-native-vector-icons/MaterialCommunityIcons";
 import IconIonic from "react-native-vector-icons/Ionicons";
 import { colors } from "@/styles/variables";
+import React from "react";
+import apiService from "../services/apiService";
+import { WebView } from "react-native-webview";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
+
+type BuscarPetDTO = {
+    id: string;
+    descricao?: string;
+    dt_nasc?: string;
+    nome?: string;
+    porte?: string;
+    raca?: string;
+    especie?: string;
+    link_foto?: string;
+    isFavoritado?: boolean;
+    isFavorito?: boolean;
+    dono?: {
+        id: string;
+        nome: string;
+    };
+};
 
 export default function PerfilPet(){
 
@@ -42,10 +61,6 @@ export default function PerfilPet(){
 
     const [description] = useState<string>("É um pet muito carinhoso e cheio de energia, ideal para uma família que busca companhia no dia a dia. Já está vacinado e vermifugado, pronto para encontrar um lar seguro e cheio de amor.")
     const IFrameTag = "iframe" as unknown as React.ElementType;
-
-    function favoritePet(){
-        setHeartIcon((prev) => (prev === "heart-outline" ? "heart" : "heart-outline"));
-    }
 
     useEffect(() => {
         let isMounted = true;
@@ -102,6 +117,90 @@ export default function PerfilPet(){
 
         return `https://www.openstreetmap.org/export/embed.html?bbox=${left}%2C${bottom}%2C${right}%2C${top}&layer=mapnik&marker=${coordinates.lat}%2C${coordinates.lon}`;
     }, [coordinates]);
+
+     const [isTogglingFavorite, setIsTogglingFavorite] = useState<boolean>(false);
+    const [isPetFavorited, setIsPetFavorited] = useState<boolean>(false);
+    const [pet, setPet] = useState<BuscarPetDTO | null>(null);
+    const [isLoadingPet, setIsLoadingPet] = useState<boolean>(false);
+    const [petError, setPetError] = useState<string | null>(null);
+
+    const params = useLocalSearchParams<{ id?: string }>();
+    const petId = Array.isArray(params.id) ? params.id[0] : params.id;
+
+    useEffect(() => {
+        async function loadPetById() {
+            if (!petId) {
+                setPetError("ID do pet nao informado.");
+                return;
+            }
+
+            setIsLoadingPet(true);
+            setPetError(null);
+
+            try {
+                const response = await apiService.get<BuscarPetDTO>(`/pets/${petId}`);
+                const favoritado =
+                    response.data.isFavoritado ??
+                    response.data.isFavorito ??
+                    (response.data as BuscarPetDTO & { favoritado?: boolean }).favoritado ??
+                    false;
+
+                setPet({ ...response.data, isFavoritado: favoritado, isFavorito: favoritado });
+                setIsPetFavorited(favoritado);
+            } catch {
+                setPetError("Nao foi possivel carregar os dados do pet.");
+            } finally {
+                setIsLoadingPet(false);
+            }
+        }
+
+        loadPetById();
+    }, [petId]);
+
+    useEffect(() => {
+        if (!pet) {
+            setIsPetFavorited(false);
+            return;
+        }
+
+        const favoritado = pet.isFavoritado ?? pet.isFavorito ?? false;
+        setIsPetFavorited(favoritado);
+    }, [pet]);
+
+    const birthDateLabel = useMemo(() => {
+        if (!pet?.dt_nasc) {
+            return "Nao informado";
+        }
+
+        const date = new Date(pet.dt_nasc);
+        if (Number.isNaN(date.getTime())) {
+            return "Nao informado";
+        }
+
+        return date.toLocaleDateString("pt-BR");
+    }, [pet?.dt_nasc]);
+
+    async function favoritePet(){
+        if (!petId || !pet || isTogglingFavorite) {
+            return;
+        }
+
+        setIsTogglingFavorite(true);
+        try {
+            if (isPetFavorited) {
+                await apiService.delete(`/pets/${petId}/favoritar`);
+                setIsPetFavorited(false);
+                setPet((currentPet) => currentPet ? { ...currentPet, isFavoritado: false, isFavorito: false } : currentPet);
+                return;
+            }
+
+            await apiService.post(`/pets/${petId}/favoritar`);
+            setIsPetFavorited(true);
+            setPet((currentPet) => currentPet ? { ...currentPet, isFavoritado: true, isFavorito: true } : currentPet);
+        } finally {
+            setIsTogglingFavorite(false);
+        }
+    }
 
     return(
         <View style={style.container}>

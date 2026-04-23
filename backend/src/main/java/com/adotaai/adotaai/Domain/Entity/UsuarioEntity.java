@@ -6,7 +6,8 @@ import java.util.UUID;
 
 import org.springframework.beans.BeanUtils;
 
-import com.adotaai.adotaai.Application.DTO.UsuarioDTO;
+import com.adotaai.adotaai.Application.DTO.AtualizarUsuarioDTO;
+import com.adotaai.adotaai.Application.DTO.CadastrarUsuarioDTO;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -37,25 +38,25 @@ public class UsuarioEntity extends AuditableEntity {
     @Column(nullable = false)
     private String senha;
 
-    @Column(nullable = false)
+    @Column(nullable = true)
     private String telefone;
 
-    @Column(nullable = false)
+    @Column(nullable = true)
     private String link_foto;
 
-    @Column(nullable = false)
+    @Column(nullable = true)
     private String endereco;
 
-    @Column(nullable = false)
+    @Column(nullable = true)
     private String cep;
 
-    @Column(nullable = false)
+    @Column(nullable = true)
     private String bairro;
 
-    @Column(nullable = false)
+    @Column(nullable = true)
     private String cidade;
 
-    @Column(nullable = false)
+    @Column(nullable = true)
     private String sg_estado;
 
     @Enumerated(EnumType.STRING)
@@ -67,7 +68,11 @@ public class UsuarioEntity extends AuditableEntity {
 
     private LocalDateTime resetTokenExpiry;
 
-    public UsuarioEntity(UsuarioDTO usuario) {
+    public UsuarioEntity(AtualizarUsuarioDTO usuario) {
+        BeanUtils.copyProperties(usuario, this);
+    }
+
+    public UsuarioEntity(CadastrarUsuarioDTO usuario) {
         BeanUtils.copyProperties(usuario, this);
     }
 
@@ -207,5 +212,21 @@ public class UsuarioEntity extends AuditableEntity {
     @Override
     public int hashCode() {
         return Objects.hashCode(id);
+    }
+
+    @Override
+    public String toString() {
+        return "UsuarioEntity{" +
+                "id=" + id +
+                ", nome='" + nome + '\'' +
+                ", cpfcnpj='" + cpfcnpj + '\'' +
+                ", email='" + email + '\'' +
+                ", telefone='" + telefone + '\'' +
+                ", endereco='" + endereco + '\'' +
+                ", cep='" + cep + '\'' +
+                ", bairro='" + bairro + '\'' +
+                ", cidade='" + cidade + '\'' +
+                ", sg_estado='" + sg_estado + '\'' +
+                '}';
     }
 }

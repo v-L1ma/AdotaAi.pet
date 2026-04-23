@@ -1,3 +1,8 @@
+import { date, z } from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { Controller, useForm } from "react-hook-form";
+import DateTimePicker, { DateTimePickerEvent } from "@react-native-community/datetimepicker";
+import { useCreatePet } from "../hooks/useCreatePet";
 import * as ImagePicker from "expo-image-picker";
 import { useRouter } from "expo-router";
 import React, { useRef, useState } from "react";
@@ -5,14 +10,49 @@ import { Alert, Image, InputAccessoryView, Keyboard, Linking, Platform, Pressabl
 import Icon1 from "react-native-vector-icons/Ionicons";
 import { colors } from "@/styles/variables";
 
+const criarAnuncioSchema = z.object({
+    nome: z.string().trim().min(2, "Nome deve ter pelo menos 2 caracteres"),
+    dt_nasc: z
+        .string()
+        .trim()
+        .refine((valor) => !Number.isNaN(Date.parse(valor)), "Informe uma data de nascimento valida")
+        .refine((valor) => new Date(valor) <= new Date(), "Data de nascimento nao pode ser no futuro"),
+    especie: z.enum(["gato", "cachorro"], {
+        message: "Selecione a especie",
+    }),
+    porte: z.enum(["pequeno", "medio", "grande"], {
+        message: "Selecione o porte",
+    }),
+    raca: z.string().trim().min(2, "Raca deve ter pelo menos 2 caracteres"),
+    descricao: z.string().trim().min(10, "Descricao deve ter pelo menos 10 caracteres"),
+});
+
+type CriarAnuncioFormData = z.infer<typeof criarAnuncioSchema>;
+
 export default function CriarAnuncioScreen() {
+    const [showDatePicker, setShowDatePicker] = useState(false);
+    const { createPet, isCreating } = useCreatePet();
+
+    const {
+        control,
+        handleSubmit,
+        setValue,
+        watch,
+        reset,
+        formState: { errors },
+    } = useForm<CriarAnuncioFormData>({
+        resolver: zodResolver(criarAnuncioSchema),
+        defaultValues: {
+            nome: "",
+            dt_nasc: new Date().toISOString().slice(0, 10),
+            especie: undefined,
+            porte: undefined,
+            raca: "",
+            descricao: "",
+        },
+    });
+
     const router = useRouter();
-    const [nome, setNome] = useState("");
-    const [idade, setIdade] = useState("");
-    const [peso, setPeso] = useState("");
-    const [especie, setEspecie] = useState<"gato" | "cachorro" | null>(null);
-    const [porte, setPorte] = useState<"pequeno" | "medio" | "grande" | null>(null);
-    const [descricao, setDescricao] = useState("");
     const [image, setImage] = useState<string | undefined>(undefined);
     const [focusedField, setFocusedField] = useState<"nome" | "idade" | "peso" | null>(null);
 
@@ -20,10 +60,6 @@ export default function CriarAnuncioScreen() {
     const idadeRef = useRef<TextInput>(null);
     const pesoRef = useRef<TextInput>(null);
     const toolbarId = "pet-form-toolbar";
-
-    const handleSave = () => {
-        alert("Anúncio criado!");
-    };
 
     const focusNextField = () => {
         if (focusedField === "nome") {
@@ -79,6 +115,67 @@ export default function CriarAnuncioScreen() {
         }
     };
 
+    const formatarData = (value: string) => {
+        if (!value) {
+            return "Selecionar data";
+        }
+
+        const date = new Date(value);
+        if (Number.isNaN(date.getTime())) {
+            return "Selecionar data";
+        }
+
+        return date.toLocaleDateString("pt-BR");
+    };
+
+    const formatarDataWebInput = (value: string) => {
+        if (value.length === 10) {
+            if(Number.isNaN(value)) {
+                return "";
+            }
+
+            const date = new Date(value);
+            if (Number.isNaN(date.getTime())) {
+                return "";
+            }
+    
+            return date.toISOString().slice(0, 10);
+        }
+
+    };
+
+    const onWebDateChange = (rawDate: string) => {
+        if(rawDate.length === 10) {
+             const isoDate = new Date(`${rawDate}T12:00:00`).toISOString();
+            setValue("dt_nasc", isoDate, { shouldValidate: true });
+        }
+    };
+
+    const handleSave = async (data: CriarAnuncioFormData) => {
+        try {
+            await createPet(data);
+
+            Alert.alert("Sucesso", "Anuncio criado com sucesso!");
+            reset();
+        } catch (error) {
+            const errorMessage = error instanceof Error ? error.message : "Falha ao criar anuncio";
+            Alert.alert("Erro", errorMessage);
+        }
+    };
+
+    const renderError = (message?: string) =>
+        message ? <Text style={{ color: "#b00020", marginBottom: 8, width: "100%" }}>{message}</Text> : null;
+
+    const datePickerButtonStyle = {
+        backgroundColor: "#f3f2f2ff",
+        width: "105%" as const,
+        minHeight: 44,
+        margin: 10,
+        paddingHorizontal: 10,
+        borderRadius: 20,
+        justifyContent: "center" as const,
+    };
+
     return (
         <View style={styles.screen}>
             <SafeAreaView style={styles.safeTop} />
@@ -113,35 +210,49 @@ export default function CriarAnuncioScreen() {
                 </View>
 
                 <View style={styles.formCard}>
-                    <Field
-                        label="Nome do Pet"
-                        value={nome}
-                        onChangeText={setNome}
-                        placeholder="Como ele se chama?"
-                        inputRef={nomeRef}
-                        returnKeyType="next"
-                        onSubmitEditing={() => idadeRef.current?.focus()}
-                        onFocus={() => setFocusedField("nome")}
-                        inputAccessoryViewID={Platform.OS === "ios" ? toolbarId : undefined}
+                    <Controller
+                        control={control}
+                        name="nome"
+                        render={({ field: { onChange, onBlur, value } }) => (
+                            <Field
+                                label="Nome do Pet"
+                                value={value}
+                                onChangeText={onChange}
+                                onBlur={onBlur}
+                                placeholder="Como ele se chama?"
+                                inputRef={nomeRef}
+                                returnKeyType="next"
+                                onSubmitEditing={() => idadeRef.current?.focus()}
+                                onFocus={() => setFocusedField("nome")}
+                                inputAccessoryViewID={Platform.OS === "ios" ? toolbarId : undefined}
+                            />
+                        )}
                     />
+                    {renderError(errors.nome?.message)}
 
                     <View style={styles.gridTwo}>
-                        <Field
-                            label="Idade"
-                            value={idade}
-                            onChangeText={setIdade}
-                            placeholder="Ex.: 2 anos"
-                            keyboardType="numeric"
-                            inputRef={idadeRef}
-                            returnKeyType="next"
-                            onSubmitEditing={() => pesoRef.current?.focus()}
-                            onFocus={() => setFocusedField("idade")}
-                            inputAccessoryViewID={Platform.OS === "ios" ? toolbarId : undefined}
+                        <Controller
+                            control={control}
+                            name="raca"
+                            render={({ field: { onChange, onBlur, value } }) => (
+                                <Field
+                                    label="Raça"
+                                    value={value}
+                                    onChangeText={onChange}
+                                    onBlur={onBlur}
+                                    placeholder="Ex.: SRD"
+                                    inputRef={idadeRef}
+                                    returnKeyType="next"
+                                    onSubmitEditing={() => pesoRef.current?.focus()}
+                                    onFocus={() => setFocusedField("idade")}
+                                    inputAccessoryViewID={Platform.OS === "ios" ? toolbarId : undefined}
+                                />
+                            )}
                         />
                         <Field
-                            label="Peso (kg)"
-                            value={peso}
-                            onChangeText={setPeso}
+                            label="Peso (kg) - Opcional"
+                            value={""}
+                            onChangeText={() => {}}
                             placeholder="Ex.: 5"
                             keyboardType="numeric"
                             inputRef={pesoRef}
@@ -151,47 +262,110 @@ export default function CriarAnuncioScreen() {
                             inputAccessoryViewID={Platform.OS === "ios" ? toolbarId : undefined}
                         />
                     </View>
+                    {renderError(errors.raca?.message)}
                 </View>
 
                 <View style={styles.block}>
                     <Text style={styles.blockTitle}>Espécie</Text>
-                    <View style={styles.row}>
-                        <Chip label="Cão" selected={especie === "cachorro"} onPress={() => setEspecie("cachorro")} />
-                        <Chip label="Gato" selected={especie === "gato"} onPress={() => setEspecie("gato")} />
-                        <Chip label="Outros" selected={false} onPress={() => {}} />
-                    </View>
+                    <Controller
+                        control={control}
+                        name="especie"
+                        render={({ field: { onChange, value } }) => (
+                            <View style={styles.row}>
+                                <Chip label="Cão" selected={value === "cachorro"} onPress={() => onChange("cachorro")} />
+                                <Chip label="Gato" selected={value === "gato"} onPress={() => onChange("gato")} />
+                            </View>
+                        )}
+                    />
+                    {renderError(errors.especie?.message)}
                 </View>
 
                 <View style={styles.block}>
                     <Text style={styles.blockTitle}>Porte</Text>
-                    <View style={styles.row}>
-                        <Chip label="Pequeno" selected={porte === "pequeno"} onPress={() => setPorte("pequeno")} />
-                        <Chip label="Médio" selected={porte === "medio"} onPress={() => setPorte("medio")} />
-                        <Chip label="Grande" selected={porte === "grande"} onPress={() => setPorte("grande")} />
+                    <Controller
+                        control={control}
+                        name="porte"
+                        render={({ field: { onChange, value } }) => (
+                            <View style={styles.row}>
+                                <Chip label="Pequeno" selected={value === "pequeno"} onPress={() => onChange("pequeno")} />
+                                <Chip label="Médio" selected={value === "medio"} onPress={() => onChange("medio")} />
+                                <Chip label="Grande" selected={value === "grande"} onPress={() => onChange("grande")} />
+                            </View>
+                        )}
+                    />
+                    {renderError(errors.porte?.message)}
+                </View>
+
+                <View style={styles.block}>
+                    <View style={styles.blockHeaderRow}>
+                        <Text style={styles.blockTitle}>Data de Nascimento</Text>
                     </View>
+                    <Controller
+                        control={control}
+                        name="dt_nasc"
+                        render={({ field: { onChange, value } }) => (
+                            <>
+                                <TouchableOpacity style={datePickerButtonStyle} onPress={() => setShowDatePicker(true)}>
+                                    <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
+                                        <Icon1 name="calendar-outline" size={20} color={colors.primary} />
+                                        <Text style={{ color: value ? colors.text : colors.textMuted }}>
+                                            {formatarData(value)}
+                                        </Text>
+                                    </View>
+                                </TouchableOpacity>
+
+                                {showDatePicker && (
+                                    <DateTimePicker
+                                        value={value ? new Date(value) : new Date()}
+                                        mode="date"
+                                        display="default"
+                                        maximumDate={new Date()}
+                                        onChange={(event, date) => {
+                                            setShowDatePicker(false);
+                                            if (date) onChange(date.toISOString());
+                                        }}
+                                    />
+                                )}
+                            </>
+                        )}
+                    />
+                    {renderError(errors.dt_nasc?.message)}
                 </View>
 
                 <View style={styles.block}>
                     <View style={styles.blockHeaderRow}>
                         <Text style={styles.blockTitle}>Descrição & História</Text>
-                        <Text style={styles.optional}>OPCIONAL</Text>
                     </View>
-                    <Field
-                        label=""
-                        value={descricao}
-                        onChangeText={setDescricao}
-                        placeholder="Conte um pouco sobre personalidade, temperamento e o que o torna especial..."
-                        multiline
+                    <Controller
+                        control={control}
+                        name="descricao"
+                        render={({ field: { onChange, onBlur, value } }) => (
+                            <Field
+                                label=""
+                                value={value}
+                                onChangeText={onChange}
+                                onBlur={onBlur}
+                                placeholder="Conte um pouco sobre personalidade, temperamento e o que o torna especial..."
+                                multiline
+                            />
+                        )}
                     />
+                    {renderError(errors.descricao?.message)}
 
-                    <TouchableOpacity style={styles.secondaryButton} onPress={() => router.push("/gerenciar-formularios") }>
+                    <TouchableOpacity style={styles.secondaryButton} onPress={() => router.push("/criarFormulario") }>
                         <Text style={styles.secondaryButtonText}>Escolher formulário</Text>
                     </TouchableOpacity>
                 </View>
 
-                <TouchableOpacity style={styles.primaryButton} onPress={handleSave}>
+                <TouchableOpacity 
+                    style={[styles.primaryButton, isCreating && { opacity: 0.7 }]} 
+                    onPress={handleSubmit(handleSave)}
+                    disabled={isCreating}
+                >
                     <Icon1 name="sparkles-outline" size={18} color="#fff" />
-                    <Text style={styles.primaryButtonText}>Criar anúncio</Text>
+                    <Text style={styles.primaryButtonText}>
+                        {isCreating ? "Criando..." : "Criar anúncio"}
+                    </Text>
                 </TouchableOpacity>
             </ScrollView>
 
@@ -218,6 +392,7 @@ type FieldProps = {
     label: string;
     value: string;
     onChangeText: (text: string) => void;
+    onBlur?: () => void;
     placeholder: string;
     keyboardType?: "default" | "numeric";
     multiline?: boolean;
@@ -232,6 +407,7 @@ function Field({
     label,
     value,
     onChangeText,
+    onBlur,
     placeholder,
     keyboardType = "default",
     multiline = false,
@@ -249,6 +425,7 @@ function Field({
                 style={[styles.input, multiline && styles.inputMultiline]}
                 value={value}
                 onChangeText={onChangeText}
+                onBlur={onBlur}
                 placeholder={placeholder}
                 placeholderTextColor="#8C8C8C"
                 keyboardType={keyboardType}

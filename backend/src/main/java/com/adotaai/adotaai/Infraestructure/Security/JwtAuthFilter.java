@@ -13,19 +13,19 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
 import java.util.Collections;
+import java.util.UUID;
 
 import com.adotaai.adotaai.Application.Util.JwtUtil;
 
 @Component
 public class JwtAuthFilter extends OncePerRequestFilter {
 
-    private static final Logger logger = LoggerFactory.getLogger(JwtAuthFilter.class);
+    private static final Logger LOG = LoggerFactory.getLogger(JwtAuthFilter.class);
 
     private final JwtUtil jwtUtil;
     private final UsuarioRepository usuarioRepository;
@@ -47,11 +47,14 @@ public class JwtAuthFilter extends OncePerRequestFilter {
             String token = authHeader.substring(7);
             try {
                 String email = jwtUtil.extractEmail(token);
+                UUID userId = jwtUtil.extractUserId(token);
 
                 if (email != null && SecurityContextHolder.getContext().getAuthentication() == null) {
-                    var usuarioOpt = usuarioRepository.findByEmail(email);
+                    var usuarioOpt = usuarioRepository.findById(userId);
 
-                    if (usuarioOpt.isPresent() && jwtUtil.validateToken(token, email)) {
+                    if (usuarioOpt.isPresent()
+                            && email.equalsIgnoreCase(usuarioOpt.get().getEmail())
+                            && jwtUtil.validateToken(token, email)) {
                         UserDetails userDetails = User.builder()
                                 .username(email)
                                 .password("")
@@ -60,12 +63,12 @@ public class JwtAuthFilter extends OncePerRequestFilter {
 
                         UsernamePasswordAuthenticationToken authToken =
                                 new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
-                        authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+                        authToken.setDetails(userId);
                         SecurityContextHolder.getContext().setAuthentication(authToken);
                     }
                 }
             } catch (Exception e) {
-                logger.debug("Token JWT inválido: {}", e.getMessage());
+                LOG.debug("Token JWT inválido: {}", e.getMessage());
             }
         }
 

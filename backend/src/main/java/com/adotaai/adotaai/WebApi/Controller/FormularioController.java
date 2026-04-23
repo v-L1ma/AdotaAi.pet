@@ -41,9 +41,8 @@ public class FormularioController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deletarFormulario(@PathVariable UUID id,
-                                                  @RequestParam UUID usuarioCriadorId) {
-        formularioService.deletarFormulario(id, usuarioCriadorId);
+    public ResponseEntity<Void> deletarFormulario(@PathVariable UUID id) {
+        formularioService.deletarFormulario(id);
         return ResponseEntity.noContent().build();
     }
 }

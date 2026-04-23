@@ -1,17 +1,22 @@
 package com.adotaai.adotaai.WebApi.Controller;
 
+import java.util.UUID;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.adotaai.adotaai.Application.DTO.CadastrarUsuarioReponseDTO;
-import com.adotaai.adotaai.Application.DTO.UsuarioDTO;
+import com.adotaai.adotaai.Application.DTO.AtualizarUsuarioDTO;
+import com.adotaai.adotaai.Application.DTO.CadastrarUsuarioDTO;
+import com.adotaai.adotaai.Application.DTO.UsuarioReponseDTO;
+import com.adotaai.adotaai.Application.DTO.UsuarioPublicoDTO;
 import com.adotaai.adotaai.Application.Service.UsuarioService;
 import com.adotaai.adotaai.Application.Util.BaseResponse;
 
@@ -23,13 +28,18 @@ public class UsuarioController {
     private UsuarioService usuarioService;
 
     @GetMapping
-    public ResponseEntity<BaseResponse<UsuarioDTO>> listarTodos() {
-        return ResponseEntity.ok(usuarioService.listarTodos());
+    public ResponseEntity<BaseResponse<UsuarioReponseDTO>> buscarUsuarioLogado() {
+        return ResponseEntity.ok(usuarioService.buscarUsuarioLogado());
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<BaseResponse<UsuarioPublicoDTO>> buscarPublicoPorId(@PathVariable UUID id) {
+        return ResponseEntity.ok(usuarioService.buscarPublicoPorId(id));
     }
 
     @PostMapping
-    public ResponseEntity<BaseResponse<CadastrarUsuarioReponseDTO>> criarUsuario(@RequestBody UsuarioDTO usuario) {
-        BaseResponse<CadastrarUsuarioReponseDTO> res = usuarioService.inserir(usuario);
+    public ResponseEntity<BaseResponse<UsuarioReponseDTO>> criarUsuario(@RequestBody CadastrarUsuarioDTO usuario) {
+        BaseResponse<UsuarioReponseDTO> res = usuarioService.inserir(usuario);
         if (res.getErrors() != null && !res.getErrors().isEmpty()) {
             return ResponseEntity.badRequest().body(res);
         }
@@ -37,8 +47,8 @@ public class UsuarioController {
     }
 
     @PutMapping
-    public ResponseEntity<BaseResponse<UsuarioDTO>> alterarUsuario(@RequestBody UsuarioDTO usuario) {
-        BaseResponse<UsuarioDTO> res = usuarioService.atualizarUsuario(usuario);
+    public ResponseEntity<BaseResponse<UsuarioReponseDTO>> alterarUsuario(@RequestBody AtualizarUsuarioDTO usuario) {
+        BaseResponse<UsuarioReponseDTO> res = usuarioService.atualizarUsuario(usuario);
         if (res.getErrors() != null && !res.getErrors().isEmpty()) {
             return ResponseEntity.badRequest().body(res);
         }
@@ -46,8 +56,8 @@ public class UsuarioController {
     }
 
     @DeleteMapping
-    public ResponseEntity<BaseResponse<UsuarioDTO>> excluirUsuario() {
-        BaseResponse<UsuarioDTO> res = usuarioService.excluir();
+    public ResponseEntity<BaseResponse<AtualizarUsuarioDTO>> excluirUsuario() {
+        BaseResponse<AtualizarUsuarioDTO> res = usuarioService.excluir();
         if (res.getErrors() != null && !res.getErrors().isEmpty()) {
             return ResponseEntity.badRequest().body(res);
         }

@@ -4,11 +4,13 @@ import org.springframework.beans.BeanUtils;
 
 import com.adotaai.adotaai.Domain.Entity.UsuarioEntity;
 
-public class CadastrarUsuarioReponseDTO {
+public class AtualizarUsuarioDTO {
 
     private String nome;
     private String cpfcnpj;
     private String email;
+    private String senha;
+    private String confirmarSenha;
     private String telefone;
     private String link_foto;
     private String endereco;
@@ -17,11 +19,11 @@ public class CadastrarUsuarioReponseDTO {
     private String cidade;
     private String sg_estado;
 
-    public CadastrarUsuarioReponseDTO(UsuarioEntity usuario) {
+    public AtualizarUsuarioDTO(UsuarioEntity usuario) {
         BeanUtils.copyProperties(usuario, this);
     }
 
-    public CadastrarUsuarioReponseDTO() {
+    public AtualizarUsuarioDTO() {
     }
 
     public String getNome() {
@@ -46,6 +48,22 @@ public class CadastrarUsuarioReponseDTO {
 
     public void setEmail(String email) {
         this.email = email;
+    }
+
+    public String getSenha() {
+        return senha;
+    }
+
+    public void setSenha(String senha) {
+        this.senha = senha;
+    }
+
+    public String getConfirmarSenha() {
+        return confirmarSenha;
+    }
+
+    public void setConfirmarSenha(String confirmarSenha) {
+        this.confirmarSenha = confirmarSenha;
     }
 
     public String getTelefone() {

@@ -7,6 +7,8 @@ import com.adotaai.adotaai.Domain.Entity.PerguntaEntity;
 import com.adotaai.adotaai.Domain.Entity.UsuarioEntity;
 import com.adotaai.adotaai.Infraestructure.Repository.FormularioRepository;
 import com.adotaai.adotaai.Infraestructure.Repository.UsuarioRepository;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -30,8 +32,7 @@ public class FormularioService implements IFormularioService {
     @Override
     @Transactional
     public FormularioEntity criarFormulario(FormularioDTO dto) {
-        UsuarioEntity criador = usuarioRepository.findById(dto.getUsuarioCriadorId())
-                .orElseThrow(() -> new RuntimeException("Usuário criador não encontrado"));
+        UsuarioEntity criador = obterUsuarioAutenticado();
 
         FormularioEntity formulario = new FormularioEntity();
         formulario.setUsuarioCriador(criador);
@@ -66,14 +67,26 @@ public class FormularioService implements IFormularioService {
 
     @Override
     @Transactional
-    public void deletarFormulario(UUID formularioId, UUID usuarioCriadorId) {
+    public void deletarFormulario(UUID formularioId) {
         FormularioEntity formulario = formularioRepository.findById(formularioId)
                 .orElseThrow(() -> new RuntimeException("Formulário não encontrado"));
 
-        if (!formulario.getUsuarioCriador().getId().equals(usuarioCriadorId)) {
+        UsuarioEntity usuarioAutenticado = obterUsuarioAutenticado();
+
+        if (!formulario.getUsuarioCriador().getId().equals(usuarioAutenticado.getId())) {
             throw new RuntimeException("Apenas o criador do formulário pode deletá-lo");
         }
 
         formularioRepository.delete(formulario);
+    }
+
+    private UsuarioEntity obterUsuarioAutenticado() {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        if (auth == null || !auth.isAuthenticated() || "anonymousUser".equals(auth.getName())) {
+            throw new RuntimeException("Usuário não autenticado.");
+        }
+
+        return usuarioRepository.findByEmail(auth.getName())
+                .orElseThrow(() -> new RuntimeException("Usuário não encontrado para o email: " + auth.getName()));
     }
 }
