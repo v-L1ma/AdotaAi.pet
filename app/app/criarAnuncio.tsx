@@ -17,7 +17,7 @@ const criarAnuncioSchema = z.object({
         .trim()
         .refine((valor) => !Number.isNaN(Date.parse(valor)), "Informe uma data de nascimento valida")
         .refine((valor) => new Date(valor) <= new Date(), "Data de nascimento nao pode ser no futuro"),
-    especie: z.enum(["gato", "cachorro"], {
+    especie: z.enum(["Gato", "Cão"], {
         message: "Selecione a especie",
     }),
     porte: z.enum(["pequeno", "medio", "grande"], {
@@ -44,7 +44,7 @@ export default function CriarAnuncioScreen() {
         resolver: zodResolver(criarAnuncioSchema),
         defaultValues: {
             nome: "",
-            dt_nasc: new Date().toISOString().slice(0, 10),
+            dt_nasc: new Date().toLocaleDateString(),
             especie: undefined,
             porte: undefined,
             raca: "",
@@ -53,7 +53,7 @@ export default function CriarAnuncioScreen() {
     });
 
     const router = useRouter();
-    const [image, setImage] = useState<string | undefined>(undefined);
+    const [image, setImage] = useState<ImagePicker.ImagePickerAsset | null>(null);
     const [focusedField, setFocusedField] = useState<"nome" | "idade" | "peso" | null>(null);
 
     const nomeRef = useRef<TextInput>(null);
@@ -108,7 +108,7 @@ export default function CriarAnuncioScreen() {
             });
 
             if (!result.canceled && result.assets && result.assets.length > 0) {
-                setImage(result.assets[0].uri);
+                setImage(result.assets[0]);
             }
         } catch {
             Alert.alert("Erro", "Não foi possível abrir a câmera agora.");
@@ -152,11 +152,24 @@ export default function CriarAnuncioScreen() {
     };
 
     const handleSave = async (data: CriarAnuncioFormData) => {
+        if (!image?.uri) {
+            Alert.alert("Imagem obrigatória", "Adicione uma foto do pet para criar o anúncio.");
+            return;
+        }
+
         try {
-            await createPet(data);
+            await createPet({
+                ...data,
+                imagem: {
+                    uri: image.uri,
+                    fileName: image.fileName,
+                    mimeType: image.mimeType,
+                },
+            });
 
             Alert.alert("Sucesso", "Anuncio criado com sucesso!");
             reset();
+            setImage(null);
         } catch (error) {
             const errorMessage = error instanceof Error ? error.message : "Falha ao criar anuncio";
             Alert.alert("Erro", errorMessage);
@@ -192,8 +205,8 @@ export default function CriarAnuncioScreen() {
             >
                 <View style={styles.identitySection}>
                     <Pressable style={styles.avatarUploader} onPress={pickImage}>
-                        {image ? (
-                            <Image source={{ uri: image }} style={styles.avatarImage} />
+                        {image?.uri ? (
+                            <Image source={{ uri: image.uri }} style={styles.avatarImage} />
                         ) : (
                             <View style={styles.avatarPlaceholder}>
                                 <Icon1 name="camera-outline" size={30} color="#8c8c8c" />
@@ -272,8 +285,8 @@ export default function CriarAnuncioScreen() {
                         name="especie"
                         render={({ field: { onChange, value } }) => (
                             <View style={styles.row}>
-                                <Chip label="Cão" selected={value === "cachorro"} onPress={() => onChange("cachorro")} />
-                                <Chip label="Gato" selected={value === "gato"} onPress={() => onChange("gato")} />
+                                <Chip label="Cão" selected={value === "Cão"} onPress={() => onChange("cachorro")} />
+                                <Chip label="Gato" selected={value === "Gato"} onPress={() => onChange("gato")} />
                             </View>
                         )}
                     />

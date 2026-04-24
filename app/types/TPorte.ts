@@ -1,0 +1,1 @@
+export type porte = "pequeno" | "medio" | "grande"

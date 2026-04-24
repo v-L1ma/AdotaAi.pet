@@ -1,9 +1,11 @@
 package com.adotaai.adotaai.WebApi.Controller;
 
 import java.util.List;
+import java.util.Date;
 import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -11,13 +13,20 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.adotaai.adotaai.Application.DTO.BuscarPetDTO;
+import com.adotaai.adotaai.Application.DTO.CadastrarPetDTO;
 import com.adotaai.adotaai.Application.DTO.PetDTO;
 import com.adotaai.adotaai.Application.Service.PetService;
 import com.adotaai.adotaai.Application.Util.BaseResponse;
+import com.adotaai.adotaai.Domain.Exception.RegraDeNegocioException;
+
+import jakarta.validation.Valid;
 
 @RestController
 @RequestMapping(value = "/pets")
@@ -31,9 +40,11 @@ public class PetController {
         return petService.listarTodos();
     }
 
-    @PostMapping
-    public ResponseEntity<PetDTO> criarPet(@RequestBody PetDTO pet) {
-        PetDTO criado = petService.criarPet(pet);
+    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<PetDTO> criarPet(
+            @RequestPart("dados") @Valid CadastrarPetDTO dados,
+            @RequestPart(value = "imagem", required = false) MultipartFile imagem) {
+        PetDTO criado = petService.criarPet(dados, imagem);
         return ResponseEntity.ok(criado);
     }
 
@@ -43,9 +54,12 @@ public class PetController {
         return ResponseEntity.ok(encontrado);
     }
 
-    @PutMapping("/{id}")
-    public ResponseEntity<PetDTO> atualizarPet(@PathVariable UUID id, @RequestBody PetDTO petDTO) {
-        PetDTO atualizado = petService.atualizarPet(id, petDTO);
+    @PutMapping(value = "/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<PetDTO> atualizarPet(
+            @PathVariable UUID id,
+            @RequestPart("dados") @Valid CadastrarPetDTO dados,
+            @RequestPart(value = "imagem", required = false) MultipartFile imagem) {
+        PetDTO atualizado = petService.atualizarPet(id, dados, imagem);
         return ResponseEntity.ok(atualizado);
     }
 
