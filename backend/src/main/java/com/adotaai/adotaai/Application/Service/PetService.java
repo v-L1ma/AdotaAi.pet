@@ -9,12 +9,16 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.adotaai.adotaai.Application.DTO.BuscarPetDTO;
+import com.adotaai.adotaai.Application.DTO.CadastrarPetDTO;
 import com.adotaai.adotaai.Application.DTO.PetDTO;
 import com.adotaai.adotaai.Domain.Entity.FavoritoPetEntity;
 import com.adotaai.adotaai.Domain.Entity.PetEntity;
 import com.adotaai.adotaai.Domain.Entity.UsuarioEntity;
+import com.adotaai.adotaai.Domain.Exception.RecursoNaoEncontradoException;
+import com.adotaai.adotaai.Domain.Exception.RegraDeNegocioException;
 import com.adotaai.adotaai.Infraestructure.Repository.FavoritoPetRepository;
 import com.adotaai.adotaai.Infraestructure.Repository.PetRepository;
 import com.adotaai.adotaai.Infraestructure.Repository.UsuarioRepository;
@@ -33,6 +37,9 @@ public class PetService {
     @Autowired
     private FavoritoPetRepository favoritoPetRepository;
 
+    @Autowired
+    private ImageUploadService imageUploadService;
+
     public List<PetDTO> listarTodos() {
         List<PetEntity> pet = petRepository.findAll();
         return pet.stream().map(PetDTO::new).toList();
@@ -40,7 +47,7 @@ public class PetService {
 
     public BuscarPetDTO buscarPet(UUID id) {
         PetEntity pet = petRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Pet não encontrado com ID: " + id));
+                .orElseThrow(() -> new RecursoNaoEncontradoException("Pet não encontrado com ID: " + id));
 
         BuscarPetDTO.DonoDTO dono = null;
         if (pet.getUser() != null) {
@@ -71,16 +78,25 @@ public class PetService {
 
     public void excluir(UUID id) {
         PetEntity pet = petRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Pet não encontrado"));
+                .orElseThrow(() -> new RecursoNaoEncontradoException("Pet não encontrado"));
         petRepository.delete(pet);
     }
 
-    public PetDTO criarPet(PetDTO petDTO) {
+    public PetDTO criarPet(CadastrarPetDTO petDTO, MultipartFile imagem) {
         PetEntity pet = new PetEntity();
         BeanUtils.copyProperties(petDTO, pet);
         UsuarioEntity usuario = obterUsuarioAutenticado();
         pet.setUser(usuario);
-        pet.setLink_foto("Testedelink");
+        pet.setStatus("Pendente");
+
+        if (imagem != null && !imagem.isEmpty()) {
+            String imageUrl = imageUploadService.uploadPetImage(imagem, pet.getId() == null ? UUID.randomUUID() : pet.getId());
+            pet.setLink_foto(imageUrl);
+        }
+
+        if (pet.getLink_foto() == null || pet.getLink_foto().isBlank()) {
+            throw new RegraDeNegocioException("A imagem do pet é obrigatória.");
+        }
 
         pet = petRepository.save(pet);
 
@@ -91,21 +107,19 @@ public class PetService {
     }
 
     @Transactional
-    public PetDTO atualizarPet(UUID id, PetDTO petDto) {
-        PetEntity pet = petRepository.findById(id).orElseThrow(() -> new RuntimeException("Pet não encontrado com ID: " + id));
-        pet.setNome(petDto.getNome());
-        pet.setStatus(petDto.getStatus());
-        pet.setDescricao(petDto.getDescricao());
-        pet.setDt_nasc(petDto.getDt_nasc());
-        pet.setPorte(petDto.getPorte());
-        pet.setRaca(petDto.getRaca());
-        pet.setEspecie(petDto.getEspecie());
-        pet.setLink_foto(petDto.getLink_foto());
+    public PetDTO atualizarPet(UUID id, CadastrarPetDTO petDto, MultipartFile imagem) {
+        PetEntity pet = petRepository.findById(id)
+                .orElseThrow(() -> new RecursoNaoEncontradoException("Pet não encontrado com ID: " + id));
+
+        BeanUtils.copyProperties(petDto, pet, "id", "user", "link_foto");
+
+        if (imagem != null && !imagem.isEmpty()) {
+            String imageUrl = imageUploadService.uploadPetImage(imagem, pet.getId());
+            pet.setLink_foto(imageUrl);
+        }
 
         PetEntity petatualizado = petRepository.save(pet);
-
         return new PetDTO(petatualizado);
-
     }
 
     @Transactional
@@ -113,7 +127,7 @@ public class PetService {
         UsuarioEntity usuarioAutenticado = obterUsuarioAutenticado();
 
         PetEntity pet = petRepository.findById(petId)
-                .orElseThrow(() -> new RuntimeException("Pet não encontrado"));
+            .orElseThrow(() -> new RecursoNaoEncontradoException("Pet não encontrado"));
 
         boolean jaFavorito = favoritoPetRepository.existsByUsuarioIdAndPetId(usuarioAutenticado.getId(), pet.getId());
         if (jaFavorito) {
