@@ -44,7 +44,7 @@ export default function CriarAnuncioScreen() {
         resolver: zodResolver(criarAnuncioSchema),
         defaultValues: {
             nome: "",
-            dt_nasc: new Date().toLocaleDateString(),
+            dt_nasc: "2026-04-24",
             especie: undefined,
             porte: undefined,
             raca: "",
@@ -285,8 +285,8 @@ export default function CriarAnuncioScreen() {
                         name="especie"
                         render={({ field: { onChange, value } }) => (
                             <View style={styles.row}>
-                                <Chip label="Cão" selected={value === "Cão"} onPress={() => onChange("cachorro")} />
-                                <Chip label="Gato" selected={value === "Gato"} onPress={() => onChange("gato")} />
+                                <Chip label="Cão" selected={value === "Cão"} onPress={() => onChange("Cão")} />
+                                <Chip label="Gato" selected={value === "Gato"} onPress={() => onChange("Gato")} />
                             </View>
                         )}
                     />
