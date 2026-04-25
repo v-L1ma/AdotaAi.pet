@@ -3,7 +3,7 @@ package com.adotaai.adotaai.Application.DTO;
 import com.adotaai.adotaai.Domain.Entity.PetEntity;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-import java.util.Date;
+import java.time. LocalDate;
 import java.util.UUID;
 
 public class PetDTO {
@@ -11,7 +11,7 @@ public class PetDTO {
     private UUID id;
     private String status = "PENDENTE";
     private String descricao;
-    private Date dt_nasc;
+    private  LocalDate dt_nasc;
     private String nome;
     private String porte;
     private String raca;
@@ -64,11 +64,11 @@ public class PetDTO {
         this.descricao = descricao;
     }
 
-    public Date getDt_nasc() {
+    public  LocalDate getDt_nasc() {
         return dt_nasc;
     }
 
-    public void setDt_nasc(Date dt_nasc) {
+    public void setDt_nasc( LocalDate dt_nasc) {
         this.dt_nasc = dt_nasc;
     }
 

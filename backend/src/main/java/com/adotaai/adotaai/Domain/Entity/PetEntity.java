@@ -1,6 +1,6 @@
 package com.adotaai.adotaai.Domain.Entity;
 
-import java.util.Date;
+import java.time.LocalDate;
 import java.util.Objects;
 
 import org.springframework.beans.BeanUtils;
@@ -37,7 +37,7 @@ public class PetEntity extends AuditableEntity {
     private String descricao;
 
     @Column(nullable = false)
-    private Date dt_nasc;
+    private LocalDate dt_nasc;
 
     @Column(nullable = false)
     private String porte;
@@ -96,11 +96,11 @@ public class PetEntity extends AuditableEntity {
         this.descricao = descricao;
     }
 
-    public Date getDt_nasc() {
+    public LocalDate getDt_nasc() {
         return dt_nasc;
     }
 
-    public void setDt_nasc(Date dt_nasc) {
+    public void setDt_nasc(LocalDate dt_nasc) {
         this.dt_nasc = dt_nasc;
     }
 
