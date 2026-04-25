@@ -1,4 +1,5 @@
 import { useCallback, useState } from "react";
+import { Platform } from "react-native";
 import { getSession } from "../lib/session";
 import apiService from "../services/apiService";
 import { especie } from "@/types/TEspecie";
@@ -21,38 +22,60 @@ export type CreatePetInput = {
 type CreatePetPayload = {
   nome: string;
   descricao: string;
-  dt_nasc: string;
+  dtNasc: string;
   porte: porte ;
   raca: string;
   especie: especie;
 };
 
+function normalizeDate(value: string): string {
+  if (!value) return value;
+  const sliced = value.slice(0, 10);
+  // Garante que é yyyy-MM-dd antes de enviar
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(sliced)) {
+    throw new Error("Formato de data inválido. Esperado: yyyy-MM-dd");
+  }
+  return sliced;
+}
+
 function toPayload(input: CreatePetInput): CreatePetPayload {
   return {
     nome: input.nome,
     descricao: input.descricao,
-    dt_nasc: input.dt_nasc,
+    dtNasc: normalizeDate(input.dt_nasc),
     porte: input.porte,
     raca: input.raca,
     especie: input.especie,
   };
 }
 
-function buildFormData(payload: CreatePetPayload, imagem: CreatePetInput["imagem"]): FormData {
+async function buildFormData(payload: CreatePetPayload, imagem: CreatePetInput["imagem"]): Promise<FormData> {
   const formData = new FormData();
 
-  formData.append("dados", JSON.stringify(payload));
+  const payloadJson = JSON.stringify(payload);
+
+  if (Platform.OS === "web") {
+    formData.append("dados", new Blob([payloadJson], { type: "application/json" }));
+  } else {
+    formData.append("dados", payloadJson);
+  }
 
   const uri = imagem.uri;
   const filename = imagem.fileName || uri.split("/").pop() || `pet-${Date.now()}.jpg`;
   const extension = filename.split(".").pop()?.toLowerCase();
   const mimeType = imagem.mimeType || (extension === "png" ? "image/png" : "image/jpeg");
 
-  formData.append("imagem", {
-    uri,
-    name: filename,
-    type: mimeType,
-  } as any);
+  if (Platform.OS === "web") {
+    const imageResponse = await fetch(uri);
+    const imageBlob = await imageResponse.blob();
+    formData.append("imagem", imageBlob, filename);
+  } else {
+    formData.append("imagem", {
+      uri,
+      name: filename,
+      type: mimeType,
+    } as any);
+  }
 
   return formData;
 }
@@ -77,13 +100,9 @@ export function useCreatePet() {
       }
 
       const payload = toPayload(input);
-      const formData = buildFormData(payload, input.imagem);
+      const formData = await buildFormData(payload, input.imagem);
 
-      await apiService.post("/pets", formData, {
-        headers: {
-          "Content-Type": "multipart/form-data",
-        },
-      });
+      await apiService.post("/pets", formData);
     } catch (err) {
       const message = parseError(err);
       setError(message);

@@ -1,12 +1,11 @@
 package com.adotaai.adotaai.Application.DTO;
 
 import com.adotaai.adotaai.Domain.Entity.EventoEntity;
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-import jakarta.persistence.Column;
-
+import java.time.LocalDate;
 import java.sql.Time;
-import java.util.Date;
 import java.util.UUID;
 
 public class EventoDTO {
@@ -20,7 +19,8 @@ public class EventoDTO {
     private Time hrinicio;
     private String hrfim;
     private String descricao;
-    private Date data;
+    @JsonFormat(pattern = "yyyy-MM-dd")
+    private LocalDate data;
     private String status = "PENDENTE";
     private String nmorganizador;
 
@@ -113,11 +113,11 @@ public class EventoDTO {
         this.status = status;
     }
 
-    public Date getData() {
+    public LocalDate getData() {
         return data;
     }
 
-    public void setData(Date data) {
+    public void setData(LocalDate data) {
         this.data = data;
     }
 

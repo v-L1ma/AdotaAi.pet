@@ -4,9 +4,11 @@ import java.time.LocalDate;
 
 import org.springframework.format.annotation.DateTimeFormat;
 
+import com.fasterxml.jackson.annotation.JsonAlias;
 import com.fasterxml.jackson.annotation.JsonFormat;
 
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 
 public class CadastrarPetDTO {
 
@@ -17,7 +19,9 @@ public class CadastrarPetDTO {
     private String descricao;
 
     @JsonFormat(pattern = "yyyy-MM-dd")
+    @JsonAlias({ "dt_nasc", "dtNasc" })
     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
+    @NotNull
     private LocalDate dtNasc;
 
     @NotBlank

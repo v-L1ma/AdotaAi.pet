@@ -1,6 +1,6 @@
 package com.adotaai.adotaai.Application.DTO;
 
-import java.util.Date;
+import java.time.LocalDate;
 import java.util.UUID;
 
 public class BuscarPetDTO {
@@ -8,7 +8,7 @@ public class BuscarPetDTO {
     private UUID id;
     private String status;
     private String descricao;
-    private Date dt_nasc;
+    private LocalDate dt_nasc;
     private String nome;
     private String porte;
     private String raca;
@@ -21,7 +21,7 @@ public class BuscarPetDTO {
     }
 
     public BuscarPetDTO(UUID id, String status, String descricao,
-                        Date dataNascimento, String nome, String porte,
+                        LocalDate dataNascimento, String nome, String porte,
                         String raca, String especie, String linkFoto, boolean isFavoritado, DonoDTO dono) {
         this.id = id;
         this.status = status;
@@ -60,11 +60,11 @@ public class BuscarPetDTO {
         this.descricao = descricao;
     }
 
-    public Date getDt_nasc() {
+    public LocalDate getDt_nasc() {
         return dt_nasc;
     }
 
-    public void setDt_nasc(Date dt_nasc) {
+    public void setDt_nasc(LocalDate dt_nasc) {
         this.dt_nasc = dt_nasc;
     }
 
