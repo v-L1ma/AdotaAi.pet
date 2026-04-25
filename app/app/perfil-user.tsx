@@ -215,18 +215,20 @@ export default function UserScreen() {
         );
     };
 
-    const showPermissionAlert = (canAskAgain: boolean) => {
+    const showPermissionAlert = (type: "camera" | "galeria", canAskAgain: boolean) => {
+        const recurso = type === "camera" ? "à câmera" : "à galeria";
+
         if (canAskAgain) {
             Alert.alert(
                 "Permissão necessária",
-                "Precisamos de acesso à câmera para atualizar sua foto de perfil.",
+                `Precisamos de acesso ${recurso} para atualizar sua foto de perfil.`,
             );
             return;
         }
 
         Alert.alert(
-            "Permissão da câmera bloqueada",
-            "Ative o acesso à câmera nas configurações do aparelho para continuar.",
+            `Permissão da ${type} bloqueada`,
+            `Ative o acesso ${recurso} nas configurações do aparelho para continuar.`,
             [
                 { text: "Cancelar", style: "cancel" },
                 { text: "Abrir configurações", onPress: () => Linking.openSettings() },
@@ -234,12 +236,12 @@ export default function UserScreen() {
         );
     };
 
-    const pickImage = async () => {
+    const pickImageFromCamera = async () => {
         try {
             const permission = await ImagePicker.requestCameraPermissionsAsync();
 
             if (!permission.granted) {
-                showPermissionAlert(permission.canAskAgain);
+                showPermissionAlert("camera", permission.canAskAgain);
                 return;
             }
 
@@ -256,6 +258,42 @@ export default function UserScreen() {
         } catch {
             Alert.alert("Erro", "Não foi possível abrir a câmera agora.");
         }
+    };
+
+    const pickImageFromGallery = async () => {
+        try {
+            const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
+
+            if (!permission.granted) {
+                showPermissionAlert("galeria", permission.canAskAgain);
+                return;
+            }
+
+            const result = await ImagePicker.launchImageLibraryAsync({
+                mediaTypes: ImagePicker.MediaTypeOptions.Images,
+                allowsEditing: true,
+                aspect: [1, 1],
+                quality: 1,
+            });
+
+            if (!result.canceled && result.assets && result.assets.length > 0) {
+                setImage(result.assets[0].uri);
+            }
+        } catch {
+            Alert.alert("Erro", "Não foi possível abrir a galeria agora.");
+        }
+    };
+
+    const pickImage = () => {
+        Alert.alert(
+            "Escolher foto",
+            "Selecione de onde deseja importar a imagem.",
+            [
+                { text: "Galeria", onPress: () => void pickImageFromGallery() },
+                { text: "Câmera", onPress: () => void pickImageFromCamera() },
+                { text: "Cancelar", style: "cancel" },
+            ]
+        );
     };
 
     const renderError = (message?: string) =>

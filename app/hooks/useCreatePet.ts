@@ -54,9 +54,10 @@ async function buildFormData(payload: CreatePetPayload, imagem: CreatePetInput["
 
   const payloadJson = JSON.stringify(payload);
 
-  if (Platform.OS === "web") {
+  try {
     formData.append("dados", new Blob([payloadJson], { type: "application/json" }));
-  } else {
+  } catch {
+    // Fallback para runtimes que nao suportam Blob no FormData.
     formData.append("dados", payloadJson);
   }
 
@@ -103,6 +104,7 @@ export function useCreatePet() {
       const formData = await buildFormData(payload, input.imagem);
 
       await apiService.post("/pets", formData);
+      console.log("Form data enviada:", formData);
     } catch (err) {
       const message = parseError(err);
       setError(message);

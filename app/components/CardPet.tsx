@@ -11,7 +11,7 @@ type Props = {
 
 export default function CardPet({animal,index, onlyPicture}:Props){
     const router = useRouter();
-    const locationText = animal.localizacao || [animal.bairro, animal.cidade, animal.uf].filter(Boolean).join(", ") || "Santos";
+    const locationText = [animal.bairro, animal.cidade, animal.uf].filter(Boolean).join(", ") || "Santos";
 
     if(!onlyPicture){
         return(
@@ -23,7 +23,7 @@ export default function CardPet({animal,index, onlyPicture}:Props){
                     }
                 })
                 )}>
-                <Image style={styles.image} source={{uri:animal.imagem}}></Image>
+                <Image style={styles.image} source={{uri:animal.link_foto}}></Image>
 
                 <View style={styles.info}>
                     <Text style={styles.name}>{animal.nome}</Text>
@@ -41,7 +41,7 @@ export default function CardPet({animal,index, onlyPicture}:Props){
                     }
                 })
             )}>
-                <Image style={styles.onlyPictureImage} resizeMode="cover" source={{uri:animal.imagem}}></Image>
+                <Image style={styles.onlyPictureImage} resizeMode="cover" source={{uri:animal.link_foto}}></Image>
             </TouchableOpacity>
         )
     }

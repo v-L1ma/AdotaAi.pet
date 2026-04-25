@@ -9,14 +9,22 @@
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "infoPlist": {
+        "NSPhotoLibraryUsageDescription": "Permita o acesso a galeria para selecionar imagens dos pets e do perfil.",
+        "NSPhotoLibraryAddUsageDescription": "Permita salvar imagens na galeria quando necessario."
+      }
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },
-      "edgeToEdgeEnabled": true
+      "edgeToEdgeEnabled": true,
+      "permissions": [
+        "READ_MEDIA_IMAGES",
+        "READ_EXTERNAL_STORAGE"
+      ]
     },
     "web": {
       "bundler": "metro",
@@ -28,7 +36,7 @@
       [
         "expo-image-picker",
         {
-          "photosPermission": "Permita o acesso às fotos para selecionar imagens dos pets.",
+          "photosPermission": "Permita o acesso a galeria para selecionar imagens dos pets e do perfil.",
           "cameraPermission": "Permita o acesso à câmera para tirar fotos dos pets e do perfil."
         }
       ],
