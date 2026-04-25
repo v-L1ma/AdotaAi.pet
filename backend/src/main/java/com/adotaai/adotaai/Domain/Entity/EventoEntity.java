@@ -1,7 +1,7 @@
 package com.adotaai.adotaai.Domain.Entity;
 
 import java.sql.Time;
-import java.util.Date;
+import java.time.LocalDate;
 import java.util.Objects;
 import java.util.UUID;
 
@@ -51,7 +51,7 @@ public class EventoEntity extends AuditableEntity {
     private String descricao;
 
     @Column(nullable = false)
-    private Date data;
+    private LocalDate data;
 
     @Column(nullable = false)
     private String status;
@@ -145,11 +145,11 @@ public class EventoEntity extends AuditableEntity {
         this.descricao = descricao;
     }
 
-    public Date getData() {
+    public LocalDate getData() {
         return data;
     }
 
-    public void setData(Date data) {
+    public void setData(LocalDate data) {
         this.data = data;
     }
 

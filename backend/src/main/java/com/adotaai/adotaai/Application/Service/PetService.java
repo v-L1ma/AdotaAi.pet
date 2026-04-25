@@ -85,6 +85,7 @@ public class PetService {
     public PetDTO criarPet(CadastrarPetDTO petDTO, MultipartFile imagem) {
         PetEntity pet = new PetEntity();
         BeanUtils.copyProperties(petDTO, pet);
+        pet.setDt_nasc(petDTO.getDtNasc());
         UsuarioEntity usuario = obterUsuarioAutenticado();
         pet.setUser(usuario);
         pet.setStatus("Pendente");
@@ -112,6 +113,7 @@ public class PetService {
                 .orElseThrow(() -> new RecursoNaoEncontradoException("Pet não encontrado com ID: " + id));
 
         BeanUtils.copyProperties(petDto, pet, "id", "user", "link_foto");
+        pet.setDt_nasc(petDto.getDtNasc());
 
         if (imagem != null && !imagem.isEmpty()) {
             String imageUrl = imageUploadService.uploadPetImage(imagem, pet.getId());

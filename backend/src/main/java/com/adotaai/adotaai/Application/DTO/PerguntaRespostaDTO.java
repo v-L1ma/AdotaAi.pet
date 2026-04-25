@@ -2,8 +2,6 @@ package com.adotaai.adotaai.Application.DTO;
 
 import java.util.UUID;
 
-import java.util.List;
-
 public class PerguntaRespostaDTO {
 
     private UUID perguntaId;
