@@ -50,10 +50,9 @@ public class PetController {
 
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<PetDTO> criarPet(
-            @RequestPart("dados") byte[] dadosBrutos,
-            @RequestPart(value = "imagem", required = false) MultipartFile imagem) {
-        CadastrarPetDTO dados = parseDados(dadosBrutos);
-        validarDados(dados);
+            @RequestPart("dados") String dadosJson,
+            @RequestPart(required = false) MultipartFile imagem) {
+        CadastrarPetDTO dados = parseDados(dadosJson);
         PetDTO criado = petService.criarPet(dados, imagem);
         return ResponseEntity.ok(criado);
     }
@@ -67,39 +66,19 @@ public class PetController {
     @PutMapping(value = "/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<PetDTO> atualizarPet(
             @PathVariable UUID id,
-            @RequestPart("dados") byte[] dadosBrutos,
+            @RequestPart("dados") String dadosJson,
             @RequestPart(value = "imagem", required = false) MultipartFile imagem) {
-        CadastrarPetDTO dados = parseDados(dadosBrutos);
-        validarDados(dados);
+        CadastrarPetDTO dados = parseDados(dadosJson);
         PetDTO atualizado = petService.atualizarPet(id, dados, imagem);
         return ResponseEntity.ok(atualizado);
     }
 
-    private CadastrarPetDTO parseDados(byte[] dadosBrutos) {
-        if (dadosBrutos == null || dadosBrutos.length == 0) {
-            throw new RegraDeNegocioException("Campo 'dados' é obrigatório no multipart.");
-        }
-
+    private CadastrarPetDTO parseDados(String dadosJson) {
         try {
-            return objectMapper.readValue(dadosBrutos, CadastrarPetDTO.class);
-        } catch (JsonProcessingException ex) {
-            String dadosRecebidos = new String(dadosBrutos, StandardCharsets.UTF_8);
-            throw new RegraDeNegocioException("JSON inválido no campo 'dados': " + dadosRecebidos);
+            return objectMapper.readValue(dadosJson, CadastrarPetDTO.class);
+        } catch (JsonProcessingException exception) {
+            throw new RegraDeNegocioException("Dados do pet inválidos no part 'dados'.");
         }
-    }
-
-    private void validarDados(CadastrarPetDTO dados) {
-        Set<ConstraintViolation<CadastrarPetDTO>> violations = validator.validate(dados);
-        if (violations.isEmpty()) {
-            return;
-        }
-
-        String mensagem = violations.stream()
-                .map(violation -> violation.getPropertyPath() + ": " + violation.getMessage())
-                .findFirst()
-                .orElse("Dados do pet inválidos.");
-
-        throw new RegraDeNegocioException(mensagem);
     }
 
     @DeleteMapping("/{id}")

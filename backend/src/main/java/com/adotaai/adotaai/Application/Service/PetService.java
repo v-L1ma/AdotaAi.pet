@@ -1,6 +1,10 @@
 package com.adotaai.adotaai.Application.Service;
 
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import java.util.List;
+import java.util.Locale;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -85,7 +89,10 @@ public class PetService {
     public PetDTO criarPet(CadastrarPetDTO petDTO, MultipartFile imagem) {
         PetEntity pet = new PetEntity();
         BeanUtils.copyProperties(petDTO, pet);
-        pet.setDt_nasc(petDTO.getDtNasc());
+
+        LocalDate date = parseDtNasc(petDTO.getDtNasc());
+
+        pet.setDt_nasc(date);
         UsuarioEntity usuario = obterUsuarioAutenticado();
         pet.setUser(usuario);
         pet.setStatus("Pendente");
@@ -113,7 +120,9 @@ public class PetService {
                 .orElseThrow(() -> new RecursoNaoEncontradoException("Pet não encontrado com ID: " + id));
 
         BeanUtils.copyProperties(petDto, pet, "id", "user", "link_foto");
-        pet.setDt_nasc(petDto.getDtNasc());
+        LocalDate date = parseDtNasc(petDto.getDtNasc());
+
+        pet.setDt_nasc(date);
 
         if (imagem != null && !imagem.isEmpty()) {
             String imageUrl = imageUploadService.uploadPetImage(imagem, pet.getId());
@@ -162,6 +171,16 @@ public class PetService {
                 .map(FavoritoPetEntity::getPet)
                 .map(PetDTO::new)
                 .toList();
+    }
+
+    private LocalDate parseDtNasc(String dtNasc) {
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd").withLocale(Locale.US);
+
+        try {
+            return LocalDate.parse(dtNasc, formatter);
+        } catch (DateTimeParseException exception) {
+            throw new RegraDeNegocioException("Data de nascimento inválida. Use o formato yyyy-MM-dd.");
+        }
     }
 
     private UsuarioEntity obterUsuarioAutenticado() {

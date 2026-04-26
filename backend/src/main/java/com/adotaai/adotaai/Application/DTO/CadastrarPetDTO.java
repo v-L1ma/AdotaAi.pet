@@ -22,7 +22,7 @@ public class CadastrarPetDTO {
     @JsonAlias({ "dt_nasc", "dtNasc" })
     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
     @NotNull
-    private LocalDate dtNasc;
+    private String dtNasc;
 
     @NotBlank
     private String porte;
@@ -49,11 +49,11 @@ public class CadastrarPetDTO {
         this.descricao = descricao;
     }
 
-    public LocalDate getDtNasc() {
+    public String getDtNasc() {
         return dtNasc;
     }
 
-    public void setDtNasc(LocalDate dtNasc) {
+    public void setDtNasc(String dtNasc) {
         this.dtNasc = dtNasc;
     }
 
