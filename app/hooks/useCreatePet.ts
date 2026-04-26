@@ -23,7 +23,7 @@ type CreatePetPayload = {
   nome: string;
   descricao: string;
   dtNasc: string;
-  porte: porte ;
+  porte: porte;
   raca: string;
   especie: especie;
 };
@@ -49,17 +49,22 @@ function toPayload(input: CreatePetInput): CreatePetPayload {
   };
 }
 
-async function buildFormData(payload: CreatePetPayload, imagem: CreatePetInput["imagem"]): Promise<FormData> {
+async function buildFormData(
+  payload: CreatePetPayload,
+  imagem: CreatePetInput["imagem"]
+): Promise<FormData> {
   const formData = new FormData();
 
   const payloadJson = JSON.stringify(payload);
 
+  // No native, enviar string evita incompatibilidades com Blob no FormData.
   if (Platform.OS === "web") {
     formData.append("dados", new Blob([payloadJson], { type: "application/json" }));
   } else {
     formData.append("dados", payloadJson);
   }
 
+  // Processa a imagem
   const uri = imagem.uri;
   const filename = imagem.fileName || uri.split("/").pop() || `pet-${Date.now()}.jpg`;
   const extension = filename.split(".").pop()?.toLowerCase();
@@ -70,6 +75,7 @@ async function buildFormData(payload: CreatePetPayload, imagem: CreatePetInput["
     const imageBlob = await imageResponse.blob();
     formData.append("imagem", imageBlob, filename);
   } else {
+    // React Native RN Fetch Blob format
     formData.append("imagem", {
       uri,
       name: filename,
@@ -82,7 +88,7 @@ async function buildFormData(payload: CreatePetPayload, imagem: CreatePetInput["
 
 function parseError(err: unknown): string {
   if (err instanceof Error) return err.message;
-  return "Falha ao criar anuncio";
+  return "Falha ao criar pet";
 }
 
 export function useCreatePet() {
@@ -102,7 +108,10 @@ export function useCreatePet() {
       const payload = toPayload(input);
       const formData = await buildFormData(payload, input.imagem);
 
-      await apiService.post("/pets", formData);
+      // Nao forcar Content-Type: o axios define boundary corretamente.
+      const response = await apiService.post("/pets", formData);
+
+      return response.data;
     } catch (err) {
       const message = parseError(err);
       setError(message);

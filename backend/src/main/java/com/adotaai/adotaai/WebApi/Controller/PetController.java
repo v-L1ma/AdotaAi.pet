@@ -1,6 +1,8 @@
 package com.adotaai.adotaai.WebApi.Controller;
 
+import java.nio.charset.StandardCharsets;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,7 +23,12 @@ import com.adotaai.adotaai.Application.DTO.CadastrarPetDTO;
 import com.adotaai.adotaai.Application.DTO.PetDTO;
 import com.adotaai.adotaai.Application.Service.PetService;
 import com.adotaai.adotaai.Application.Util.BaseResponse;
-import jakarta.validation.Valid;
+import com.adotaai.adotaai.Domain.Exception.RegraDeNegocioException;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
+import jakarta.validation.ConstraintViolation;
+import jakarta.validation.Validator;
 
 @RestController
 @RequestMapping(value = "/pets")
@@ -30,6 +37,12 @@ public class PetController {
     @Autowired
     private PetService petService;
 
+    @Autowired
+    private ObjectMapper objectMapper;
+
+    @Autowired
+    private Validator validator;
+
     @GetMapping
     public List<PetDTO> listarTodosPets() {
         return petService.listarTodos();
@@ -37,8 +50,9 @@ public class PetController {
 
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<PetDTO> criarPet(
-            @RequestPart("dados") @Valid CadastrarPetDTO dados,
-            @RequestPart(value = "imagem", required = false) MultipartFile imagem) {
+            @RequestPart("dados") String dadosJson,
+            @RequestPart(required = false) MultipartFile imagem) {
+        CadastrarPetDTO dados = parseDados(dadosJson);
         PetDTO criado = petService.criarPet(dados, imagem);
         return ResponseEntity.ok(criado);
     }
@@ -52,10 +66,19 @@ public class PetController {
     @PutMapping(value = "/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<PetDTO> atualizarPet(
             @PathVariable UUID id,
-            @RequestPart("dados") @Valid CadastrarPetDTO dados,
+            @RequestPart("dados") String dadosJson,
             @RequestPart(value = "imagem", required = false) MultipartFile imagem) {
+        CadastrarPetDTO dados = parseDados(dadosJson);
         PetDTO atualizado = petService.atualizarPet(id, dados, imagem);
         return ResponseEntity.ok(atualizado);
+    }
+
+    private CadastrarPetDTO parseDados(String dadosJson) {
+        try {
+            return objectMapper.readValue(dadosJson, CadastrarPetDTO.class);
+        } catch (JsonProcessingException exception) {
+            throw new RegraDeNegocioException("Dados do pet inválidos no part 'dados'.");
+        }
     }
 
     @DeleteMapping("/{id}")

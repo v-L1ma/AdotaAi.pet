@@ -12,5 +12,8 @@ export type animal = {
     raca:string;
     link_foto: string;
     user_id:string;
+    bairro?: string;
+    cidade?: string;
+    uf?: string;
     // genero: string;
 }
