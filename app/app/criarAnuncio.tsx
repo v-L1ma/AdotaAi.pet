@@ -142,6 +142,10 @@ export default function CriarAnuncioScreen() {
     };
 
     const pickImage = () => {
+        if (Platform.OS === "web") {
+            pickImageFromGallery();
+            return;
+        }
         Alert.alert(
             "Escolher foto",
             "Selecione de onde deseja importar a imagem.",
