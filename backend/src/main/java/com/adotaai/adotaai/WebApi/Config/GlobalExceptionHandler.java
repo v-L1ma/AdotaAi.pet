@@ -41,6 +41,14 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
     }
 
+    @ExceptionHandler(IllegalArgumentException.class)
+    public ResponseEntity<BaseResponse<String>> handleIllegalArgumentException(IllegalArgumentException ex) {
+        BaseResponse<String> response = new BaseResponse<>();
+        response.setMessage("Erro de validação");
+        response.getErrors().add(ex.getMessage());
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
+    }
+
     @ExceptionHandler(RuntimeException.class)
     public ResponseEntity<BaseResponse<String>> handleRuntimeException(RuntimeException ex) {
         BaseResponse<String> response = new BaseResponse<>();

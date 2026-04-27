@@ -7,6 +7,7 @@ import com.adotaai.adotaai.Application.DTO.RefreshTokenRequestDTO;
 import com.adotaai.adotaai.Application.DTO.RefreshTokenResponseDTO;
 import com.adotaai.adotaai.Application.DTO.ResetarSenhaDTO;
 import com.adotaai.adotaai.Domain.Entity.UsuarioEntity;
+import com.adotaai.adotaai.Domain.Exception.RegraDeNegocioException;
 import com.adotaai.adotaai.Infraestructure.Repository.UsuarioRepository;
 import com.adotaai.adotaai.Application.Util.JwtUtil;
 import jakarta.transaction.Transactional;
@@ -45,24 +46,31 @@ public class AuthService {
         String emailNormalizado = loginRequest.getEmail() == null ? "" : loginRequest.getEmail().trim().toLowerCase();
 
         UsuarioEntity usuario = usuarioRepository.findByEmailIgnoreCase(emailNormalizado)
-                .orElseThrow(() -> new RuntimeException("Email e/ou senha inválidos."));
+                .orElseThrow(() -> new RegraDeNegocioException("Email e/ou senha inválidos."));
 
         if (!passwordEncoder.matches(loginRequest.getSenha(), usuario.getSenha())) {
-            throw new RuntimeException("Email e/ou senha inválidos.");
+            throw new RegraDeNegocioException("Email e/ou senha inválidos.");
         }
 
         if (Boolean.FALSE.equals(usuario.getFl_ativo())) {
-            throw new RuntimeException("Usuário inativo.");
+            throw new RegraDeNegocioException("Usuário inativo.");
         }
 
         String token = jwtUtil.generateToken(usuario.getEmail(), usuario.getId(), usuario.getCargo());
         String refreshToken = jwtUtil.generateRefreshToken(usuario.getEmail(), usuario.getId(), usuario.getCargo());
-        return new LoginResponseDTO(token, refreshToken, usuario.getId(), usuario.getEmail(), usuario.getNome(), usuario.getCargo());
+
+        boolean isCadastroComplete = usuario.getCep() != null && !usuario.getCep().isBlank() &&
+                                    usuario.getBairro() != null && !usuario.getBairro().isBlank() &&
+                                    usuario.getCidade() != null && !usuario.getCidade().isBlank() &&
+                                    usuario.getSg_estado() != null && !usuario.getSg_estado().isBlank() &&
+                                    usuario.getTelefone() != null && !usuario.getTelefone().isBlank();
+
+        return new LoginResponseDTO(token, refreshToken, usuario.getId(), usuario.getEmail(), usuario.getNome(), usuario.getCargo(), isCadastroComplete);
     }
 
     public RefreshTokenResponseDTO refresh(RefreshTokenRequestDTO refreshRequest) {
         if (refreshRequest == null || refreshRequest.getRefreshToken() == null || refreshRequest.getRefreshToken().isBlank()) {
-            throw new RuntimeException("Refresh token inválido.");
+            throw new RegraDeNegocioException("Refresh token inválido.");
         }
 
         String refreshToken = refreshRequest.getRefreshToken();
@@ -71,18 +79,18 @@ public class AuthService {
         try {
             email = jwtUtil.extractEmail(refreshToken);
         } catch (Exception e) {
-            throw new RuntimeException("Refresh token inválido.");
+            throw new RegraDeNegocioException("Refresh token inválido.");
         }
 
         UsuarioEntity usuario = usuarioRepository.findByEmailIgnoreCase(email)
-                .orElseThrow(() -> new RuntimeException("Refresh token inválido."));
+                .orElseThrow(() -> new RegraDeNegocioException("Refresh token inválido."));
 
         if (!jwtUtil.validateRefreshToken(refreshToken, email)) {
-            throw new RuntimeException("Refresh token inválido.");
+            throw new RegraDeNegocioException("Refresh token inválido.");
         }
 
         if (Boolean.FALSE.equals(usuario.getFl_ativo())) {
-            throw new RuntimeException("Usuário inativo.");
+            throw new RegraDeNegocioException("Usuário inativo.");
         }
 
         String newAccessToken = jwtUtil.generateToken(usuario.getEmail(), usuario.getId(), usuario.getCargo());
@@ -96,7 +104,7 @@ public class AuthService {
         String emailNormalizado = dto.getEmail() == null ? "" : dto.getEmail().trim().toLowerCase();
 
         UsuarioEntity usuario = usuarioRepository.findByEmailIgnoreCase(emailNormalizado)
-                .orElseThrow(() -> new RuntimeException("E-mail não encontrado."));
+                .orElseThrow(() -> new RegraDeNegocioException("E-mail não encontrado."));
 
         String token = UUID.randomUUID().toString();
         usuario.setResetToken(token);
@@ -109,10 +117,10 @@ public class AuthService {
     @Transactional
     public void resetarSenha(ResetarSenhaDTO dto) {
         UsuarioEntity usuario = usuarioRepository.findByResetToken(dto.getToken())
-                .orElseThrow(() -> new RuntimeException("Token inválido."));
+                .orElseThrow(() -> new RegraDeNegocioException("Token inválido."));
 
         if (usuario.getResetTokenExpiry() == null || LocalDateTime.now().isAfter(usuario.getResetTokenExpiry())) {
-            throw new RuntimeException("Token expirado.");
+            throw new RegraDeNegocioException("Token expirado.");
         }
 
         usuario.setSenha(passwordEncoder.encode(dto.getNovaSenha()));

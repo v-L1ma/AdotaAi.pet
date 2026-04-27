@@ -12,7 +12,6 @@ public class AtualizarUsuarioDTO {
     private String senha;
     private String confirmarSenha;
     private String telefone;
-    private String link_foto;
     private String endereco;
     private String cep;
     private String bairro;
@@ -72,14 +71,6 @@ public class AtualizarUsuarioDTO {
 
     public void setTelefone(String telefone) {
         this.telefone = telefone;
-    }
-
-    public String getLink_foto() {
-        return link_foto;
-    }
-
-    public void setLink_foto(String link_foto) {
-        this.link_foto = link_foto;
     }
 
     public String getEndereco() {

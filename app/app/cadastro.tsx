@@ -3,10 +3,8 @@ import React, { useEffect, useRef, useState } from "react";
 import { useAuth } from "../hooks/useAuth";
 import { SafeAreaView, Text, TextInput, Image, TouchableOpacity, KeyboardAvoidingView, View, Platform, Animated, Easing } from "react-native";
 import styles from "../styles/AppStyles";
-import { useTabNavigation } from "@/hooks/useTabNavigation";
 
 export default function CadastroScreen() {
-  const { navigateToTab } = useTabNavigation();
   const slideAnim = useRef(new Animated.Value(1000)).current;
   const { register, isLoading } = useAuth();
   const [nome, setNome] = useState("");
@@ -42,20 +40,20 @@ export default function CadastroScreen() {
       return;
     }
 
-    try {
-      await register({
-        nome: nomeNormalizado,
-        email: emailNormalizado,
-        cpfcnpj: cpfCnpjNormalizado,
-        senha,
-        confirmarSenha,
-      });
+    const result = await register({
+      nome: nomeNormalizado,
+      email: emailNormalizado,
+      cpfcnpj: cpfCnpjNormalizado,
+      senha,
+      confirmarSenha,
+    });
 
-      await router.replace("/login");
-    } catch (error) {
-      const message = error instanceof Error ? error.message : "Falha ao realizar cadastro";
-      setErro(message);
+    if (!result.ok) {
+      setErro(result.message);
+      return;
     }
+
+    await router.replace("/login");
   };
 
   return (

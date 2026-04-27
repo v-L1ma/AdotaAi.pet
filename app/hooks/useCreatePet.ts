@@ -1,6 +1,7 @@
 import { useCallback, useState } from "react";
 import { Platform } from "react-native";
 import { getSession } from "../lib/session";
+import { getApiErrorMessages } from "../services/apiErrorService";
 import apiService from "../services/apiService";
 import { especie } from "@/types/TEspecie";
 import { porte } from "@/types/TPorte";
@@ -27,6 +28,19 @@ type CreatePetPayload = {
   raca: string;
   especie: especie;
 };
+
+type HookSuccessResult<T> = {
+  ok: true;
+  data: T;
+};
+
+type HookErrorResult = {
+  ok: false;
+  message: string;
+  messages: string[];
+};
+
+type HookResult<T> = HookSuccessResult<T> | HookErrorResult;
 
 function normalizeDate(value: string): string {
   if (!value) return value;
@@ -86,18 +100,15 @@ async function buildFormData(
   return formData;
 }
 
-function parseError(err: unknown): string {
-  if (err instanceof Error) return err.message;
-  return "Falha ao criar pet";
-}
-
 export function useCreatePet() {
   const [isCreating, setIsCreating] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [errorMessages, setErrorMessages] = useState<string[]>([]);
 
-  const createPet = useCallback(async (input: CreatePetInput) => {
+  const createPet = useCallback(async (input: CreatePetInput): Promise<HookResult<unknown>> => {
     setIsCreating(true);
     setError(null);
+    setErrorMessages([]);
 
     try {
       const session = getSession();
@@ -111,11 +122,20 @@ export function useCreatePet() {
       // Nao forcar Content-Type: o axios define boundary corretamente.
       const response = await apiService.post("/pets", formData);
 
-      return response.data;
+      return {
+        ok: true,
+        data: response.data,
+      };
     } catch (err) {
-      const message = parseError(err);
+      const messages = getApiErrorMessages(err, "Falha ao criar pet");
+      const message = messages[0] || "Falha ao criar pet";
       setError(message);
-      throw err;
+      setErrorMessages(messages);
+      return {
+        ok: false,
+        message,
+        messages,
+      };
     } finally {
       setIsCreating(false);
     }
@@ -125,5 +145,6 @@ export function useCreatePet() {
     createPet,
     isCreating,
     error,
+    errorMessages,
   };
 }

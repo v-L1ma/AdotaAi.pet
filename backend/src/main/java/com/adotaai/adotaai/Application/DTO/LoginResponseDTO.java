@@ -13,14 +13,16 @@ public class LoginResponseDTO {
     private String email;
     private String nome;
     private Roles cargo;
+    private boolean isCadastroComplete;
 
-    public LoginResponseDTO(String token, String refreshToken, UUID id, String email, String nome, Roles cargo) {
+    public LoginResponseDTO(String token, String refreshToken, UUID id, String email, String nome, Roles cargo, boolean isCadastroComplete) {
         this.token = token;
         this.refreshToken = refreshToken;
         this.id = id;
         this.email = email;
         this.nome = nome;
         this.cargo = cargo;
+        this.isCadastroComplete = isCadastroComplete;
     }
 
     public String getToken() {
@@ -77,5 +79,13 @@ public class LoginResponseDTO {
 
     public void setCargo(Roles cargo) {
         this.cargo = cargo;
+    }
+
+    public boolean isCadastroComplete() {
+        return isCadastroComplete;
+    }
+
+    public void setCadastroComplete(boolean cadastroComplete) {
+        isCadastroComplete = cadastroComplete;
     }
 }
