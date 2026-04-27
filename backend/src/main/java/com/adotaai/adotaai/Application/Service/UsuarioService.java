@@ -29,16 +29,21 @@ import jakarta.transaction.Transactional;
 @Service
 public class UsuarioService {
 
+    private static final long MAX_FOTO_PERFIL_BYTES = 50L * 1024L * 1024L;
+
     private final UsuarioRepository usuarioRepository;
     private final PetRepository petRepository;
     private final PasswordEncoder passwordEncoder;
+    private final ImageUploadService imageUploadService;
 
     public UsuarioService(UsuarioRepository usuarioRepository,
             PetRepository petRepository,
-            PasswordEncoder passwordEncoder) {
+            PasswordEncoder passwordEncoder,
+            ImageUploadService imageUploadService) {
         this.usuarioRepository = usuarioRepository;
         this.petRepository = petRepository;
         this.passwordEncoder = passwordEncoder;
+        this.imageUploadService = imageUploadService;
     }
 
     public BaseResponse<UsuarioReponseDTO> listarTodos() {
@@ -190,6 +195,26 @@ public class UsuarioService {
         return new BaseResponse<>("Usuário atualizado com sucesso.", List.of(responseDTO), null);
     }
 
+    @Transactional
+    public BaseResponse<UsuarioReponseDTO> atualizarFotoPerfil(MultipartFile imagem) {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        if (auth == null || !auth.isAuthenticated() || auth.getName().equals("anonymousUser")) {
+            throw new RegraDeNegocioException("Usuário não autenticado.");
+        }
+
+        UsuarioEntity usuario = usuarioRepository.findByEmailIgnoreCase(auth.getName())
+                .orElseThrow(() -> new RecursoNaoEncontradoException("Usuário não encontrado para o email: " + auth.getName()));
+
+        validarFotoPerfil(imagem);
+
+        String imageUrl = imageUploadService.uploadUserProfileImage(imagem, usuario.getId());
+        usuario.setLink_foto(imageUrl);
+        usuario.setLast_modified_at(LocalDateTime.now());
+        usuario.setLast_modified_by(usuario.getId());
+
+        UsuarioEntity usuarioAtualizado = usuarioRepository.save(usuario);
+        return new BaseResponse<>("Foto de perfil atualizada com sucesso.", List.of(new UsuarioReponseDTO(usuarioAtualizado)), null);
+    }
 
     @Transactional
     public BaseResponse<AtualizarUsuarioDTO> excluir() {

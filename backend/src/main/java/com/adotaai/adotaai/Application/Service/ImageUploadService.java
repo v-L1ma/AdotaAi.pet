@@ -35,10 +35,10 @@ public class ImageUploadService {
     private static final int MAX_WIDTH = 1280;
     private static final int MAX_HEIGHT = 1280;
     private static final int SCALE_ATTEMPTS = 6;
+    private static final String USERS_BUCKET_NAME = "users";
 
     @Value("${supabase.url:}")
     private String supabaseUrl;
-
 
     @Value("${supabase.service-key:}")
     private String supabaseServiceKey;
@@ -66,25 +66,24 @@ public class ImageUploadService {
 
     public String uploadPetImage(MultipartFile imagem, UUID petId) {
         validarConfiguracaoSupabase();
-        validarArquivoRecebido(imagem);
+        validarArquivoRecebido(imagem, maxImageBytes);
 
-        byte[] arquivoOriginal;
-        try {
-            arquivoOriginal = imagem.getBytes();
-        } catch (IOException ex) {
-            throw new RegraDeNegocioException("Não foi possível ler a imagem enviada.");
-        }
-
-        ImageType imageType = detectImageTypeByMagicBytes(arquivoOriginal);
-        if (imageType == ImageType.UNKNOWN) {
-            throw new RegraDeNegocioException("Formato de imagem inválido. Envie JPG ou PNG.");
-        }
-
-        byte[] imagemComprimida = comprimirParaJpeg(arquivoOriginal);
+        byte[] imagemComprimida = processarImagem(imagem);
         String objectPath = montarNomeArquivo(petId);
-        enviarParaSupabase(objectPath, imagemComprimida);
+        enviarParaSupabase(bucketName, objectPath, imagemComprimida);
 
-        return construirUrlPublica(objectPath);
+        return construirUrlPublica(bucketName, objectPath);
+    }
+
+    public String uploadUserProfileImage(MultipartFile imagem, UUID userId) {
+        validarConfiguracaoSupabase();
+        validarArquivoObrigatorio(imagem);
+
+        byte[] imagemComprimida = processarImagem(imagem);
+        String objectPath = montarNomeArquivoFotoPerfil(userId);
+        enviarParaSupabase(USERS_BUCKET_NAME, objectPath, imagemComprimida);
+
+        return construirUrlPublica(USERS_BUCKET_NAME, objectPath);
     }
 
     private void validarConfiguracaoSupabase() {
@@ -95,13 +94,36 @@ public class ImageUploadService {
         }
     }
 
-    private void validarArquivoRecebido(MultipartFile imagem) {
+    private void validarArquivoObrigatorio(MultipartFile imagem) {
         if (imagem == null || imagem.isEmpty()) {
             throw new RegraDeNegocioException("Imagem obrigatória para upload.");
         }
+    }
 
-        if (imagem.getSize() > maxImageBytes) {
-            throw new RegraDeNegocioException("Imagem acima do limite permitido de " + maxImageBytes + " bytes.");
+    private void validarArquivoRecebido(MultipartFile imagem, long maxBytes) {
+        validarArquivoObrigatorio(imagem);
+
+        if (imagem.getSize() > maxBytes) {
+            throw new RegraDeNegocioException("Imagem acima do limite permitido de " + maxBytes + " bytes.");
+        }
+    }
+
+    private byte[] processarImagem(MultipartFile imagem) {
+        byte[] arquivoOriginal = lerArquivo(imagem);
+
+        ImageType imageType = detectImageTypeByMagicBytes(arquivoOriginal);
+        if (imageType == ImageType.UNKNOWN) {
+            throw new RegraDeNegocioException("Formato de imagem inválido. Envie JPG ou PNG.");
+        }
+
+        return comprimirParaJpeg(arquivoOriginal);
+    }
+
+    private byte[] lerArquivo(MultipartFile imagem) {
+        try {
+            return imagem.getBytes();
+        } catch (IOException ex) {
+            throw new RegraDeNegocioException("NÃ£o foi possível ler a imagem enviada.");
         }
     }
 
@@ -210,9 +232,20 @@ public class ImageUploadService {
                 UUID.randomUUID());
     }
 
-    private void enviarParaSupabase(String objectPath, byte[] content) {
+    private String montarNomeArquivoFotoPerfil(UUID userId) {
+        LocalDate hoje = LocalDate.now();
+        return String.format(
+                Locale.ROOT,
+                "foto-perfil/%d/%02d/%s-%s.jpg",
+                hoje.getYear(),
+                hoje.getMonthValue(),
+                userId,
+                UUID.randomUUID());
+    }
+
+    private void enviarParaSupabase(String targetBucketName, String objectPath, byte[] content) {
         PutObjectRequest putObjectRequest = PutObjectRequest.builder()
-                .bucket(bucketName)
+                .bucket(targetBucketName)
                 .key(objectPath)
                 .contentType("image/jpeg")
                 .build();
@@ -224,7 +257,7 @@ public class ImageUploadService {
         }
     }
 
-    private String construirUrlPublica(String objectPath) {
+    private String construirUrlPublica(String targetBucketName, String objectPath) {
         String base = supabaseUrl.endsWith("/")
                 ? supabaseUrl.substring(0, supabaseUrl.length() - 1)
                 : supabaseUrl;
@@ -233,7 +266,7 @@ public class ImageUploadService {
                 ? objectPath.substring(1)
                 : objectPath;
 
-        return base + "/storage/v1/object/public/" + bucketName + "/" + path;
+        return base + "/storage/v1/object/public/" + targetBucketName + "/" + path;
     }
 
     private ImageType detectImageTypeByMagicBytes(byte[] bytes) {
