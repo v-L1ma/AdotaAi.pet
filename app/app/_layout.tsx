@@ -6,9 +6,11 @@ import {
   Manrope_800ExtraBold,
 } from "@expo-google-fonts/manrope";
 import { Stack, useRouter, useSegments } from "expo-router";
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { ActivityIndicator, View } from "react-native";
+import CadastroIncompletoModal from "@/components/CadastroIncompletoModal";
 import { getSession } from "../lib/session";
+import { registerCadastroIncompletoHandler } from "../services/apiService";
 import { tokenService } from "../services/tokenService";
 
 const PUBLIC_ROUTES = new Set(["index", "login", "cadastro"]);
@@ -17,6 +19,7 @@ export default function RootLayout() {
   const router = useRouter();
   const segments = useSegments();
   const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
+  const [showCadastroIncompletoModal, setShowCadastroIncompletoModal] = useState(false);
 
   const currentRoute = useMemo(() => {
     return segments[segments.length - 1];
@@ -47,6 +50,18 @@ export default function RootLayout() {
     };
   }, [currentRoute]);
 
+  const openCadastroIncompletoModal = useCallback(() => {
+    setShowCadastroIncompletoModal(true);
+  }, []);
+
+  useEffect(() => {
+    registerCadastroIncompletoHandler(openCadastroIncompletoModal);
+
+    return () => {
+      registerCadastroIncompletoHandler(null);
+    };
+  }, [openCadastroIncompletoModal]);
+
   useEffect(() => {
     if (isAuthenticated === null) {
       return;
@@ -76,10 +91,21 @@ export default function RootLayout() {
   if (!fontsLoaded) return null;
 
   return (
-    <Stack
-      screenOptions={{
-        headerShown: false,
-      }}
-    />
+    <>
+      <Stack
+        screenOptions={{
+          headerShown: false,
+        }}
+      />
+
+      <CadastroIncompletoModal
+        visible={showCadastroIncompletoModal}
+        onClose={() => setShowCadastroIncompletoModal(false)}
+        onConcluirCadastro={() => {
+          setShowCadastroIncompletoModal(false);
+          router.push("/perfil-user");
+        }}
+      />
+    </>
   );
 }

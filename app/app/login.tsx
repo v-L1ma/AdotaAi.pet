@@ -5,7 +5,6 @@ import { Animated, Easing } from "react-native";
 import Icon1 from "react-native-vector-icons/AntDesign";
 import styles from "../styles/AppStyles";
 import { useAuth } from "../hooks/useAuth";
-import { useTabNavigation } from "@/hooks/useTabNavigation";
 import { router } from "expo-router";
 
 export default function LoginScreen() {
@@ -34,16 +33,17 @@ export default function LoginScreen() {
       return;
     }
 
-    try {
-      await login({
-        email: emailNormalizado,
-        senha,
-      });
-      router.replace("/Home");
-    } catch (error) {
-      const message = error instanceof Error ? error.message : "Falha ao realizar login";
-      setErro(message);
+    const result = await login({
+      email: emailNormalizado,
+      senha,
+    });
+
+    if (!result.ok) {
+      setErro(result.message);
+      return;
     }
+
+    router.replace("/Home");
   };
 
 

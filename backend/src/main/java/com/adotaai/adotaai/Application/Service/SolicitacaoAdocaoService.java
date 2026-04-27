@@ -137,10 +137,10 @@ public class SolicitacaoAdocaoService implements ISolicitacaoAdocaoService {
     private UsuarioEntity obterUsuarioAutenticado() {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         if (auth == null || !auth.isAuthenticated() || "anonymousUser".equals(auth.getName())) {
-            throw new RuntimeException("Usuário não autenticado.");
+            throw new RegraDeNegocioException("Usuário não autenticado.");
         }
 
         return usuarioRepository.findByEmail(auth.getName())
-                .orElseThrow(() -> new RuntimeException("Usuário não encontrado para o email: " + auth.getName()));
+                .orElseThrow(() -> new RecursoNaoEncontradoException("Usuário não encontrado para o email: " + auth.getName()));
     }
 }

@@ -2,7 +2,7 @@ import * as ImagePicker from "expo-image-picker";
 import { zodResolver } from "@hookform/resolvers/zod";
 import React, { useEffect, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
-import { Alert, Image, SafeAreaView, ScrollView, Text, TextInput, TouchableOpacity, Pressable, View, Linking, StyleSheet } from "react-native";
+import { Alert, Image, SafeAreaView, ScrollView, Text, TextInput, TouchableOpacity, Pressable, View, Linking, StyleSheet, Platform } from "react-native";
 import { z } from "zod";
 import Icon1 from "react-native-vector-icons/Ionicons";
 import { getSession } from "../lib/session";
@@ -10,6 +10,7 @@ import apiService from "../services/apiService";
 import { router } from "expo-router";
 import AppHeader from "@/components/AppHeader";
 import { colors } from "@/styles/variables";
+import { MAX_PROFILE_PICTURE_SIZE_BYTES, useUpdateProfilePicture } from "../hooks/useUpdateProfilePicture";
 
 type UsuarioAtualizacaoDTO = {
     nome: string;
@@ -72,8 +73,9 @@ type PerfilUsuarioFormData = z.infer<typeof perfilUsuarioSchema>;
 
 export default function UserScreen() {
     const [isSaving, setIsSaving] = useState(false);
-    const [image, setImage] = useState<string | null>(null);
+    const [image, setImage] = useState<ImagePicker.ImagePickerAsset | null>(null);
     const [userLogado, setUserLogado] = useState<UsuarioAtualizacaoDTO | null>(null);
+    const { updateProfilePicture, isUpdatingProfilePicture } = useUpdateProfilePicture();
 
     const {
         control,
@@ -84,6 +86,7 @@ export default function UserScreen() {
         formState: { errors, dirtyFields },
     } = useForm<PerfilUsuarioFormData>({
         resolver: zodResolver(perfilUsuarioSchema),
+        mode: "onBlur",
         defaultValues: {
             nome: "",
             cpfcnpj: "",
@@ -147,7 +150,7 @@ export default function UserScreen() {
     }, [reset, setValue]);
 
     const onSubmit = async (data: PerfilUsuarioFormData) => {
-        if (isSaving) {
+        if (isSaving || isUpdatingProfilePicture) {
             return;
         }
 
@@ -158,7 +161,6 @@ export default function UserScreen() {
                 cpfcnpj: data.cpfcnpj.trim(),
                 email: data.email.trim(),
                 telefone: data.telefone?.trim() || undefined,
-                link_foto: data.link_foto?.trim() || undefined,
                 endereco: data.endereco?.trim() || undefined,
                 cep: data.cep?.trim() || undefined,
                 bairro: data.bairro?.trim() || undefined,
@@ -176,11 +178,29 @@ export default function UserScreen() {
             }
 
             await apiService.put("/usuario", payload);
+
+            if (image) {
+                const uploadResult = await updateProfilePicture({
+                    uri: image.uri,
+                    fileName: image.fileName,
+                    mimeType: image.mimeType,
+                    fileSize: image.fileSize,
+                });
+
+                if (!uploadResult.ok) {
+                    throw new Error(uploadResult.message);
+                }
+
+                const novaFoto = uploadResult.data.link_foto ?? "";
+                setValue("link_foto", novaFoto);
+                setUserLogado((current) => (current ? { ...current, link_foto: novaFoto } : current));
+                setImage(null);
+            }
             Alert.alert("Sucesso", "Dados atualizados com sucesso!");
             setValue("senha", "");
             setValue("confirmarSenha", "");
         } catch {
-            Alert.alert("Erro", "Não foi possível atualizar seus dados. Tente novamente.");
+            Alert.alert("Erro", "Nao foi possivel atualizar seus dados. Tente novamente.");
         } finally {
             setIsSaving(false);
         }
@@ -202,8 +222,8 @@ export default function UserScreen() {
         }
 
         Alert.alert(
-            "Descartar alterações?",
-            "Você fez alterações e ainda não salvou. Se voltar agora, as alterações serão descartadas.",
+            "Descartar alteracoes?",
+            "Voce fez alteracoes e ainda nao salvou. Se voltar agora, as alteracoes serao descartadas.",
             [
                 { text: "Continuar editando", style: "cancel" },
                 {
@@ -216,26 +236,34 @@ export default function UserScreen() {
     };
 
     const showPermissionAlert = (type: "camera" | "galeria", canAskAgain: boolean) => {
-        const recurso = type === "camera" ? "à câmera" : "à galeria";
+        const recurso = type === "camera" ? "a camera" : "a galeria";
 
         if (canAskAgain) {
             Alert.alert(
-                "Permissão necessária",
+                "Permissao necessaria",
                 `Precisamos de acesso ${recurso} para atualizar sua foto de perfil.`,
             );
             return;
         }
 
         Alert.alert(
-            `Permissão da ${type} bloqueada`,
-            `Ative o acesso ${recurso} nas configurações do aparelho para continuar.`,
+            `Permissao da ${type} bloqueada`,
+            `Ative o acesso ${recurso} nas configuracoes do aparelho para continuar.`,
             [
                 { text: "Cancelar", style: "cancel" },
-                { text: "Abrir configurações", onPress: () => Linking.openSettings() },
+                { text: "Abrir configuracoes", onPress: () => Linking.openSettings() },
             ]
         );
     };
 
+    const validateImageSize = (selectedImage: ImagePicker.ImagePickerAsset) => {
+        if (selectedImage.fileSize != null && selectedImage.fileSize > MAX_PROFILE_PICTURE_SIZE_BYTES) {
+            Alert.alert("Erro", "A imagem deve ter no maximo 50 MB.");
+            return false;
+        }
+
+        return true;
+    };
     const pickImageFromCamera = async () => {
         try {
             const permission = await ImagePicker.requestCameraPermissionsAsync();
@@ -253,10 +281,15 @@ export default function UserScreen() {
             });
 
             if (!result.canceled && result.assets && result.assets.length > 0) {
-                setImage(result.assets[0].uri);
+                const selectedImage = result.assets[0];
+                if (!validateImageSize(selectedImage)) {
+                    return;
+                }
+
+                setImage(selectedImage);
             }
         } catch {
-            Alert.alert("Erro", "Não foi possível abrir a câmera agora.");
+            Alert.alert("Erro", "Nao foi possivel abrir a camera agora.");
         }
     };
 
@@ -277,20 +310,29 @@ export default function UserScreen() {
             });
 
             if (!result.canceled && result.assets && result.assets.length > 0) {
-                setImage(result.assets[0].uri);
+                const selectedImage = result.assets[0];
+                if (!validateImageSize(selectedImage)) {
+                    return;
+                }
+
+                setImage(selectedImage);
             }
         } catch {
-            Alert.alert("Erro", "Não foi possível abrir a galeria agora.");
+            Alert.alert("Erro", "Nao foi possivel abrir a galeria agora.");
         }
     };
 
     const pickImage = () => {
+        if (Platform.OS === "web") {
+            pickImageFromGallery();
+            return;
+        }
         Alert.alert(
             "Escolher foto",
             "Selecione de onde deseja importar a imagem.",
             [
                 { text: "Galeria", onPress: () => void pickImageFromGallery() },
-                { text: "Câmera", onPress: () => void pickImageFromCamera() },
+                { text: "Camera", onPress: () => void pickImageFromCamera() },
                 { text: "Cancelar", style: "cancel" },
             ]
         );
@@ -307,7 +349,7 @@ export default function UserScreen() {
                 <View style={styles.heroCard}>
                     <Pressable style={styles.avatarWrap} onPress={pickImage}>
                         {image || linkFoto ? (
-                            <Image source={{ uri: image ?? linkFoto ?? "" }} style={styles.avatarImage} />
+                            <Image source={{ uri: image?.uri ?? linkFoto ?? "" }} style={styles.avatarImage} />
                         ) : (
                             <Icon1 name="image" size={40} color="#868585ff" />
                         )}
@@ -415,29 +457,14 @@ export default function UserScreen() {
 
                     <Controller
                         control={control}
-                        name="link_foto"
-                        render={({ field: { onChange, onBlur, value } }) => (
-                            <Field
-                                label="Link da Foto"
-                                value={value || ""}
-                                onChangeText={onChange}
-                                onBlur={onBlur}
-                                placeholder="https://..."
-                            />
-                        )}
-                    />
-                    {renderError(errors.link_foto?.message)}
-
-                    <Controller
-                        control={control}
                         name="endereco"
                         render={({ field: { onChange, onBlur, value } }) => (
                             <Field
-                                label="Endereço"
+                                label="Endereco"
                                 value={value || ""}
                                 onChangeText={onChange}
                                 onBlur={onBlur}
-                                placeholder="Digite seu endereço..."
+                                placeholder="Digite seu endereco..."
                                 multiline
                             />
                         )}
@@ -505,12 +532,12 @@ export default function UserScreen() {
                 </SafeAreaView>
 
                 <TouchableOpacity 
-                    style={[styles.primaryButton, isSaving && { opacity: 0.7 }]} 
+                    style={[styles.primaryButton, (isSaving || isUpdatingProfilePicture) && { opacity: 0.7 }]} 
                     onPress={handleSubmit(onSubmit)}
-                    disabled={isSaving}
+                    disabled={isSaving || isUpdatingProfilePicture}
                 >
                     <Text style={styles.primaryButtonText}>
-                        {isSaving ? "Salvando..." : "Salvar alterações"}
+                        {isSaving || isUpdatingProfilePicture ? "Salvando..." : "Salvar alteracoes"}
                     </Text>
                 </TouchableOpacity>
             </ScrollView>

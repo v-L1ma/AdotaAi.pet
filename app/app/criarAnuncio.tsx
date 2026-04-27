@@ -199,23 +199,23 @@ export default function CriarAnuncioScreen() {
             return;
         }
 
-        try {
-            await createPet({
-                ...data,
-                imagem: {
-                    uri: image.uri,
-                    fileName: image.fileName,
-                    mimeType: image.mimeType,
-                },
-            });
+        const result = await createPet({
+            ...data,
+            imagem: {
+                uri: image.uri,
+                fileName: image.fileName,
+                mimeType: image.mimeType,
+            },
+        });
 
-            Alert.alert("Sucesso", "Anuncio criado com sucesso!");
-            reset();
-            setImage(null);
-        } catch (error) {
-            const errorMessage = error instanceof Error ? error.message : "Falha ao criar anuncio";
-            Alert.alert("Erro", errorMessage);
+        if (!result.ok) {
+            Alert.alert("Erro", result.messages.join("\n"));
+            return;
         }
+
+        Alert.alert("Sucesso", "Anuncio criado com sucesso!");
+        reset();
+        setImage(null);
     };
 
     const renderError = (message?: string) =>

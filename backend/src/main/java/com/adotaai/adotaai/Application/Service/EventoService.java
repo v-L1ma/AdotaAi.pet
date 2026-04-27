@@ -3,6 +3,8 @@ package com.adotaai.adotaai.Application.Service;
 import com.adotaai.adotaai.Application.DTO.EventoDTO;
 import com.adotaai.adotaai.Domain.Entity.EventoEntity;
 import com.adotaai.adotaai.Domain.Entity.UsuarioEntity;
+import com.adotaai.adotaai.Domain.Exception.RecursoNaoEncontradoException;
+import com.adotaai.adotaai.Domain.Exception.RegraDeNegocioException;
 import com.adotaai.adotaai.Infraestructure.Repository.EventoRepository;
 import com.adotaai.adotaai.Infraestructure.Repository.UsuarioRepository;
 import jakarta.transaction.Transactional;
@@ -31,7 +33,7 @@ public class EventoService {
 
     public void excluir(UUID id) {
         EventoEntity evento = eventoRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Evento não encontrado"));
+                .orElseThrow(() -> new RecursoNaoEncontradoException("Evento não encontrado"));
         eventoRepository.delete(evento);
     }
 
@@ -51,7 +53,7 @@ public class EventoService {
 
     @Transactional
     public EventoDTO atualizarEvento(UUID id, EventoDTO eventoDto) {
-        EventoEntity evento = eventoRepository.findById(id).orElseThrow(() -> new RuntimeException("Evento não encontrado com ID: " + id));
+        EventoEntity evento = eventoRepository.findById(id).orElseThrow(() -> new RecursoNaoEncontradoException("Evento não encontrado com ID: " + id));
         evento.setNome(eventoDto.getNome());
         evento.setEndereco(eventoDto.getEndereco());
         evento.setBairro(eventoDto.getBairro());
@@ -73,10 +75,10 @@ public class EventoService {
     private UsuarioEntity obterUsuarioAutenticado() {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         if (auth == null || !auth.isAuthenticated() || "anonymousUser".equals(auth.getName())) {
-            throw new RuntimeException("Usuário não autenticado.");
+            throw new RegraDeNegocioException("Usuário não autenticado.");
         }
 
         return usuarioRepository.findByEmail(auth.getName())
-                .orElseThrow(() -> new RuntimeException("Usuário não encontrado para o email: " + auth.getName()));
+                .orElseThrow(() -> new RecursoNaoEncontradoException("Usuário não encontrado para o email: " + auth.getName()));
     }
 }

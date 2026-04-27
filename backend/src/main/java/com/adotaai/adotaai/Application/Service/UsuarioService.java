@@ -8,6 +8,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.adotaai.adotaai.Application.DTO.AtualizarUsuarioDTO;
 import com.adotaai.adotaai.Application.DTO.CadastrarUsuarioDTO;
@@ -18,6 +19,8 @@ import com.adotaai.adotaai.Application.Util.CnpjValidator;
 import com.adotaai.adotaai.Application.Util.CpfValidator;
 import com.adotaai.adotaai.Domain.Entity.Roles;
 import com.adotaai.adotaai.Domain.Entity.UsuarioEntity;
+import com.adotaai.adotaai.Domain.Exception.RecursoNaoEncontradoException;
+import com.adotaai.adotaai.Domain.Exception.RegraDeNegocioException;
 import com.adotaai.adotaai.Infraestructure.Repository.PetRepository;
 import com.adotaai.adotaai.Infraestructure.Repository.UsuarioRepository;
 
@@ -26,16 +29,21 @@ import jakarta.transaction.Transactional;
 @Service
 public class UsuarioService {
 
+    private static final long MAX_FOTO_PERFIL_BYTES = 50L * 1024L * 1024L;
+
     private final UsuarioRepository usuarioRepository;
     private final PetRepository petRepository;
     private final PasswordEncoder passwordEncoder;
+    private final ImageUploadService imageUploadService;
 
     public UsuarioService(UsuarioRepository usuarioRepository,
             PetRepository petRepository,
-            PasswordEncoder passwordEncoder) {
+            PasswordEncoder passwordEncoder,
+            ImageUploadService imageUploadService) {
         this.usuarioRepository = usuarioRepository;
         this.petRepository = petRepository;
         this.passwordEncoder = passwordEncoder;
+        this.imageUploadService = imageUploadService;
     }
 
     public BaseResponse<UsuarioReponseDTO> listarTodos() {
@@ -47,18 +55,18 @@ public class UsuarioService {
     public BaseResponse<UsuarioReponseDTO> buscarUsuarioLogado() {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         if (auth == null || !auth.isAuthenticated() || auth.getName().equals("anonymousUser")) {
-            throw new RuntimeException("Usuário não autenticado.");
+            throw new RegraDeNegocioException("Usuário não autenticado.");
         }
 
         UsuarioEntity usuario = usuarioRepository.findByEmailIgnoreCase(auth.getName())
-                .orElseThrow(() -> new RuntimeException("Usuário não encontrado para o email: " + auth.getName()));
+                .orElseThrow(() -> new RecursoNaoEncontradoException("Usuário não encontrado para o email: " + auth.getName()));
 
         return new BaseResponse<>("Sucesso", List.of(new UsuarioReponseDTO(usuario)), null);
     }
 
     public BaseResponse<UsuarioPublicoDTO> buscarPublicoPorId(UUID id) {
         UsuarioEntity usuario = usuarioRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Usuário não encontrado."));
+                .orElseThrow(() -> new RecursoNaoEncontradoException("Usuário não encontrado."));
 
         return new BaseResponse<>("Sucesso", List.of(new UsuarioPublicoDTO(usuario)), null);
     }
@@ -69,11 +77,11 @@ public class UsuarioService {
                 || usuarioDTO.getSenha() == null || usuarioDTO.getSenha().trim().isEmpty()
                 || usuarioDTO.getConfirmarSenha() == null || usuarioDTO.getConfirmarSenha().trim().isEmpty()
                 || usuarioDTO.getCpfcnpj() == null || usuarioDTO.getCpfcnpj().trim().isEmpty()) {
-            throw new RuntimeException("Campos obrigatórios não podem estar vazios.");
+            throw new RegraDeNegocioException("Campos obrigatórios não podem estar vazios.");
         }
 
         if (!usuarioDTO.getSenha().equals(usuarioDTO.getConfirmarSenha())) {
-            throw new RuntimeException("Senha e confirmar senha não conferem.");
+            throw new RegraDeNegocioException("Senha e confirmar senha não conferem.");
         }
 
         String emailNormalizado = usuarioDTO.getEmail().trim().toLowerCase();
@@ -85,11 +93,11 @@ public class UsuarioService {
         if (usuarioDTO.getCpfcnpj() != null) {
             String cpfcnpjLimpo = usuarioDTO.getCpfcnpj().replaceAll("[^0-9]", "");
             if (cpfcnpjLimpo.length() == 11 && !CpfValidator.isValid(cpfcnpjLimpo)) {
-                throw new RuntimeException("CPF inválido.");
+                throw new RegraDeNegocioException("CPF inválido.");
             } else if (cpfcnpjLimpo.length() == 14 && !CnpjValidator.isValid(cpfcnpjLimpo)) {
-                throw new RuntimeException("CNPJ inválido.");
+                throw new RegraDeNegocioException("CNPJ inválido.");
             } else if (cpfcnpjLimpo.length() != 11 && cpfcnpjLimpo.length() != 14) {
-                throw new RuntimeException("CPF/CNPJ com tamanho inválido.");
+                throw new RegraDeNegocioException("CPF/CNPJ com tamanho inválido.");
             }
         }
 
@@ -97,11 +105,11 @@ public class UsuarioService {
         boolean cpfcnpjExiste = usuarioDTO.getCpfcnpj() != null && usuarioRepository.findByCpfcnpj(usuarioDTO.getCpfcnpj()).isPresent();
 
         if (emailExiste) {
-            throw new RuntimeException("Usuário já cadastrado com este e-mail.");
+            throw new RegraDeNegocioException("Usuário já cadastrado com este e-mail.");
         }
 
         if (cpfcnpjExiste) {
-            throw new RuntimeException("Usuário já cadastrado com este CPF/CNPJ.");
+            throw new RegraDeNegocioException("Usuário já cadastrado com este CPF/CNPJ.");
         }
 
         UsuarioEntity usuarioEntity = new UsuarioEntity(usuarioDTO);
@@ -124,12 +132,12 @@ public class UsuarioService {
     public BaseResponse<UsuarioReponseDTO> atualizarUsuario(AtualizarUsuarioDTO userDto) {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         if (auth == null || !auth.isAuthenticated() || auth.getName().equals("anonymousUser")) {
-            throw new RuntimeException("Usuário não autenticado.");
+            throw new RegraDeNegocioException("Usuário não autenticado.");
         }
 
         var optUser = usuarioRepository.findByEmailIgnoreCase(auth.getName());
         if (optUser.isEmpty()) {
-            throw new RuntimeException("Usuário não encontrado para o email: " + auth.getName());
+            throw new RecursoNaoEncontradoException("Usuário não encontrado para o email: " + auth.getName());
         }
 
         UsuarioEntity user = optUser.get();
@@ -138,39 +146,38 @@ public class UsuarioService {
         user.setCpfcnpj(userDto.getCpfcnpj());
         String novoEmailNormalizado = userDto.getEmail() == null ? null : userDto.getEmail().trim().toLowerCase();
         if (novoEmailNormalizado == null || novoEmailNormalizado.isBlank()) {
-            throw new RuntimeException("E-mail é obrigatório.");
+            throw new RegraDeNegocioException("E-mail é obrigatório.");
         }
 
         if (!user.getEmail().equalsIgnoreCase(novoEmailNormalizado)
                 && usuarioRepository.findByEmailIgnoreCase(novoEmailNormalizado).isPresent()) {
-            throw new RuntimeException("Usuário já cadastrado com este e-mail.");
+            throw new RegraDeNegocioException("Usuário já cadastrado com este e-mail.");
         }
 
         String novoCpfCnpjNormalizado = userDto.getCpfcnpj() == null ? null : userDto.getCpfcnpj().replaceAll("[^0-9]", "");
         if (novoCpfCnpjNormalizado == null || novoCpfCnpjNormalizado.isBlank()) {
-            throw new RuntimeException("CPF/CNPJ é obrigatório.");
+            throw new RegraDeNegocioException("CPF/CNPJ é obrigatório.");
         }
 
         if (!user.getCpfcnpj().equals(novoCpfCnpjNormalizado)
                 && usuarioRepository.findByCpfcnpj(novoCpfCnpjNormalizado).isPresent()) {
-            throw new RuntimeException("Usuário já cadastrado com este CPF/CNPJ.");
+            throw new RegraDeNegocioException("Usuário já cadastrado com este CPF/CNPJ.");
         }
 
         user.setCpfcnpj(novoCpfCnpjNormalizado);
         user.setEmail(novoEmailNormalizado);
         if (userDto.getSenha() != null && !userDto.getSenha().isBlank()) {
             if (userDto.getConfirmarSenha() == null || userDto.getConfirmarSenha().isBlank()) {
-                throw new RuntimeException("Confirmação de senha é obrigatória ao alterar a senha.");
+                throw new RegraDeNegocioException("Confirmação de senha é obrigatória ao alterar a senha.");
             }
 
             if (!userDto.getSenha().equals(userDto.getConfirmarSenha())) {
-                throw new RuntimeException("Senha e confirmar senha não conferem.");
+                throw new RegraDeNegocioException("Senha e confirmar senha não conferem.");
             }
 
             user.setSenha(passwordEncoder.encode(userDto.getSenha()));
         }
         user.setTelefone(userDto.getTelefone());
-        user.setLink_foto("TODO:ARRUMAR O UPLOAD");
         user.setEndereco(userDto.getEndereco());
         user.setCep(userDto.getCep());
         user.setBairro(userDto.getBairro());
@@ -189,15 +196,36 @@ public class UsuarioService {
     }
 
     @Transactional
+    public BaseResponse<UsuarioReponseDTO> atualizarFotoPerfil(MultipartFile imagem) {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        if (auth == null || !auth.isAuthenticated() || auth.getName().equals("anonymousUser")) {
+            throw new RegraDeNegocioException("Usuário não autenticado.");
+        }
+
+        UsuarioEntity usuario = usuarioRepository.findByEmailIgnoreCase(auth.getName())
+                .orElseThrow(() -> new RecursoNaoEncontradoException("Usuário não encontrado para o email: " + auth.getName()));
+
+        validarFotoPerfil(imagem);
+
+        String imageUrl = imageUploadService.uploadUserProfileImage(imagem, usuario.getId());
+        usuario.setLink_foto(imageUrl);
+        usuario.setLast_modified_at(LocalDateTime.now());
+        usuario.setLast_modified_by(usuario.getId());
+
+        UsuarioEntity usuarioAtualizado = usuarioRepository.save(usuario);
+        return new BaseResponse<>("Foto de perfil atualizada com sucesso.", List.of(new UsuarioReponseDTO(usuarioAtualizado)), null);
+    }
+
+    @Transactional
     public BaseResponse<AtualizarUsuarioDTO> excluir() {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         if (auth == null || !auth.isAuthenticated() || auth.getName().equals("anonymousUser")) {
-            throw new RuntimeException("Usuário não autenticado.");
+            throw new RegraDeNegocioException("Usuário não autenticado.");
         }
 
         var optUser = usuarioRepository.findByEmailIgnoreCase(auth.getName());
         if (optUser.isEmpty()) {
-            throw new RuntimeException("Usuário não encontrado para o email: " + auth.getName());
+            throw new RecursoNaoEncontradoException("Usuário não encontrado para o email: " + auth.getName());
         }
 
         UsuarioEntity usuario = optUser.get();
@@ -208,6 +236,16 @@ public class UsuarioService {
         petRepository.deleteByUserId(usuario.getId());
 
         return new BaseResponse<>("Usuário excluído com sucesso.", null, null);
+    }
+
+    private void validarFotoPerfil(MultipartFile imagem) {
+        if (imagem == null || imagem.isEmpty()) {
+            throw new RegraDeNegocioException("Imagem obrigatória para upload.");
+        }
+
+        if (imagem.getSize() > MAX_FOTO_PERFIL_BYTES) {
+            throw new RegraDeNegocioException("Imagem acima do limite permitido de 50 MB.");
+        }
     }
 
 }

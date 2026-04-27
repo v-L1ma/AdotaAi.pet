@@ -142,7 +142,7 @@ public class PetService {
 
         boolean jaFavorito = favoritoPetRepository.existsByUsuarioIdAndPetId(usuarioAutenticado.getId(), pet.getId());
         if (jaFavorito) {
-            throw new RuntimeException("Pet já está favoritado para este usuário");
+            throw new RegraDeNegocioException("Pet já está favoritado para este usuário");
         }
 
         FavoritoPetEntity favorito = new FavoritoPetEntity();
@@ -157,7 +157,7 @@ public class PetService {
 
         FavoritoPetEntity favorito = favoritoPetRepository
                 .findByUsuarioIdAndPetId(usuarioAutenticado.getId(), petId)
-                .orElseThrow(() -> new RuntimeException("Pet não está favoritado para este usuário"));
+                .orElseThrow(() -> new RegraDeNegocioException("Pet não está favoritado para este usuário"));
 
         favoritoPetRepository.delete(favorito);
     }
@@ -185,7 +185,7 @@ public class PetService {
 
     private UsuarioEntity obterUsuarioAutenticado() {
         return obterUsuarioAutenticadoOpcional()
-                .orElseThrow(() -> new RuntimeException("Usuário não autenticado."));
+                .orElseThrow(() -> new RegraDeNegocioException("Usuário não autenticado."));
     }
 
     private Optional<UsuarioEntity> obterUsuarioAutenticadoOpcional() {

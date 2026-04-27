@@ -5,6 +5,8 @@ import com.adotaai.adotaai.Application.DTO.FormularioTemplateDTO;
 import com.adotaai.adotaai.Domain.Entity.FormularioEntity;
 import com.adotaai.adotaai.Domain.Entity.PerguntaEntity;
 import com.adotaai.adotaai.Domain.Entity.UsuarioEntity;
+import com.adotaai.adotaai.Domain.Exception.RecursoNaoEncontradoException;
+import com.adotaai.adotaai.Domain.Exception.RegraDeNegocioException;
 import com.adotaai.adotaai.Infraestructure.Repository.FormularioRepository;
 import com.adotaai.adotaai.Infraestructure.Repository.UsuarioRepository;
 import org.springframework.security.core.Authentication;
@@ -62,19 +64,19 @@ public class FormularioService implements IFormularioService {
     public FormularioTemplateDTO buscarFormularioPorId(UUID id) {
         return formularioRepository.findById(id)
                 .map(FormularioTemplateDTO::new)
-                .orElseThrow(() -> new RuntimeException("Formulário não encontrado"));
+                .orElseThrow(() -> new RecursoNaoEncontradoException("Formulário não encontrado"));
     }
 
     @Override
     @Transactional
     public void deletarFormulario(UUID formularioId) {
         FormularioEntity formulario = formularioRepository.findById(formularioId)
-                .orElseThrow(() -> new RuntimeException("Formulário não encontrado"));
+                .orElseThrow(() -> new RecursoNaoEncontradoException("Formulário não encontrado"));
 
         UsuarioEntity usuarioAutenticado = obterUsuarioAutenticado();
 
         if (!formulario.getUsuarioCriador().getId().equals(usuarioAutenticado.getId())) {
-            throw new RuntimeException("Apenas o criador do formulário pode deletá-lo");
+            throw new RegraDeNegocioException("Apenas o criador do formulário pode deletá-lo");
         }
 
         formularioRepository.delete(formulario);
@@ -83,10 +85,10 @@ public class FormularioService implements IFormularioService {
     private UsuarioEntity obterUsuarioAutenticado() {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         if (auth == null || !auth.isAuthenticated() || "anonymousUser".equals(auth.getName())) {
-            throw new RuntimeException("Usuário não autenticado.");
+            throw new RegraDeNegocioException("Usuário não autenticado.");
         }
 
         return usuarioRepository.findByEmail(auth.getName())
-                .orElseThrow(() -> new RuntimeException("Usuário não encontrado para o email: " + auth.getName()));
+                .orElseThrow(() -> new RecursoNaoEncontradoException("Usuário não encontrado para o email: " + auth.getName()));
     }
 }
