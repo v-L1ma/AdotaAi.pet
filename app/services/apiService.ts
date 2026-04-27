@@ -2,7 +2,10 @@ import axios from "axios";
 import type { AxiosError, InternalAxiosRequestConfig } from "axios";
 import { API_BASE_URL } from "../lib/api";
 import { clearSession, getSession, updateSessionToken } from "../lib/session";
+import { normalizeApiError } from "./apiErrorService";
 import { tokenService } from "./tokenService";
+
+type CadastroIncompletoHandler = () => void;
 
 type RetryableRequestConfig = InternalAxiosRequestConfig & {
   _retry?: boolean;
@@ -14,6 +17,31 @@ const apiService = axios.create({
 });
 
 let refreshInFlight: Promise<string | null> | null = null;
+let cadastroIncompletoHandler: CadastroIncompletoHandler | null = null;
+
+export function registerCadastroIncompletoHandler(handler: CadastroIncompletoHandler | null) {
+  cadastroIncompletoHandler = handler;
+}
+
+function isCadastroIncompletoError(error: AxiosError) {
+  if (error.response?.status !== 403) {
+    return false;
+  }
+
+  const data = error.response.data as
+    | { message?: string; errors?: string[] }
+    | undefined;
+
+  if (!data) {
+    return false;
+  }
+
+  const message = data.message?.toLowerCase() ?? "";
+  const errors = (data.errors ?? []).map((item) => item.toLowerCase());
+
+  return message.includes("cadastro incompleto")
+    || errors.some((item) => item.includes("finalize seu cadastro"));
+}
 
 async function refreshAccessToken() {
   const refreshToken = await tokenService.getRefreshToken();
@@ -59,6 +87,14 @@ apiService.interceptors.response.use(
   (response) => response,
   async (error: AxiosError) => {
     const originalRequest = error.config as RetryableRequestConfig | undefined;
+
+    if (isCadastroIncompletoError(error)) {
+      cadastroIncompletoHandler?.();
+      return Promise.reject(
+        normalizeApiError(error, "Finalize seu cadastro para acessar este recurso")
+      );
+    }
+
     console.log("Erro na resposta da API:", {
       url: originalRequest?.url,
       method: originalRequest?.method,
@@ -67,7 +103,7 @@ apiService.interceptors.response.use(
     });
 
     if (!originalRequest || error.response?.status !== 401 || originalRequest._retry) {
-      return Promise.reject(error);
+      return Promise.reject(normalizeApiError(error));
     }
 
     originalRequest._retry = true;
@@ -82,7 +118,7 @@ apiService.interceptors.response.use(
     if (!newAccessToken) {
       await tokenService.clearTokens();
       clearSession();
-      return Promise.reject(error);
+      return Promise.reject(normalizeApiError(error, "Sessao expirada. Faca login novamente"));
     }
 
     if (originalRequest.headers && typeof (originalRequest.headers as any).set === "function") {
