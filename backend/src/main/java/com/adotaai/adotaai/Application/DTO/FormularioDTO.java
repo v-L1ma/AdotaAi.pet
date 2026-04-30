@@ -1,36 +1,17 @@
 package com.adotaai.adotaai.Application.DTO;
 
-import jakarta.validation.constraints.NotEmpty;
-import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
 import java.util.List;
-import java.util.UUID;
 
 public class FormularioDTO {
 
-    @NotNull(message = "O ID do usuário criador é obrigatório.")
-    private UUID usuarioCriadorId;
-
-    @NotNull(message = "O ID do usuário respondente é obrigatório.")
-    private UUID usuarioRespondenteId;
-
-    @NotEmpty(message = "A lista de perguntas não pode estar vazia.")
-    private List<@NotNull(message = "A pergunta não pode ser nula.") String> perguntas;
-
-    public UUID getUsuarioCriadorId() {
-        return usuarioCriadorId;
-    }
-
-    public void setUsuarioCriadorId(UUID usuarioCriadorId) {
-        this.usuarioCriadorId = usuarioCriadorId;
-    }
-
-    public UUID getUsuarioRespondenteId() {
-        return usuarioRespondenteId;
-    }
-
-    public void setUsuarioRespondenteId(UUID usuarioRespondenteId) {
-        this.usuarioRespondenteId = usuarioRespondenteId;
-    }
+    @Size(min = 1, max = 20, message = "A lista de perguntas deve conter entre 1 e 20 itens.")
+    private List<
+            @NotBlank(message = "A pergunta não pode estar vazia.")
+            @Size(max = 120, message = "A pergunta deve conter no máximo 120 caracteres.")
+            String
+            > perguntas;
 
     public List<String> getPerguntas() {
         return perguntas;

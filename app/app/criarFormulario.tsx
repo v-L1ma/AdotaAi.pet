@@ -3,6 +3,9 @@ import { FlatList, Pressable, StyleSheet, Text, TextInput, TouchableOpacity, Vie
 import * as Progress from 'react-native-progress';
 import AppHeader from '../components/AppHeader';
 import colors from '../styles/colors';
+import apiService from "../services/apiService";
+import { getApiErrorMessage } from "../services/apiErrorService";
+import { useRouter } from "expo-router";
 
 
 interface Pergunta{
@@ -11,6 +14,7 @@ interface Pergunta{
 }
 
 export default function CriarFormulario(){
+    const router = useRouter();
 
     const [perguntasFrequentes,setPerguntasFrequentes]=useState<Pergunta[]>([
         { id: 1, conteudo: "Qual seu endereço completo? Com nome da rua, número e cidade" },
@@ -46,6 +50,8 @@ export default function CriarFormulario(){
     const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
     const [perguntaInput, setPerguntaInput] = useState<string>("");
     const [erroMessage, setErroMessage] = useState<string | null>(null);
+    const [saveError, setSaveError] = useState<string | null>(null);
+    const [isSaving, setIsSaving] = useState(false);
 
 
     function selecionarPergunta(pergunta: Pergunta) {
@@ -54,7 +60,7 @@ export default function CriarFormulario(){
             setPerguntasSelecionadas((prev) => prev.filter((p) => p.id !== pergunta.id));
             return;
         } 
-        if(perguntasSelecionadas.length<=20){
+        if(perguntasSelecionadas.length < 20){
         // senão, adiciona
             setPerguntasSelecionadas((prev) => [...prev, pergunta]);
         }
@@ -65,7 +71,7 @@ export default function CriarFormulario(){
     }
 
     function handleChange(text:string){
-        setErroMessage(text.length > 120 ? "A pergunta pode ter no máximo 120 caracteres." : null);
+        setErroMessage(text.length > 120 ? "A pergunta pode ter no maximo 120 caracteres." : null);
         setPerguntaInput(text)
     }
 
@@ -75,11 +81,37 @@ export default function CriarFormulario(){
         setIsModalOpen(!isModalOpen);
     }
 
+    async function salvarFormulario() {
+        setSaveError(null);
+
+        if (perguntasSelecionadas.length === 0) {
+            setSaveError("Selecione ao menos uma pergunta para salvar o formulario.");
+            return;
+        }
+
+        const perguntas = perguntasSelecionadas.map((pergunta) => pergunta.conteudo.trim());
+
+        setIsSaving(true);
+        try {
+            await apiService.post("/formularios", { perguntas });
+            router.push("/gerenciar-formularios");
+        } catch (err) {
+            setSaveError(getApiErrorMessage(err, "Nao foi possivel salvar o formulario."));
+        } finally {
+            setIsSaving(false);
+        }
+    }
+
 
     function criarNovaPergunta(){
 
         if(perguntaInput.length<=0){
             setErroMessage("A pergunta não pode ser vazia.");
+            return;
+        }
+
+        if(perguntaInput.length > 120){
+            setErroMessage("A pergunta pode ter no maximo 120 caracteres.");
             return;
         }
 
@@ -137,8 +169,15 @@ export default function CriarFormulario(){
                     <TouchableOpacity style={[style.button, style.secondaryButton]} onPress={()=>abrirFecharPopUp()}>
                         <Text style={style.secondaryButtonText}>Criar pergunta personalizada</Text>
                     </TouchableOpacity>
-                    <TouchableOpacity style={[style.button, style.primaryButton]}>
-                        <Text style={style.primaryButtonText}>Salvar questionário</Text>
+                    {saveError && <Text style={style.errorText}>{saveError}</Text>}
+                    <TouchableOpacity
+                        style={[style.button, style.primaryButton, isSaving && style.buttonDisabled]}
+                        onPress={salvarFormulario}
+                        disabled={isSaving}
+                    >
+                        <Text style={style.primaryButtonText}>
+                            {isSaving ? "Salvando..." : "Salvar questionario"}
+                        </Text>
                     </TouchableOpacity>
                 </View>
             </View>
@@ -315,5 +354,8 @@ const style = StyleSheet.create({
     errorText: {
         color:"red",
         fontSize: 13,
-    }
+    },
+    buttonDisabled: {
+        opacity: 0.7,
+    },
 });
