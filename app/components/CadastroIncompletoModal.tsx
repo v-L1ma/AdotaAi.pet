@@ -1,5 +1,6 @@
 import React from "react";
-import { Modal, Pressable, StyleSheet, Text, TouchableOpacity } from "react-native";
+import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import AppModal from "./AppModal";
 
 type CadastroIncompletoModalProps = {
   visible: boolean;
@@ -13,54 +14,28 @@ export default function CadastroIncompletoModal({
   onConcluirCadastro,
 }: CadastroIncompletoModalProps) {
   return (
-    <Modal transparent animationType="fade" visible={visible} onRequestClose={onClose}>
-      <Pressable style={styles.modalOverlay} onPress={onClose}>
-        <Pressable style={styles.modalCard} onPress={() => {}}>
-          <Text style={styles.modalTitle}>Cadastro incompleto</Text>
-          <Text style={styles.modalMessage}>
-            Seu perfil ainda não está completo. Finalize seu cadastro para continuar usando todos os recursos.
-          </Text>
-
+    <AppModal
+      visible={visible}
+      onClose={onClose}
+      title="Cadastro incompleto"
+      message="Seu perfil ainda nao esta completo. Finalize seu cadastro para continuar usando todos os recursos."
+      footer={
+        <View style={styles.buttonStack}>
           <TouchableOpacity style={styles.primaryButton} onPress={onConcluirCadastro}>
             <Text style={styles.primaryButtonText}>Concluir cadastro</Text>
           </TouchableOpacity>
-
           <TouchableOpacity style={styles.secondaryButton} onPress={onClose}>
             <Text style={styles.secondaryButtonText}>Lembrar mais tarde</Text>
           </TouchableOpacity>
-        </Pressable>
-      </Pressable>
-    </Modal>
+        </View>
+      }
+    />
   );
 }
 
 const styles = StyleSheet.create({
-  modalOverlay: {
-    flex: 1,
-    backgroundColor: "rgba(0, 0, 0, 0.4)",
-    justifyContent: "center",
-    alignItems: "center",
-    padding: 24,
-  },
-  modalCard: {
-    width: "100%",
-    maxWidth: 420,
-    borderRadius: 18,
-    backgroundColor: "#fff",
-    padding: 20,
-    borderWidth: 1,
-    borderColor: "#ECECEC",
-    gap: 12,
-  },
-  modalTitle: {
-    fontSize: 21,
-    fontWeight: "800",
-    color: "#1B1B1B",
-  },
-  modalMessage: {
-    fontSize: 15,
-    lineHeight: 22,
-    color: "#4D4D4D",
+  buttonStack: {
+    gap: 10,
   },
   primaryButton: {
     marginTop: 6,
