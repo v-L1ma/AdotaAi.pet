@@ -1,10 +1,12 @@
 import { Entypo, Ionicons, MaterialIcons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
-import React, { useMemo, useState } from "react";
-import { Alert, Image, ScrollView, StyleSheet, Text, TouchableOpacity, View, useWindowDimensions } from "react-native";
+import React, { useEffect, useMemo, useState } from "react";
+import { ActivityIndicator, Alert, Image, ScrollView, StyleSheet, Text, TouchableOpacity, View, useWindowDimensions } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import colors from "../styles/colors";
 import { useTabNavigation } from "@/hooks/useTabNavigation";
+import apiService from "@/services/apiService";
+import { animal } from "@/types/TAnimal";
 
 export default function MeusPets() {
   const router = useRouter();
@@ -30,90 +32,77 @@ export default function MeusPets() {
     };
   }, [isSmall, isTablet, width]);
 
-  const [pets, setPets] = useState([
-    {
-      id: 1,
-      nome: 'Rex',
-      idade: '2 anos',
-      especie: 'Cachorro',
-      imagem: require('../assets/images/dog1.png'),
-    },
-    {
-      id: 2,
-      nome: 'Luna',
-      idade: '1 ano',
-      especie: 'Gato',
-      imagem: require('../assets/images/cat1.png'),
-    },
-    {
-      id: 3,
-      nome: 'Toby',
-      idade: '3 anos',
-      especie: 'Cachorro',
-      imagem: require('../assets/images/dog1.png'),
-    },
-    {
-      id: 4,
-      nome: 'Mimi',
-      idade: '6 meses',
-      especie: 'Gato',
-      imagem: require('../assets/images/cat1.png'),
-    },
-    {
-      id: 5,
-      nome: 'Thor',
-      idade: '4 anos',
-      especie: 'Cachorro',
-      imagem: require('../assets/images/dog1.png'),
-    },
-    {
-      id: 6,
-      nome: 'Nina',
-      idade: '8 meses',
-      especie: 'Gato',
-      imagem: require('../assets/images/cat1.png'),
-    },
-    {
-      id: 7,
-      nome: 'Bidu',
-      idade: '5 anos',
-      especie: 'Cachorro',
-      imagem: require('../assets/images/dog1.png'),
-    },
-    {
-      id: 8,
-      nome: 'Mel',
-      idade: '2 anos',
-      especie: 'Gato',
-      imagem: require('../assets/images/cat1.png'),
-    },
-    {
-      id: 9,
-      nome: 'Simba',
-      idade: '1 ano',
-      especie: 'Cachorro',
-      imagem: require('../assets/images/dog1.png'),
-    },
-    {
-      id: 10,
-      nome: 'Lili',
-      idade: '3 anos',
-      especie: 'Gato',
-      imagem: require('../assets/images/cat1.png'),
-    },
-  ]);
+  const [pets, setPets] = useState<animal[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [loadError, setLoadError] = useState<string | null>(null);
 
-  const handleDelete = (id: number) => {
-    console.log('Clicou para excluir o pet de id:', id);
+  useEffect(() => {
+    let isMounted = true;
+
+    async function loadPets() {
+      setIsLoading(true);
+      setLoadError(null);
+
+      try {
+        const response = await apiService.get<animal[]>("/usuario/pets");
+        if (isMounted) {
+          setPets(response.data ?? []);
+        }
+      } catch {
+        if (isMounted) {
+          setLoadError("Nao foi possivel carregar seus pets.");
+        }
+      } finally {
+        if (isMounted) {
+          setIsLoading(false);
+        }
+      }
+    }
+
+    loadPets();
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
+  const formatarIdade = (dtNasc?: string) => {
+    if (!dtNasc) {
+      return "Idade nao informada";
+    }
+
+    const date = new Date(dtNasc);
+    if (Number.isNaN(date.getTime())) {
+      return "Idade nao informada";
+    }
+
+    const diffMs = Date.now() - date.getTime();
+    const diffYears = Math.floor(diffMs / (1000 * 60 * 60 * 24 * 365.25));
+    if (diffYears > 0) {
+      return `${diffYears} ano${diffYears > 1 ? "s" : ""}`;
+    }
+
+    const diffMonths = Math.max(1, Math.floor(diffMs / (1000 * 60 * 60 * 24 * 30.5)));
+    return `${diffMonths} mes${diffMonths > 1 ? "es" : ""}`;
+  };
+
+  const handleDelete = (id: string) => {
     Alert.alert(
-      'Excluir anúncio',
-      'Deseja realmente apagar este anúncio de animal?',
+      "Excluir anuncio",
+      "Deseja realmente apagar este anuncio de animal?",
       [
-        { text: 'Cancelar', style: 'cancel' },
+        { text: "Cancelar", style: "cancel" },
         {
-          text: 'Excluir',
-          style: 'destructive',
-          onPress: () => setPets(pets.filter(pet => pet.id !== id)),
+          text: "Excluir",
+          style: "destructive",
+          onPress: async () => {
+            try {
+              await apiService.delete(`/pets/${id}`);
+              setPets((current) => current.filter((pet) => pet.id !== id));
+            } catch {
+              Alert.alert("Erro", "Nao foi possivel excluir este pet.");
+            }
+          },
         },
       ]
     );
@@ -150,13 +139,28 @@ export default function MeusPets() {
           <Text style={[styles.addButtonText, { fontSize: isSmall ? 16 : 17 }]}>Adicionar novo pet</Text>
         </TouchableOpacity>
 
+        {isLoading && (
+          <View style={styles.loadingWrap}>
+            <ActivityIndicator size="small" color={colors.primary} />
+            <Text style={styles.loadingText}>Carregando seus pets...</Text>
+          </View>
+        )}
+
+        {!isLoading && loadError && (
+          <Text style={styles.errorText}>{loadError}</Text>
+        )}
+
+        {!isLoading && !loadError && pets.length === 0 && (
+          <Text style={styles.emptyText}>Voce ainda nao cadastrou pets.</Text>
+        )}
+
         {pets.map((pet) => (
             <View
               key={pet.id}
               style={[styles.card, { width: metrics.cardWidth }]}
             >
               <Image
-                source={pet.imagem}
+                source={{ uri: pet.link_foto }}
                 style={[
                   styles.petImage,
                   {
@@ -169,7 +173,7 @@ export default function MeusPets() {
               />
               <View style={styles.petInfo}>
                 <Text numberOfLines={1} style={[styles.petName, { fontSize: metrics.titleSize }]}>{pet.nome}</Text>
-                <Text numberOfLines={1} style={[styles.petAge, { fontSize: metrics.subtitleSize }]}>{pet.idade}</Text>
+                <Text numberOfLines={1} style={[styles.petAge, { fontSize: metrics.subtitleSize }]}>{formatarIdade(pet.dt_nasc)}</Text>
                 <View style={styles.speciesBadge}>
                   <Text style={[styles.speciesText, { fontSize: metrics.speciesSize }]}>{pet.especie}</Text>
                 </View>
@@ -247,6 +251,30 @@ const styles = StyleSheet.create({
     alignSelf: "center",
     width: "100%",
     maxWidth: 960,
+  },
+  loadingWrap: {
+    alignItems: "center",
+    gap: 6,
+    marginTop: 12,
+  },
+  loadingText: {
+    fontSize: 13,
+    color: "#6b6b6b",
+    fontWeight: "600",
+  },
+  errorText: {
+    textAlign: "center",
+    color: "#b00020",
+    fontSize: 13,
+    marginTop: 12,
+    fontWeight: "600",
+  },
+  emptyText: {
+    textAlign: "center",
+    color: "#6b6b6b",
+    fontSize: 14,
+    marginTop: 12,
+    fontWeight: "600",
   },
   addButton: {
     minHeight: 58,

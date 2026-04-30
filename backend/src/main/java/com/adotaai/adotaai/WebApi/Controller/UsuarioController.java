@@ -20,9 +20,11 @@ import org.springframework.web.multipart.MultipartFile;
 import com.adotaai.adotaai.Application.DTO.AtualizarUsuarioDTO;
 import com.adotaai.adotaai.Application.DTO.CadastrarUsuarioDTO;
 import com.adotaai.adotaai.Application.DTO.EventoDTO;
+import com.adotaai.adotaai.Application.DTO.PetDTO;
 import com.adotaai.adotaai.Application.DTO.UsuarioReponseDTO;
 import com.adotaai.adotaai.Application.DTO.UsuarioPublicoDTO;
 import com.adotaai.adotaai.Application.Service.EventoService;
+import com.adotaai.adotaai.Application.Service.PetService;
 import com.adotaai.adotaai.Application.Service.UsuarioService;
 import com.adotaai.adotaai.Application.Util.BaseResponse;
 
@@ -35,6 +37,9 @@ public class UsuarioController {
 
     @Autowired
     private EventoService eventoService;
+
+    @Autowired
+    private PetService petService;
 
     @GetMapping
     public ResponseEntity<BaseResponse<UsuarioReponseDTO>> buscarUsuarioLogado() {
@@ -85,6 +90,11 @@ public class UsuarioController {
     @GetMapping("/eventos")
     public ResponseEntity<List<EventoDTO>> listarEventosUsuarioLogado() {
         return ResponseEntity.ok(eventoService.listarEventosUsuarioLogado());
+    }
+
+    @GetMapping("/pets")
+    public ResponseEntity<List<PetDTO>> listarPetsUsuarioLogado() {
+        return ResponseEntity.ok(petService.listarPetsUsuarioLogado());
     }
 
 }
