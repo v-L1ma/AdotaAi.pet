@@ -24,23 +24,34 @@ public class SolicitacaoAdocaoService implements ISolicitacaoAdocaoService {
     private final FormularioRepository formularioRepository;
     private final PerguntaRepository perguntaRepository;
     private final RespostaRepository respostaRepository;
+    private final PetRepository petRepository;
 
     public SolicitacaoAdocaoService(SolicitacaoAdocaoRepository solicitacaoRepository,
                                     UsuarioRepository usuarioRepository,
                                     FormularioRepository formularioRepository,
                                     PerguntaRepository perguntaRepository,
-                                    RespostaRepository respostaRepository) {
+                                    RespostaRepository respostaRepository,
+                                    PetRepository petRepository) {
         this.solicitacaoRepository = solicitacaoRepository;
         this.usuarioRepository = usuarioRepository;
         this.formularioRepository = formularioRepository;
         this.perguntaRepository = perguntaRepository;
         this.respostaRepository = respostaRepository;
+        this.petRepository = petRepository;
     }
 
     @Override
     @Transactional
     public SolicitacaoResponseDTO criarSolicitacao(SolicitacaoAdocaoDTO dto) {
         UsuarioEntity adotante = obterUsuarioAutenticado();
+
+        boolean jaRespondeuFormulario = respostaRepository.existsBySolicitacaoFormularioIdAndSolicitacaoAdotanteId(
+                dto.getFormularioId(),
+                adotante.getId());
+        if (jaRespondeuFormulario) {
+            throw new RegraDeNegocioException("Você já respondeu o formulário de triagem para este anúncio.");
+        }
+
         FormularioEntity formulario = formularioRepository.findById(dto.getFormularioId())
                 .orElseThrow(() -> new RecursoNaoEncontradoException("Formulário não encontrado"));
 
@@ -134,13 +145,60 @@ public class SolicitacaoAdocaoService implements ISolicitacaoAdocaoService {
         return new SolicitacaoResponseDTO(solicitacaoSalva);
     }
 
-    private UsuarioEntity obterUsuarioAutenticado() {
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        if (auth == null || !auth.isAuthenticated() || "anonymousUser".equals(auth.getName())) {
-            throw new RegraDeNegocioException("Usuário não autenticado.");
+    @Override
+    @Transactional(readOnly = true)
+    public List<SolicitacaoResponseDTO> listarRecebidas() {
+        UsuarioEntity usuario = obterUsuarioAutenticado();
+        return solicitacaoRepository.findAllByAnuncianteId(usuario.getId())
+                .stream()
+                .map(this::toDtoWithPet)
+                .toList();
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<SolicitacaoResponseDTO> listarEnviadas() {
+        UsuarioEntity usuario = obterUsuarioAutenticado();
+        return solicitacaoRepository.findAllByAdotanteId(usuario.getId())
+                .stream()
+                .map(this::toDtoWithPet)
+                .toList();
+    }
+
+    private SolicitacaoResponseDTO toDtoWithPet(SolicitacaoAdocaoEntity entity) {
+        PetEntity pet = null;
+        if (entity.getFormulario() != null) {
+            pet = petRepository.findByFormularioId(entity.getFormulario().getId()).orElse(null);
         }
 
-        return usuarioRepository.findByEmail(auth.getName())
-                .orElseThrow(() -> new RecursoNaoEncontradoException("Usuário não encontrado para o email: " + auth.getName()));
+        return new SolicitacaoResponseDTO(entity, pet);
+    }
+
+    private UsuarioEntity obterUsuarioAutenticado() {
+        return obterUsuarioAutenticadoOpcional()
+                .orElseThrow(() -> new RegraDeNegocioException("Usuário não autenticado."));
+    }
+
+    private Optional<UsuarioEntity> obterUsuarioAutenticadoOpcional() {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        if (auth == null || !auth.isAuthenticated() || "anonymousUser".equals(auth.getName())) {
+            return Optional.empty();
+        }
+
+        Object details = auth.getDetails();
+        if (details instanceof UUID userId) {
+            return usuarioRepository.findById(userId);
+        }
+
+        if (details instanceof String userIdStr) {
+            try {
+                UUID userId = UUID.fromString(userIdStr);
+                return usuarioRepository.findById(userId);
+            } catch (IllegalArgumentException ignored) {
+                // Fallback para autenticações antigas baseadas em email.
+            }
+        }
+
+        return usuarioRepository.findByEmail(auth.getName());
     }
 }

@@ -9,4 +9,6 @@ import java.util.UUID;
 public interface RespostaRepository extends JpaRepository<RespostaEntity, UUID> {
 
     List<RespostaEntity> findBySolicitacaoId(UUID solicitacaoId);
+
+    boolean existsBySolicitacaoFormularioIdAndSolicitacaoAdotanteId(UUID formularioId, UUID adotanteId);
 }

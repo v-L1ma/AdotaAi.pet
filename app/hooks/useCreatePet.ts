@@ -13,6 +13,7 @@ export type CreatePetInput = {
   porte: porte; // enum uppercase
   raca: string;
   descricao: string;
+  formularioId?: string | null;
   imagem: {
     uri: string;
     fileName?: string | null;
@@ -27,6 +28,7 @@ type CreatePetPayload = {
   porte: porte;
   raca: string;
   especie: especie;
+  formularioId: string | null;
 };
 
 type HookSuccessResult<T> = {
@@ -60,6 +62,7 @@ function toPayload(input: CreatePetInput): CreatePetPayload {
     porte: input.porte,
     raca: input.raca,
     especie: input.especie,
+    formularioId: input.formularioId ?? null,
   };
 }
 
