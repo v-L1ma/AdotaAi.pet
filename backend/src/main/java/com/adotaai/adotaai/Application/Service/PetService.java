@@ -19,11 +19,13 @@ import com.adotaai.adotaai.Application.DTO.BuscarPetDTO;
 import com.adotaai.adotaai.Application.DTO.CadastrarPetDTO;
 import com.adotaai.adotaai.Application.DTO.PetDTO;
 import com.adotaai.adotaai.Domain.Entity.FavoritoPetEntity;
+import com.adotaai.adotaai.Domain.Entity.FormularioEntity;
 import com.adotaai.adotaai.Domain.Entity.PetEntity;
 import com.adotaai.adotaai.Domain.Entity.UsuarioEntity;
 import com.adotaai.adotaai.Domain.Exception.RecursoNaoEncontradoException;
 import com.adotaai.adotaai.Domain.Exception.RegraDeNegocioException;
 import com.adotaai.adotaai.Infraestructure.Repository.FavoritoPetRepository;
+import com.adotaai.adotaai.Infraestructure.Repository.FormularioRepository;
 import com.adotaai.adotaai.Infraestructure.Repository.PetRepository;
 import com.adotaai.adotaai.Infraestructure.Repository.UsuarioRepository;
 
@@ -42,11 +44,20 @@ public class PetService {
     private FavoritoPetRepository favoritoPetRepository;
 
     @Autowired
+    private FormularioRepository formularioRepository;
+
+    @Autowired
     private ImageUploadService imageUploadService;
 
     public List<PetDTO> listarTodos() {
         List<PetEntity> pet = petRepository.findAll();
         return pet.stream().map(PetDTO::new).toList();
+    }
+
+    public List<PetDTO> listarPetsUsuarioLogado() {
+        UsuarioEntity usuarioAutenticado = obterUsuarioAutenticado();
+        List<PetEntity> pets = petRepository.findAllByUserId(usuarioAutenticado.getId());
+        return pets.stream().map(PetDTO::new).toList();
     }
 
     public BuscarPetDTO buscarPet(UUID id) {
@@ -66,18 +77,21 @@ public class PetService {
                 pet.getId());
         }
 
+        UUID formularioId = pet.getFormulario() != null ? pet.getFormulario().getId() : null;
+
         return new BuscarPetDTO(
-                pet.getId(),
-                pet.getStatus(),
-                pet.getDescricao(),
-                pet.getDt_nasc(),
-                pet.getNome(),
-                pet.getPorte(),
-                pet.getRaca(),
-                pet.getEspecie(),
-                pet.getLink_foto(),
-                isFavoritado,
-                dono);
+            pet.getId(),
+            pet.getStatus(),
+            pet.getDescricao(),
+            pet.getDt_nasc(),
+            pet.getNome(),
+            pet.getPorte(),
+            pet.getRaca(),
+            pet.getEspecie(),
+            pet.getLink_foto(),
+            formularioId,
+            isFavoritado,
+            dono);
     }
 
     public void excluir(UUID id) {
@@ -96,6 +110,7 @@ public class PetService {
         UsuarioEntity usuario = obterUsuarioAutenticado();
         pet.setUser(usuario);
         pet.setStatus("Pendente");
+        pet.setFormulario(resolveFormulario(petDTO));
 
         if (imagem != null && !imagem.isEmpty()) {
             String imageUrl = imageUploadService.uploadPetImage(imagem, pet.getId() == null ? UUID.randomUUID() : pet.getId());
@@ -123,6 +138,7 @@ public class PetService {
         LocalDate date = parseDtNasc(petDto.getDtNasc());
 
         pet.setDt_nasc(date);
+        pet.setFormulario(resolveFormulario(petDto));
 
         if (imagem != null && !imagem.isEmpty()) {
             String imageUrl = imageUploadService.uploadPetImage(imagem, pet.getId());
@@ -181,6 +197,16 @@ public class PetService {
         } catch (DateTimeParseException exception) {
             throw new RegraDeNegocioException("Data de nascimento inválida. Use o formato yyyy-MM-dd.");
         }
+    }
+
+    private FormularioEntity resolveFormulario(CadastrarPetDTO petDTO) {
+        if (petDTO.getFormularioId() == null) {
+            return null;
+        }
+
+        return formularioRepository.findById(petDTO.getFormularioId())
+                .orElseThrow(() -> new RecursoNaoEncontradoException(
+                        "Formulario nao encontrado com ID: " + petDTO.getFormularioId()));
     }
 
     private UsuarioEntity obterUsuarioAutenticado() {

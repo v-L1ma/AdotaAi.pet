@@ -1,7 +1,7 @@
-import { date, z } from "zod";
+import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Controller, useForm } from "react-hook-form";
-import DateTimePicker, { DateTimePickerEvent } from "@react-native-community/datetimepicker";
+import DateTimePicker from "@react-native-community/datetimepicker";
 import { useCreatePet } from "../hooks/useCreatePet";
 import * as ImagePicker from "expo-image-picker";
 import { useRouter } from "expo-router";
@@ -9,6 +9,8 @@ import React, { useRef, useState } from "react";
 import { Alert, Image, InputAccessoryView, Keyboard, Linking, Platform, Pressable, SafeAreaView, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
 import Icon1 from "react-native-vector-icons/Ionicons";
 import { colors } from "@/styles/variables";
+import SelecionarFormularioModal from "@/components/SelecionarFormularioModal";
+import { Formulario } from "@/types/Formulario";
 
 const criarAnuncioSchema = z.object({
     nome: z.string().trim().min(2, "Nome deve ter pelo menos 2 caracteres"),
@@ -31,13 +33,17 @@ type CriarAnuncioFormData = z.infer<typeof criarAnuncioSchema>;
 
 export default function CriarAnuncioScreen() {
     const [showDatePicker, setShowDatePicker] = useState(false);
+    const [isModalFormulariosOpen, setIsModalFormulariosOpen] = useState(false);
+    const [formularioSelecionado, setFormularioSelecionado] = useState<Formulario | null>(null);
+
+    const onClose = () => setIsModalFormulariosOpen(false);
+
     const { createPet, isCreating } = useCreatePet();
 
     const {
         control,
         handleSubmit,
         setValue,
-        watch,
         reset,
         formState: { errors },
     } = useForm<CriarAnuncioFormData>({
@@ -91,6 +97,11 @@ export default function CriarAnuncioScreen() {
                 { text: "Abrir configurações", onPress: () => Linking.openSettings() },
             ]
         );
+    };
+
+    const handleSelecionarFormulario = (formulario: Formulario | null) => {
+        setFormularioSelecionado(formulario);
+        setIsModalFormulariosOpen(false);
     };
 
     const pickImageFromCamera = async () => {
@@ -201,6 +212,7 @@ export default function CriarAnuncioScreen() {
 
         const result = await createPet({
             ...data,
+            formularioId: formularioSelecionado?.id ?? null,
             imagem: {
                 uri: image.uri,
                 fileName: image.fileName,
@@ -216,6 +228,7 @@ export default function CriarAnuncioScreen() {
         Alert.alert("Sucesso", "Anuncio criado com sucesso!");
         reset();
         setImage(null);
+        setFormularioSelecionado(null);
     };
 
     const renderError = (message?: string) =>
@@ -407,9 +420,29 @@ export default function CriarAnuncioScreen() {
                     />
                     {renderError(errors.descricao?.message)}
 
-                    <TouchableOpacity style={styles.secondaryButton} onPress={() => router.push("/criarFormulario") }>
-                        <Text style={styles.secondaryButtonText}>Escolher formulário</Text>
-                    </TouchableOpacity>
+                    {formularioSelecionado ? (
+                        <View style={styles.formularioCard}>
+                            <View style={styles.formularioInfo}>
+                                <View style={styles.formularioIcon}>
+                                    <Icon1 name="list-outline" size={20} color={colors.primary} />
+                                </View>
+                                <View style={styles.formularioText}>
+                                    <Text style={styles.formularioLabel}>Formulario selecionado</Text>
+                                    <Text style={styles.formularioTitle}>{formularioSelecionado.titulo}</Text>
+                                </View>
+                            </View>
+                            <TouchableOpacity
+                                style={styles.formularioChangeButton}
+                                onPress={() => setIsModalFormulariosOpen(true)}
+                            >
+                                <Text style={styles.formularioChangeText}>Mudar</Text>
+                            </TouchableOpacity>
+                        </View>
+                    ) : (
+                        <TouchableOpacity style={styles.secondaryButton} onPress={() => setIsModalFormulariosOpen(true)}>
+                            <Text style={styles.secondaryButtonText}>Escolher formulario</Text>
+                        </TouchableOpacity>
+                    )}
                 </View>
 
                 <TouchableOpacity 
@@ -439,6 +472,12 @@ export default function CriarAnuncioScreen() {
                     </View>
                 </InputAccessoryView>
             )}
+
+            <SelecionarFormularioModal
+                visible={isModalFormulariosOpen}
+                onClose={onClose}
+                onFormularioSelecionado={handleSelecionarFormulario}
+            />
         </View>
     );
 }
@@ -689,6 +728,59 @@ const styles = StyleSheet.create({
         color: colors.text,
         fontWeight: "700",
         fontSize: 14,
+    },
+    formularioCard: {
+        flexDirection: "row",
+        alignItems: "center",
+        justifyContent: "space-between",
+        gap: 12,
+        paddingVertical: 12,
+        paddingHorizontal: 14,
+        borderRadius: 16,
+        backgroundColor: colors.surfaceLow,
+        borderWidth: 1,
+        borderColor: colors.surfaceLowest,
+    },
+    formularioInfo: {
+        flexDirection: "row",
+        alignItems: "center",
+        gap: 10,
+        flex: 1,
+    },
+    formularioIcon: {
+        width: 34,
+        height: 34,
+        borderRadius: 12,
+        alignItems: "center",
+        justifyContent: "center",
+        backgroundColor: colors.secondaryContainer,
+    },
+    formularioText: {
+        flex: 1,
+    },
+    formularioLabel: {
+        fontSize: 11,
+        letterSpacing: 0.6,
+        textTransform: "uppercase",
+        color: colors.textMuted,
+        fontWeight: "700",
+    },
+    formularioTitle: {
+        fontSize: 15,
+        fontWeight: "800",
+        color: colors.text,
+        marginTop: 2,
+    },
+    formularioChangeButton: {
+        paddingHorizontal: 12,
+        paddingVertical: 8,
+        borderRadius: 999,
+        backgroundColor: colors.primary,
+    },
+    formularioChangeText: {
+        color: "#fff",
+        fontSize: 12,
+        fontWeight: "800",
     },
     keyboardToolbar: {
         backgroundColor: "#F5F5F7",

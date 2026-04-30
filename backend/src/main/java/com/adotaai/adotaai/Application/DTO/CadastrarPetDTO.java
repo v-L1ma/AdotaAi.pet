@@ -1,6 +1,6 @@
 package com.adotaai.adotaai.Application.DTO;
 
-import java.time.LocalDate;
+import java.util.UUID;
 
 import org.springframework.format.annotation.DateTimeFormat;
 
@@ -32,6 +32,8 @@ public class CadastrarPetDTO {
 
     @NotBlank
     private String especie;
+
+    private UUID formularioId;
 
     public String getNome() {
         return nome;
@@ -79,6 +81,14 @@ public class CadastrarPetDTO {
 
     public void setEspecie(String especie) {
         this.especie = especie;
+    }
+
+    public UUID getFormularioId() {
+        return formularioId;
+    }
+
+    public void setFormularioId(UUID formularioId) {
+        this.formularioId = formularioId;
     }
 
     

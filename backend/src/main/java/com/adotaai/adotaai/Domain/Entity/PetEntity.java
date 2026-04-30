@@ -51,6 +51,11 @@ public class PetEntity extends AuditableEntity {
     @Column(nullable = false)
     private String link_foto;
 
+        @ManyToOne
+        @JoinColumn(name = "formulario_id", nullable = true, foreignKey = @ForeignKey(name = "formulario_id",
+            foreignKeyDefinition = "FOREIGN KEY (formulario_id) REFERENCES formularios(id)"))
+        private FormularioEntity formulario;
+
     @ManyToOne
     @JoinColumn(name = "user_id", nullable = false, foreignKey = @ForeignKey(name = "user_id",
             foreignKeyDefinition = "FOREIGN KEY (user_id) REFERENCES usuario(id) ON DELETE CASCADE"))
@@ -134,6 +139,14 @@ public class PetEntity extends AuditableEntity {
 
     public void setLink_foto(String link_foto) {
         this.link_foto = link_foto;
+    }
+
+    public FormularioEntity getFormulario() {
+        return formulario;
+    }
+
+    public void setFormulario(FormularioEntity formulario) {
+        this.formulario = formulario;
     }
 
     @Override
