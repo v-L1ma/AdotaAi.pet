@@ -14,6 +14,7 @@ public class BuscarPetDTO {
     private String raca;
     private String especie;
     private String link_foto;
+    private UUID formularioId;
     private boolean isFavoritado;
     private DonoDTO dono;
 
@@ -22,7 +23,8 @@ public class BuscarPetDTO {
 
     public BuscarPetDTO(UUID id, String status, String descricao,
                         LocalDate dataNascimento, String nome, String porte,
-                        String raca, String especie, String linkFoto, boolean isFavoritado, DonoDTO dono) {
+                        String raca, String especie, String linkFoto, UUID formularioId,
+                        boolean isFavoritado, DonoDTO dono) {
         this.id = id;
         this.status = status;
         this.descricao = descricao;
@@ -32,6 +34,7 @@ public class BuscarPetDTO {
         this.raca = raca;
         this.especie = especie;
         this.link_foto = linkFoto;
+        this.formularioId = formularioId;
         this.isFavoritado = isFavoritado;
         this.dono = dono;
     }
@@ -106,6 +109,14 @@ public class BuscarPetDTO {
 
     public void setLink_foto(String link_foto) {
         this.link_foto = link_foto;
+    }
+
+    public UUID getFormularioId() {
+        return formularioId;
+    }
+
+    public void setFormularioId(UUID formularioId) {
+        this.formularioId = formularioId;
     }
 
     public boolean isFavoritado() {

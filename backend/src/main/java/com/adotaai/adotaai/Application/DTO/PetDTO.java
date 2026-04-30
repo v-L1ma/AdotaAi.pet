@@ -17,6 +17,7 @@ public class PetDTO {
     private String raca;
     private String especie;
     private String link_foto;
+    private UUID formularioId;
 
     @JsonProperty(value = "user_id", access = JsonProperty.Access.READ_ONLY)
     private UUID user_id;
@@ -31,6 +32,9 @@ public class PetDTO {
         this.raca = pet.getRaca();
         this.especie = pet.getEspecie();
         this.link_foto = pet.getLink_foto();
+        if (pet.getFormulario() != null) {
+            this.formularioId = pet.getFormulario().getId();
+        }
 
         if (pet.getUser() != null) {
             this.user_id = pet.getUser().getId();
@@ -110,6 +114,14 @@ public class PetDTO {
 
     public void setLink_foto(String link_foto) {
         this.link_foto = link_foto;
+    }
+
+    public UUID getFormularioId() {
+        return formularioId;
+    }
+
+    public void setFormularioId(UUID formularioId) {
+        this.formularioId = formularioId;
     }
 
     public UUID getUser_id() {
