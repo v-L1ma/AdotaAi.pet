@@ -5,9 +5,12 @@ import org.springframework.stereotype.Repository;
 
 import com.adotaai.adotaai.Domain.Entity.EventoEntity;
 
+import java.util.List;
 import java.util.UUID;
 
 @Repository
 public interface EventoRepository extends JpaRepository<EventoEntity, UUID> {
+
+	List<EventoEntity> findAllByUserId(UUID userId);
 
 }

@@ -10,6 +10,7 @@ import java.util.UUID;
 
 public class EventoDTO {
 
+    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     private UUID id;
     private String nome;
     private String endereco;
@@ -21,10 +22,13 @@ public class EventoDTO {
     private String descricao;
     @JsonFormat(pattern = "yyyy-MM-dd")
     private LocalDate data;
+    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     private String status = "PENDENTE";
+
+    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     private String nmorganizador;
 
-    @JsonProperty("user_id")
+    @JsonProperty(value = "user_id", access = JsonProperty.Access.READ_ONLY)
     private UUID user_id;
 
     public EventoDTO(EventoEntity evento) {

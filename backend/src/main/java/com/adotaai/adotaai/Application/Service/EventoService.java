@@ -13,9 +13,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
-import java.util.UUID;
-
 import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
 
 @Service
 public class EventoService {
@@ -31,9 +31,27 @@ public class EventoService {
         return eventos.stream().map(EventoDTO::new).toList();
     }
 
-    public void excluir(UUID id) {
+    public EventoDTO buscarPorId(UUID id) {
         EventoEntity evento = eventoRepository.findById(id)
                 .orElseThrow(() -> new RecursoNaoEncontradoException("Evento não encontrado"));
+        return new EventoDTO(evento);
+    }
+
+    public List<EventoDTO> listarEventosUsuarioLogado() {
+        UsuarioEntity usuario = obterUsuarioAutenticado();
+        return eventoRepository.findAllByUserId(usuario.getId())
+                .stream()
+                .map(EventoDTO::new)
+                .toList();
+    }
+
+    public void excluir(UUID id) {
+        UsuarioEntity usuario = obterUsuarioAutenticado();
+        EventoEntity evento = eventoRepository.findById(id)
+                .orElseThrow(() -> new RecursoNaoEncontradoException("Evento não encontrado"));
+        if (evento.getUser() == null || !evento.getUser().getId().equals(usuario.getId())) {
+            throw new RegraDeNegocioException("Apenas o organizador pode excluir o evento.");
+        }
         eventoRepository.delete(evento);
     }
 
@@ -42,6 +60,8 @@ public class EventoService {
         BeanUtils.copyProperties(eventoDTO, evento);
         UsuarioEntity usuario = obterUsuarioAutenticado();
         evento.setUser(usuario);
+        evento.setNmorganizador(usuario.getNome());
+        evento.setStatus("PENDENTE");
 
         evento = eventoRepository.save(evento);
 
@@ -53,7 +73,12 @@ public class EventoService {
 
     @Transactional
     public EventoDTO atualizarEvento(UUID id, EventoDTO eventoDto) {
-        EventoEntity evento = eventoRepository.findById(id).orElseThrow(() -> new RecursoNaoEncontradoException("Evento não encontrado com ID: " + id));
+        UsuarioEntity usuario = obterUsuarioAutenticado();
+        EventoEntity evento = eventoRepository.findById(id)
+                .orElseThrow(() -> new RecursoNaoEncontradoException("Evento não encontrado com ID: " + id));
+        if (evento.getUser() == null || !evento.getUser().getId().equals(usuario.getId())) {
+            throw new RegraDeNegocioException("Apenas o organizador pode editar o evento.");
+        }
         evento.setNome(eventoDto.getNome());
         evento.setEndereco(eventoDto.getEndereco());
         evento.setBairro(eventoDto.getBairro());
@@ -63,8 +88,6 @@ public class EventoService {
         evento.setHrfim(eventoDto.getHrfim());
         evento.setDescricao(eventoDto.getDescricao());
         evento.setData(eventoDto.getData());
-        evento.setStatus(eventoDto.getStatus());
-        evento.setNmorganizador(eventoDto.getNmorganizador());
 
         EventoEntity eventoatualizado = eventoRepository.save(evento);
 
@@ -73,12 +96,30 @@ public class EventoService {
     }
 
     private UsuarioEntity obterUsuarioAutenticado() {
+        return obterUsuarioAutenticadoOpcional()
+                .orElseThrow(() -> new RegraDeNegocioException("Usuário não autenticado."));
+    }
+
+    private Optional<UsuarioEntity> obterUsuarioAutenticadoOpcional() {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         if (auth == null || !auth.isAuthenticated() || "anonymousUser".equals(auth.getName())) {
-            throw new RegraDeNegocioException("Usuário não autenticado.");
+            return Optional.empty();
         }
 
-        return usuarioRepository.findByEmail(auth.getName())
-                .orElseThrow(() -> new RecursoNaoEncontradoException("Usuário não encontrado para o email: " + auth.getName()));
+        Object details = auth.getDetails();
+        if (details instanceof UUID userId) {
+            return usuarioRepository.findById(userId);
+        }
+
+        if (details instanceof String userIdStr) {
+            try {
+                UUID userId = UUID.fromString(userIdStr);
+                return usuarioRepository.findById(userId);
+            } catch (IllegalArgumentException ignored) {
+                // Fallback para autenticações antigas baseadas em email.
+            }
+        }
+
+        return usuarioRepository.findByEmail(auth.getName());
     }
 }

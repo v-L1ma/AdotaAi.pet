@@ -30,9 +30,15 @@ public class EventoController {
         return eventoService.listarTodos();
     }
 
+    @GetMapping("/{id}")
+    public ResponseEntity<EventoDTO> buscarEvento(@PathVariable UUID id) {
+        return ResponseEntity.ok(eventoService.buscarPorId(id));
+    }
+
     @PostMapping
-    public void criarEvento(@RequestBody EventoDTO evento) {
-        eventoService.criarEvento(evento);
+    public ResponseEntity<EventoDTO> criarEvento(@RequestBody EventoDTO evento) {
+        EventoDTO criado = eventoService.criarEvento(evento);
+        return ResponseEntity.ok(criado);
     }
 
     @PutMapping("/{id}")
