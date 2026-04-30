@@ -1,45 +1,83 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from "expo-router";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Alert, FlatList, Image, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import colors from '../styles/colors';
+import apiService from "@/services/apiService";
+import { animal } from "@/types/TAnimal";
 
-// Mock temporário para exibição
-type Favorito = {
-  id: string;
-  nome: string;
-  especie: string;
-  idade: string;
-  imagem: any;
+type FavoritosResponse = {
+  message?: string;
+  data?: animal[];
 };
-
-const initialFavoritos: Favorito[] = [
-  {
-    id: '1',
-    nome: 'Luna',
-    especie: 'Gato',
-    idade: '2 anos',
-    imagem: require('../assets/images/cat1.png'),
-  },
-  {
-    id: '2',
-    nome: 'Thor',
-    especie: 'Cachorro',
-    idade: '3 anos',
-    imagem: require('../assets/images/dog1.png'),
-  },
-];
 
 export default function MeusFavoritos() {
   const router = useRouter();
-  const [favoritos, setFavoritos] = useState<Favorito[]>(initialFavoritos);
+  const [favoritos, setFavoritos] = useState<animal[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [loadError, setLoadError] = useState<string | null>(null);
 
-  const handleDesfavoritar = (id: string) => {
-    setFavoritos(favoritos.filter(fav => fav.id !== id));
+  useEffect(() => {
+    let isMounted = true;
+
+    async function loadFavoritos() {
+      setIsLoading(true);
+      setLoadError(null);
+
+      try {
+        const response = await apiService.get<FavoritosResponse>("/pets/favoritos");
+        if (isMounted) {
+          setFavoritos(response.data?.data ?? []);
+        }
+      } catch {
+        if (isMounted) {
+          setLoadError("Nao foi possivel carregar seus favoritos.");
+        }
+      } finally {
+        if (isMounted) {
+          setIsLoading(false);
+        }
+      }
+    }
+
+    loadFavoritos();
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
+  const formatarIdade = (dtNasc?: string) => {
+    if (!dtNasc) {
+      return "Idade nao informada";
+    }
+
+    const date = new Date(dtNasc);
+    if (Number.isNaN(date.getTime())) {
+      return "Idade nao informada";
+    }
+
+    const diffMs = Date.now() - date.getTime();
+    const diffYears = Math.floor(diffMs / (1000 * 60 * 60 * 24 * 365.25));
+    if (diffYears > 0) {
+      return `${diffYears} ano${diffYears > 1 ? "s" : ""}`;
+    }
+
+    const diffMonths = Math.max(1, Math.floor(diffMs / (1000 * 60 * 60 * 24 * 30.5)));
+    return `${diffMonths} mes${diffMonths > 1 ? "es" : ""}`;
   };
 
-  const confirmDesfavoritar = (item: Favorito) => {
+  const handleDesfavoritar = async (id: string) => {
+    try {
+      await apiService.delete(`/pets/${id}/favoritar`);
+      setFavoritos((current) => current.filter((fav) => fav.id !== id));
+    } catch {
+      Alert.alert("Erro", "Nao foi possivel desfavoritar agora.");
+    }
+  };
+
+  const confirmDesfavoritar = (item: animal) => {
     Alert.alert(
       'Remover dos favoritos',
       `Deseja realmente desfavoritar ${item.nome}?`,
@@ -50,12 +88,12 @@ export default function MeusFavoritos() {
     );
   };
 
-  const renderItem = ({ item }: { item: Favorito }) => (
+  const renderItem = ({ item }: { item: animal }) => (
     <View style={styles.card}>
-      <Image source={item.imagem} style={styles.petImage} />
+      <Image source={{ uri: item.link_foto }} style={styles.petImage} />
       <View style={styles.content}>
         <Text style={styles.petName}>{item.nome}</Text>
-        <Text style={styles.petInfo}>{item.especie} • {item.idade}</Text>
+        <Text style={styles.petInfo}>{item.especie} • {formatarIdade(item.dt_nasc)}</Text>
         <Text style={styles.petDescription} numberOfLines={2}>
           Pronto para encontrar um novo lar com carinho e segurança.
         </Text>
@@ -84,7 +122,15 @@ export default function MeusFavoritos() {
           renderItem={renderItem}
           contentContainerStyle={{ paddingBottom: 32, paddingTop: 12, paddingHorizontal: 2 }}
           showsVerticalScrollIndicator={false}
-          ListEmptyComponent={<Text style={styles.emptyText}>Nenhum animal favoritado ainda.</Text>}
+          ListEmptyComponent={
+            isLoading ? (
+              <Text style={styles.emptyText}>Carregando favoritos...</Text>
+            ) : loadError ? (
+              <Text style={styles.emptyText}>{loadError}</Text>
+            ) : (
+              <Text style={styles.emptyText}>Nenhum animal favoritado ainda.</Text>
+            )
+          }
         />
       </View>
     </>
