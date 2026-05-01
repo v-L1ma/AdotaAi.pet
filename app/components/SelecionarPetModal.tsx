@@ -74,7 +74,7 @@ export default function SelecionarPetModal({ visible, onClose, formulario }: Sel
     setError(null);
 
     apiService
-      .get("/pets/me")
+      .get("/usuario/pets")
       .then((response) => {
         if (!isActive) return;
 
@@ -148,6 +148,11 @@ export default function SelecionarPetModal({ visible, onClose, formulario }: Sel
       return;
     }
 
+    if(Platform.OS=="web"){
+      handleUpdate(pet, formulario.id)
+      return
+    }
+    
     Alert.alert(
       "Confirmar vinculo",
       `Vincular o formulario "${formulario.titulo}" ao pet "${pet.nome}"?`,
@@ -159,6 +164,10 @@ export default function SelecionarPetModal({ visible, onClose, formulario }: Sel
   };
 
   const confirmDesvinculo = (pet: PetApi) => {
+    if(Platform.OS=="web"){
+      handleUpdate(pet, null) 
+    }
+
     Alert.alert(
       "Remover formulario",
       `Remover o formulario vinculado ao pet "${pet.nome}"?`,
@@ -208,15 +217,18 @@ export default function SelecionarPetModal({ visible, onClose, formulario }: Sel
                   </Text>
                 </View>
                 <View style={styles.petActions}>
-                  <TouchableOpacity
-                    style={[styles.actionButton, styles.primaryAction]}
-                    onPress={() => confirmVinculo(pet)}
-                    disabled={isSaving || !formulario}
-                  >
-                    <Text style={styles.actionButtonText}>
-                      {isSaving ? "Salvando..." : "Vincular"}
-                    </Text>
-                  </TouchableOpacity>
+                  {!hasFormulario && (
+                    <TouchableOpacity
+                      style={[styles.actionButton, styles.primaryAction]}
+                      onPress={() => confirmVinculo(pet)}
+                      disabled={isSaving || !formulario}
+                    >
+                      <Text style={styles.actionButtonText}>
+                        {isSaving ? "Salvando..." : "Vincular"}
+                      </Text>
+                    </TouchableOpacity>
+                  )
+                  }
                   {hasFormulario && (
                     <TouchableOpacity
                       style={[styles.actionButton, styles.secondaryAction]}
