@@ -9,6 +9,7 @@ import java.util.UUID;
 
 public interface IFormularioService {
     FormularioEntity criarFormulario(FormularioDTO dto);
+    FormularioTemplateDTO atualizarFormulario(UUID id, FormularioDTO dto);
     List<FormularioTemplateDTO> listarFormularios();
     FormularioTemplateDTO buscarFormularioPorId(UUID id);
     void deletarFormulario(UUID formularioId);

@@ -52,7 +52,7 @@ export default function CardFormulario({
                 <View style={styles.actions}>
                 
                 {shouldShowEdit && (
-                  <TouchableOpacity style={styles.secondaryButton} onPress={() => router.push("/criarFormulario") }>
+                  <TouchableOpacity style={styles.secondaryButton} onPress={() => router.push(`/criarFormulario?id=${item.id}`)}>
                       <Text style={styles.secondaryText}>Editar</Text>
                   </TouchableOpacity>
                 )}

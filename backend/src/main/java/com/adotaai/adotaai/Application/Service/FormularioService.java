@@ -61,6 +61,38 @@ public class FormularioService implements IFormularioService {
     }
 
     @Override
+    @Transactional
+    public FormularioTemplateDTO atualizarFormulario(UUID id, FormularioDTO dto) {
+        if (dto.getPerguntas() == null || dto.getPerguntas().isEmpty()) {
+            throw new RegraDeNegocioException("A lista de perguntas nao pode estar vazia.");
+        }
+        if (dto.getPerguntas().size() > 20) {
+            throw new RegraDeNegocioException("A lista de perguntas deve conter no maximo 20 itens.");
+        }
+
+        FormularioEntity formulario = formularioRepository.findById(id)
+                .orElseThrow(() -> new RecursoNaoEncontradoException("Formulário não encontrado"));
+
+        UsuarioEntity usuarioAutenticado = obterUsuarioAutenticado();
+
+        if (!formulario.getUsuarioCriador().getId().equals(usuarioAutenticado.getId())) {
+            throw new RegraDeNegocioException("Apenas o criador do formulário pode editá-lo");
+        }
+
+        formulario.getPerguntas().clear();
+        
+        for (String textoPergunta : dto.getPerguntas()) {
+            PerguntaEntity p = new PerguntaEntity();
+            p.setTexto(textoPergunta);
+            p.setFormulario(formulario);
+            formulario.getPerguntas().add(p);
+        }
+        
+        formularioRepository.save(formulario);
+        return new FormularioTemplateDTO(formulario);
+    }
+
+    @Override
     public List<FormularioTemplateDTO> listarFormularios() {
         UsuarioEntity usuarioAutenticado = obterUsuarioAutenticado();
         return formularioRepository.findAllByUsuarioCriadorId(usuarioAutenticado.getId())

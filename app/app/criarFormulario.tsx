@@ -1,11 +1,11 @@
-import React, { useState } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { FlatList, Pressable, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
 import * as Progress from 'react-native-progress';
 import AppHeader from '../components/AppHeader';
 import colors from '../styles/colors';
 import apiService from "../services/apiService";
 import { getApiErrorMessage } from "../services/apiErrorService";
-import { useRouter } from "expo-router";
+import { useRouter, useLocalSearchParams } from "expo-router";
 
 
 interface Pergunta{
@@ -15,6 +15,8 @@ interface Pergunta{
 
 export default function CriarFormulario(){
     const router = useRouter();
+    const { id } = useLocalSearchParams();
+    const editId = id as string | undefined;
 
     const [perguntasFrequentes,setPerguntasFrequentes]=useState<Pergunta[]>([
         { id: 1, conteudo: "Qual seu endereço completo? Com nome da rua, número e cidade" },
@@ -52,7 +54,46 @@ export default function CriarFormulario(){
     const [erroMessage, setErroMessage] = useState<string | null>(null);
     const [saveError, setSaveError] = useState<string | null>(null);
     const [isSaving, setIsSaving] = useState(false);
+    const [isLoading, setIsLoading] = useState(false);
 
+    const loadFormulario = useCallback(async () => {
+        if (!editId) return;
+        setIsLoading(true);
+        try {
+            const response = await apiService.get(`/formularios/${editId}`);
+            const perguntasApi = response.data?.perguntas || [];
+            
+            const selecionadas: Pergunta[] = [];
+            const novasPerguntas: Pergunta[] = [];
+            
+            perguntasApi.forEach((item: { texto?: string }, idx: number) => {
+                const texto = item?.texto?.trim() || "";
+                if (!texto) return;
+                
+                const existente = perguntasFrequentes.find((p) => p.conteudo === texto);
+                if (existente) {
+                    selecionadas.push(existente);
+                } else {
+                    const nova: Pergunta = { id: Date.now() + idx, conteudo: texto };
+                    novasPerguntas.push(nova);
+                    selecionadas.push(nova);
+                }
+            });
+            
+            if (novasPerguntas.length > 0) {
+                setPerguntasFrequentes((prev) => [...prev, ...novasPerguntas]);
+            }
+            setPerguntasSelecionadas(selecionadas);
+        } catch {
+            setSaveError("Não foi possível carregar o formulário.");
+        } finally {
+            setIsLoading(false);
+        }
+    }, [editId]);
+
+    useEffect(() => {
+        loadFormulario();
+    }, [loadFormulario]);
 
     function selecionarPergunta(pergunta: Pergunta) {
         // já está selecionada? remove
@@ -93,7 +134,11 @@ export default function CriarFormulario(){
 
         setIsSaving(true);
         try {
+            if (editId) {
+                await apiService.put(`/formularios/${editId}`, { perguntas });
+            } else {
             await apiService.post("/formularios", { perguntas });
+            }
             router.push("/gerenciar-formularios");
         } catch (err) {
             setSaveError(getApiErrorMessage(err, "Nao foi possivel salvar o formulario."));
@@ -135,7 +180,7 @@ export default function CriarFormulario(){
 
     return(
         <View style={style.screen}>
-            <AppHeader title="Criar Formulário" titleFontSize={20} />
+            <AppHeader title={editId ? "Editar Formulário" : "Criar Formulário"} titleFontSize={20} />
 
             <View style={style.main}>
                 <Text style={style.heroSubtitle}>Selecione até 20 perguntas para avaliar os adotantes de forma segura.</Text>
@@ -176,7 +221,7 @@ export default function CriarFormulario(){
                         disabled={isSaving}
                     >
                         <Text style={style.primaryButtonText}>
-                            {isSaving ? "Salvando..." : "Salvar questionario"}
+                            {isSaving ? "Salvando..." : editId ? "Atualizar questionario" : "Salvar questionario"}
                         </Text>
                     </TouchableOpacity>
                 </View>
