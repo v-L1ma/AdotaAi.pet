@@ -134,11 +134,18 @@ public class PetService {
         PetEntity pet = petRepository.findById(id)
                 .orElseThrow(() -> new RecursoNaoEncontradoException("Pet não encontrado com ID: " + id));
 
-        BeanUtils.copyProperties(petDto, pet, "id", "user", "link_foto");
-        LocalDate date = parseDtNasc(petDto.getDtNasc());
-
-        pet.setDt_nasc(date);
-        pet.setFormulario(resolveFormulario(petDto));
+        if (petDto != null && petDto.getNome() != null) {
+            if (petDto.getNome() != null) pet.setNome(petDto.getNome());
+            if (petDto.getDescricao() != null) pet.setDescricao(petDto.getDescricao());
+            if (petDto.getDtNasc() != null) {
+                LocalDate date = parseDtNasc(petDto.getDtNasc());
+                pet.setDt_nasc(date);
+            }
+            if (petDto.getPorte() != null) pet.setPorte(petDto.getPorte());
+            if (petDto.getRaca() != null) pet.setRaca(petDto.getRaca());
+            if (petDto.getEspecie() != null) pet.setEspecie(petDto.getEspecie());
+            pet.setFormulario(resolveFormulario(petDto));
+        }
 
         if (imagem != null && !imagem.isEmpty()) {
             String imageUrl = imageUploadService.uploadPetImage(imagem, pet.getId());

@@ -3,14 +3,17 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Controller, useForm } from "react-hook-form";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import { useCreatePet } from "../hooks/useCreatePet";
+import { useEditPet } from "../hooks/useEditPet";
 import * as ImagePicker from "expo-image-picker";
-import { useRouter } from "expo-router";
-import React, { useRef, useState } from "react";
+import { useLocalSearchParams, useRouter } from "expo-router";
+import React, { useEffect, useRef, useState } from "react";
 import { Alert, Image, InputAccessoryView, Keyboard, Linking, Platform, Pressable, SafeAreaView, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
 import Icon1 from "react-native-vector-icons/Ionicons";
 import { colors } from "@/styles/variables";
 import SelecionarFormularioModal from "@/components/SelecionarFormularioModal";
 import { Formulario } from "@/types/Formulario";
+import apiService from "@/services/apiService";
+import { animal } from "@/types/TAnimal";
 
 const criarAnuncioSchema = z.object({
     nome: z.string().trim().min(2, "Nome deve ter pelo menos 2 caracteres"),
@@ -36,9 +39,56 @@ export default function CriarAnuncioScreen() {
     const [isModalFormulariosOpen, setIsModalFormulariosOpen] = useState(false);
     const [formularioSelecionado, setFormularioSelecionado] = useState<Formulario | null>(null);
 
+    const params = useLocalSearchParams<{ petId?: string }>();
+    const isEditing = !!params.petId;
+    const [petData, setPetData] = useState<animal | null>(null);
+    const [isLoadingPet, setIsLoadingPet] = useState(false);
+
     const onClose = () => setIsModalFormulariosOpen(false);
 
     const { createPet, isCreating } = useCreatePet();
+    const { editPet, isEditing: isEditingPet } = useEditPet();
+
+    useEffect(() => {
+        if (!isEditing || !params.petId) {
+            return;
+        }
+
+        async function loadPet() {
+            setIsLoadingPet(true);
+            try {
+                const response = await apiService.get<animal>(`/pets/${params.petId}`);
+                setPetData(response.data);
+            } catch {
+                Alert.alert("Erro", "Nao foi carregar os dados do pet.");
+            } finally {
+                setIsLoadingPet(false);
+            }
+        }
+
+        loadPet();
+    }, [isEditing, params.petId]);
+
+    const getDefaultValues = () => {
+        if (petData) {
+            return {
+                nome: petData.nome,
+                dt_nasc: petData.dt_nasc,
+                especie: petData.especie as "Gato" | "Cão",
+                porte: petData.porte as "pequeno" | "medio" | "grande",
+                raca: petData.raca,
+                descricao: petData.descricao,
+            };
+        }
+        return {
+            nome: "",
+            dt_nasc: "2026-04-24",
+            especie: undefined,
+            porte: undefined,
+            raca: "",
+            descricao: "",
+        };
+    };
 
     const {
         control,
@@ -48,18 +98,27 @@ export default function CriarAnuncioScreen() {
         formState: { errors },
     } = useForm<CriarAnuncioFormData>({
         resolver: zodResolver(criarAnuncioSchema),
-        defaultValues: {
-            nome: "",
-            dt_nasc: "2026-04-24",
-            especie: undefined,
-            porte: undefined,
-            raca: "",
-            descricao: "",
-        },
+        defaultValues: getDefaultValues(),
     });
+
+    useEffect(() => {
+        if (petData) {
+            reset({
+                nome: petData.nome,
+                dt_nasc: petData.dt_nasc,
+                especie: petData.especie as "Gato" | "Cão",
+                porte: petData.porte as "pequeno" | "medio" | "grande",
+                raca: petData.raca,
+                descricao: petData.descricao,
+            });
+            setExistingPhotoUrl(petData.link_foto);
+            setFormularioSelecionado(null);
+        }
+    }, [petData, reset]);
 
     const router = useRouter();
     const [image, setImage] = useState<ImagePicker.ImagePickerAsset | null>(null);
+    const [existingPhotoUrl, setExistingPhotoUrl] = useState<string | null>(null);
     const [focusedField, setFocusedField] = useState<"nome" | "idade" | "peso" | null>(null);
 
     const nomeRef = useRef<TextInput>(null);
@@ -205,6 +264,33 @@ export default function CriarAnuncioScreen() {
     };
 
     const handleSave = async (data: CriarAnuncioFormData) => {
+        if (isEditing) {
+            const result = await editPet({
+                petId: params.petId!,
+                nome: data.nome,
+                dt_nasc: data.dt_nasc,
+                especie: data.especie as "Gato" | "Cão",
+                porte: data.porte as "pequeno" | "medio" | "grande",
+                raca: data.raca,
+                descricao: data.descricao,
+                formularioId: formularioSelecionado?.id ?? null,
+                imagem: image ? {
+                    uri: image.uri,
+                    fileName: image.fileName,
+                    mimeType: image.mimeType,
+                } : null,
+            });
+
+            if (!result.ok) {
+                Alert.alert("Erro", result.messages.join("\n"));
+                return;
+            }
+
+            Alert.alert("Sucesso", "Anuncio atualizado com sucesso!");
+            router.back();
+            return;
+        }
+
         if (!image?.uri) {
             Alert.alert("Imagem obrigatória", "Adicione uma foto do pet para criar o anúncio.");
             return;
@@ -262,6 +348,8 @@ export default function CriarAnuncioScreen() {
                     <Pressable style={styles.avatarUploader} onPress={pickImage}>
                         {image?.uri ? (
                             <Image source={{ uri: image.uri }} style={styles.avatarImage} />
+                        ) : existingPhotoUrl ? (
+                            <Image source={{ uri: existingPhotoUrl }} style={styles.avatarImage} />
                         ) : (
                             <View style={styles.avatarPlaceholder}>
                                 <Icon1 name="camera-outline" size={30} color="#8c8c8c" />
@@ -273,8 +361,8 @@ export default function CriarAnuncioScreen() {
                         </View>
                     </Pressable>
 
-                    <Text style={styles.heroTitle}>Nova História</Text>
-                    <Text style={styles.heroSubtitle}>Dê voz a um novo companheiro</Text>
+                    <Text style={styles.heroTitle}>{isEditing ? "Editar História" : "Nova História"}</Text>
+                    <Text style={styles.heroSubtitle}>{isEditing ? "Atualize as informações do seu companheiro" : "Dê voz a um novo companheiro"}</Text>
                 </View>
 
                 <View style={styles.formCard}>
@@ -446,13 +534,13 @@ export default function CriarAnuncioScreen() {
                 </View>
 
                 <TouchableOpacity 
-                    style={[styles.primaryButton, isCreating && { opacity: 0.7 }]} 
+                    style={[styles.primaryButton, (isCreating || isEditingPet) && { opacity: 0.7 }]} 
                     onPress={handleSubmit(handleSave)}
-                    disabled={isCreating}
+                    disabled={isCreating || isEditingPet || isLoadingPet}
                 >
                     <Icon1 name="sparkles-outline" size={18} color="#fff" />
                     <Text style={styles.primaryButtonText}>
-                        {isCreating ? "Criando..." : "Criar anúncio"}
+                        {isLoadingPet ? "Carregando..." : isEditing ? (isEditingPet ? "Salvando..." : "Salvar alteracoes") : (isCreating ? "Criando..." : "Criar anúncio")}
                     </Text>
                 </TouchableOpacity>
             </ScrollView>

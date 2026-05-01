@@ -1,7 +1,7 @@
 import { Entypo, Ionicons, MaterialIcons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import React, { useEffect, useMemo, useState } from "react";
-import { ActivityIndicator, Alert, Image, ScrollView, StyleSheet, Text, TouchableOpacity, View, useWindowDimensions } from "react-native";
+import { ActivityIndicator, Alert, Image, Modal, Pressable, ScrollView, StyleSheet, Text, TouchableOpacity, View, useWindowDimensions } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import colors from "../styles/colors";
 import { useTabNavigation } from "@/hooks/useTabNavigation";
@@ -35,6 +35,7 @@ export default function MeusPets() {
   const [pets, setPets] = useState<animal[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [loadError, setLoadError] = useState<string | null>(null);
+  const [popoverPetId, setPopoverPetId] = useState<string | null>(null);
 
   useEffect(() => {
     let isMounted = true;
@@ -180,21 +181,40 @@ export default function MeusPets() {
               </View>
 
               <View style={styles.actionsColumn}>
-                <TouchableOpacity
-                  onPress={() => navigateToTab("/criar-anuncio")}
-                  style={[styles.actionButton, { width: metrics.actionSize, height: metrics.actionSize }]}
-                  hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
-                >
-                  <Entypo name="dots-three-vertical" size={metrics.iconSize} color={colors.primary} />
-                </TouchableOpacity>
+                <View style={{ position: "relative" }}>
+                  <TouchableOpacity
+                    onPress={() => setPopoverPetId(popoverPetId === pet.id ? null : pet.id)}
+                    style={[styles.actionButton, { width: metrics.actionSize, height: metrics.actionSize }]}
+                    hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+                  >
+                    <Entypo name="dots-three-vertical" size={metrics.iconSize} color={colors.primary} />
+                  </TouchableOpacity>
 
-                <TouchableOpacity
-                  onPress={() => handleDelete(pet.id)}
-                  style={[styles.actionButton, { width: metrics.actionSize, height: metrics.actionSize }]}
-                  hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
-                >
-                  <MaterialIcons name="delete" size={metrics.iconSize + 1} color={colors.primary} />
-                </TouchableOpacity>
+                  {popoverPetId === pet.id && (
+                    <View style={styles.popover}>
+                      <TouchableOpacity
+                        style={styles.popoverItem}
+                        onPress={() => {
+                          setPopoverPetId(null);
+                          navigateToTab(`/criar-anuncio?petId=${pet.id}`);
+                        }}
+                      >
+                        <Ionicons name="create-outline" size={18} color={colors.primary} />
+                        <Text style={styles.popoverText}>Editar</Text>
+                      </TouchableOpacity>
+                      <TouchableOpacity
+                        style={styles.popoverItem}
+                        onPress={() => {
+                          setPopoverPetId(null);
+                          handleDelete(pet.id);
+                        }}
+                      >
+                        <MaterialIcons name="delete" size={18} color="#E74C3C" />
+                        <Text style={[styles.popoverText, { color: "#E74C3C" }]}>Excluir</Text>
+                      </TouchableOpacity>
+                    </View>
+                  )}
+                </View>
               </View>
             </View>
           ))}
@@ -345,5 +365,37 @@ const styles = StyleSheet.create({
     backgroundColor: `${colors.secondary}55`,
     alignItems: "center",
     justifyContent: "center",
+  },
+  modalOverlay: {
+    flex: 1,
+    zIndex:0,
+    backgroundColor: "rgba(0, 0, 0, 0.3)",
+  },
+  popover: {
+    position: "absolute",
+    right: 0,
+    top: "100%",
+    marginTop: 8,
+    backgroundColor: "#fff",
+    borderRadius: 12,
+    paddingVertical: 6,
+    minWidth: 120,
+    shadowColor: "#000",
+    shadowOpacity: 0.15,
+    shadowRadius: 10,
+    zIndex: 150,
+  },
+  popoverItem: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+    paddingVertical: 10,
+    paddingHorizontal: 14,
+    elevation: 8,
+  },
+  popoverText: {
+    fontSize: 14,
+    fontWeight: "600",
+    color: colors.primary,
   },
 });
