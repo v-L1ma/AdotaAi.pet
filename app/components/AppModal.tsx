@@ -58,6 +58,8 @@ const styles = StyleSheet.create({
   },
   modalCard: {
     width: "100%",
+    maxHeight: 700,
+    overflowY: "scroll",
     borderRadius: 18,
     backgroundColor: "#fff",
     padding: 20,
