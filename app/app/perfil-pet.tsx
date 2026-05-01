@@ -1,7 +1,7 @@
 import { LinearGradient } from "expo-linear-gradient";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useEffect, useMemo, useState } from "react";
-import { ActivityIndicator, Image, Platform, Pressable, SafeAreaView, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { ActivityIndicator, Alert, Image, Platform, Pressable, SafeAreaView, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import IconMat from "react-native-vector-icons/MaterialCommunityIcons";
 import IconIonic from "react-native-vector-icons/Ionicons";
 import { colors } from "@/styles/variables";
@@ -25,6 +25,7 @@ type BuscarPetDTO = {
         id: string;
         nome: string;
     };
+    formularioId?: string;
 };
 
 export default function PerfilPet(){
@@ -123,6 +124,7 @@ export default function PerfilPet(){
     const [pet, setPet] = useState<BuscarPetDTO | null>(null);
     const [isLoadingPet, setIsLoadingPet] = useState<boolean>(false);
     const [petError, setPetError] = useState<string | null>(null);
+    const [isAdopting, setIsAdopting] = useState<boolean>(false);
 
     const params = useLocalSearchParams<{ id?: string }>();
     const petId = Array.isArray(params.id) ? params.id[0] : params.id;
@@ -180,7 +182,7 @@ export default function PerfilPet(){
         return date.toLocaleDateString("pt-BR");
     }, [pet?.dt_nasc]);
 
-    async function favoritePet(){
+async function favoritePet(){
         if (!petId || !pet || isTogglingFavorite) {
             return;
         }
@@ -199,6 +201,32 @@ export default function PerfilPet(){
             setPet((currentPet) => currentPet ? { ...currentPet, isFavoritado: true, isFavorito: true } : currentPet);
         } finally {
             setIsTogglingFavorite(false);
+        }
+    }
+
+    async function handleAdotar() {
+        if (!petId || !pet || isAdopting) {
+            return;
+        }
+
+        setIsAdopting(true);
+        try {
+            if (pet.formularioId) {
+                // First create a solicitation, then redirect to stepper
+                const solicitacaoResponse = await apiService.post("/solicitacoes", { petId: petId });
+                const solicitacaoId = solicitacaoResponse.data.id;
+                // Redirect to step-by-step form responder
+                router.push(`/responder-formulario-stepper?formularioId=${pet.formularioId}&solicitacaoId=${solicitacaoId}`);
+            } else {
+                // Send adoption request directly
+                await apiService.post("/solicitacoes", { petId: petId });
+                Alert.alert("Sucesso", "Solicitação de adoção enviada!");
+                router.back();
+            }
+        } catch (err) {
+            Alert.alert("Erro", "Não foi possível enviar a solicitação de adoção.");
+        } finally {
+            setIsAdopting(false);
         }
     }
 
@@ -312,15 +340,14 @@ export default function PerfilPet(){
                 </View>
             </ScrollView>
 
-            <View style={style.footer}>
-                <TouchableOpacity style={style.button}>
-                    <Text style={style.buttonText}>Quero adotar!</Text>
-                </TouchableOpacity>
-            </View>
+<View style={style.footer}>
+        <TouchableOpacity style={style.button} onPress={handleAdotar}>
+            <Text style={style.buttonText}>Quero adotar!</Text>
+        </TouchableOpacity>
+    </View>
         </View>
     )
 }
-
 const style = StyleSheet.create({
     container:{
         flex:1,

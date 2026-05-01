@@ -27,8 +27,12 @@ public class SolicitacaoAdocaoEntity extends AuditableEntity {
     private UsuarioEntity anunciante;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "formulario_id", nullable = false)
+    @JoinColumn(name = "formulario_id", nullable = true)
     private FormularioEntity formulario;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "pet_id", nullable = false)
+    private PetEntity pet;
 
     @JsonManagedReference("solicitacao-respostas")
     @OneToMany(mappedBy = "solicitacao", cascade = CascadeType.ALL, orphanRemoval = true)
@@ -81,10 +85,18 @@ public class SolicitacaoAdocaoEntity extends AuditableEntity {
     }
 
     public void setFormulario(FormularioEntity formulario) {
-        if (formulario == null) {
-            throw new IllegalArgumentException("O formulário não pode ser nulo.");
-        }
         this.formulario = formulario;
+    }
+
+    public PetEntity getPet() {
+        return pet;
+    }
+
+    public void setPet(PetEntity pet) {
+        if (pet == null) {
+            throw new IllegalArgumentException("O pet não pode ser nulo.");
+        }
+        this.pet = pet;
     }
 
     public List<RespostaEntity> getRespostas() {

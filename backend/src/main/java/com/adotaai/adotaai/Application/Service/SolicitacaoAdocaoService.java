@@ -45,32 +45,51 @@ public class SolicitacaoAdocaoService implements ISolicitacaoAdocaoService {
     public SolicitacaoResponseDTO criarSolicitacao(SolicitacaoAdocaoDTO dto) {
         UsuarioEntity adotante = obterUsuarioAutenticado();
 
-        boolean jaRespondeuFormulario = respostaRepository.existsBySolicitacaoFormularioIdAndSolicitacaoAdotanteId(
-                dto.getFormularioId(),
-                adotante.getId());
-        if (jaRespondeuFormulario) {
-            throw new RegraDeNegocioException("Você já respondeu o formulário de triagem para este anúncio.");
+        PetEntity pet = petRepository.findById(dto.getPetId())
+                .orElseThrow(() -> new RecursoNaoEncontradoException("Pet não encontrado"));
+
+        FormularioEntity formulario = null;
+
+        if (pet.getFormulario() != null) {
+            formulario = pet.getFormulario();
+
+            if (dto.getFormularioId() != null && !dto.getFormularioId().equals(formulario.getId())) {
+                throw new RegraDeNegocioException("O formulário informado não corresponde ao formulário vinculado a este pet.");
+            }
+
+            boolean jaRespondeuFormulario = respostaRepository.existsBySolicitacaoFormularioIdAndSolicitacaoAdotanteId(
+                    formulario.getId(),
+                    adotante.getId());
+            if (jaRespondeuFormulario) {
+                throw new RegraDeNegocioException("Você já respondeu o formulário de triagem para este anúncio.");
+            }
+        } else if (dto.getFormularioId() != null) {
+            throw new RegraDeNegocioException("Este pet não possui formulário vinculado. Não é necessário responder formulário para adotar este pet.");
         }
 
-        FormularioEntity formulario = formularioRepository.findById(dto.getFormularioId())
-                .orElseThrow(() -> new RecursoNaoEncontradoException("Formulário não encontrado"));
+        UsuarioEntity anunciante = pet.getUser();
 
-        UsuarioEntity anunciante = formulario.getUsuarioCriador();
-
-        Optional<SolicitacaoAdocaoEntity> solicitacaoExistente =
-                solicitacaoRepository.findByAdotanteIdAndFormularioId(adotante.getId(), formulario.getId());
-
-        if (solicitacaoExistente.isPresent()) {
-            throw new RegraDeNegocioException("Você já enviou uma solicitação para este formulário.");
+        Optional<SolicitacaoAdocaoEntity> solicitacaoExistente;
+        if (formulario != null) {
+            solicitacaoExistente = solicitacaoRepository.findByAdotanteIdAndFormularioId(adotante.getId(), formulario.getId());
+            if (solicitacaoExistente.isPresent()) {
+                throw new RegraDeNegocioException("Você já enviou uma solicitação para este formulário.");
+            }
+        } else {
+            solicitacaoExistente = solicitacaoRepository.findByAdotanteIdAndPetId(adotante.getId(), pet.getId());
+            if (solicitacaoExistente.isPresent()) {
+                throw new RegraDeNegocioException("Você já enviou uma solicitação para este pet.");
+            }
         }
 
         SolicitacaoAdocaoEntity novaSolicitacao = new SolicitacaoAdocaoEntity();
         novaSolicitacao.setAdotante(adotante);
         novaSolicitacao.setAnunciante(anunciante);
         novaSolicitacao.setFormulario(formulario);
+        novaSolicitacao.setPet(pet);
 
         SolicitacaoAdocaoEntity solicitacaoSalva = solicitacaoRepository.save(novaSolicitacao);
-        return new SolicitacaoResponseDTO(solicitacaoSalva);
+        return new SolicitacaoResponseDTO(solicitacaoSalva, pet);
     }
 
     @Override
@@ -99,19 +118,18 @@ public class SolicitacaoAdocaoService implements ISolicitacaoAdocaoService {
 
         FormularioEntity formularioOriginal = solicitacao.getFormulario();
 
-        if (formularioOriginal == null) {
-            throw new RegraDeNegocioException("Não foi possível encontrar o formulário associado a esta solicitação.");
+        List<PerguntaRespostaDTO> perguntasRespostas = null;
+        if (formularioOriginal != null && formularioOriginal.getPerguntas() != null) {
+            perguntasRespostas = formularioOriginal.getPerguntas().stream()
+                    .map(pergunta -> {
+                        String respostaTexto = solicitacao.getRespostas().stream()
+                                .filter(resposta -> resposta.getPergunta().getId().equals(pergunta.getId()))
+                                .map(RespostaEntity::getResposta)
+                                .findFirst()
+                                .orElse(null);
+                        return new PerguntaRespostaDTO(pergunta.getId(), pergunta.getTexto(), respostaTexto);
+                    }).toList();
         }
-
-        List<PerguntaRespostaDTO> perguntasRespostas = formularioOriginal.getPerguntas().stream()
-                .map(pergunta -> {
-                    String respostaTexto = solicitacao.getRespostas().stream()
-                            .filter(resposta -> resposta.getPergunta().getId().equals(pergunta.getId()))
-                            .map(RespostaEntity::getResposta)
-                            .findFirst()
-                            .orElse(null);
-                    return new PerguntaRespostaDTO(pergunta.getId(), pergunta.getTexto(), respostaTexto);
-                }).toList();
 
         return new FormularioDetalhadoDTO(
                 solicitacao.getId(),
@@ -166,12 +184,7 @@ public class SolicitacaoAdocaoService implements ISolicitacaoAdocaoService {
     }
 
     private SolicitacaoResponseDTO toDtoWithPet(SolicitacaoAdocaoEntity entity) {
-        PetEntity pet = null;
-        if (entity.getFormulario() != null) {
-            pet = petRepository.findByFormularioId(entity.getFormulario().getId()).orElse(null);
-        }
-
-        return new SolicitacaoResponseDTO(entity, pet);
+        return new SolicitacaoResponseDTO(entity, entity.getPet());
     }
 
     private UsuarioEntity obterUsuarioAutenticado() {

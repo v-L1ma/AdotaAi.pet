@@ -12,6 +12,8 @@ public interface SolicitacaoAdocaoRepository extends JpaRepository<SolicitacaoAd
 
     Optional<SolicitacaoAdocaoEntity> findByAdotanteIdAndFormularioId(UUID adotanteId, UUID formularioId);
 
+    Optional<SolicitacaoAdocaoEntity> findByAdotanteIdAndPetId(UUID adotanteId, UUID petId);
+
     List<SolicitacaoAdocaoEntity> findAllByAdotanteId(UUID adotanteId);
 
     List<SolicitacaoAdocaoEntity> findAllByAnuncianteId(UUID anuncianteId);

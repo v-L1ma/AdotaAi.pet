@@ -5,8 +5,18 @@ import java.util.UUID;
 
 public class SolicitacaoAdocaoDTO {
 
-    @NotNull(message = "O ID do formulário é obrigatório.")
+    @NotNull(message = "O ID do pet é obrigatório.")
+    private UUID petId;
+
     private UUID formularioId;
+
+    public UUID getPetId() {
+        return petId;
+    }
+
+    public void setPetId(UUID petId) {
+        this.petId = petId;
+    }
 
     public UUID getFormularioId() {
         return formularioId;
