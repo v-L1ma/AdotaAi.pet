@@ -4,6 +4,7 @@ import { useRouter } from "expo-router";
 import { useEffect, useMemo, useState } from "react";
 import { ActivityIndicator, FlatList, Image, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import apiService from "@/services/apiService";
+import NavBar from "@/components/NavBar";
 
 type EventoDTO = {
   id: string;
@@ -20,7 +21,7 @@ type EventoDTO = {
   nmorganizador?: string;
 };
 
-export default function InicioEventos() {
+export default function Eventos() {
   const router = useRouter();
   const [eventos, setEventos] = useState<EventoDTO[]>([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -135,6 +136,7 @@ export default function InicioEventos() {
           </TouchableOpacity>
         )}
       />
+      <NavBar></NavBar>
     </View>
   );
 }

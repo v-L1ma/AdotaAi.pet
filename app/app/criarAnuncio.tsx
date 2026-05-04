@@ -14,6 +14,7 @@ import SelecionarFormularioModal from "@/components/SelecionarFormularioModal";
 import { Formulario } from "@/types/Formulario";
 import apiService from "@/services/apiService";
 import { animal } from "@/types/TAnimal";
+import AppHeader from "@/components/AppHeader";
 
 const criarAnuncioSchema = z.object({
     nome: z.string().trim().min(2, "Nome deve ter pelo menos 2 caracteres"),
@@ -333,12 +334,7 @@ export default function CriarAnuncioScreen() {
     return (
         <View style={styles.screen}>
             <SafeAreaView style={styles.safeTop} />
-            <View style={styles.header}>
-                <TouchableOpacity onPress={() => router.back()} style={styles.headerButton}>
-                    <Icon1 name="arrow-back" size={22} color={colors.primary} />
-                </TouchableOpacity>
-                <View style={styles.headerSpacer} />
-            </View>
+            <AppHeader title="Criar Anúncio" onBackPress={() => router.back()} />
 
             <ScrollView                style={styles.scroll}
                 contentContainerStyle={styles.content}
@@ -667,7 +663,7 @@ const styles = StyleSheet.create({
         flex: 1,
     },
     content: {
-        paddingTop: 10,
+        paddingTop: 70,
         paddingHorizontal: 20,
         paddingBottom: 90,
         gap: 16,

@@ -5,6 +5,7 @@ import { ActivityIndicator, Image, ScrollView, StyleSheet, Text, TouchableOpacit
 import { SafeAreaView } from 'react-native-safe-area-context';
 import colors from '../styles/colors';
 import apiService from "@/services/apiService";
+import AppHeader from '@/components/AppHeader';
 
 type SolicitacaoDTO = {
   id: string;
@@ -166,12 +167,7 @@ export default function Solicitacoes() {
   if (selecionada) {
     return (
       <SafeAreaView style={styles.screen} edges={['top', 'left', 'right', 'bottom']}>
-        <View style={styles.header}>
-          <TouchableOpacity onPress={() => setAberta(null)} style={styles.backButton}>
-            <Ionicons name="arrow-back" size={28} color={colors.primary} />
-          </TouchableOpacity>
-          <Text style={styles.headerTitle}>Formulario de Triagem</Text>
-        </View>
+        <AppHeader title="Solicitações" onBackPress={() => router.back()} />
 
         <ScrollView contentContainerStyle={styles.formContent}>
           <View style={styles.formCard}>
@@ -209,12 +205,7 @@ export default function Solicitacoes() {
   return (
     <>
       <SafeAreaView edges={['top']} style={{ backgroundColor: '#fff' }} />
-      <View style={styles.header}>
-        <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
-          <Ionicons name="arrow-back" size={28} color={colors.primary} />
-        </TouchableOpacity>
-        <Text style={styles.headerTitle}>Solicitacoes</Text>
-      </View>
+        <AppHeader title="Solicitações" onBackPress={() => router.back()} />
 
       <View style={styles.screen}>
         <View style={styles.tabsWrap}>
@@ -285,6 +276,7 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#f6f7f9',
     paddingHorizontal: 16,
+    paddingTop: 60,
   },
   header: {
     width: '100%',

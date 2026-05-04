@@ -357,8 +357,6 @@ export default function UserScreen() {
                             <Icon1 name="camera" size={16} color="#fff" />
                         </View>
                     </Pressable>
-
-                    <Text style={styles.profileTitle}>{userLogado?.nome || ""}</Text>
                 </View>
 
                 <SafeAreaView style={styles.formCard}>
@@ -627,27 +625,32 @@ const styles = StyleSheet.create({
         color: '#222',
     },
     formCard: {
-        backgroundColor: '#fff',
+        backgroundColor: colors.surfaceLow,
         borderRadius: 22,
         borderWidth: 1,
+        padding: 20,
+        paddingTop: 20,
+        paddingBottom: 20,
+        paddingHorizontal: 20,
         borderColor: '#ececec',
-        padding: 14,
-        gap: 10,
     },
     fieldWrap: {
         gap: 6,
+        paddingHorizontal:15,
+        paddingBottom: 10,
+        paddingTop: 10,
     },
     label: {
         fontSize: 11,
         fontWeight: '800',
-        color: '#777',
+        color: colors.primary,
         textTransform: 'uppercase',
         letterSpacing: 0.8,
         marginLeft: 4,
     },
     input: {
         borderRadius: 14,
-        backgroundColor: '#f4f4f4',
+        backgroundColor: '#ffffff',
         borderWidth: 1,
         borderColor: '#e7e7e7',
         paddingHorizontal: 12,

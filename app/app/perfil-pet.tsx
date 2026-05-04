@@ -32,7 +32,6 @@ export default function PerfilPet(){
 
     const router = useRouter();
     const insets = useSafeAreaInsets();
-    const [heartIcon, setHeartIcon]=useState<string>("heart-outline")
     const [mapLoading, setMapLoading] = useState<boolean>(true);
     const [mapError, setMapError] = useState<string | null>(null);
     const [coordinates, setCoordinates] = useState<{ lat: number; lon: number } | null>(null);
@@ -46,8 +45,6 @@ export default function PerfilPet(){
         uf?: string | string[];
     }>();
 
-    const petName = Array.isArray(nome) ? nome[0] : nome || "Alfredo";
-    const petImage = Array.isArray(imagem) ? imagem[0] : imagem || "https://img.freepik.com/fotos-gratis/fotografia-vertical-de-foco-superficial-de-um-bonito-cachorro-de-golden-retriever-sentado-em-um-chao-de-grama_181624-27259.jpg?w=360";
     const locationText = useMemo(() => {
         const localizacaoValue = Array.isArray(localizacao) ? localizacao[0] : localizacao;
         if (localizacaoValue && localizacaoValue.trim().length > 0) return localizacaoValue;
@@ -60,7 +57,7 @@ export default function PerfilPet(){
         return dynamicParts || "Marapé, Santos - SP";
     }, [bairro, cidade, localizacao, uf]);
 
-    const [description] = useState<string>("É um pet muito carinhoso e cheio de energia, ideal para uma família que busca companhia no dia a dia. Já está vacinado e vermifugado, pronto para encontrar um lar seguro e cheio de amor.")
+    const description = pet?.descricao || "Descrição não informada.";
     const IFrameTag = "iframe" as unknown as React.ElementType;
 
     useEffect(() => {
@@ -119,12 +116,15 @@ export default function PerfilPet(){
         return `https://www.openstreetmap.org/export/embed.html?bbox=${left}%2C${bottom}%2C${right}%2C${top}&layer=mapnik&marker=${coordinates.lat}%2C${coordinates.lon}`;
     }, [coordinates]);
 
-     const [isTogglingFavorite, setIsTogglingFavorite] = useState<boolean>(false);
+    const [isTogglingFavorite, setIsTogglingFavorite] = useState<boolean>(false);
     const [isPetFavorited, setIsPetFavorited] = useState<boolean>(false);
     const [pet, setPet] = useState<BuscarPetDTO | null>(null);
     const [isLoadingPet, setIsLoadingPet] = useState<boolean>(false);
     const [petError, setPetError] = useState<string | null>(null);
     const [isAdopting, setIsAdopting] = useState<boolean>(false);
+
+    const petName = pet?.nome || (Array.isArray(nome) ? nome[0] : nome) || "Alfredo";
+    const petImage = pet?.link_foto || (Array.isArray(imagem) ? imagem[0] : imagem) || "https://img.freepik.com/fotos-gratis/fotografia-vertical-de-foco-superficial-de-um-bonito-cachorro-de-golden-retriever-sentado-em-um-chao-de-grama_181624-27259.jpg?w=360";
 
     const params = useLocalSearchParams<{ id?: string }>();
     const petId = Array.isArray(params.id) ? params.id[0] : params.id;
@@ -252,7 +252,7 @@ async function favoritePet(){
                     </SafeAreaView>
 
                     <Pressable onPress={()=>favoritePet()} style={style.favoriteFloatingButton}>
-                        <IconMat name={heartIcon} size={29} color={colors.primary}></IconMat>
+                        <IconMat name={isPetFavorited ? "heart" : "heart-outline"} size={29} color={colors.primary}></IconMat>
                     </Pressable>
                 </View>
 
@@ -268,17 +268,17 @@ async function favoritePet(){
                     <View style={style.caracteristicasContainer}>
                         <View style={style.caracteristicasCard}>
                             <Text style={style.kicker}>Idade</Text>
-                            <Text style={style.tituloCard}>9 meses</Text>
+                            <Text style={style.tituloCard}>{birthDateLabel}</Text>
                         </View>
 
                         <View style={style.caracteristicasCard}>
                             <Text style={style.kicker}>Gênero</Text>
-                            <Text style={style.tituloCard}>Macho</Text>
+                            <Text style={style.tituloCard}>{pet?.especie || "Nao informado"}</Text>
                         </View>
 
                         <View style={style.caracteristicasCard}>
                             <Text style={style.kicker}>Peso</Text>
-                            <Text style={style.tituloCard}>3.5kg</Text>
+                            <Text style={style.tituloCard}>{pet?.porte || "Nao informado"}</Text>
                         </View>
                     </View>
 
@@ -287,7 +287,7 @@ async function favoritePet(){
                             <Text style={style.aboutTitle}>Sobre</Text>
                             <View style={style.divider}></View>
                         </View>
-                        <Text style={style.aboutText}>{description}</Text>
+                            <Text style={style.aboutText}>{description}</Text>
 
                         <View style={style.publisher}>
                             <Image

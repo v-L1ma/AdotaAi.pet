@@ -4,6 +4,7 @@ import React from "react";
 import { ScrollView, StyleSheet, Text, TouchableOpacity, View, useWindowDimensions } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { colors } from "@/styles/variables";
+import AppHeader from "@/components/AppHeader";
 
 type SettingItem = {
     title: string;
@@ -23,7 +24,7 @@ export default function ConfigScreen() {
         { title: "Solicitações", icon: "notifications-outline", route: "/solicitacoes", badge: "3" },
         { title: "Meus favoritos", icon: "heart-outline", route: "/meus-favoritos" },
         { title: "Formulários", icon: "document-text-outline", route: "/gerenciar-formularios" },
-        { title: "Eventos", icon: "calendar-outline", route: "/inicio-eventos" },
+        { title: "Meus Eventos", icon: "calendar-outline", route: "/meus-eventos" },
     ];
 
     const infoItems: SettingItem[] = [
@@ -62,20 +63,7 @@ export default function ConfigScreen() {
 
     return (
         <SafeAreaView style={styles.screen} edges={["top", "left", "right"]}>
-            <View style={styles.header}>
-                <TouchableOpacity
-                    onPress={() => router.back()}
-                    style={styles.backButton}
-                    hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
-                >
-                    <Ionicons name="arrow-back" size={28} color={colors.primary} />
-                </TouchableOpacity>
-
-                <View style={styles.headerContent}>
-                    <Text style={styles.headerTitle}></Text>
-                    <Text style={styles.headerSubtitle}></Text>
-                </View>
-            </View>
+            <AppHeader title="Configurações" onBackPress={() => router.back()} />
 
             <ScrollView
                 style={styles.scroll}
@@ -115,6 +103,7 @@ const styles = StyleSheet.create({
     },
     scroll: {
         flex: 1,
+        paddingTop: 50,
     },
     content: {
         paddingHorizontal: 20,

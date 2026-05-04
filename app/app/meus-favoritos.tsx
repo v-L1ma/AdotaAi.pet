@@ -6,6 +6,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import colors from '../styles/colors';
 import apiService from "@/services/apiService";
 import { animal } from "@/types/TAnimal";
+import AppHeader from '@/components/AppHeader';
 
 type FavoritosResponse = {
   message?: string;
@@ -107,14 +108,7 @@ export default function MeusFavoritos() {
   return (
     <>
       <SafeAreaView edges={['top']} style={{ backgroundColor: '#fff' }} />
-      <View style={styles.header}>
-        <TouchableOpacity onPress={() => router.back()} style={styles.backButton} hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
-          <Ionicons name="arrow-back" size={28} color={colors.primary} />
-        </TouchableOpacity>
-        <View style={{ flex: 1, alignItems: 'center' }}>
-          <Text style={styles.headerTitle}>Meus Favoritos</Text>
-        </View>
-      </View>
+      <AppHeader title="Meus Favoritos" onBackPress={() => router.back()} />
       <View style={styles.container}>
         <FlatList
           data={favoritos}
@@ -170,7 +164,7 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#f6f7f9',
     paddingHorizontal: 16,
-    paddingTop: 12,
+    paddingTop: 70,
   },
   card: {
     flexDirection: 'row',

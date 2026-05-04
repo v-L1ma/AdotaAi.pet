@@ -7,6 +7,7 @@ import colors from "../styles/colors";
 import { useTabNavigation } from "@/hooks/useTabNavigation";
 import apiService from "@/services/apiService";
 import { animal } from "@/types/TAnimal";
+import AppHeader from "@/components/AppHeader";
 
 export default function MeusPets() {
   const router = useRouter();
@@ -110,19 +111,8 @@ export default function MeusPets() {
   };
 
   return (
-    <SafeAreaView style={styles.screen} edges={["top", "left", "right", "bottom"]}>
-      <View style={styles.header}>
-        <TouchableOpacity
-          onPress={() => router.back()}
-          style={styles.backButton}
-          hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
-        >
-            <Ionicons name="arrow-back" size={28} color={colors.primary} />
-        </TouchableOpacity>
-        <View style={styles.headerTitleWrap}>
-          <Text style={styles.headerTitle}>Meus Pets</Text>
-        </View>
-      </View>
+    <View style={styles.screen}>
+      <AppHeader title="Meus Pets" onBackPress={() => router.back()} />
 
       <ScrollView
         contentContainerStyle={[
@@ -219,7 +209,7 @@ export default function MeusPets() {
             </View>
           ))}
       </ScrollView>
-    </SafeAreaView>
+    </View>
   );
 }
 
@@ -262,7 +252,7 @@ const styles = StyleSheet.create({
     color: "#E74C3C",
   },
   content: {
-    paddingTop: 20,
+    paddingTop: 130,
     paddingBottom: 28,
     alignItems: "center",
     gap: 12,
