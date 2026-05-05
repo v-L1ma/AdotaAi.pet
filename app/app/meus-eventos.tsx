@@ -2,8 +2,9 @@ import AppHeader from "@/components/AppHeader";
 import { colors } from "@/styles/variables";
 import { useRouter } from "expo-router";
 import { useEffect, useMemo, useState } from "react";
-import { ActivityIndicator, FlatList, Image, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { ActivityIndicator, FlatList, Image, StyleSheet, Text, TouchableOpacity, useWindowDimensions, View } from "react-native";
 import apiService from "@/services/apiService";
+import Ionicons from "@expo/vector-icons/build/Ionicons";
 
 type EventoDTO = {
   id: string;
@@ -25,6 +26,27 @@ export default function MeusEventos() {
   const [eventos, setEventos] = useState<EventoDTO[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [loadError, setLoadError] = useState<string | null>(null);
+
+  const { width } = useWindowDimensions();
+  const isSmall = width < 360;
+  const isTablet = width >= 768;
+
+  const metrics = useMemo(() => {
+    const horizontalPadding = isTablet ? 24 : 16;
+    const maxContentWidth = isTablet ? 760 : width - horizontalPadding * 2;
+    const cardWidth = Math.min(maxContentWidth, width - horizontalPadding * 2);
+
+    return {
+      horizontalPadding,
+      cardWidth,
+      imageSize: isSmall ? 62 : 72,
+      titleSize: isSmall ? 17 : 19,
+      subtitleSize: isSmall ? 13 : 14,
+      speciesSize: isSmall ? 10 : 11,
+      iconSize: isSmall ? 18 : 20,
+      actionSize: isSmall ? 34 : 38,
+    };
+  }, [isSmall, isTablet, width]);
 
   useEffect(() => {
     let isMounted = true;
@@ -89,6 +111,14 @@ export default function MeusEventos() {
     <View style={styles.screen}>
       <AppHeader title="Meus Eventos" titleFontSize={20} />
 
+      <TouchableOpacity
+          onPress={() => {router.push("/criar-evento")}}
+          style={[styles.addButton, { width: metrics.cardWidth }]}
+        >
+        <Ionicons name="add-circle-outline" size={metrics.iconSize + 2} color={colors.primary} />
+        <Text style={[styles.addButtonText, { fontSize: isSmall ? 16 : 17 }]}>Adicionar novo evento</Text>
+      </TouchableOpacity>
+
       <FlatList
         data={eventos}
         keyExtractor={(item) => item.id}
@@ -152,6 +182,8 @@ const styles = StyleSheet.create({
   screen: {
     flex: 1,
     backgroundColor: "#F8F8F8",
+    paddingTop: 130,
+    alignItems: "center",
   },
   list: {
     paddingTop: 110,
@@ -235,5 +267,21 @@ const styles = StyleSheet.create({
     fontSize: 12,
     lineHeight: 16,
     color: colors.textMuted,
+  },
+  addButton: {
+    minHeight: 58,
+    borderRadius: 18,
+    backgroundColor: "#FFE8E5",
+    borderColor: "#FFD0CC",
+    borderWidth: 1,
+    marginBottom: 8,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 8,
+  },
+  addButtonText: {
+    color: colors.primary,
+    fontWeight: "800",
   },
 });

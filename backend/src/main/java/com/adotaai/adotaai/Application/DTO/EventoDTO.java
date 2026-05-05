@@ -5,7 +5,6 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import java.time.LocalDate;
-import java.sql.Time;
 import java.util.UUID;
 
 public class EventoDTO {
@@ -17,7 +16,7 @@ public class EventoDTO {
     private String bairro;
     private String cidade;
     private String cep;
-    private Time hrinicio;
+    private String hrinicio;
     private String hrfim;
     private String descricao;
     @JsonFormat(pattern = "yyyy-MM-dd")
@@ -101,11 +100,11 @@ public class EventoDTO {
         this.cep = cep;
     }
 
-    public Time getHrinicio() {
+    public String getHrinicio() {
         return hrinicio;
     }
 
-    public void setHrinicio(Time hrinicio) {
+    public void setHrinicio(String hrinicio) {
         this.hrinicio = hrinicio;
     }
 

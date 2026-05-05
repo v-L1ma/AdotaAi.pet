@@ -1,6 +1,5 @@
 package com.adotaai.adotaai.Domain.Entity;
 
-import java.sql.Time;
 import java.time.LocalDate;
 import java.util.Objects;
 import java.util.UUID;
@@ -42,7 +41,7 @@ public class EventoEntity extends AuditableEntity {
     private String cep;
 
     @Column(nullable = false)
-    private Time hrinicio;
+    private String hrinicio;
 
     @Column(nullable = false)
     private String hrfim;
@@ -121,11 +120,11 @@ public class EventoEntity extends AuditableEntity {
         this.cep = cep;
     }
 
-    public Time getHrinicio() {
+    public String getHrinicio() {
         return hrinicio;
     }
 
-    public void setHrinicio(Time hrinicio) {
+    public void setHrinicio(String hrinicio) {
         this.hrinicio = hrinicio;
     }
 
