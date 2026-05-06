@@ -6,6 +6,16 @@ import { ActivityIndicator, FlatList, Image, StyleSheet, Text, TouchableOpacity,
 import apiService from "@/services/apiService";
 import NavBar from "@/components/NavBar";
 
+const timeRegex = /^([01]\d|2[0-3]):[0-5]\d$/;
+
+const formatarHoraDisplay = (hora: string | undefined): string => {
+    if (!hora) return "";
+    if (timeRegex.test(hora)) return hora;
+    const parsed = new Date(hora);
+    if (Number.isNaN(parsed.getTime())) return "";
+    return parsed.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" });
+};
+
 type EventoDTO = {
   id: string;
   nome: string;
@@ -130,7 +140,7 @@ export default function Eventos() {
                 <Text style={styles.tagText}>{item.status || "Evento"}</Text>
               </View>
               <Text style={styles.title}>{item.nome}</Text>
-              <Text style={styles.meta}>{formatarData(item.data, item.hrinicio)}</Text>
+              <Text style={styles.meta}>{formatarData(item.data, formatarHoraDisplay(item.hrinicio))}</Text>
               <Text style={styles.meta}>{formatarLocal(item)}</Text>
             </View>
           </TouchableOpacity>

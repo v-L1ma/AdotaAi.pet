@@ -2,9 +2,11 @@ import AppHeader from "@/components/AppHeader";
 import { colors } from "@/styles/variables";
 import { useRouter } from "expo-router";
 import { useEffect, useMemo, useState } from "react";
-import { ActivityIndicator, FlatList, Image, StyleSheet, Text, TouchableOpacity, useWindowDimensions, View } from "react-native";
+import { ActivityIndicator, Alert, FlatList, Image, Pressable, StyleSheet, Text, TouchableOpacity, useWindowDimensions, View } from "react-native";
 import apiService from "@/services/apiService";
 import Ionicons from "@expo/vector-icons/build/Ionicons";
+
+const timeRegex = /^([01]\d|2[0-3]):[0-5]\d$/;
 
 type EventoDTO = {
   id: string;
@@ -26,6 +28,8 @@ export default function MeusEventos() {
   const [eventos, setEventos] = useState<EventoDTO[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [loadError, setLoadError] = useState<string | null>(null);
+  const [menuVisible, setMenuVisible] = useState<string | null>(null);
+  const [isDeleting, setIsDeleting] = useState<string | null>(null);
 
   const { width } = useWindowDimensions();
   const isSmall = width < 360;
@@ -96,6 +100,14 @@ export default function MeusEventos() {
     return dia;
   };
 
+  const formatarHoraDisplay = (hora: string | undefined): string => {
+    if (!hora) return "";
+    if (timeRegex.test(hora)) return hora;
+    const parsed = new Date(hora);
+    if (Number.isNaN(parsed.getTime())) return "";
+    return parsed.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" });
+  };
+
   const formatarLocal = (evento: EventoDTO) => {
     const parts = [evento.endereco, evento.bairro, evento.cidade].filter(Boolean);
     if (parts.length > 0) {
@@ -105,11 +117,51 @@ export default function MeusEventos() {
     return "Local nao informado";
   };
 
-  const listHeader = useMemo(() => <Hero />, []);
+  const handleEdit = (evento: EventoDTO) => {
+    setMenuVisible(null);
+    router.push({
+      pathname: "/criar-evento",
+      params: { id: evento.id },
+    });
+  };
+
+  const handleDelete = (evento: EventoDTO) => {
+    setMenuVisible(null);
+    Alert.alert(
+      "Remover Evento",
+      `Tem certeza que deseja remover "${evento.nome}"?`,
+      [
+        { text: "Cancelar", style: "cancel" },
+        {
+          text: "Remover",
+          style: "destructive",
+          onPress: async () => {
+            setIsDeleting(evento.id);
+            try {
+              await apiService.delete(`/eventos/${evento.id}`);
+              setEventos((prev) => prev.filter((e) => e.id !== evento.id));
+              Alert.alert("Sucesso", "Evento removido com sucesso.");
+            } catch {
+              Alert.alert("Erro", "Nao foi possivel remover o evento.");
+            } finally {
+              setIsDeleting(null);
+            }
+          },
+        },
+      ]
+    );
+  };
+
+  const closeMenu = () => setMenuVisible(null);
 
   return (
     <View style={styles.screen}>
       <AppHeader title="Meus Eventos" titleFontSize={20} />
+
+      <View style={styles.hero}>
+        <Text style={styles.heroTitle}>Participe de eventos de adocao e bem-estar animal</Text>
+        <Text style={styles.heroSubtitle}>Encontros, campanhas e acoes para conectar familias e pets.</Text>
+      </View>
 
       <TouchableOpacity
           onPress={() => {router.push("/criar-evento")}}
@@ -124,7 +176,7 @@ export default function MeusEventos() {
         keyExtractor={(item) => item.id}
         contentContainerStyle={styles.list}
         showsVerticalScrollIndicator={false}
-        ListHeaderComponent={listHeader}
+        style={{ width: metrics.cardWidth }}
         ListEmptyComponent={
           isLoading ? (
             <View style={styles.loadingWrap}>
@@ -138,42 +190,66 @@ export default function MeusEventos() {
           )
         }
         renderItem={({ item }) => (
-          <TouchableOpacity
-            style={styles.card}
-            onPress={() =>
-              router.push({
-                pathname: "/detalhes-evento" as never,
-                params: {
-                  id: item.id,
-                },
-              })
-            }
-          >
-            <Image
-              source={{ uri: "https://images.unsplash.com/photo-1548199973-03cce0bbc87b?w=1200" }}
-              style={styles.cardImage}
-            />
+          <View style={styles.cardWrap}>
+            <TouchableOpacity
+              style={styles.card}
+              onPress={() =>
+                router.push({
+                  pathname: "/detalhes-evento" as never,
+                  params: {
+                    id: item.id,
+                  },
+                })
+              }
+              disabled={!!menuVisible}
+            >
+              <Image
+                source={{ uri: "https://images.unsplash.com/photo-1548199973-03cce0bbc87b?w=1200" }}
+                style={styles.cardImage}
+              />
 
-            <View style={styles.cardBody}>
-              <View style={styles.tag}>
-                <Text style={styles.tagText}>{item.status || "Evento"}</Text>
-              </View>
+              <View style={styles.cardBody}>
+                <View style={styles.tag}>
+                  <Text style={styles.tagText}>{item.status || "Evento"}</Text>
+                </View>
               <Text style={styles.title}>{item.nome}</Text>
-              <Text style={styles.meta}>{formatarData(item.data, item.hrinicio)}</Text>
+              <Text style={styles.meta}>{formatarData(item.data, formatarHoraDisplay(item.hrinicio))}</Text>
               <Text style={styles.meta}>{formatarLocal(item)}</Text>
             </View>
           </TouchableOpacity>
-        )}
-      />
-    </View>
-  );
-}
 
-function Hero() {
-  return (
-    <View style={styles.hero}>
-      <Text style={styles.heroTitle}>Participe de eventos de adocao e bem-estar animal</Text>
-      <Text style={styles.heroSubtitle}>Encontros, campanhas e acoes para conectar familias e pets.</Text>
+          <TouchableOpacity
+            style={styles.menuButton}
+            onPress={() => setMenuVisible(menuVisible === item.id ? null : item.id)}
+          >
+            <Ionicons name="ellipsis-vertical" size={18} color={colors.text} />
+          </TouchableOpacity>
+
+          {menuVisible === item.id && (
+            <View style={styles.menuPopup}>
+              <TouchableOpacity style={styles.menuOption} onPress={() => handleEdit(item)}>
+                <Ionicons name="create-outline" size={16} color={colors.text} />
+                <Text style={styles.menuOptionText}>Editar</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={styles.menuOption}
+                onPress={() => handleDelete(item)}
+                disabled={isDeleting === item.id}
+              >
+                <Ionicons name="trash-outline" size={16} color="#b00020" />
+                <Text style={[styles.menuOptionText, { color: "#b00020" }]}>
+                  {isDeleting === item.id ? "Removendo..." : "Remover"}
+                </Text>
+              </TouchableOpacity>
+            </View>
+          )}
+
+          {menuVisible && menuVisible !== item.id && (
+            <Pressable style={styles.menuOverlay} onPress={closeMenu} />
+          )}
+        </View>
+      )}
+      />
     </View>
   );
 }
@@ -186,8 +262,8 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   list: {
-    paddingTop: 110,
-    paddingHorizontal: 14,
+    paddingTop: 0,
+    paddingHorizontal: 0,
     paddingBottom: 32,
     gap: 12,
   },
@@ -267,6 +343,58 @@ const styles = StyleSheet.create({
     fontSize: 12,
     lineHeight: 16,
     color: colors.textMuted,
+  },
+  cardWrap: {
+    position: "relative",
+  },
+  menuButton: {
+    position: "absolute",
+    top: 8,
+    right: 8,
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: "rgba(255,255,255,0.9)",
+    alignItems: "center",
+    justifyContent: "center",
+    zIndex: 10,
+  },
+  menuPopup: {
+    position: "absolute",
+    top: 42,
+    right: 8,
+    backgroundColor: colors.surfaceLowest,
+    borderRadius: 10,
+    shadowColor: "#191C1D",
+    shadowOpacity: 0.15,
+    shadowOffset: { width: 0, height: 4 },
+    shadowRadius: 12,
+    elevation: 5,
+    zIndex: 20,
+    minWidth: 120,
+    overflow: "hidden",
+  },
+  menuOption: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+    paddingHorizontal: 14,
+    paddingVertical: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: colors.surfaceLow,
+  },
+  menuOptionText: {
+    fontSize: 14,
+    fontWeight: "600",
+    color: colors.text,
+  },
+  menuOverlay: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    zIndex: 15,
   },
   addButton: {
     minHeight: 58,

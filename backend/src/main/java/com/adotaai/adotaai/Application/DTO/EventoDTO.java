@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.UUID;
 
 public class EventoDTO {
@@ -16,8 +17,10 @@ public class EventoDTO {
     private String bairro;
     private String cidade;
     private String cep;
-    private String hrinicio;
-    private String hrfim;
+    @JsonFormat(pattern = "HH:mm")
+    private LocalTime hrinicio;
+    @JsonFormat(pattern = "HH:mm")
+    private LocalTime hrfim;
     private String descricao;
     @JsonFormat(pattern = "yyyy-MM-dd")
     private LocalDate data;
@@ -100,12 +103,12 @@ public class EventoDTO {
         this.cep = cep;
     }
 
-    public String getHrinicio() {
-        return hrinicio;
+    public String getHrInicio() {
+        return hrinicio != null ? hrinicio.toString() : null;
     }
 
-    public void setHrinicio(String hrinicio) {
-        this.hrinicio = hrinicio;
+    public void setHrInicio(String hrinicio) {
+        this.hrinicio = hrinicio != null && !hrinicio.isEmpty() ? LocalTime.parse(hrinicio) : null;
     }
 
     public String getStatus() {
@@ -132,14 +135,14 @@ public class EventoDTO {
         this.descricao = descricao;
     }
 
-    public String getHrfim() {
-        return hrfim;
+    public String getHrFim() {
+        return hrfim != null ? hrfim.toString() : null;
     }
 
-    public void setHrfim(String hrfim) {
-        this.hrfim = hrfim;
+    public void setHrFim(String hrfim) {
+        this.hrfim = hrfim != null && !hrfim.isEmpty() ? LocalTime.parse(hrfim) : null;
     }
-
+    
     public String getNmorganizador() {
         return nmorganizador;
     }

@@ -13,6 +13,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+
+import java.time.LocalTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -57,7 +59,15 @@ public class EventoService {
 
     public EventoDTO criarEvento(EventoDTO eventoDTO) {
         EventoEntity evento = new EventoEntity();
-        BeanUtils.copyProperties(eventoDTO, evento);
+        evento.setNome(eventoDTO.getNome());
+        evento.setEndereco(eventoDTO.getEndereco());
+        evento.setBairro(eventoDTO.getBairro());
+        evento.setCidade(eventoDTO.getCidade());
+        evento.setCep(eventoDTO.getCep());
+        evento.setHrinicio(eventoDTO.getHrInicio().isEmpty() ? null : LocalTime.parse(eventoDTO.getHrInicio()));
+        evento.setHrfim(eventoDTO.getHrFim().isEmpty() ? null : LocalTime.parse(eventoDTO.getHrFim()));
+        evento.setDescricao(eventoDTO.getDescricao());
+        evento.setData(eventoDTO.getData());
         UsuarioEntity usuario = obterUsuarioAutenticado();
         evento.setUser(usuario);
         evento.setNmorganizador(usuario.getNome());
@@ -84,8 +94,8 @@ public class EventoService {
         evento.setBairro(eventoDto.getBairro());
         evento.setCidade(eventoDto.getCidade());
         evento.setCep(eventoDto.getCep());
-        evento.setHrinicio(eventoDto.getHrinicio());
-        evento.setHrfim(eventoDto.getHrfim());
+        evento.setHrinicio(eventoDto.getHrInicio().isEmpty() ? null : LocalTime.parse(eventoDto.getHrInicio()));
+        evento.setHrfim(eventoDto.getHrFim().isEmpty() ? null : LocalTime.parse(eventoDto.getHrFim()));
         evento.setDescricao(eventoDto.getDescricao());
         evento.setData(eventoDto.getData());
 

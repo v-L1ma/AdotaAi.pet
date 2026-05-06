@@ -5,12 +5,18 @@ import DateTimePicker from "@react-native-community/datetimepicker";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import React, { useEffect, useRef, useState } from "react";
 import { Alert, Keyboard, Platform, SafeAreaView, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
-import Icon1 from "react-native-vector-icons/Ionicons";
+import Icon from "react-native-vector-icons/Ionicons";
 import { colors } from "@/styles/variables";
 import apiService from "@/services/apiService";
 import AppHeader from "@/components/AppHeader";
 
 const timeRegex = /^([01]\d|2[0-3]):[0-5]\d$/;
+
+const formatarHoraInput = (value: string): string => {
+    const numeros = value.replace(/\D/g, "").slice(0, 4);
+    if (numeros.length <= 2) return numeros;
+    return `${numeros.slice(0, 2)}:${numeros.slice(2)}`;
+};
 
 const criarEventoSchema = z.object({
     nome: z.string().trim().min(2, "Nome deve ter pelo menos 2 caracteres"),
@@ -29,15 +35,15 @@ const criarEventoSchema = z.object({
         .string()
         .trim()
         .refine(
-            (valor) => timeRegex.test(valor) || !Number.isNaN(Date.parse(valor)),
-            "Informe o horario no formato HH:mm ou ISO",
+            (valor) => timeRegex.test(valor),
+            "Informe o horario no formato HH:mm",
         ),
     hrfim: z
         .string()
         .trim()
         .refine(
-            (valor) => timeRegex.test(valor) || !Number.isNaN(Date.parse(valor)),
-            "Informe o horario no formato HH:mm ou ISO",
+            (valor) => timeRegex.test(valor),
+            "Informe o horario no formato HH:mm",
         ),
     descricao: z.string().trim().min(10, "Descricao deve ter pelo menos 10 caracteres"),
 });
@@ -59,8 +65,6 @@ type EventoDTO = {
 
 export default function CriarEventoScreen() {
     const [showDatePicker, setShowDatePicker] = useState(false);
-    const [showStartTimePicker, setShowStartTimePicker] = useState(false);
-    const [showEndTimePicker, setShowEndTimePicker] = useState(false);
 
     const params = useLocalSearchParams<{ id?: string }>();
     const eventoId = Array.isArray(params.id) ? params.id[0] : params.id;
@@ -168,47 +172,11 @@ export default function CriarEventoScreen() {
         return parsed.toLocaleDateString("pt-BR");
     };
 
-    const formatarHora = (value: string) => {
-        if (!value) {
-            return "Selecionar horario";
-        }
-
-        if (timeRegex.test(value)) {
-            return value;
-        }
-
-        const parsed = new Date(value);
-        if (Number.isNaN(parsed.getTime())) {
-            return "Selecionar horario";
-        }
-
-        return parsed.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" });
-    };
-
-    const buildDateTimeIso = (time: Date, dateString?: string) => {
-        const base = dateString && /^\d{4}-\d{2}-\d{2}$/.test(dateString)
-            ? new Date(`${dateString}T00:00:00`)
-            : new Date();
-        const result = new Date(base);
-        result.setHours(time.getHours(), time.getMinutes(), 0, 0);
-        return result.toISOString();
-    };
-
-    const normalizeTime = (value: string, dateString?: string) => {
-        if (timeRegex.test(value)) {
-            const baseDate = dateString && /^\d{4}-\d{2}-\d{2}$/.test(dateString)
-                ? dateString
-                : new Date().toISOString().slice(0, 10);
-            return new Date(`${baseDate}T${value}:00`).toISOString();
-        }
-        return value;
-    };
-
     const handleSave = async (data: CriarEventoFormData) => {
         const payload = {
             ...data,
-            hrinicio: normalizeTime(data.hrinicio, data.data),
-            hrfim: normalizeTime(data.hrfim, data.data),
+            hrinicio: data.hrinicio,
+            hrfim: data.hrfim,
         };
 
         setIsSaving(true);
@@ -245,7 +213,7 @@ export default function CriarEventoScreen() {
             >
                 <View style={styles.identitySection}>
                     <View style={styles.heroIcon}>
-                        <Icon1 name="calendar-outline" size={28} color="#fff" />
+                        <Icon name="calendar-outline" size={28} color="#fff" />
                     </View>
                     <Text style={styles.heroTitle}>{isEditing ? "Atualize seu evento" : "Novo evento"}</Text>
                     <Text style={styles.heroSubtitle}>
@@ -366,7 +334,7 @@ export default function CriarEventoScreen() {
                                         onPress={() => setShowDatePicker(true)}
                                     >
                                         <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
-                                            <Icon1 name="calendar-outline" size={20} color={colors.primary} />
+                                            <Icon name="calendar-outline" size={20} color={colors.primary} />
                                             <Text style={{ color: value ? colors.text : colors.textMuted }}>
                                                 {formatarData(value)}
                                             </Text>
@@ -398,42 +366,15 @@ export default function CriarEventoScreen() {
                             <Controller
                                 control={control}
                                 name="hrinicio"
-                                render={({ field: { onChange, value } }) => (
-                                    <View>
-                                        <Field
-                                            label="Inicio"
-                                            value={value}
-                                            onChangeText={onChange}
-                                            placeholder="HH:mm"
-                                        />
-                                        {!isWeb && (
-                                            <TouchableOpacity
-                                                style={styles.timePickerButton}
-                                                onPress={() => setShowStartTimePicker(true)}
-                                            >
-                                                <Icon1 name="time-outline" size={18} color="#fff" />
-                                            </TouchableOpacity>
-                                        )}
-                                        {showStartTimePicker && (
-                                            <DateTimePicker
-                                                value={value && timeRegex.test(value)
-                                                    ? new Date(`2000-01-01T${value}:00`)
-                                                    : value && !Number.isNaN(Date.parse(value))
-                                                        ? new Date(value)
-                                                        : new Date()}
-                                                mode="time"
-                                                display="default"
-                                                onChange={(event, date) => {
-                                                    if (date) {
-                                                        const hours = String(date.getHours()).padStart(2, "0");
-                                                        const minutes = String(date.getMinutes()).padStart(2, "0");
-                                                        onChange(`${hours}:${minutes}`);
-                                                    }
-                                                    setShowStartTimePicker(false);
-                                                }}
-                                            />
-                                        )}
-                                    </View>
+                                render={({ field: { onChange, onBlur, value } }) => (
+                                    <Field
+                                        label="Inicio"
+                                        value={value}
+                                        onChangeText={(text) => onChange(formatarHoraInput(text))}
+                                        onBlur={onBlur}
+                                        placeholder="HH:mm"
+                                        keyboardType="numeric"
+                                    />
                                 )}
                             />
                         </View>
@@ -441,42 +382,15 @@ export default function CriarEventoScreen() {
                             <Controller
                                 control={control}
                                 name="hrfim"
-                                render={({ field: { onChange, value } }) => (
-                                    <View>
-                                        <Field
-                                            label="Fim"
-                                            value={value}
-                                            onChangeText={onChange}
-                                            placeholder="HH:mm"
-                                        />
-                                        {!isWeb && (
-                                            <TouchableOpacity
-                                                style={styles.timePickerButton}
-                                                onPress={() => setShowEndTimePicker(true)}
-                                            >
-                                                <Icon1 name="time-outline" size={18} color="#fff" />
-                                            </TouchableOpacity>
-                                        )}
-                                        {showEndTimePicker && (
-                                            <DateTimePicker
-                                                value={value && timeRegex.test(value)
-                                                    ? new Date(`2000-01-01T${value}:00`)
-                                                    : value && !Number.isNaN(Date.parse(value))
-                                                        ? new Date(value)
-                                                        : new Date()}
-                                                mode="time"
-                                                display="default"
-                                                onChange={(event, date) => {
-                                                    if (date) {
-                                                        const hours = String(date.getHours()).padStart(2, "0");
-                                                        const minutes = String(date.getMinutes()).padStart(2, "0");
-                                                        onChange(`${hours}:${minutes}`);
-                                                    }
-                                                    setShowEndTimePicker(false);
-                                                }}
-                                            />
-                                        )}
-                                    </View>
+                                render={({ field: { onChange, onBlur, value } }) => (
+                                    <Field
+                                        label="Fim"
+                                        value={value}
+                                        onChangeText={(text) => onChange(formatarHoraInput(text))}
+                                        onBlur={onBlur}
+                                        placeholder="HH:mm"
+                                        keyboardType="numeric"
+                                    />
                                 )}
                             />
                         </View>
@@ -509,7 +423,7 @@ export default function CriarEventoScreen() {
                     onPress={handleSubmit(handleSave)}
                     disabled={isSaving || isLoadingEvento}
                 >
-                    <Icon1 name="sparkles-outline" size={18} color="#fff" />
+                    <Icon name="sparkles-outline" size={18} color="#fff" />
                     <Text style={styles.primaryButtonText}>
                         {isLoadingEvento
                             ? "Carregando..."

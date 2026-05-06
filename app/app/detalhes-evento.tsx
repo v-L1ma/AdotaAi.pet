@@ -2,8 +2,18 @@ import AppHeader from "@/components/AppHeader";
 import { colors } from "@/styles/variables";
 import { useLocalSearchParams } from "expo-router";
 import { useEffect, useMemo, useState } from "react";
-import { ActivityIndicator, Image, ScrollView, StyleSheet, Text, View } from "react-native";
+import { ActivityIndicator, Image, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import apiService from "@/services/apiService";
+
+const timeRegex = /^([01]\d|2[0-3]):[0-5]\d$/;
+
+const formatarHoraDisplay = (hora: string | undefined): string => {
+    if (!hora) return "";
+    if (timeRegex.test(hora)) return hora;
+    const parsed = new Date(hora);
+    if (Number.isNaN(parsed.getTime())) return "";
+    return parsed.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" });
+};
 
 type EventoDTO = {
   id: string;
@@ -80,16 +90,16 @@ export default function DetalhesEvento() {
     });
   }, [evento?.data]);
 
-  const horarioLabel = useMemo(() => {
+const horarioLabel = useMemo(() => {
     if (!evento) {
       return "Horario nao informado";
     }
 
-    const inicio = evento.hrinicio ? evento.hrinicio : "";
-    const fim = evento.hrfim ? evento.hrfim : "";
+    const inicio = evento.hrinicio ? formatarHoraDisplay(evento.hrinicio) : "";
+    const fim = evento.hrfim ? formatarHoraDisplay(evento.hrfim) : "";
 
     if (inicio && fim) {
-      return `${inicio} — ${fim}`;
+      return `${inicio} - ${fim}`;
     }
 
     return inicio || fim || "Horario nao informado";
@@ -155,6 +165,10 @@ export default function DetalhesEvento() {
             </>
           )}
         </View>
+
+        <TouchableOpacity style={styles.button}>
+          <Text style={styles.buttonText}>Quero participar!</Text>
+        </TouchableOpacity>
 
         {evento && (
           <>
@@ -308,5 +322,24 @@ const styles = StyleSheet.create({
     fontSize: 13,
     color: "#b00020",
     fontWeight: "600",
+  },
+  button: {
+    marginTop: 4,
+    backgroundColor: colors.primary,
+    borderRadius: 16,
+    paddingVertical: 15,
+    alignItems: "center",
+    shadowColor: colors.primary,
+    shadowOpacity: 0.24,
+    shadowOffset: { width: 0, height: 8 },
+    shadowRadius: 14,
+    elevation: 5,
+    width: "95%",
+    alignSelf: "center",
+  },
+  buttonText: {
+    color: "white",
+    fontSize: 17,
+    fontWeight: "700",
   },
 });
