@@ -1,9 +1,10 @@
 import AppHeader from "@/components/AppHeader";
 import { colors } from "@/styles/variables";
-import { useLocalSearchParams } from "expo-router";
+import { useLocalSearchParams, useRouter } from "expo-router";
 import { useEffect, useMemo, useState } from "react";
 import { ActivityIndicator, Image, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import apiService from "@/services/apiService";
+import Ionicons from "@expo/vector-icons/build/Ionicons";
 
 const timeRegex = /^([01]\d|2[0-3]):[0-5]\d$/;
 
@@ -28,6 +29,7 @@ type EventoDTO = {
   data?: string;
   status?: string;
   nmorganizador?: string;
+  isInscrito?: boolean;
 };
 
 export default function DetalhesEvento() {
@@ -37,6 +39,9 @@ export default function DetalhesEvento() {
   const [evento, setEvento] = useState<EventoDTO | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [loadError, setLoadError] = useState<string | null>(null);
+  const [isInscritoLoading, setIsInscritoLoading] = useState(false);
+  const [isInscrito, setIsInscrito] = useState(false);
+  const router = useRouter();
 
   useEffect(() => {
     if (!eventoId) {
@@ -54,6 +59,7 @@ export default function DetalhesEvento() {
         const response = await apiService.get<EventoDTO>(`/eventos/${eventoId}`);
         if (isMounted) {
           setEvento(response.data);
+          setIsInscrito(response.data.isInscrito ?? false);
         }
       } catch {
         if (isMounted) {
@@ -166,9 +172,43 @@ const horarioLabel = useMemo(() => {
           )}
         </View>
 
-        <TouchableOpacity style={styles.button}>
-          <Text style={styles.buttonText}>Quero participar!</Text>
-        </TouchableOpacity>
+        {isInscrito ? (
+          <>
+            <TouchableOpacity style={[styles.button, styles.buttonDisabled]} disabled>
+              <Ionicons name="checkmark-circle" size={20} color="white" />
+              <Text style={styles.buttonText}>Inscrito</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={styles.linkButton}
+              onPress={() => router.push("/eventos-inscritos")}
+            >
+              <Text style={styles.linkText}>Gostaria de desmarcar sua presença? Gerencie seus eventos inscritos</Text>
+            </TouchableOpacity>
+          </>
+        ) : (
+          <TouchableOpacity
+            style={styles.button}
+            onPress={async () => {
+              if (!eventoId || isInscritoLoading) return;
+              setIsInscritoLoading(true);
+              try {
+                await apiService.post(`/eventos/${eventoId}/presenca`);
+                setIsInscrito(true);
+              } catch {
+                alert("Não foi possível confirmar presença. Tente novamente.");
+              } finally {
+                setIsInscritoLoading(false);
+              }
+            }}
+            disabled={isInscritoLoading}
+          >
+            {isInscritoLoading ? (
+              <ActivityIndicator size="small" color="white" />
+            ) : (
+              <Text style={styles.buttonText}>Quero participar!</Text>
+            )}
+          </TouchableOpacity>
+        )}
 
         {evento && (
           <>
@@ -337,9 +377,25 @@ const styles = StyleSheet.create({
     width: "95%",
     alignSelf: "center",
   },
+  buttonDisabled: {
+    backgroundColor: "#4CAF50",
+    shadowColor: "#4CAF50",
+  },
   buttonText: {
     color: "white",
     fontSize: 17,
     fontWeight: "700",
+  },
+  linkButton: {
+    marginTop: 8,
+    alignSelf: "center",
+    paddingVertical: 8,
+  },
+  linkText: {
+    color: colors.primary,
+    fontSize: 13,
+    fontWeight: "600",
+    textAlign: "center",
+    textDecorationLine: "underline",
   },
 });

@@ -2,10 +2,12 @@ package com.adotaai.adotaai.Application.Service;
 
 import com.adotaai.adotaai.Application.DTO.EventoDTO;
 import com.adotaai.adotaai.Domain.Entity.EventoEntity;
+import com.adotaai.adotaai.Domain.Entity.PresencaEventoEntity;
 import com.adotaai.adotaai.Domain.Entity.UsuarioEntity;
 import com.adotaai.adotaai.Domain.Exception.RecursoNaoEncontradoException;
 import com.adotaai.adotaai.Domain.Exception.RegraDeNegocioException;
 import com.adotaai.adotaai.Infraestructure.Repository.EventoRepository;
+import com.adotaai.adotaai.Infraestructure.Repository.PresencaEventoRepository;
 import com.adotaai.adotaai.Infraestructure.Repository.UsuarioRepository;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.BeanUtils;
@@ -28,23 +30,33 @@ public class EventoService {
     @Autowired
     private UsuarioRepository usuarioRepository;
 
+    @Autowired
+    private PresencaEventoRepository presencaEventoRepository;
+
     public List<EventoDTO> listarTodos() {
         List<EventoEntity> eventos = eventoRepository.findAll();
-        return eventos.stream().map(EventoDTO::new).toList();
+        return eventos.stream().map(this::toDtoComPresencas).toList();
     }
 
     public EventoDTO buscarPorId(UUID id) {
         EventoEntity evento = eventoRepository.findById(id)
                 .orElseThrow(() -> new RecursoNaoEncontradoException("Evento não encontrado"));
-        return new EventoDTO(evento);
+        return toDtoComPresencas(evento);
     }
 
     public List<EventoDTO> listarEventosUsuarioLogado() {
         UsuarioEntity usuario = obterUsuarioAutenticado();
         return eventoRepository.findAllByUserId(usuario.getId())
                 .stream()
-                .map(EventoDTO::new)
+                .map(this::toDtoComPresencas)
                 .toList();
+    }
+
+    private EventoDTO toDtoComPresencas(EventoEntity evento) {
+        EventoDTO dto = new EventoDTO(evento);
+        dto.setContagemPresencas(presencaEventoRepository.countByEventoId(evento.getId()));
+        dto.setIsInscrito(this.isUsuarioInscrito(evento.getId()));
+        return dto;
     }
 
     public void excluir(UUID id) {
@@ -78,6 +90,7 @@ public class EventoService {
         EventoDTO dto = new EventoDTO();
         BeanUtils.copyProperties(evento, dto);
         dto.setUser_id(evento.getUser().getId());
+        dto.setContagemPresencas(0L);
         return dto;
     }
 
@@ -101,8 +114,58 @@ public class EventoService {
 
         EventoEntity eventoatualizado = eventoRepository.save(evento);
 
-        return new EventoDTO(eventoatualizado);
+        return toDtoComPresencas(eventoatualizado);
 
+    }
+
+    public void registrarPresenca(UUID eventoId) {
+        UsuarioEntity usuario = obterUsuarioAutenticado();
+        EventoEntity evento = eventoRepository.findById(eventoId)
+                .orElseThrow(() -> new RecursoNaoEncontradoException("Evento não encontrado"));
+
+        if (presencaEventoRepository.existsByEventoIdAndUsuarioId(eventoId, usuario.getId())) {
+            throw new RegraDeNegocioException("Presença já registrada neste evento");
+        }
+
+        PresencaEventoEntity presenca = new PresencaEventoEntity(evento, usuario);
+        presencaEventoRepository.save(presenca);
+    }
+
+    public void removerPresenca(UUID eventoId) {
+        UsuarioEntity usuario = obterUsuarioAutenticado();
+        EventoEntity evento = eventoRepository.findById(eventoId)
+                .orElseThrow(() -> new RecursoNaoEncontradoException("Evento não encontrado"));
+
+        PresencaEventoEntity presenca = presencaEventoRepository
+                .findByEventoIdAndUsuarioId(eventoId, usuario.getId())
+                .orElseThrow(() -> new RegraDeNegocioException("Presença não encontrada neste evento"));
+
+        presencaEventoRepository.delete(presenca);
+    }
+
+    public long contarPresencas(UUID eventoId) {
+        return presencaEventoRepository.countByEventoId(eventoId);
+    }
+
+    public boolean isUsuarioInscrito(UUID eventoId) {
+        try {
+            UsuarioEntity usuario = obterUsuarioAutenticado();
+            return presencaEventoRepository.existsByEventoIdAndUsuarioId(eventoId, usuario.getId());
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
+    public List<EventoDTO> listarEventosInscritos() {
+        UsuarioEntity usuario = obterUsuarioAutenticado();
+        List<PresencaEventoEntity> presencas = presencaEventoRepository.findByUsuarioId(usuario.getId());
+        return presencas.stream()
+                .map(presenca -> {
+                    EventoDTO dto = new EventoDTO(presenca.getEvento());
+                    dto.setContagemPresencas(presencaEventoRepository.countByEventoId(presenca.getEvento().getId()));
+                    return dto;
+                })
+                .toList();
     }
 
     private UsuarioEntity obterUsuarioAutenticado() {

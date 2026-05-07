@@ -53,4 +53,15 @@ public class EventoController {
         return ResponseEntity.ok().build();
     }
 
+    @PostMapping("/{id}/presenca")
+    public ResponseEntity<Void> registrarPresenca(@PathVariable UUID id) {
+        eventoService.registrarPresenca(id);
+        return ResponseEntity.ok().build();
+    }
+
+    @DeleteMapping("/{id}/presenca")
+    public ResponseEntity<Void> removerPresenca(@PathVariable UUID id) {
+        eventoService.removerPresenca(id);
+        return ResponseEntity.ok().build();
+    }
 }

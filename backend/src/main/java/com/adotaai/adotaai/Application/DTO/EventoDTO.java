@@ -33,6 +33,11 @@ public class EventoDTO {
     @JsonProperty(value = "user_id", access = JsonProperty.Access.READ_ONLY)
     private UUID user_id;
 
+    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
+    private Long contagemPresencas;
+
+    private Boolean isInscrito;
+
     public EventoDTO(EventoEntity evento) {
         this.id = evento.getId();
         this.nome = evento.getNome();
@@ -158,4 +163,20 @@ public class EventoDTO {
     public void setUser_id(UUID user_id) {
         this.user_id = user_id;
     }
+
+    public Long getContagemPresencas() {
+        return contagemPresencas;
+    }
+
+    public void setContagemPresencas(Long contagemPresencas) {
+        this.contagemPresencas = contagemPresencas;
+    }
+
+    public Boolean getIsInscrito() {
+        return isInscrito;
+    }
+    public void setIsInscrito(Boolean isInscrito) {
+        this.isInscrito = isInscrito;
+    }
+    
 }
