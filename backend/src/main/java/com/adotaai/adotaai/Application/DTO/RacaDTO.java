@@ -8,7 +8,7 @@ public class RacaDTO {
 
     private UUID id;
     private String nome;
-    private String especie;
+    private UUID especieId;
 
     public RacaDTO() {
     }
@@ -16,7 +16,7 @@ public class RacaDTO {
     public RacaDTO(RacaEntity racaEntity) {
         this.id = racaEntity.getId();
         this.nome = racaEntity.getNome();
-        this.especie = racaEntity.getEspecie();
+        this.especieId = racaEntity.getEspecieId();
     }
 
     public UUID getId() {
@@ -35,11 +35,11 @@ public class RacaDTO {
         this.nome = nome;
     }
 
-    public String getEspecie() {
-        return especie;
+    public UUID getEspecieId() {
+        return especieId;
     }
 
-    public void setEspecie(String especie) {
-        this.especie = especie;
+    public void setEspecieId(UUID especieId) {
+        this.especieId = especieId;
     }
 }

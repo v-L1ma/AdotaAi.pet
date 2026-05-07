@@ -45,8 +45,18 @@ public class PetEntity extends AuditableEntity {
     @Column(nullable = false)
     private String raca;
 
+    @ManyToOne
+    @JoinColumn(name = "raca_id", nullable = true, foreignKey = @ForeignKey(name = "raca_id",
+            foreignKeyDefinition = "FOREIGN KEY (raca_id) REFERENCES racas(id)"))
+    private RacaEntity racaEntity;
+
     @Column(nullable = false)
     private String especie;
+
+    @ManyToOne
+    @JoinColumn(name = "especie_id", nullable = true, foreignKey = @ForeignKey(name = "especie_id",
+            foreignKeyDefinition = "FOREIGN KEY (especie_id) REFERENCES especies(id)"))
+    private EspecieEntity especieEntity;
 
     @Column(nullable = false)
     private String link_foto;
@@ -125,12 +135,28 @@ public class PetEntity extends AuditableEntity {
         this.raca = raca;
     }
 
+    public RacaEntity getRacaEntity() {
+        return racaEntity;
+    }
+
+    public void setRacaEntity(RacaEntity racaEntity) {
+        this.racaEntity = racaEntity;
+    }
+
     public String getEspecie() {
         return especie;
     }
 
     public void setEspecie(String especie) {
         this.especie = especie;
+    }
+
+    public EspecieEntity getEspecieEntity() {
+        return especieEntity;
+    }
+
+    public void setEspecieEntity(EspecieEntity especieEntity) {
+        this.especieEntity = especieEntity;
     }
 
     public String getLink_foto() {

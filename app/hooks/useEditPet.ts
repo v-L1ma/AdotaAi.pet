@@ -3,16 +3,15 @@ import { Platform } from "react-native";
 import { getSession } from "../lib/session";
 import { getApiErrorMessages } from "../services/apiErrorService";
 import apiService from "../services/apiService";
-import { especie } from "@/types/TEspecie";
 import { porte } from "@/types/TPorte";
 
 export type EditPetInput = {
   petId: string;
   nome: string;
   dt_nasc: string;
-  especie: especie;
+  especieId: string;
   porte: porte;
-  raca: string;
+  racaId: string;
   descricao: string;
   formularioId?: string | null;
   imagem?: {
@@ -27,8 +26,8 @@ type EditPetPayload = {
   descricao: string;
   dtNasc: string;
   porte: porte;
-  raca: string;
-  especie: especie;
+  racaId: string;
+  especieId: string;
   formularioId: string | null;
 };
 
@@ -60,8 +59,8 @@ function toPayload(input: EditPetInput): EditPetPayload {
     descricao: input.descricao,
     dtNasc: normalizeDate(input.dt_nasc),
     porte: input.porte,
-    raca: input.raca,
-    especie: input.especie,
+    racaId: input.racaId,
+    especieId: input.especieId,
     formularioId: input.formularioId ?? null,
   };
 }

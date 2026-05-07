@@ -12,5 +12,9 @@ public interface RacaRepository extends JpaRepository<RacaEntity, UUID> {
 
     List<RacaEntity> findAllByOrderByNomeAsc();
 
-    boolean existsByNomeAndEspecie(String nome, String especie);
+    List<RacaEntity> findByEspecieNomeIgnoreCaseOrderByNomeAsc(String especie);
+
+    List<RacaEntity> findByEspecie_IdOrderByNomeAsc(UUID especieId);
+
+    boolean existsByNomeAndEspecie_Id(String nome, UUID especieId);
 }

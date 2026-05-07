@@ -12,6 +12,7 @@ public class BuscarPetDTO {
     private String nome;
     private String porte;
     private String raca;
+    private UUID racaId;
     private String especie;
     private String link_foto;
     private UUID formularioId;
@@ -23,7 +24,7 @@ public class BuscarPetDTO {
 
     public BuscarPetDTO(UUID id, String status, String descricao,
                         LocalDate dataNascimento, String nome, String porte,
-                        String raca, String especie, String linkFoto, UUID formularioId,
+                        String raca, UUID racaId, String especie, String linkFoto, UUID formularioId,
                         boolean isFavoritado, DonoDTO dono) {
         this.id = id;
         this.status = status;
@@ -32,6 +33,7 @@ public class BuscarPetDTO {
         this.nome = nome;
         this.porte = porte;
         this.raca = raca;
+        this.racaId = racaId;
         this.especie = especie;
         this.link_foto = linkFoto;
         this.formularioId = formularioId;
@@ -95,6 +97,14 @@ public class BuscarPetDTO {
         this.raca = raca;
     }
 
+    public UUID getRacaId() {
+        return racaId;
+    }
+
+    public void setRacaId(UUID racaId) {
+        this.racaId = racaId;
+    }
+
     public String getEspecie() {
         return especie;
     }
@@ -138,13 +148,15 @@ public class BuscarPetDTO {
     public static class DonoDTO {
         private UUID id;
         private String nome;
+        private String linkFotoPerfil;
 
         public DonoDTO() {
         }
 
-        public DonoDTO(UUID id, String nome) {
+        public DonoDTO(UUID id, String nome, String linkFotoPerfil) {
             this.id = id;
             this.nome = nome;
+            this.linkFotoPerfil = linkFotoPerfil;
         }
 
         public UUID getId() {
@@ -161,6 +173,14 @@ public class BuscarPetDTO {
 
         public void setNome(String nome) {
             this.nome = nome;
+        }
+
+        public String getLinkFotoPerfil() {
+            return linkFotoPerfil;
+        }
+
+        public void setLinkFotoPerfil(String linkFotoPerfil) {
+            this.linkFotoPerfil = linkFotoPerfil;
         }
     }
 }

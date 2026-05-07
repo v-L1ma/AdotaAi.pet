@@ -4,10 +4,12 @@ import { Controller, useForm } from "react-hook-form";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import { useCreatePet } from "../hooks/useCreatePet";
 import { useEditPet } from "../hooks/useEditPet";
+import { useRacas } from "../hooks/useRacas";
+import { useEspecies } from "../hooks/useEspecies";
 import * as ImagePicker from "expo-image-picker";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import React, { useEffect, useRef, useState } from "react";
-import { Alert, Image, InputAccessoryView, Keyboard, Linking, Platform, Pressable, SafeAreaView, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
+import { Alert, Image, InputAccessoryView, Keyboard, Linking, Modal, Platform, Pressable, SafeAreaView, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
 import Icon1 from "react-native-vector-icons/Ionicons";
 import { colors } from "@/styles/variables";
 import SelecionarFormularioModal from "@/components/SelecionarFormularioModal";
@@ -23,13 +25,11 @@ const criarAnuncioSchema = z.object({
         .trim()
         .refine((valor) => !Number.isNaN(Date.parse(valor)), "Informe uma data de nascimento valida")
         .refine((valor) => new Date(valor) <= new Date(), "Data de nascimento nao pode ser no futuro"),
-    especie: z.enum(["Gato", "Cão"], {
-        message: "Selecione a especie",
-    }),
+    especieId: z.string().uuid("Selecione a especie"),
     porte: z.enum(["pequeno", "medio", "grande"], {
         message: "Selecione o porte",
     }),
-    raca: z.string().trim().min(2, "Raca deve ter pelo menos 2 caracteres"),
+    racaId: z.string().uuid("Selecione uma raça"),
     descricao: z.string().trim().min(10, "Descricao deve ter pelo menos 10 caracteres"),
 });
 
@@ -38,7 +38,11 @@ type CriarAnuncioFormData = z.infer<typeof criarAnuncioSchema>;
 export default function CriarAnuncioScreen() {
     const [showDatePicker, setShowDatePicker] = useState(false);
     const [isModalFormulariosOpen, setIsModalFormulariosOpen] = useState(false);
+    const [isRacaSelectOpen, setIsRacaSelectOpen] = useState(false);
     const [formularioSelecionado, setFormularioSelecionado] = useState<Formulario | null>(null);
+    const [selectedEspecieId, setSelectedEspecieId] = useState<string | undefined>(undefined);
+    const { racas, isLoading, refetch: refetchRacas } = useRacas(selectedEspecieId);
+    const { especies } = useEspecies();
 
     const params = useLocalSearchParams<{ petId?: string }>();
     const isEditing = !!params.petId;
@@ -75,18 +79,18 @@ export default function CriarAnuncioScreen() {
             return {
                 nome: petData.nome,
                 dt_nasc: petData.dt_nasc,
-                especie: petData.especie as "Gato" | "Cão",
+                especieId: (petData as any).especieId || "",
                 porte: petData.porte as "pequeno" | "medio" | "grande",
-                raca: petData.raca,
+                racaId: (petData as any).racaId || "",
                 descricao: petData.descricao,
             };
         }
         return {
             nome: "",
             dt_nasc: "2026-04-24",
-            especie: undefined,
+            especieId: "",
             porte: undefined,
-            raca: "",
+            racaId: "",
             descricao: "",
         };
     };
@@ -107,15 +111,22 @@ export default function CriarAnuncioScreen() {
             reset({
                 nome: petData.nome,
                 dt_nasc: petData.dt_nasc,
-                especie: petData.especie as "Gato" | "Cão",
+                especieId: (petData as any).especieId || "",
                 porte: petData.porte as "pequeno" | "medio" | "grande",
-                raca: petData.raca,
+                racaId: (petData as any).racaId || "",
                 descricao: petData.descricao,
             });
+            setSelectedEspecieId((petData as any).especieId || "");
             setExistingPhotoUrl(petData.link_foto);
             setFormularioSelecionado(null);
         }
     }, [petData, reset]);
+
+    useEffect(() => {
+        if (selectedEspecieId) {
+            refetchRacas();
+        }
+    }, [selectedEspecieId, refetchRacas]);
 
     const router = useRouter();
     const [image, setImage] = useState<ImagePicker.ImagePickerAsset | null>(null);
@@ -270,9 +281,9 @@ export default function CriarAnuncioScreen() {
                 petId: params.petId!,
                 nome: data.nome,
                 dt_nasc: data.dt_nasc,
-                especie: data.especie as "Gato" | "Cão",
+                especieId: data.especieId,
                 porte: data.porte as "pequeno" | "medio" | "grande",
-                raca: data.raca,
+                racaId: data.racaId,
                 descricao: data.descricao,
                 formularioId: formularioSelecionado?.id ?? null,
                 imagem: image ? {
@@ -383,24 +394,24 @@ export default function CriarAnuncioScreen() {
                     {renderError(errors.nome?.message)}
 
                     <View style={styles.gridTwo}>
-                        <Controller
-                            control={control}
-                            name="raca"
-                            render={({ field: { onChange, onBlur, value } }) => (
-                                <Field
-                                    label="Raça"
-                                    value={value}
-                                    onChangeText={onChange}
-                                    onBlur={onBlur}
-                                    placeholder="Ex.: SRD"
-                                    inputRef={idadeRef}
-                                    returnKeyType="next"
-                                    onSubmitEditing={() => pesoRef.current?.focus()}
-                                    onFocus={() => setFocusedField("idade")}
-                                    inputAccessoryViewID={Platform.OS === "ios" ? toolbarId : undefined}
-                                />
-                            )}
-                        />
+                        <View style={styles.fieldWrap}>
+                            <Text style={styles.label}>Raça</Text>
+                            <Controller
+                                control={control}
+                                name="racaId"
+                                render={({ field: { onChange, value } }) => (
+                                    <TouchableOpacity 
+                                        style={styles.htmlSelect}
+                                        onPress={() => setIsRacaSelectOpen(true)}
+                                    >
+                                        <Text style={[styles.htmlSelectText, !value && styles.htmlSelectPlaceholder]}>
+                                            {value ? racas.find(r => r.id === value)?.nome : "Selecione"}
+                                        </Text>
+                                        <Icon1 name="chevron-down" size={18} color={colors.textMuted} />
+                                    </TouchableOpacity>
+                                )}
+                            />
+                        </View>
                         <Field
                             label="Peso (kg) - Opcional"
                             value={""}
@@ -414,22 +425,79 @@ export default function CriarAnuncioScreen() {
                             inputAccessoryViewID={Platform.OS === "ios" ? toolbarId : undefined}
                         />
                     </View>
-                    {renderError(errors.raca?.message)}
+
+                    <Modal
+                        visible={isRacaSelectOpen}
+                        transparent
+                        animationType="fade"
+                        onRequestClose={() => setIsRacaSelectOpen(false)}
+                    >
+                        <View style={styles.modalOverlay}>
+                            <View style={styles.racaModalContent}>
+                                <View style={styles.racaModalHeader}>
+                                    <Text style={styles.racaModalTitle}>Selecione a Raça</Text>
+                                    <TouchableOpacity onPress={() => setIsRacaSelectOpen(false)}>
+                                        <Icon1 name="close" size={24} color={colors.text} />
+                                    </TouchableOpacity>
+                                </View>
+                                <ScrollView style={styles.racaModalScroll}>
+                                    {racas.length === 0 && selectedEspecieId && (
+                                        <Text style={styles.racaModalEmpty}>
+                                            {isLoading ? "Carregando..." : "Nenhuma raça encontrada"}
+                                        </Text>
+                                    )}
+                                    <Controller
+                                        control={control}
+                                        name="racaId"
+                                        render={({ field: { onChange, value } }) => (
+                                            <>
+                                                {racas.map((r) => (
+                                                    <TouchableOpacity
+                                                        key={r.id}
+                                                        style={[styles.racaModalOption, value === r.id && styles.racaModalOptionSelected]}
+                                                        onPress={() => {
+                                                            onChange(r.id);
+                                                            setIsRacaSelectOpen(false);
+                                                        }}
+                                                    >
+                                                        <Text style={[styles.racaModalOptionText, value === r.id && styles.racaModalOptionTextSelected]}>
+                                                            {r.nome}
+                                                        </Text>
+                                                        {value === r.id && <Icon1 name="checkmark" size={20} color={colors.primary} />}
+                                                    </TouchableOpacity>
+                                                ))}
+                                            </>
+                                        )}
+                                    />
+                                </ScrollView>
+                            </View>
+                        </View>
+                    </Modal>
+                    {renderError(errors.racaId?.message)}
                 </View>
 
                 <View style={styles.block}>
                     <Text style={styles.blockTitle}>Espécie</Text>
                     <Controller
                         control={control}
-                        name="especie"
+                        name="especieId"
                         render={({ field: { onChange, value } }) => (
                             <View style={styles.row}>
-                                <Chip label="Cão" selected={value === "Cão"} onPress={() => onChange("Cão")} />
-                                <Chip label="Gato" selected={value === "Gato"} onPress={() => onChange("Gato")} />
+                                {especies.map((esp) => (
+                                    <Chip 
+                                        key={esp.id} 
+                                        label={esp.nome} 
+                                        selected={value === esp.id} 
+                                        onPress={() => { 
+                                            onChange(esp.id); 
+                                            setSelectedEspecieId(esp.id); 
+                                        }} 
+                                    />
+                                ))}
                             </View>
                         )}
                     />
-                    {renderError(errors.especie?.message)}
+                    {renderError(errors.especieId?.message)}
                 </View>
 
                 <View style={styles.block}>
@@ -899,5 +967,79 @@ const styles = StyleSheet.create({
         color: '#fff',
         fontWeight: "800",
         fontSize: 17,
+    },
+    htmlSelect: {
+        borderRadius: 14,
+        backgroundColor: colors.surfaceLowest,
+        paddingHorizontal: 14,
+        paddingVertical: 13,
+        flexDirection: "row",
+        justifyContent: "space-between",
+        alignItems: "center",
+        minHeight: 46,
+    },
+    htmlSelectText: {
+        color: colors.text,
+        fontSize: 14,
+        fontWeight: "500",
+    },
+    htmlSelectPlaceholder: {
+        color: colors.textMuted,
+    },
+    modalOverlay: {
+        flex: 1,
+        backgroundColor: "rgba(0, 0, 0, 0.5)",
+        justifyContent: "center",
+        alignItems: "center",
+        padding: 40,
+    },
+    racaModalContent: {
+        backgroundColor: colors.surfaceLow,
+        borderRadius: 20,
+        width: "100%",
+        maxHeight: "70%",
+        overflow: "hidden",
+    },
+    racaModalHeader: {
+        flexDirection: "row",
+        justifyContent: "space-between",
+        alignItems: "center",
+        padding: 16,
+        borderBottomWidth: 1,
+        borderBottomColor: colors.surfaceLowest,
+    },
+    racaModalTitle: {
+        fontSize: 18,
+        fontWeight: "800",
+        color: colors.text,
+    },
+    racaModalScroll: {
+        maxHeight: 400,
+    },
+    racaModalEmpty: {
+        color: colors.textMuted,
+        fontSize: 14,
+        padding: 20,
+        textAlign: "center",
+    },
+    racaModalOption: {
+        flexDirection: "row",
+        justifyContent: "space-between",
+        alignItems: "center",
+        paddingHorizontal: 16,
+        paddingVertical: 14,
+        borderBottomWidth: 1,
+        borderBottomColor: colors.surfaceLowest,
+    },
+    racaModalOptionSelected: {
+        backgroundColor: colors.secondaryContainer,
+    },
+    racaModalOptionText: {
+        color: colors.text,
+        fontSize: 15,
+    },
+    racaModalOptionTextSelected: {
+        color: colors.primary,
+        fontWeight: "700",
     },
 });

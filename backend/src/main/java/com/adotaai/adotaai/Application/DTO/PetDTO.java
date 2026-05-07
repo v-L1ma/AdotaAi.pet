@@ -15,6 +15,7 @@ public class PetDTO {
     private String nome;
     private String porte;
     private String raca;
+    private UUID racaId;
     private String especie;
     private String link_foto;
     private UUID formularioId;
@@ -30,6 +31,9 @@ public class PetDTO {
         this.nome = pet.getNome();
         this.porte = pet.getPorte();
         this.raca = pet.getRaca();
+        if (pet.getRacaEntity() != null) {
+            this.racaId = pet.getRacaEntity().getId();
+        }
         this.especie = pet.getEspecie();
         this.link_foto = pet.getLink_foto();
         if (pet.getFormulario() != null) {
@@ -98,6 +102,14 @@ public class PetDTO {
 
     public void setRaca(String raca) {
         this.raca = raca;
+    }
+
+    public UUID getRacaId() {
+        return racaId;
+    }
+
+    public void setRacaId(UUID racaId) {
+        this.racaId = racaId;
     }
 
     public String getEspecie() {

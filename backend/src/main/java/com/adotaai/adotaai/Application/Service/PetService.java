@@ -18,15 +18,19 @@ import org.springframework.web.multipart.MultipartFile;
 import com.adotaai.adotaai.Application.DTO.BuscarPetDTO;
 import com.adotaai.adotaai.Application.DTO.CadastrarPetDTO;
 import com.adotaai.adotaai.Application.DTO.PetDTO;
+import com.adotaai.adotaai.Domain.Entity.EspecieEntity;
 import com.adotaai.adotaai.Domain.Entity.FavoritoPetEntity;
 import com.adotaai.adotaai.Domain.Entity.FormularioEntity;
 import com.adotaai.adotaai.Domain.Entity.PetEntity;
+import com.adotaai.adotaai.Domain.Entity.RacaEntity;
 import com.adotaai.adotaai.Domain.Entity.UsuarioEntity;
 import com.adotaai.adotaai.Domain.Exception.RecursoNaoEncontradoException;
 import com.adotaai.adotaai.Domain.Exception.RegraDeNegocioException;
+import com.adotaai.adotaai.Infraestructure.Repository.EspecieRepository;
 import com.adotaai.adotaai.Infraestructure.Repository.FavoritoPetRepository;
 import com.adotaai.adotaai.Infraestructure.Repository.FormularioRepository;
 import com.adotaai.adotaai.Infraestructure.Repository.PetRepository;
+import com.adotaai.adotaai.Infraestructure.Repository.RacaRepository;
 import com.adotaai.adotaai.Infraestructure.Repository.UsuarioRepository;
 
 import jakarta.transaction.Transactional;
@@ -45,6 +49,12 @@ public class PetService {
 
     @Autowired
     private FormularioRepository formularioRepository;
+
+    @Autowired
+    private RacaRepository racaRepository;
+
+    @Autowired
+    private EspecieRepository especieRepository;
 
     @Autowired
     private ImageUploadService imageUploadService;
@@ -66,7 +76,7 @@ public class PetService {
 
         BuscarPetDTO.DonoDTO dono = null;
         if (pet.getUser() != null) {
-            dono = new BuscarPetDTO.DonoDTO(pet.getUser().getId(), pet.getUser().getNome());
+            dono = new BuscarPetDTO.DonoDTO(pet.getUser().getId(), pet.getUser().getNome(), pet.getUser().getLink_foto());
         }
 
         boolean isFavoritado = false;
@@ -78,6 +88,7 @@ public class PetService {
         }
 
         UUID formularioId = pet.getFormulario() != null ? pet.getFormulario().getId() : null;
+        UUID racaId = pet.getRacaEntity() != null ? pet.getRacaEntity().getId() : null;
 
         return new BuscarPetDTO(
             pet.getId(),
@@ -87,6 +98,7 @@ public class PetService {
             pet.getNome(),
             pet.getPorte(),
             pet.getRaca(),
+            racaId,
             pet.getEspecie(),
             pet.getLink_foto(),
             formularioId,
@@ -102,7 +114,7 @@ public class PetService {
 
     public PetDTO criarPet(CadastrarPetDTO petDTO, MultipartFile imagem) {
         PetEntity pet = new PetEntity();
-        BeanUtils.copyProperties(petDTO, pet);
+        BeanUtils.copyProperties(petDTO, pet, "racaId", "especieId");
 
         LocalDate date = parseDtNasc(petDTO.getDtNasc());
 
@@ -111,6 +123,20 @@ public class PetService {
         pet.setUser(usuario);
         pet.setStatus("Pendente");
         pet.setFormulario(resolveFormulario(petDTO));
+        
+        if (petDTO.getEspecieId() != null) {
+            EspecieEntity especie = especieRepository.findById(petDTO.getEspecieId())
+                    .orElseThrow(() -> new RecursoNaoEncontradoException("Espécie não encontrada com ID: " + petDTO.getEspecieId()));
+            pet.setEspecieEntity(especie);
+            pet.setEspecie(especie.getNome());
+        }
+
+        if (petDTO.getRacaId() != null) {
+            RacaEntity raca = racaRepository.findById(petDTO.getRacaId())
+                    .orElseThrow(() -> new RecursoNaoEncontradoException("Raça não encontrada com ID: " + petDTO.getRacaId()));
+            pet.setRacaEntity(raca);
+            pet.setRaca(raca.getNome());
+        }
 
         if (imagem != null && !imagem.isEmpty()) {
             String imageUrl = imageUploadService.uploadPetImage(imagem, pet.getId() == null ? UUID.randomUUID() : pet.getId());
@@ -142,8 +168,18 @@ public class PetService {
                 pet.setDt_nasc(date);
             }
             if (petDto.getPorte() != null) pet.setPorte(petDto.getPorte());
-            if (petDto.getRaca() != null) pet.setRaca(petDto.getRaca());
-            if (petDto.getEspecie() != null) pet.setEspecie(petDto.getEspecie());
+            if (petDto.getEspecieId() != null) {
+                EspecieEntity especie = especieRepository.findById(petDto.getEspecieId())
+                        .orElseThrow(() -> new RecursoNaoEncontradoException("Espécie não encontrada com ID: " + petDto.getEspecieId()));
+                pet.setEspecieEntity(especie);
+                pet.setEspecie(especie.getNome());
+            }
+            if (petDto.getRacaId() != null) {
+                RacaEntity raca = racaRepository.findById(petDto.getRacaId())
+                        .orElseThrow(() -> new RecursoNaoEncontradoException("Raça não encontrada com ID: " + petDto.getRacaId()));
+                pet.setRacaEntity(raca);
+                pet.setRaca(raca.getNome());
+            }
             pet.setFormulario(resolveFormulario(petDto));
         }
 
