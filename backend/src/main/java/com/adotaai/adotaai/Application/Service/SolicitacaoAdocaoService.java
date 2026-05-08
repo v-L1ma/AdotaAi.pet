@@ -57,12 +57,6 @@ public class SolicitacaoAdocaoService implements ISolicitacaoAdocaoService {
                 throw new RegraDeNegocioException("O formulário informado não corresponde ao formulário vinculado a este pet.");
             }
 
-            boolean jaRespondeuFormulario = respostaRepository.existsBySolicitacaoFormularioIdAndSolicitacaoAdotanteId(
-                    formulario.getId(),
-                    adotante.getId());
-            if (jaRespondeuFormulario) {
-                throw new RegraDeNegocioException("Você já respondeu o formulário de triagem para este anúncio.");
-            }
         } else if (dto.getFormularioId() != null) {
             throw new RegraDeNegocioException("Este pet não possui formulário vinculado. Não é necessário responder formulário para adotar este pet.");
         }
@@ -70,16 +64,10 @@ public class SolicitacaoAdocaoService implements ISolicitacaoAdocaoService {
         UsuarioEntity anunciante = pet.getUser();
 
         Optional<SolicitacaoAdocaoEntity> solicitacaoExistente;
-        if (formulario != null) {
-            solicitacaoExistente = solicitacaoRepository.findByAdotanteIdAndFormularioId(adotante.getId(), formulario.getId());
-            if (solicitacaoExistente.isPresent()) {
-                throw new RegraDeNegocioException("Você já enviou uma solicitação para este formulário.");
-            }
-        } else {
-            solicitacaoExistente = solicitacaoRepository.findByAdotanteIdAndPetId(adotante.getId(), pet.getId());
-            if (solicitacaoExistente.isPresent()) {
-                throw new RegraDeNegocioException("Você já enviou uma solicitação para este pet.");
-            }
+        
+        solicitacaoExistente = solicitacaoRepository.findByAdotanteIdAndPetId(adotante.getId(), pet.getId());
+        if (solicitacaoExistente.isPresent()) {
+            throw new RegraDeNegocioException("Você já enviou uma solicitação para este pet.");
         }
 
         SolicitacaoAdocaoEntity novaSolicitacao = new SolicitacaoAdocaoEntity();
@@ -90,6 +78,7 @@ public class SolicitacaoAdocaoService implements ISolicitacaoAdocaoService {
 
         SolicitacaoAdocaoEntity solicitacaoSalva = solicitacaoRepository.save(novaSolicitacao);
         return new SolicitacaoResponseDTO(solicitacaoSalva, pet);
+        //falta juntar a rota de responder o formulario para ser junto com a solicitacao
     }
 
     @Override

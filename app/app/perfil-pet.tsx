@@ -9,6 +9,7 @@ import { WebView } from "react-native-webview";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { favoritePet, getPetById, unfavoritePet } from "../services/petService";
 import { createSolicitacaoDirect } from "../services/solicitacaoService";
+import { birthToAge } from "@/utils/birthToAge";
 
 type BuscarPetDTO = {
     id: string;
@@ -29,7 +30,6 @@ type BuscarPetDTO = {
 };
 
 export default function PerfilPet(){
-
     const router = useRouter();
     const insets = useSafeAreaInsets();
     const [mapLoading, setMapLoading] = useState<boolean>(true);
@@ -267,7 +267,7 @@ export default function PerfilPet(){
                     <View style={style.caracteristicasContainer}>
                         <View style={style.caracteristicasCard}>
                             <Text style={style.kicker}>Idade</Text>
-                            <Text style={style.tituloCard}>{birthDateLabel}</Text>
+                            <Text style={style.tituloCard}>{birthToAge(birthDateLabel)}</Text>
                         </View>
 
                         <View style={style.caracteristicasCard}>
@@ -276,7 +276,7 @@ export default function PerfilPet(){
                         </View>
 
                         <View style={style.caracteristicasCard}>
-                            <Text style={style.kicker}>Peso</Text>
+                            <Text style={style.kicker}>Porte</Text>
                             <Text style={style.tituloCard}>{pet?.porte || "Nao informado"}</Text>
                         </View>
                     </View>

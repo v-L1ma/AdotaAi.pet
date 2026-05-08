@@ -44,6 +44,7 @@ export default function ListagemPets(){
 
         void loadPets();
     }, []);
+    
     const [imageRatios, setImageRatios] = useState<Record<string, number>>({});
     const sheetTranslateY = useMemo(() => new Animated.Value(460), []);
     const backdropOpacity = useMemo(() => new Animated.Value(0), []);

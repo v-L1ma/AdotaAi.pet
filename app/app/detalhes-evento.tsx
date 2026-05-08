@@ -43,15 +43,7 @@ export default function DetalhesEvento() {
   const [isInscrito, setIsInscrito] = useState(false);
   const router = useRouter();
 
-  useEffect(() => {
-    if (!eventoId) {
-      setLoadError("Evento nao informado.");
-      return;
-    }
-
-    let isMounted = true;
-
-    async function loadEvento() {
+  async function loadEvento(isMounted = true) {
       setIsLoading(true);
       setLoadError(null);
 
@@ -72,8 +64,13 @@ export default function DetalhesEvento() {
       }
     }
 
-    loadEvento();
-
+  useEffect(() => {
+    if (!eventoId) {
+      setLoadError("Evento nao informado.");
+      return;
+    }
+    let isMounted = true;
+    loadEvento(isMounted);
     return () => {
       isMounted = false;
     };
@@ -174,7 +171,7 @@ const horarioLabel = useMemo(() => {
 
         {isInscrito ? (
           <>
-            <TouchableOpacity style={[styles.button, styles.buttonDisabled]} disabled>
+            <TouchableOpacity style={[styles.button, styles.buttonDisabled, { display: "flex" }]} disabled>
               <Ionicons name="checkmark-circle" size={20} color="white" />
               <Text style={styles.buttonText}>Inscrito</Text>
             </TouchableOpacity>
@@ -192,8 +189,9 @@ const horarioLabel = useMemo(() => {
               if (!eventoId || isInscritoLoading) return;
               setIsInscritoLoading(true);
               try {
-                await registrarPresenca(eventoId);
-                setIsInscrito(true);
+                await registrarPresenca(eventoId).then(() => {
+                  loadEvento();
+                });
               } catch {
                 alert("Não foi possível confirmar presença. Tente novamente.");
               } finally {
@@ -364,10 +362,13 @@ const styles = StyleSheet.create({
     fontWeight: "600",
   },
   button: {
+    display: "flex",
+    flexDirection: "row",
+    justifyContent: "center",
     marginTop: 4,
     backgroundColor: colors.primary,
-    borderRadius: 16,
-    paddingVertical: 15,
+    borderRadius: 10,
+    paddingVertical: 10,
     alignItems: "center",
     shadowColor: colors.primary,
     shadowOpacity: 0.24,

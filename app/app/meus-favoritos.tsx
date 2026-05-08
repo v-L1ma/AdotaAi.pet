@@ -85,7 +85,12 @@ export default function MeusFavoritos() {
   };
 
   const renderItem = ({ item }: { item: animal }) => (
-    <View style={styles.card}>
+    <TouchableOpacity style={styles.card} onPress={() => router.push({
+                    pathname:"/perfil-pet",
+                    params:{
+                        id: item.id
+                    }
+                })}>
       <Image source={{ uri: item.link_foto }} style={styles.petImage} />
       <View style={styles.content}>
         <Text style={styles.petName}>{item.nome}</Text>
@@ -97,7 +102,7 @@ export default function MeusFavoritos() {
       <TouchableOpacity style={styles.favoriteButton} onPress={() => confirmDesfavoritar(item)}>
         <Ionicons name="heart" size={22} color={colors.primary} />
       </TouchableOpacity>
-    </View>
+    </TouchableOpacity>
   );
 
   return (
