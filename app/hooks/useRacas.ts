@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
-import apiService from "@/services/apiService";
+import lookupService from "@/services/lookupService";
 import { raca } from "@/types/TRaca";
 
 export function useRacas(especieId?: string) {
@@ -11,10 +11,8 @@ export function useRacas(especieId?: string) {
     setIsLoading(true);
     setError(null);
     try {
-      const response = await apiService.get<raca[]>("/lookups/racas", {
-        params: especieId ? { especie_id: especieId } : undefined,
-      });
-      setRacas(response.data);
+      const response = await lookupService.getRacas(especieId);
+      setRacas(response);
     } catch (err) {
       setError("Falha ao carregar raças");
     } finally {

@@ -1,14 +1,8 @@
 import { useState, useEffect, useCallback } from "react";
-import apiService from "@/services/apiService";
-import { especie as especieType } from "@/types/TEspecie";
-
-type especieEntity = {
-  id: string;
-  nome: string;
-};
+import lookupService, { type EspecieEntity } from "@/services/lookupService";
 
 export function useEspecies() {
-  const [especies, setEspecies] = useState<especieEntity[]>([]);
+  const [especies, setEspecies] = useState<EspecieEntity[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -16,8 +10,8 @@ export function useEspecies() {
     setIsLoading(true);
     setError(null);
     try {
-      const response = await apiService.get<especieEntity[]>("/lookups/especies");
-      setEspecies(response.data);
+      const response = await lookupService.getEspecies();
+      setEspecies(response);
     } catch (err) {
       setError("Falha ao carregar espécies");
     } finally {

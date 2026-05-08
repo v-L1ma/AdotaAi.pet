@@ -2,9 +2,10 @@ import React, { useEffect, useMemo, useState } from "react";
 import { Alert, Image, Platform, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import AppModal from "./AppModal";
 import { Formulario } from "@/types/Formulario";
-import apiService from "@/services/apiService";
 import { getApiErrorMessage } from "@/services/apiErrorService";
 import { colors } from "@/styles/variables";
+import { getUserPets, linkFormToPet, type PetUpsertData } from "@/services/petService";
+import type { animal } from "@/types/TAnimal";
 
 type SelecionarPetModalProps = {
   visible: boolean;
@@ -12,44 +13,13 @@ type SelecionarPetModalProps = {
   formulario: Formulario | null;
 };
 
-type PetApi = {
-  id: string;
-  nome: string;
-  especie: string;
-  porte: string;
-  raca: string;
-  descricao: string;
-  dt_nasc: string;
-  link_foto: string;
+type PetApi = animal & {
   formularioId?: string | null;
-};
-
-type PetPayload = {
-  nome: string;
-  descricao: string;
-  dtNasc: string;
-  porte: string;
-  raca: string;
-  especie: string;
-  formularioId: string | null;
 };
 
 function normalizeDate(value: string): string {
   if (!value) return value;
   return value.slice(0, 10);
-}
-
-function buildFormData(payload: PetPayload): FormData {
-  const formData = new FormData();
-  const payloadJson = JSON.stringify(payload);
-
-  if (Platform.OS === "web") {
-    formData.append("dados", new Blob([payloadJson], { type: "application/json" }));
-  } else {
-    formData.append("dados", payloadJson);
-  }
-
-  return formData;
 }
 
 export default function SelecionarPetModal({ visible, onClose, formulario }: SelecionarPetModalProps) {
@@ -73,12 +43,9 @@ export default function SelecionarPetModal({ visible, onClose, formulario }: Sel
     setIsLoading(true);
     setError(null);
 
-    apiService
-      .get("/usuario/pets")
-      .then((response) => {
+    getUserPets()
+      .then((data) => {
         if (!isActive) return;
-
-        const data: PetApi[] = Array.isArray(response.data) ? response.data : [];
         setPets(data);
       })
       .catch((err) => {
@@ -106,18 +73,15 @@ export default function SelecionarPetModal({ visible, onClose, formulario }: Sel
     setError(null);
 
     try {
-      const payload: PetPayload = {
+      const payload: PetUpsertData = {
         nome: pet.nome,
         descricao: pet.descricao,
         dtNasc: normalizeDate(pet.dt_nasc),
         porte: pet.porte,
-        raca: pet.raca,
-        especie: pet.especie,
         formularioId,
       };
 
-      const formData = buildFormData(payload);
-      await apiService.put(`/pets/${pet.id}`, formData);
+      await linkFormToPet(pet.id, payload);
 
       setPets((prev) =>
         prev.map((item) =>
@@ -130,11 +94,7 @@ export default function SelecionarPetModal({ visible, onClose, formulario }: Sel
         )
       );
 
-      const successMessage = formularioId
-        ? "Formulario vinculado com sucesso."
-        : "Formulario removido do pet com sucesso.";
-
-      Alert.alert("Sucesso", successMessage, [{ text: "OK", onPress: onClose }]);
+      onClose();
     } catch (err) {
       setError(getApiErrorMessage(err, "Nao foi possivel atualizar o pet."));
     } finally {
@@ -148,7 +108,7 @@ export default function SelecionarPetModal({ visible, onClose, formulario }: Sel
       return;
     }
 
-    if(Platform.OS=="web"){
+    if(Platform.OS==="web"){
       handleUpdate(pet, formulario.id)
       return
     }
@@ -164,7 +124,7 @@ export default function SelecionarPetModal({ visible, onClose, formulario }: Sel
   };
 
   const confirmDesvinculo = (pet: PetApi) => {
-    if(Platform.OS=="web"){
+    if(Platform.OS==="web"){
       handleUpdate(pet, null) 
     }
 

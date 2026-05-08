@@ -3,7 +3,7 @@ import { colors } from "@/styles/variables";
 import { useRouter } from "expo-router";
 import { useEffect, useMemo, useState } from "react";
 import { ActivityIndicator, FlatList, Image, StyleSheet, Text, TouchableOpacity, View } from "react-native";
-import apiService from "@/services/apiService";
+import { EventoDTO, getEventos } from "@/services/eventoService";
 import NavBar from "@/components/NavBar";
 
 const timeRegex = /^([01]\d|2[0-3]):[0-5]\d$/;
@@ -14,21 +14,6 @@ const formatarHoraDisplay = (hora: string | undefined): string => {
     const parsed = new Date(hora);
     if (Number.isNaN(parsed.getTime())) return "";
     return parsed.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" });
-};
-
-type EventoDTO = {
-  id: string;
-  nome: string;
-  endereco?: string;
-  bairro?: string;
-  cidade?: string;
-  cep?: string;
-  hrinicio?: string;
-  hrfim?: string;
-  descricao?: string;
-  data?: string;
-  status?: string;
-  nmorganizador?: string;
 };
 
 export default function Eventos() {
@@ -45,9 +30,9 @@ export default function Eventos() {
       setLoadError(null);
 
       try {
-        const response = await apiService.get<EventoDTO[]>("/eventos");
+        const response = await getEventos();
         if (isMounted) {
-          setEventos(response.data ?? []);
+          setEventos(response ?? []);
         }
       } catch {
         if (isMounted) {
@@ -102,7 +87,7 @@ export default function Eventos() {
 
       <FlatList
         data={eventos}
-        keyExtractor={(item) => item.id}
+        keyExtractor={(item) => item.id ?? ""}
         contentContainerStyle={styles.list}
         showsVerticalScrollIndicator={false}
         ListHeaderComponent={listHeader}

@@ -1,14 +1,14 @@
 import { LinearGradient } from "expo-linear-gradient";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { ActivityIndicator, Alert, Image, Platform, Pressable, SafeAreaView, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import IconMat from "react-native-vector-icons/MaterialCommunityIcons";
 import IconIonic from "react-native-vector-icons/Ionicons";
 import { colors } from "@/styles/variables";
-import React from "react";
-import apiService from "../services/apiService";
 import { WebView } from "react-native-webview";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { favoritePet, getPetById, unfavoritePet } from "../services/petService";
+import { createSolicitacaoDirect } from "../services/solicitacaoService";
 
 type BuscarPetDTO = {
     id: string;
@@ -25,7 +25,7 @@ type BuscarPetDTO = {
         id: string;
         nome: string;
     };
-    formularioId?: string;
+    formularioId?: string | null;
 };
 
 export default function PerfilPet(){
@@ -57,7 +57,7 @@ export default function PerfilPet(){
         return dynamicParts || "Marapé, Santos - SP";
     }, [bairro, cidade, localizacao, uf]);
 
-    const description = pet?.descricao || "Descrição não informada.";
+    // const description = pet?.descricao || "Descrição não informada.";
     const IFrameTag = "iframe" as unknown as React.ElementType;
 
     useEffect(() => {
@@ -124,7 +124,7 @@ export default function PerfilPet(){
     const [isAdopting, setIsAdopting] = useState<boolean>(false);
 
     const petName = pet?.nome || (Array.isArray(nome) ? nome[0] : nome) || "Alfredo";
-    const petImage = pet?.link_foto || (Array.isArray(imagem) ? imagem[0] : imagem) || "https://img.freepik.com/fotos-gratis/fotografia-vertical-de-foco-superficial-de-um-bonito-cachorro-de-golden-retriever-sentado-em-um-chao-de-grama_181624-27259.jpg?w=360";
+    const petImage = pet?.link_foto || (Array.isArray(imagem) ? imagem[0] : imagem) || "https://img.freepik.com/fotos-gratis/fotografia-vertical-de-foco-superficial-de-um-bonito-Cão-de-golden-retriever-sentado-em-um-chao-de-grama_181624-27259.jpg?w=360";
 
     const params = useLocalSearchParams<{ id?: string }>();
     const petId = Array.isArray(params.id) ? params.id[0] : params.id;
@@ -140,14 +140,14 @@ export default function PerfilPet(){
             setPetError(null);
 
             try {
-                const response = await apiService.get<BuscarPetDTO>(`/pets/${petId}`);
+                const response = await getPetById(petId);
                 const favoritado =
-                    response.data.isFavoritado ??
-                    response.data.isFavorito ??
-                    (response.data as BuscarPetDTO & { favoritado?: boolean }).favoritado ??
+                    response.isFavoritado ??
+                    response.isFavorito ??
+                    (response as BuscarPetDTO & { favoritado?: boolean }).favoritado ??
                     false;
 
-                setPet({ ...response.data, isFavoritado: favoritado, isFavorito: favoritado });
+                setPet({ ...response, isFavoritado: favoritado, isFavorito: favoritado });
                 setIsPetFavorited(favoritado);
             } catch {
                 setPetError("Nao foi possivel carregar os dados do pet.");
@@ -182,7 +182,7 @@ export default function PerfilPet(){
         return date.toLocaleDateString("pt-BR");
     }, [pet?.dt_nasc]);
 
-async function favoritePet(){
+    async function handleToggleFavorite(){
         if (!petId || !pet || isTogglingFavorite) {
             return;
         }
@@ -190,13 +190,13 @@ async function favoritePet(){
         setIsTogglingFavorite(true);
         try {
             if (isPetFavorited) {
-                await apiService.delete(`/pets/${petId}/favoritar`);
+                await unfavoritePet(petId);
                 setIsPetFavorited(false);
                 setPet((currentPet) => currentPet ? { ...currentPet, isFavoritado: false, isFavorito: false } : currentPet);
                 return;
             }
 
-            await apiService.post(`/pets/${petId}/favoritar`);
+            await favoritePet(petId);
             setIsPetFavorited(true);
             setPet((currentPet) => currentPet ? { ...currentPet, isFavoritado: true, isFavorito: true } : currentPet);
         } finally {
@@ -213,14 +213,13 @@ async function favoritePet(){
         try {
             if (pet.formularioId) {
                 // First create a solicitation, then redirect to stepper
-                const solicitacaoResponse = await apiService.post("/solicitacoes", { petId: petId });
-                const solicitacaoId = solicitacaoResponse.data.id;
+                const solicitacaoResponse = await createSolicitacaoDirect({ petId: petId });
+                const solicitacaoId = solicitacaoResponse.id;
                 // Redirect to step-by-step form responder
                 router.push(`/responder-formulario-stepper?formularioId=${pet.formularioId}&solicitacaoId=${solicitacaoId}`);
             } else {
                 // Send adoption request directly
-                await apiService.post("/solicitacoes", { petId: petId });
-                Alert.alert("Sucesso", "Solicitação de adoção enviada!");
+                await createSolicitacaoDirect({ petId: petId });
                 router.back();
             }
         } catch (err) {
@@ -251,7 +250,7 @@ async function favoritePet(){
                         <View style={style.headerSpacer} />
                     </SafeAreaView>
 
-                    <Pressable onPress={()=>favoritePet()} style={style.favoriteFloatingButton}>
+                    <Pressable onPress={handleToggleFavorite} style={style.favoriteFloatingButton}>
                         <IconMat name={isPetFavorited ? "heart" : "heart-outline"} size={29} color={colors.primary}></IconMat>
                     </Pressable>
                 </View>
@@ -287,7 +286,7 @@ async function favoritePet(){
                             <Text style={style.aboutTitle}>Sobre</Text>
                             <View style={style.divider}></View>
                         </View>
-                            <Text style={style.aboutText}>{description}</Text>
+                            {/* <Text style={style.aboutText}>{description}</Text> */}
 
                         <View style={style.publisher}>
                             <Image

@@ -7,8 +7,8 @@ import React, { useEffect, useRef, useState } from "react";
 import { Alert, Keyboard, Platform, SafeAreaView, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
 import Icon from "react-native-vector-icons/Ionicons";
 import { colors } from "@/styles/variables";
-import apiService from "@/services/apiService";
 import AppHeader from "@/components/AppHeader";
+import { EventoDTO, createEvento, updateEvento, getEventoById } from "@/services/eventoService";
 
 const timeRegex = /^([01]\d|2[0-3]):[0-5]\d$/;
 
@@ -50,19 +50,6 @@ const criarEventoSchema = z.object({
 
 type CriarEventoFormData = z.infer<typeof criarEventoSchema>;
 
-type EventoDTO = {
-    id?: string;
-    nome: string;
-    endereco?: string;
-    bairro?: string;
-    cidade?: string;
-    cep?: string;
-    hrinicio?: string;
-    hrfim?: string;
-    descricao?: string;
-    data?: string;
-};
-
 export default function CriarEventoScreen() {
     const [showDatePicker, setShowDatePicker] = useState(false);
 
@@ -82,14 +69,16 @@ export default function CriarEventoScreen() {
         let isMounted = true;
 
         async function loadEvento() {
-            setIsLoadingEvento(true);
             try {
-                const response = await apiService.get<EventoDTO>(`/eventos/${eventoId}`);
+                setIsLoadingEvento(true);
+
+                const evento = await getEventoById(eventoId);
+
                 if (isMounted) {
-                    setEventoData(response.data);
+                    setEventoData(evento);
                 }
-            } catch {
-                Alert.alert("Erro", "Nao foi possivel carregar os dados do evento.");
+            } catch (error) {
+                console.error(error);
             } finally {
                 if (isMounted) {
                     setIsLoadingEvento(false);
@@ -182,14 +171,12 @@ export default function CriarEventoScreen() {
         setIsSaving(true);
         try {
             if (isEditing && eventoId) {
-                await apiService.put(`/eventos/${eventoId}`, payload);
-                Alert.alert("Sucesso", "Evento atualizado com sucesso!");
+                await updateEvento(eventoId, payload);
                 router.back();
                 return;
             }
 
-            await apiService.post("/eventos", payload);
-            Alert.alert("Sucesso", "Evento criado com sucesso!");
+            await createEvento(payload);
             reset();
         } catch {
             Alert.alert("Erro", "Nao foi possivel salvar o evento.");

@@ -1,4 +1,4 @@
-import { StyleSheet, View } from "react-native";
+import { TouchableOpacity, StyleSheet, View } from "react-native";
 import Icon from 'react-native-vector-icons/Octicons';
 import IconMat from 'react-native-vector-icons/MaterialCommunityIcons';
 import { colors } from "@/styles/variables";
@@ -6,7 +6,6 @@ import { usePathname } from "expo-router";
 import { BlurView } from "expo-blur";
 import React from "react";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { TouchableOpacity } from "react-native";
 import { useTabNavigation } from "@/hooks/useTabNavigation";
 
 export default function NavBar(){

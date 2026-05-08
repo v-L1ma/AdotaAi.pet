@@ -1,6 +1,5 @@
 import CardPet from "@/components/CardPet";
 import NavBar from "@/components/NavBar";
-import apiService from "@/services/apiService";
 import { colors } from "@/styles/variables";
 import { animal } from "@/types/TAnimal";
 import React, { useEffect, useMemo, useState } from "react";
@@ -9,6 +8,7 @@ import Icon from "react-native-vector-icons/FontAwesome5";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { especie } from "@/types/TEspecie";
 import { porte } from "@/types/TPorte";
+import { getPets } from "@/services/petService";
 
 const width = Dimensions.get("window").width
 const columnGap = 12;
@@ -33,8 +33,8 @@ export default function ListagemPets(){
             setPetsError(null);
 
             try {
-                const response = await apiService.get<animal[]>("/pets");
-                setPets(response.data)
+                const response = await getPets();
+                setPets(response);
             } catch {
                 setPetsError("Nao foi possivel carregar os pets.");
             } finally {

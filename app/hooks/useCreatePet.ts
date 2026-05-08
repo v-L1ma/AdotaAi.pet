@@ -2,7 +2,7 @@ import { useCallback, useState } from "react";
 import { Platform } from "react-native";
 import { getSession } from "../lib/session";
 import { getApiErrorMessages } from "../services/apiErrorService";
-import apiService from "../services/apiService";
+import { createPetFromFormData } from "../services/petService";
 import { porte } from "@/types/TPorte";
 
 export type CreatePetInput = {
@@ -122,11 +122,11 @@ export function useCreatePet() {
       const formData = await buildFormData(payload, input.imagem);
 
       // Nao forcar Content-Type: o axios define boundary corretamente.
-      const response = await apiService.post("/pets", formData);
+      const pet = await createPetFromFormData(formData);
 
       return {
         ok: true,
-        data: response.data,
+        data: pet,
       };
     } catch (err) {
       const messages = getApiErrorMessages(err, "Falha ao criar pet");

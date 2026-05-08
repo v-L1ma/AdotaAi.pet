@@ -3,25 +3,10 @@ import { colors } from "@/styles/variables";
 import { useRouter } from "expo-router";
 import { useEffect, useMemo, useState } from "react";
 import { ActivityIndicator, Alert, FlatList, Image, Pressable, StyleSheet, Text, TouchableOpacity, useWindowDimensions, View } from "react-native";
-import apiService from "@/services/apiService";
+import { deleteEvento, EventoDTO, getEventosUsuario } from "@/services/eventoService";
 import Ionicons from "@expo/vector-icons/build/Ionicons";
 
 const timeRegex = /^([01]\d|2[0-3]):[0-5]\d$/;
-
-type EventoDTO = {
-  id: string;
-  nome: string;
-  endereco?: string;
-  bairro?: string;
-  cidade?: string;
-  cep?: string;
-  hrinicio?: string;
-  hrfim?: string;
-  descricao?: string;
-  data?: string;
-  status?: string;
-  nmorganizador?: string;
-};
 
 export default function MeusEventos() {
   const router = useRouter();
@@ -60,9 +45,9 @@ export default function MeusEventos() {
       setLoadError(null);
 
       try {
-        const response = await apiService.get<EventoDTO[]>("/usuario/eventos");
+        const response = await getEventosUsuario();
         if (isMounted) {
-          setEventos(response.data ?? []);
+          setEventos(response ?? []);
         }
       } catch {
         if (isMounted) {
@@ -136,11 +121,10 @@ export default function MeusEventos() {
           text: "Remover",
           style: "destructive",
           onPress: async () => {
-            setIsDeleting(evento.id);
+            setIsDeleting(evento.id ?? null);
             try {
-              await apiService.delete(`/eventos/${evento.id}`);
+              await deleteEvento(evento.id ?? "");
               setEventos((prev) => prev.filter((e) => e.id !== evento.id));
-              Alert.alert("Sucesso", "Evento removido com sucesso.");
             } catch {
               Alert.alert("Erro", "Nao foi possivel remover o evento.");
             } finally {
@@ -173,7 +157,7 @@ export default function MeusEventos() {
 
       <FlatList
         data={eventos}
-        keyExtractor={(item) => item.id}
+        keyExtractor={(item) => item.id ?? ""}
         contentContainerStyle={styles.list}
         showsVerticalScrollIndicator={false}
         style={{ width: metrics.cardWidth }}
@@ -220,7 +204,7 @@ export default function MeusEventos() {
 
           <TouchableOpacity
             style={styles.menuButton}
-            onPress={() => setMenuVisible(menuVisible === item.id ? null : item.id)}
+            onPress={() => setMenuVisible(menuVisible === (item.id ?? "") ? null : item.id ?? "")}
           >
             <Ionicons name="ellipsis-vertical" size={18} color={colors.text} />
           </TouchableOpacity>

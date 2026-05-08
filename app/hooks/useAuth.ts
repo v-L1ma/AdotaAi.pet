@@ -1,31 +1,8 @@
 import { useCallback, useState } from "react";
 import { AuthSession, clearSession, setSession } from "../lib/session";
 import { getApiErrorMessages } from "../services/apiErrorService";
-import apiService from "../services/apiService";
+import authService, { type LoginInput, type LoginResponse, type RegisterInput } from "../services/authService";
 import { tokenService } from "../services/tokenService";
-
-type LoginInput = {
-  email: string;
-  senha: string;
-};
-
-type LoginResponse = {
-  token: string;
-  refreshToken?: string;
-  tipo: string;
-  id: string;
-  email: string;
-  nome: string;
-  cargo: string;
-};
-
-type RegisterInput = {
-  nome: string;
-  email: string;
-  senha: string;
-  confirmarSenha: string;
-  cpfcnpj: string;
-};
 
 type HookSuccessResult<T> = {
   ok: true;
@@ -51,10 +28,7 @@ export function useAuth() {
     setErrorMessages([]);
 
     try {
-      const response = await apiService.post<LoginResponse>("/auth/login", input);
-      const parsedBody = response.data;
-
-      const loginResponse = parsedBody as LoginResponse;
+      const loginResponse = await authService.login(input);
       const session: AuthSession = {
         token: loginResponse.token,
         tokenType: loginResponse.tipo || "Bearer",
@@ -93,15 +67,7 @@ export function useAuth() {
     setErrorMessages([]);
 
     try {
-      const response = await apiService.post("/usuario", {
-        nome: input.nome,
-        email: input.email,
-        senha: input.senha,
-        confirmarSenha: input.confirmarSenha,
-        cpfcnpj: input.cpfcnpj,
-      });
-
-      const parsedBody = response.data;
+      const parsedBody = await authService.register(input);
 
       return {
         ok: true,

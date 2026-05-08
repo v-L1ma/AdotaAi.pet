@@ -7,15 +7,7 @@ import { useRouter } from "expo-router";
 import { useFocusEffect } from "@react-navigation/native";
 import React, { useCallback, useState } from "react";
 import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
-import apiService from "@/services/apiService";
-
-type FormularioApi = {
-  id: string;
-  titulo?: string;
-  perguntas?: Array<{ id: string; texto: string }>;
-  status?: "Publicado" | "Rascunho";
-  atualizadoEm?: string;
-};
+import { getFormularios } from "@/services/formularioService";
 
 export default function GerenciarFormularios() {
   const router = useRouter();
@@ -30,20 +22,10 @@ export default function GerenciarFormularios() {
     setIsLoading(true);
     setError(null);
 
-    apiService
-      .get("/formularios")
-      .then((response) => {
+    getFormularios()
+      .then((data) => {
         if (!isActive) return;
-
-        const data: FormularioApi[] = Array.isArray(response.data) ? response.data : [];
-        const mapped = data.map((item) => ({
-          id: String(item.id),
-          titulo: item.titulo || `Formulario ${String(item.id).slice(0, 8)}`,
-          perguntas: Array.isArray(item.perguntas) ? item.perguntas.length : 0,
-          status: item.status || "Publicado",
-          atualizadoEm: item.atualizadoEm || "-",
-        }));
-        setFormularios(mapped);
+        setFormularios(data);
       })
       .catch(() => {
         if (!isActive) return;

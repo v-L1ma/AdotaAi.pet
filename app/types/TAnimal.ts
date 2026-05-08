@@ -15,5 +15,15 @@ export type animal = {
     bairro?: string;
     cidade?: string;
     uf?: string;
+    racaId?: string;
+    especieId?: string;
+    formularioId?: string | null;
+    isFavoritado?: boolean;
+    isFavorito?: boolean;
+    dono?: {
+        id: string;
+        nome: string;
+        linkFotoPerfil?: string;
+    };
     // genero: string;
 }

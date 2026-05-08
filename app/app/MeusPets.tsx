@@ -1,13 +1,12 @@
 import { Entypo, Ionicons, MaterialIcons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import React, { useEffect, useMemo, useState } from "react";
-import { ActivityIndicator, Alert, Image, Modal, Pressable, ScrollView, StyleSheet, Text, TouchableOpacity, View, useWindowDimensions } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
+import { ActivityIndicator, Alert, Image, ScrollView, StyleSheet, Text, TouchableOpacity, View, useWindowDimensions } from "react-native";
 import colors from "../styles/colors";
 import { useTabNavigation } from "@/hooks/useTabNavigation";
-import apiService from "@/services/apiService";
 import { animal } from "@/types/TAnimal";
 import AppHeader from "@/components/AppHeader";
+import { deletePet, getUserPets } from "@/services/petService";
 
 export default function MeusPets() {
   const router = useRouter();
@@ -46,9 +45,9 @@ export default function MeusPets() {
       setLoadError(null);
 
       try {
-        const response = await apiService.get<animal[]>("/usuario/pets");
+        const response = await getUserPets();
         if (isMounted) {
-          setPets(response.data ?? []);
+          setPets(response ?? []);
         }
       } catch {
         if (isMounted) {
@@ -99,7 +98,7 @@ export default function MeusPets() {
           style: "destructive",
           onPress: async () => {
             try {
-              await apiService.delete(`/pets/${id}`);
+              await deletePet(id);
               setPets((current) => current.filter((pet) => pet.id !== id));
             } catch {
               Alert.alert("Erro", "Nao foi possivel excluir este pet.");

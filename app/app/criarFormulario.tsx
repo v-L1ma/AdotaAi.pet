@@ -3,9 +3,9 @@ import { FlatList, Pressable, StyleSheet, Text, TextInput, TouchableOpacity, Vie
 import * as Progress from 'react-native-progress';
 import AppHeader from '../components/AppHeader';
 import colors from '../styles/colors';
-import apiService from "../services/apiService";
 import { getApiErrorMessage } from "../services/apiErrorService";
 import { useRouter, useLocalSearchParams } from "expo-router";
+import { createFormulario, getFormularioTemplateById, updateFormulario } from "../services/formularioService";
 
 
 interface Pergunta{
@@ -20,7 +20,7 @@ export default function CriarFormulario(){
 
     const [perguntasFrequentes,setPerguntasFrequentes]=useState<Pergunta[]>([
         { id: 1, conteudo: "Qual seu endereço completo? Com nome da rua, número e cidade" },
-        { id: 2, conteudo: "Você mora em casa ou apto? É totalmente telada (o), incluindo todas as janelas, os cômodos e sacada? (Essa pergunta é primordial na Adoção de Gatos e alguns Cachorros específicos)." },
+        { id: 2, conteudo: "Você mora em casa ou apto? É totalmente telada (o), incluindo todas as janelas, os cômodos e sacada? (Essa pergunta é primordial na Adoção de Gatos e alguns Cãos específicos)." },
         { id: 3, conteudo: "Tem outros animais? Quais? São vacinados e castrados?" },
         { id: 4, conteudo: "Já teve outros animais? O que aconteceu com eles?" },
         { id: 5, conteudo: "Você é o responsável na sua residência?" },
@@ -33,19 +33,19 @@ export default function CriarFormulario(){
         { id: 12, conteudo: "Caso tenha que se mudar pra um local menor ou um local que não aceite animais, o que você faria com ele?" },
         { id: 13, conteudo: "Já devolveu algum animal adotado?" },
         { id: 14, conteudo: "Já teve que doar algum animal seu? Se sim, qual foi o motivo?" },
-        { id: 15, conteudo: "Caso o animal seja cachorro, e cresça mais do que o esperado, o que você faria?" },
+        { id: 15, conteudo: "Caso o animal seja Cão, e cresça mais do que o esperado, o que você faria?" },
         { id: 16, conteudo: "Você tem consciência de que o animal provavelmente viverá em torno de 15 anos, e que a partir do momento da adoção ele passará a fazer parte de todos os seus planos, como um membro da família?" },
         { id: 17, conteudo: "Caso o animal fique doente e você não tenha condições de levar no veterinário, o que faria?" },
         { id: 18, conteudo: "Quantas pessoas moram com você? Se tiver crianças, qual a idade delas? Como elas reagem com os animais?" },
         { id: 19, conteudo: "Se você descobrir que um membro da família é alérgico aos pêlos dele, o que você faria com o animal?" },
         { id: 20, conteudo: "Quantas horas por dia o animal passará sozinho?" },
-        { id: 21, conteudo: "Se o animal for cão, quantas vezes irá passear com o mesmo?" },
+        { id: 21, conteudo: "Se o animal for Cão, quantas vezes irá passear com o mesmo?" },
         { id: 22, conteudo: "Qual marca de ração irá oferecer ao animal? Quanto pretende gastar em um saco de 15 kg mais ou menos?" },
         { id: 23, conteudo: "Você possui imóvel próprio ou mora de aluguel? Pretende se mudar?" },
         { id: 24, conteudo: "Se o animal for gato, você é a favor dele dar voltinhas na rua?" },
         { id: 25, conteudo: "Qual veterinário você costuma ir?" },
         { id: 26, conteudo: "Qual a sua profissão? Atualmente está trabalhando?" },
-        { id: 27, conteudo: "Você está ciente e de acordo em doar 10kg ou 15kg de ração (cão ou gato) para a ONG no ato da adoção?" }
+        { id: 27, conteudo: "Você está ciente e de acordo em doar 10kg ou 15kg de ração (Cão ou gato) para a ONG no ato da adoção?" }
     ]);
 
     const [perguntasSelecionadas,setPerguntasSelecionadas]=useState<Pergunta[]>([]);
@@ -60,8 +60,8 @@ export default function CriarFormulario(){
         if (!editId) return;
         setIsLoading(true);
         try {
-            const response = await apiService.get(`/formularios/${editId}`);
-            const perguntasApi = response.data?.perguntas || [];
+            const response = await getFormularioTemplateById(editId);
+            const perguntasApi = response?.perguntas || [];
             
             const selecionadas: Pergunta[] = [];
             const novasPerguntas: Pergunta[] = [];
@@ -135,9 +135,9 @@ export default function CriarFormulario(){
         setIsSaving(true);
         try {
             if (editId) {
-                await apiService.put(`/formularios/${editId}`, { perguntas });
+                await updateFormulario(editId, { perguntas });
             } else {
-            await apiService.post("/formularios", { perguntas });
+                await createFormulario({ perguntas });
             }
             router.push("/gerenciar-formularios");
         } catch (err) {

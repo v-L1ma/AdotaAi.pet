@@ -3,7 +3,7 @@ import { colors } from "@/styles/variables";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useEffect, useMemo, useState } from "react";
 import { ActivityIndicator, Image, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
-import apiService from "@/services/apiService";
+import { getEventoById, registrarPresenca } from "@/services/eventoService";
 import Ionicons from "@expo/vector-icons/build/Ionicons";
 
 const timeRegex = /^([01]\d|2[0-3]):[0-5]\d$/;
@@ -17,7 +17,7 @@ const formatarHoraDisplay = (hora: string | undefined): string => {
 };
 
 type EventoDTO = {
-  id: string;
+  id?: string;
   nome: string;
   endereco?: string;
   bairro?: string;
@@ -56,10 +56,10 @@ export default function DetalhesEvento() {
       setLoadError(null);
 
       try {
-        const response = await apiService.get<EventoDTO>(`/eventos/${eventoId}`);
+        const response = await getEventoById(eventoId);
         if (isMounted) {
-          setEvento(response.data);
-          setIsInscrito(response.data.isInscrito ?? false);
+          setEvento(response);
+          setIsInscrito(response.isInscrito ?? false);
         }
       } catch {
         if (isMounted) {
@@ -192,7 +192,7 @@ const horarioLabel = useMemo(() => {
               if (!eventoId || isInscritoLoading) return;
               setIsInscritoLoading(true);
               try {
-                await apiService.post(`/eventos/${eventoId}/presenca`);
+                await registrarPresenca(eventoId);
                 setIsInscrito(true);
               } catch {
                 alert("Não foi possível confirmar presença. Tente novamente.");

@@ -2,7 +2,7 @@ import { useCallback, useState } from "react";
 import { Platform } from "react-native";
 import { getSession } from "../lib/session";
 import { getApiErrorMessages } from "../services/apiErrorService";
-import apiService from "../services/apiService";
+import { updatePet, updatePetFromFormData } from "../services/petService";
 import { porte } from "@/types/TPorte";
 
 export type EditPetInput = {
@@ -121,22 +121,18 @@ export function useEditPet() {
       
       if (input.imagem?.uri) {
         const formData = await buildFormData(payload, input.imagem);
-        const response = await apiService.put(`/pets/${input.petId}`, formData, {
-          headers: { "Content-Type": "multipart/form-data" },
-        });
+        const pet = await updatePetFromFormData(input.petId, formData);
         return {
           ok: true,
-          data: response.data,
+          data: pet,
         };
       }
 
-      const response = await apiService.put(`/pets/${input.petId}`, payload, {
-        headers: { "Content-Type": "application/json" },
-      });
+      const pet = await updatePet(input.petId, payload);
 
       return {
         ok: true,
-        data: response.data,
+        data: pet,
       };
     } catch (err) {
       const messages = getApiErrorMessages(err, "Falha ao editar pet");

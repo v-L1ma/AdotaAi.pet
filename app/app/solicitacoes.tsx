@@ -1,10 +1,13 @@
-import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from "expo-router";
 import React, { useEffect, useMemo, useState } from "react";
 import { ActivityIndicator, Image, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from 'react-native-safe-area-context';
 import colors from '../styles/colors';
-import apiService from "@/services/apiService";
+import {
+  getDetalhesSolicitacao,
+  getSolicitacoesEnviadas,
+  getSolicitacoesRecebidas,
+} from "@/services/solicitacaoService";
 import AppHeader from '@/components/AppHeader';
 
 type SolicitacaoDTO = {
@@ -58,13 +61,13 @@ export default function Solicitacoes() {
 
       try {
         const [recebidosRes, enviadosRes] = await Promise.all([
-          apiService.get<SolicitacaoDTO[]>("/solicitacoes/recebidas"),
-          apiService.get<SolicitacaoDTO[]>("/solicitacoes/enviadas"),
+          getSolicitacoesRecebidas(),
+          getSolicitacoesEnviadas(),
         ]);
 
         if (isMounted) {
-          setRecebidos(recebidosRes.data ?? []);
-          setEnviados(enviadosRes.data ?? []);
+          setRecebidos(recebidosRes ?? []);
+          setEnviados(enviadosRes ?? []);
         }
       } catch {
         if (isMounted) {
@@ -98,9 +101,9 @@ export default function Solicitacoes() {
       setDetalhesError(null);
 
       try {
-        const response = await apiService.get<FormularioDetalhadoDTO>(`/solicitacoes/${aberta}`);
+        const response = await getDetalhesSolicitacao(aberta ?? "");
         if (isMounted) {
-          setDetalhes(response.data);
+          setDetalhes(response);
         }
       } catch {
         if (isMounted) {

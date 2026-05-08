@@ -14,9 +14,9 @@ import Icon1 from "react-native-vector-icons/Ionicons";
 import { colors } from "@/styles/variables";
 import SelecionarFormularioModal from "@/components/SelecionarFormularioModal";
 import { Formulario } from "@/types/Formulario";
-import apiService from "@/services/apiService";
 import { animal } from "@/types/TAnimal";
 import AppHeader from "@/components/AppHeader";
+import { getPetById } from "@/services/petService";
 
 const criarAnuncioSchema = z.object({
     nome: z.string().trim().min(2, "Nome deve ter pelo menos 2 caracteres"),
@@ -55,15 +55,16 @@ export default function CriarAnuncioScreen() {
     const { editPet, isEditing: isEditingPet } = useEditPet();
 
     useEffect(() => {
-        if (!isEditing || !params.petId) {
+        const petId = Array.isArray(params.petId) ? params.petId[0] : params.petId;
+        if (!isEditing || !petId) {
             return;
         }
 
         async function loadPet() {
             setIsLoadingPet(true);
             try {
-                const response = await apiService.get<animal>(`/pets/${params.petId}`);
-                setPetData(response.data);
+                const response = await getPetById(petId);
+                setPetData(response);
             } catch {
                 Alert.alert("Erro", "Nao foi carregar os dados do pet.");
             } finally {
@@ -298,7 +299,6 @@ export default function CriarAnuncioScreen() {
                 return;
             }
 
-            Alert.alert("Sucesso", "Anuncio atualizado com sucesso!");
             router.back();
             return;
         }
@@ -323,7 +323,6 @@ export default function CriarAnuncioScreen() {
             return;
         }
 
-        Alert.alert("Sucesso", "Anuncio criado com sucesso!");
         reset();
         setImage(null);
         setFormularioSelecionado(null);

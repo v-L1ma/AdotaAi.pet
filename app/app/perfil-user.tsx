@@ -6,11 +6,11 @@ import { Alert, Image, SafeAreaView, ScrollView, Text, TextInput, TouchableOpaci
 import { z } from "zod";
 import Icon1 from "react-native-vector-icons/Ionicons";
 import { getSession } from "../lib/session";
-import apiService from "../services/apiService";
 import { router } from "expo-router";
 import AppHeader from "@/components/AppHeader";
 import { colors } from "@/styles/variables";
 import { MAX_PROFILE_PICTURE_SIZE_BYTES, useUpdateProfilePicture } from "../hooks/useUpdateProfilePicture";
+import { getCurrentUser, updateUser } from "../services/userService";
 
 type UsuarioAtualizacaoDTO = {
     nome: string;
@@ -26,10 +26,6 @@ type UsuarioAtualizacaoDTO = {
     cidade?: string;
     sg_estado?: string;
     cargo?: string;
-};
-
-type ApiResponse<T> = {
-    data?: T[];
 };
 
 const perfilUsuarioSchema = z
@@ -116,13 +112,7 @@ export default function UserScreen() {
             setValue("cargo", session.cargo ?? "");
 
             try {
-                const response = await apiService.get<ApiResponse<UsuarioAtualizacaoDTO>>("/usuario");
-                const usuarios = response.data?.data ?? [];
-                const usuarioLogado = usuarios.find((usuario) => usuario.email === session.email);
-
-                if (!usuarioLogado) {
-                    return;
-                }
+                const usuarioLogado = await getCurrentUser();
 
                 setUserLogado(usuarioLogado);
 
@@ -177,7 +167,7 @@ export default function UserScreen() {
                 payload.confirmarSenha = data.confirmarSenha?.trim();
             }
 
-            await apiService.put("/usuario", payload);
+            await updateUser(payload);
 
             if (image) {
                 const uploadResult = await updateProfilePicture({
@@ -196,7 +186,6 @@ export default function UserScreen() {
                 setUserLogado((current) => (current ? { ...current, link_foto: novaFoto } : current));
                 setImage(null);
             }
-            Alert.alert("Sucesso", "Dados atualizados com sucesso!");
             setValue("senha", "");
             setValue("confirmarSenha", "");
         } catch {
@@ -207,12 +196,11 @@ export default function UserScreen() {
     };
 
     const hasUnsavedChanges =
-        watch("nome").trim().length > 0 ||
-        watch("email").trim().length > 0 ||
-        watch("telefone")!.trim().length > 0 ||
-        watch("senha")!.trim().length > 0 ||
-        watch("endereco")!.trim().length > 0 ||
-        watch("cep")!.trim().length > 0 ||
+        watch("nome").trim() !== userLogado?.nome ||
+        watch("email").trim() !== userLogado?.email ||
+        watch("telefone")!.trim() !== userLogado?.telefone ||
+        watch("endereco")!.trim() !== userLogado?.endereco ||
+        watch("cep")!.trim() !== userLogado?.cep ||
         !!image;
 
     const handleBackPress = () => {
@@ -257,7 +245,7 @@ export default function UserScreen() {
     };
 
     const validateImageSize = (selectedImage: ImagePicker.ImagePickerAsset) => {
-        if (selectedImage.fileSize != null && selectedImage.fileSize > MAX_PROFILE_PICTURE_SIZE_BYTES) {
+        if (selectedImage.fileSize !== null && (selectedImage.fileSize ?? 0) > MAX_PROFILE_PICTURE_SIZE_BYTES) {
             Alert.alert("Erro", "A imagem deve ter no maximo 50 MB.");
             return false;
         }

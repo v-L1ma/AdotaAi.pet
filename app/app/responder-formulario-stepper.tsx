@@ -3,19 +3,10 @@ import { useEffect, useState } from "react";
 import { ActivityIndicator, Alert, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
-import apiService from "@/services/apiService";
 import colors from "@/styles/colors";
-
-type PerguntaDTO = {
-  id: string;
-  texto: string;
-};
-
-type FormularioTemplateDTO = {
-  id: string;
-  usuarioCriadorId: string;
-  perguntas: PerguntaDTO[];
-};
+import { getFormularioTemplateById } from "@/services/formularioService";
+import { submitSolicitacaoRespostas } from "@/services/solicitacaoService";
+import type { FormularioTemplateDTO } from "@/types/Formulario";
 
 export default function ResponderFormularioStepper() {
   const router = useRouter();
@@ -43,9 +34,9 @@ export default function ResponderFormularioStepper() {
       setError(null);
 
       try {
-        const response = await apiService.get<FormularioTemplateDTO>(`/formularios/${formularioId}`);
+        const response = await getFormularioTemplateById(formularioId);
         if (isMounted) {
-          setFormulario(response.data);
+          setFormulario(response);
         }
       } catch {
         if (isMounted) {
@@ -102,17 +93,13 @@ export default function ResponderFormularioStepper() {
     setIsSubmitting(true);
 
     try {
-      await Promise.all(
-        formulario.perguntas.map((pergunta) =>
-          apiService.post("/solicitacoes/respostas", {
-            solicitacaoId,
-            perguntaId: pergunta.id,
-            resposta: respostas[pergunta.id],
-          })
-        )
+      await submitSolicitacaoRespostas(
+        formulario.perguntas.map((pergunta) => ({
+          solicitacaoId,
+          perguntaId: pergunta.id,
+          resposta: respostas[pergunta.id],
+        }))
       );
-
-      Alert.alert("Sucesso", "Formulario respondido com sucesso.");
       router.back();
     } catch {
       Alert.alert("Erro", "Nao foi possivel enviar suas respostas.");

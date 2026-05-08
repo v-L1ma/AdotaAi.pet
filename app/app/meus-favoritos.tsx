@@ -4,14 +4,9 @@ import React, { useEffect, useState } from "react";
 import { Alert, FlatList, Image, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import colors from '../styles/colors';
-import apiService from "@/services/apiService";
 import { animal } from "@/types/TAnimal";
 import AppHeader from '@/components/AppHeader';
-
-type FavoritosResponse = {
-  message?: string;
-  data?: animal[];
-};
+import { getUserFavorites, unfavoritePet } from "@/services/petService";
 
 export default function MeusFavoritos() {
   const router = useRouter();
@@ -27,9 +22,9 @@ export default function MeusFavoritos() {
       setLoadError(null);
 
       try {
-        const response = await apiService.get<FavoritosResponse>("/pets/favoritos");
+        const response = await getUserFavorites();
         if (isMounted) {
-          setFavoritos(response.data?.data ?? []);
+          setFavoritos(response ?? []);
         }
       } catch {
         if (isMounted) {
@@ -71,7 +66,7 @@ export default function MeusFavoritos() {
 
   const handleDesfavoritar = async (id: string) => {
     try {
-      await apiService.delete(`/pets/${id}/favoritar`);
+      await unfavoritePet(id);
       setFavoritos((current) => current.filter((fav) => fav.id !== id));
     } catch {
       Alert.alert("Erro", "Nao foi possivel desfavoritar agora.");
