@@ -25,6 +25,7 @@ export default function ConfigScreen() {
         { title: "Meus favoritos", icon: "heart-outline", route: "/meus-favoritos" },
         { title: "Formulários", icon: "document-text-outline", route: "/gerenciar-formularios" },
         { title: "Meus Eventos", icon: "calendar-outline", route: "/meus-eventos" },
+        { title: "Eventos Inscritos", icon: "calendar-outline", route: "/eventos-inscritos" },
     ];
 
     const infoItems: SettingItem[] = [

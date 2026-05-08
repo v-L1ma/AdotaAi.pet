@@ -2,33 +2,16 @@ import AppHeader from "@/components/AppHeader";
 import { colors } from "@/styles/variables";
 import { useRouter } from "expo-router";
 import { useEffect, useMemo, useState } from "react";
-import { ActivityIndicator, Alert, FlatList, Image, Pressable, StyleSheet, Text, TouchableOpacity, useWindowDimensions, View } from "react-native";
-import { removerPresenca } from "@/services/eventoService";
+import { ActivityIndicator, Alert, FlatList, Image, Platform, Pressable, StyleSheet, Text, TouchableOpacity, useWindowDimensions, View } from "react-native";
+import { EventoDTO, removerPresenca } from "@/services/eventoService";
 import Ionicons from "@expo/vector-icons/build/Ionicons";
+import { useEventosInscritos } from "@/hooks/useEventosInscritos";
 
 const timeRegex = /^([01]\d|2[0-3]):[0-5]\d$/;
 
-type EventoDTO = {
-  id: string;
-  nome: string;
-  endereco?: string;
-  bairro?: string;
-  cidade?: string;
-  cep?: string;
-  hrinicio?: string;
-  hrfim?: string;
-  descricao?: string;
-  data?: string;
-  status?: string;
-  nmorganizador?: string;
-  contagemPresencas?: number;
-};
-
 export default function EventosInscritos() {
   const router = useRouter();
-  const [eventos, setEventos] = useState<EventoDTO[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
-  const [loadError, setLoadError] = useState<string | null>(null);
+  const {eventos, isLoading, error, refetch} = useEventosInscritos();
   const [isCancelling, setIsCancelling] = useState<string | null>(null);
 
   const { width } = useWindowDimensions();
@@ -51,36 +34,6 @@ export default function EventosInscritos() {
       actionSize: isSmall ? 34 : 38,
     };
   }, [isSmall, isTablet, width]);
-
-  // useEffect(() => {
-  //   let isMounted = true;
-
-  //   async function loadEventos() {
-  //     setIsLoading(true);
-  //     setLoadError(null);
-
-  //     try {
-  //       // const response = await apiService.get<EventoDTO[]>("/usuario/eventos-inscritos");
-  //       if (isMounted) {
-  //         // setEventos(response.data ?? []);
-  //       }
-  //     } catch {
-  //       if (isMounted) {
-  //         setLoadError("Nao foi possivel carregar os eventos inscritos.");
-  //       }
-  //     } finally {
-  //       if (isMounted) {
-  //         setIsLoading(false);
-  //       }
-  //     }
-  //   }
-
-  //   loadEventos();
-
-  //   return () => {
-  //     isMounted = false;
-  //   };
-  // }, []);
 
   const formatarData = (data?: string, hora?: string) => {
     if (!data) {
@@ -118,6 +71,15 @@ export default function EventosInscritos() {
   };
 
   const handleCancelarInscricao = (evento: EventoDTO) => {
+    if(Platform.OS === "web") {
+      if(window.confirm(`Tem certeza que deseja cancelar sua presença em "${evento.nome}"?`)) {
+        setIsCancelling(evento.id ?? null); 
+        removerPresenca(evento.id ?? "").then(() => {
+          refetch();
+        });
+      }
+      return;
+    }
     Alert.alert(
       "Cancelar Inscrição",
       `Tem certeza que deseja cancelar sua presença em "${evento.nome}"?`,
@@ -127,10 +89,12 @@ export default function EventosInscritos() {
           text: "Sim, cancelar",
           style: "destructive",
           onPress: async () => {
-            setIsCancelling(evento.id);
+            setIsCancelling(evento.id ?? null);
             try {
-              await removerPresenca(evento.id);
-              setEventos((prev) => prev.filter((e) => e.id !== evento.id));
+              await removerPresenca(evento.id ?? "").then(() => {
+                refetch();
+                setIsCancelling(null);
+              });
             } catch {
               Alert.alert("Erro", "Não foi possível cancelar a inscrição.");
             } finally {
@@ -153,7 +117,7 @@ export default function EventosInscritos() {
 
       <FlatList
         data={eventos}
-        keyExtractor={(item) => item.id}
+        keyExtractor={(item) => item.id ?? ""}
         contentContainerStyle={styles.list}
         showsVerticalScrollIndicator={false}
         style={{ width: metrics.cardWidth }}
@@ -163,8 +127,8 @@ export default function EventosInscritos() {
               <ActivityIndicator size="small" color={colors.primary} />
               <Text style={styles.loadingText}>Carregando...</Text>
             </View>
-          ) : loadError ? (
-            <Text style={styles.emptyText}>{loadError}</Text>
+          ) : error ? (
+            <Text style={styles.emptyText}>{error}</Text>
           ) : (
             <View style={styles.emptyContainer}>
               <Ionicons name="calendar-outline" size={48} color={colors.textMuted} />
@@ -211,23 +175,25 @@ export default function EventosInscritos() {
                     {item.contagemPresencas} participante{item.contagemPresencas !== 1 ? "s" : ""}
                   </Text>
                 )}
-              </View>
-            </TouchableOpacity>
-
-            <TouchableOpacity
+                <TouchableOpacity
               style={styles.cancelButton}
               onPress={() => handleCancelarInscricao(item)}
               disabled={isCancelling === item.id}
             >
               {isCancelling === item.id ? (
-                <ActivityIndicator size="small" color="#b00020" />
+                <ActivityIndicator size="small" color="white" />
               ) : (
                 <>
-                  <Ionicons name="close-circle-outline" size={16} color="#b00020" />
-                  <Text style={styles.cancelButtonText}>CancelarInscricao</Text>
+                  <Ionicons name="close-circle-outline" size={16} color="white" />
+                  <Text style={styles.cancelButtonText}>Cancelar Inscricao</Text>
                 </>
               )}
             </TouchableOpacity>
+              </View>
+              
+            </TouchableOpacity>
+
+            
           </View>
         )}
       />
@@ -366,13 +332,11 @@ const styles = StyleSheet.create({
     position: "relative",
   },
   cancelButton: {
-    position: "absolute",
-    top: 8,
-    right: 8,
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "rgba(255,255,255,0.95)",
-    borderRadius: 16,
+    justifyContent: "center",
+    backgroundColor: "#b00020",
+    borderRadius: 4,
     paddingHorizontal: 10,
     paddingVertical: 6,
     gap: 4,
@@ -383,7 +347,7 @@ const styles = StyleSheet.create({
     elevation: 2,
   },
   cancelButtonText: {
-    color: "#b00020",
+    color: "white",
     fontWeight: "700",
     fontSize: 11,
   },
