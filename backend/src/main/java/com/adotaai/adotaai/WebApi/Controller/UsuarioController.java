@@ -92,6 +92,11 @@ public class UsuarioController {
         return ResponseEntity.ok(eventoService.listarEventosUsuarioLogado());
     }
 
+    @GetMapping("/eventos-inscritos")
+    public ResponseEntity<List<EventoDTO>> listarEventosInscritos() {
+        return ResponseEntity.ok(eventoService.listarEventosInscritos());
+    }
+
     @GetMapping("/pets")
     public ResponseEntity<List<PetDTO>> listarPetsUsuarioLogado() {
         return ResponseEntity.ok(petService.listarPetsUsuarioLogado());
