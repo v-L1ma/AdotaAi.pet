@@ -1,7 +1,7 @@
 package com.adotaai.adotaai.Domain.Entity;
 
-import java.sql.Time;
 import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.Objects;
 import java.util.UUID;
 
@@ -41,11 +41,11 @@ public class EventoEntity extends AuditableEntity {
     @Column(nullable = false)
     private String cep;
 
-    @Column(nullable = false)
-    private Time hrinicio;
+    @Column(nullable = false, columnDefinition = "TIME")
+    private LocalTime hrinicio;
 
-    @Column(nullable = false)
-    private String hrfim;
+    @Column(nullable = false, columnDefinition = "TIME")
+    private LocalTime hrfim;
 
     @Column(nullable = false)
     private String descricao;
@@ -55,6 +55,9 @@ public class EventoEntity extends AuditableEntity {
 
     @Column(nullable = false)
     private String status;
+
+    @Column(nullable = true)
+    private String mensagemReprovado;
 
     @Column(nullable = false)
     private String nmorganizador;
@@ -121,19 +124,19 @@ public class EventoEntity extends AuditableEntity {
         this.cep = cep;
     }
 
-    public Time getHrinicio() {
+    public LocalTime getHrinicio() {
         return hrinicio;
     }
 
-    public void setHrinicio(Time hrinicio) {
+    public void setHrinicio(LocalTime hrinicio) {
         this.hrinicio = hrinicio;
     }
 
-    public String getHrfim() {
+    public LocalTime getHrfim() {
         return hrfim;
     }
 
-    public void setHrfim(String hrfim) {
+    public void setHrfim(LocalTime hrfim) {
         this.hrfim = hrfim;
     }
 
@@ -175,6 +178,14 @@ public class EventoEntity extends AuditableEntity {
 
     public void setUser(UsuarioEntity user) {
         this.user = user;
+    }
+
+    public String getMensagemReprovado() {
+        return mensagemReprovado;
+    }
+
+    public void setMensagemReprovado(String mensagemReprovado) {
+        this.mensagemReprovado = mensagemReprovado;
     }
 
     @Override

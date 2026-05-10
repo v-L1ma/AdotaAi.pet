@@ -1,24 +1,63 @@
 import AppHeader from "@/components/AppHeader";
+import CardFormulario from "@/components/CardFormulario";
+import SelecionarPetModal from "@/components/SelecionarPetModal";
 import { colors } from "@/styles/variables";
+import { Formulario } from "@/types/Formulario";
 import { useRouter } from "expo-router";
-import { Image, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
-
-type Formulario = {
-  id: number;
-  titulo: string;
-  perguntas: number;
-  status: "Publicado" | "Rascunho";
-  atualizadoEm: string;
-};
-
-const formularios: Formulario[] = [
-  { id: 1, titulo: "Questionário padrão de adoção", perguntas: 20, status: "Publicado", atualizadoEm: "18/03/2026" },
-  { id: 2, titulo: "Triagem para cães de grande porte", perguntas: 16, status: "Rascunho", atualizadoEm: "14/03/2026" },
-  { id: 3, titulo: "Formulário para gatos", perguntas: 18, status: "Publicado", atualizadoEm: "10/03/2026" },
-];
+import { useFocusEffect } from "@react-navigation/native";
+import React, { useCallback, useState } from "react";
+import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { getFormularios } from "@/services/formularioService";
 
 export default function GerenciarFormularios() {
   const router = useRouter();
+  const [formularios, setFormularios] = useState<Formulario[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [isPetModalVisible, setIsPetModalVisible] = useState(false);
+  const [formularioSelecionado, setFormularioSelecionado] = useState<Formulario | null>(null);
+
+  const carregarFormularios = useCallback(() => {
+    let isActive = true;
+    setIsLoading(true);
+    setError(null);
+
+    getFormularios()
+      .then((data) => {
+        if (!isActive) return;
+        setFormularios(data);
+      })
+      .catch(() => {
+        if (!isActive) return;
+        setError("Nao foi possivel carregar os formularios.");
+        setFormularios([]);
+      })
+      .finally(() => {
+        if (!isActive) return;
+        setIsLoading(false);
+      });
+
+    return () => {
+      isActive = false;
+    };
+  }, []);
+
+  useFocusEffect(
+    useCallback(() => {
+      const cleanup = carregarFormularios();
+      return () => cleanup?.();
+    }, [carregarFormularios])
+  );
+
+  const handleAbrirModal = (formulario: Formulario) => {
+    setFormularioSelecionado(formulario);
+    setIsPetModalVisible(true);
+  };
+
+  const handleFecharModal = () => {
+    setIsPetModalVisible(false);
+    setFormularioSelecionado(null);
+  };
 
   return (
     <View style={styles.screen}>
@@ -29,38 +68,31 @@ export default function GerenciarFormularios() {
           <Text style={styles.heroSubtitle}>Edite e organize os formulários que os candidatos irão responder.</Text>
         </View>
 
-        {formularios.map((item) => (
-          <View key={item.id} style={styles.card}>
-            <Image
-              source={{ uri: item.id % 2 === 0 ? "https://images.unsplash.com/photo-1537151625747-768eb6cf92b2?w=1200" : "https://images.unsplash.com/photo-1548199973-03cce0bbc87b?w=1200" }}
-              style={styles.cover}
-            />
-
-            <View style={styles.headerRow}>
-              <Text style={styles.title}>{item.titulo}</Text>
-              <View style={[styles.badge, item.status === "Publicado" ? styles.badgePublished : styles.badgeDraft]}>
-                <Text style={styles.badgeText}>{item.status}</Text>
-              </View>
-            </View>
-
-            <Text style={styles.info}>{item.perguntas} perguntas • atualizado em {item.atualizadoEm}</Text>
-
-            <View style={styles.actions}>
-              <TouchableOpacity style={styles.secondaryButton} onPress={() => router.push("/criarFormulario") }>
-                <Text style={styles.secondaryText}>Editar</Text>
-              </TouchableOpacity>
-
-              <TouchableOpacity style={styles.primaryButton} onPress={() => router.push("/criarAnuncio") }>
-                <Text style={styles.primaryText}>Vincular anúncio</Text>
-              </TouchableOpacity>
-            </View>
-          </View>
+        {isLoading && <Text style={styles.feedbackText}>Carregando formularios...</Text>}
+        {!isLoading && error && <Text style={styles.feedbackText}>{error}</Text>}
+        {!isLoading && !error && formularios.length === 0 && (
+          <Text style={styles.feedbackText}>Nenhum formulario encontrado.</Text>
+        )}
+        {!isLoading && !error && formularios.map((item) => (
+          <CardFormulario
+            key={item.id}
+            item={item}
+            index={item.id}
+            onVicularAnuncio={handleAbrirModal}
+            showEditButton={true}
+          />
         ))}
 
         <TouchableOpacity style={styles.cta} onPress={() => router.push("/criarFormulario") }>
           <Text style={styles.ctaText}>Criar novo formulário</Text>
         </TouchableOpacity>
       </ScrollView>
+
+      <SelecionarPetModal
+        visible={isPetModalVisible}
+        onClose={handleFecharModal}
+        formulario={formularioSelecionado}
+      />
     </View>
   );
 }
@@ -194,5 +226,11 @@ const styles = StyleSheet.create({
     color: "white",
     fontSize: 17,
     fontWeight: "700",
+  },
+  feedbackText: {
+    color: colors.textMuted,
+    fontSize: 14,
+    textAlign: "center",
+    marginVertical: 8,
   },
 });

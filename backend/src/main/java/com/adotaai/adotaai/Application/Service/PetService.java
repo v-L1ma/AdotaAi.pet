@@ -1,6 +1,7 @@
 package com.adotaai.adotaai.Application.Service;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.List;
@@ -18,13 +19,20 @@ import org.springframework.web.multipart.MultipartFile;
 import com.adotaai.adotaai.Application.DTO.BuscarPetDTO;
 import com.adotaai.adotaai.Application.DTO.CadastrarPetDTO;
 import com.adotaai.adotaai.Application.DTO.PetDTO;
+import com.adotaai.adotaai.Domain.Entity.EspecieEntity;
 import com.adotaai.adotaai.Domain.Entity.FavoritoPetEntity;
+import com.adotaai.adotaai.Domain.Entity.FormularioEntity;
 import com.adotaai.adotaai.Domain.Entity.PetEntity;
+import com.adotaai.adotaai.Domain.Entity.RacaEntity;
 import com.adotaai.adotaai.Domain.Entity.UsuarioEntity;
+import com.adotaai.adotaai.Domain.Enum.Status;
 import com.adotaai.adotaai.Domain.Exception.RecursoNaoEncontradoException;
 import com.adotaai.adotaai.Domain.Exception.RegraDeNegocioException;
+import com.adotaai.adotaai.Infraestructure.Repository.EspecieRepository;
 import com.adotaai.adotaai.Infraestructure.Repository.FavoritoPetRepository;
+import com.adotaai.adotaai.Infraestructure.Repository.FormularioRepository;
 import com.adotaai.adotaai.Infraestructure.Repository.PetRepository;
+import com.adotaai.adotaai.Infraestructure.Repository.RacaRepository;
 import com.adotaai.adotaai.Infraestructure.Repository.UsuarioRepository;
 
 import jakarta.transaction.Transactional;
@@ -42,20 +50,35 @@ public class PetService {
     private FavoritoPetRepository favoritoPetRepository;
 
     @Autowired
+    private FormularioRepository formularioRepository;
+
+    @Autowired
+    private RacaRepository racaRepository;
+
+    @Autowired
+    private EspecieRepository especieRepository;
+
+    @Autowired
     private ImageUploadService imageUploadService;
 
     public List<PetDTO> listarTodos() {
-        List<PetEntity> pet = petRepository.findAll();
+        List<PetEntity> pet = petRepository.findAllVisible();
         return pet.stream().map(PetDTO::new).toList();
     }
 
+    public List<PetDTO> listarPetsUsuarioLogado() {
+        UsuarioEntity usuarioAutenticado = obterUsuarioAutenticado();
+        List<PetEntity> pets = petRepository.findAllByFl_ativoTrueAndUserId(usuarioAutenticado.getId());
+        return pets.stream().map(PetDTO::new).toList();
+    }
+
     public BuscarPetDTO buscarPet(UUID id) {
-        PetEntity pet = petRepository.findById(id)
+        PetEntity pet = petRepository.findByIdAndFl_ativoTrue(id)
                 .orElseThrow(() -> new RecursoNaoEncontradoException("Pet não encontrado com ID: " + id));
 
         BuscarPetDTO.DonoDTO dono = null;
         if (pet.getUser() != null) {
-            dono = new BuscarPetDTO.DonoDTO(pet.getUser().getId(), pet.getUser().getNome());
+            dono = new BuscarPetDTO.DonoDTO(pet.getUser().getId(), pet.getUser().getNome(), pet.getUser().getLink_foto());
         }
 
         boolean isFavoritado = false;
@@ -66,36 +89,63 @@ public class PetService {
                 pet.getId());
         }
 
+        UUID formularioId = pet.getFormulario() != null ? pet.getFormulario().getId() : null;
+        UUID racaId = pet.getRacaEntity() != null ? pet.getRacaEntity().getId() : null;
+
         return new BuscarPetDTO(
-                pet.getId(),
-                pet.getStatus(),
-                pet.getDescricao(),
-                pet.getDt_nasc(),
-                pet.getNome(),
-                pet.getPorte(),
-                pet.getRaca(),
-                pet.getEspecie(),
-                pet.getLink_foto(),
-                isFavoritado,
-                dono);
+            pet.getId(),
+            pet.getStatus(),
+            pet.getDescricao(),
+            pet.getDt_nasc(),
+            pet.getNome(),
+            pet.getPorte(),
+            pet.getRaca(),
+            racaId,
+            pet.getEspecie(),
+            pet.getLink_foto(),
+            formularioId,
+            isFavoritado,
+            dono);
     }
 
+    @Transactional
     public void excluir(UUID id) {
-        PetEntity pet = petRepository.findById(id)
+        PetEntity pet = petRepository.findByIdAndFl_ativoTrue(id)
                 .orElseThrow(() -> new RecursoNaoEncontradoException("Pet não encontrado"));
-        petRepository.delete(pet);
+        pet.setFl_ativo(false);
+        pet.setLast_modified_at(LocalDateTime.now());
+        pet.setLast_modified_by(obterUsuarioAutenticado().getId());
+        petRepository.save(pet);
     }
 
     public PetDTO criarPet(CadastrarPetDTO petDTO, MultipartFile imagem) {
         PetEntity pet = new PetEntity();
-        BeanUtils.copyProperties(petDTO, pet);
+        BeanUtils.copyProperties(petDTO, pet, "racaId", "especieId");
 
         LocalDate date = parseDtNasc(petDTO.getDtNasc());
 
         pet.setDt_nasc(date);
         UsuarioEntity usuario = obterUsuarioAutenticado();
         pet.setUser(usuario);
-        pet.setStatus("Pendente");
+        pet.setStatus(Status.PENDENTE.name());
+        pet.setFormulario(resolveFormulario(petDTO));
+        pet.setFl_ativo(true);
+        pet.setCreated_at(LocalDateTime.now());
+        pet.setCreated_by(usuario.getId());
+        
+        if (petDTO.getEspecieId() != null) {
+            EspecieEntity especie = especieRepository.findById(petDTO.getEspecieId())
+                    .orElseThrow(() -> new RecursoNaoEncontradoException("Espécie não encontrada com ID: " + petDTO.getEspecieId()));
+            pet.setEspecieEntity(especie);
+            pet.setEspecie(especie.getNome());
+        }
+
+        if (petDTO.getRacaId() != null) {
+            RacaEntity raca = racaRepository.findById(petDTO.getRacaId())
+                    .orElseThrow(() -> new RecursoNaoEncontradoException("Raça não encontrada com ID: " + petDTO.getRacaId()));
+            pet.setRacaEntity(raca);
+            pet.setRaca(raca.getNome());
+        }
 
         if (imagem != null && !imagem.isEmpty()) {
             String imageUrl = imageUploadService.uploadPetImage(imagem, pet.getId() == null ? UUID.randomUUID() : pet.getId());
@@ -119,15 +169,37 @@ public class PetService {
         PetEntity pet = petRepository.findById(id)
                 .orElseThrow(() -> new RecursoNaoEncontradoException("Pet não encontrado com ID: " + id));
 
-        BeanUtils.copyProperties(petDto, pet, "id", "user", "link_foto");
-        LocalDate date = parseDtNasc(petDto.getDtNasc());
-
-        pet.setDt_nasc(date);
+        if (petDto != null && petDto.getNome() != null) {
+            if (petDto.getNome() != null) pet.setNome(petDto.getNome());
+            if (petDto.getDescricao() != null) pet.setDescricao(petDto.getDescricao());
+            if (petDto.getDtNasc() != null) {
+                LocalDate date = parseDtNasc(petDto.getDtNasc());
+                pet.setDt_nasc(date);
+            }
+            if (petDto.getPorte() != null) pet.setPorte(petDto.getPorte());
+            if (petDto.getEspecieId() != null) {
+                EspecieEntity especie = especieRepository.findById(petDto.getEspecieId())
+                        .orElseThrow(() -> new RecursoNaoEncontradoException("Espécie não encontrada com ID: " + petDto.getEspecieId()));
+                pet.setEspecieEntity(especie);
+                pet.setEspecie(especie.getNome());
+            }
+            if (petDto.getRacaId() != null) {
+                RacaEntity raca = racaRepository.findById(petDto.getRacaId())
+                        .orElseThrow(() -> new RecursoNaoEncontradoException("Raça não encontrada com ID: " + petDto.getRacaId()));
+                pet.setRacaEntity(raca);
+                pet.setRaca(raca.getNome());
+            }
+            pet.setFormulario(resolveFormulario(petDto));
+        }
 
         if (imagem != null && !imagem.isEmpty()) {
             String imageUrl = imageUploadService.uploadPetImage(imagem, pet.getId());
             pet.setLink_foto(imageUrl);
         }
+
+        pet.setLast_modified_at(LocalDateTime.now());
+        pet.setLast_modified_by(obterUsuarioAutenticado().getId());
+        pet.setStatus(Status.PENDENTE.name());
 
         PetEntity petatualizado = petRepository.save(pet);
         return new PetDTO(petatualizado);
@@ -148,6 +220,9 @@ public class PetService {
         FavoritoPetEntity favorito = new FavoritoPetEntity();
         favorito.setUsuario(usuarioAutenticado);
         favorito.setPet(pet);
+        favorito.setFl_ativo(true);
+        favorito.setCreated_at(java.time.LocalDateTime.now());
+        favorito.setCreated_by(usuarioAutenticado.getId());
         favoritoPetRepository.save(favorito);
     }
 
@@ -183,6 +258,16 @@ public class PetService {
         }
     }
 
+    private FormularioEntity resolveFormulario(CadastrarPetDTO petDTO) {
+        if (petDTO.getFormularioId() == null) {
+            return null;
+        }
+
+        return formularioRepository.findById(petDTO.getFormularioId())
+                .orElseThrow(() -> new RecursoNaoEncontradoException(
+                        "Formulario nao encontrado com ID: " + petDTO.getFormularioId()));
+    }
+
     private UsuarioEntity obterUsuarioAutenticado() {
         return obterUsuarioAutenticadoOpcional()
                 .orElseThrow(() -> new RegraDeNegocioException("Usuário não autenticado."));
@@ -209,6 +294,46 @@ public class PetService {
         }
 
         return usuarioRepository.findByEmail(auth.getName());
+    }
+
+    public List<PetDTO> listarPetsPendentes() {
+        List<PetEntity> pets = petRepository.findAll();
+        return pets.stream().map(PetDTO::new).toList();
+    }
+
+    @Transactional
+    public void aprovarPet(UUID id) {
+        UsuarioEntity admin = obterUsuarioAutenticado();
+        if (admin.getCargo() != com.adotaai.adotaai.Domain.Entity.Roles.ADMINISTRADOR) {
+            throw new RegraDeNegocioException("Acesso negado. Apenas administradores podem aprovar pets.");
+        }
+
+        PetEntity pet = petRepository.findById(id)
+                .orElseThrow(() -> new RecursoNaoEncontradoException("Pet não encontrado com ID: " + id));
+
+        pet.setStatus(Status.APROVADO.name());
+        pet.setLast_modified_at(LocalDateTime.now());
+        pet.setLast_modified_by(admin.getId());
+        petRepository.save(pet);
+    }
+
+    @Transactional
+    public void reprovarPet(UUID id, String motivo) {
+        UsuarioEntity admin = obterUsuarioAutenticado();
+        if (admin.getCargo() != com.adotaai.adotaai.Domain.Entity.Roles.ADMINISTRADOR) {
+            throw new RegraDeNegocioException("Acesso negado. Apenas administradores podem reprovar pets.");
+        }
+
+        PetEntity pet = petRepository.findById(id)
+                .orElseThrow(() -> new RecursoNaoEncontradoException("Pet não encontrado com ID: " + id));
+
+        pet.setStatus(Status.REPROVADO.name());
+        if (motivo != null && !motivo.isBlank()) {
+            pet.setMensagemReprovado(motivo);
+        }
+        pet.setLast_modified_at(LocalDateTime.now());
+        pet.setLast_modified_by(admin.getId());
+        petRepository.save(pet);
     }
 
 }

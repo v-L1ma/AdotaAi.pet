@@ -1,14 +1,15 @@
 import { LinearGradient } from "expo-linear-gradient";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import { useEffect, useMemo, useState } from "react";
-import { ActivityIndicator, Image, Platform, Pressable, SafeAreaView, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import React, { useEffect, useMemo, useState } from "react";
+import { ActivityIndicator, Alert, Image, Platform, Pressable, SafeAreaView, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import IconMat from "react-native-vector-icons/MaterialCommunityIcons";
 import IconIonic from "react-native-vector-icons/Ionicons";
 import { colors } from "@/styles/variables";
-import React from "react";
-import apiService from "../services/apiService";
 import { WebView } from "react-native-webview";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { favoritePet, getPetById, unfavoritePet } from "../services/petService";
+import { createSolicitacaoDirect } from "../services/solicitacaoService";
+import { birthToAge } from "@/utils/birthToAge";
 
 type BuscarPetDTO = {
     id: string;
@@ -25,13 +26,12 @@ type BuscarPetDTO = {
         id: string;
         nome: string;
     };
+    formularioId?: string | null;
 };
 
 export default function PerfilPet(){
-
     const router = useRouter();
     const insets = useSafeAreaInsets();
-    const [heartIcon, setHeartIcon]=useState<string>("heart-outline")
     const [mapLoading, setMapLoading] = useState<boolean>(true);
     const [mapError, setMapError] = useState<string | null>(null);
     const [coordinates, setCoordinates] = useState<{ lat: number; lon: number } | null>(null);
@@ -45,8 +45,6 @@ export default function PerfilPet(){
         uf?: string | string[];
     }>();
 
-    const petName = Array.isArray(nome) ? nome[0] : nome || "Alfredo";
-    const petImage = Array.isArray(imagem) ? imagem[0] : imagem || "https://img.freepik.com/fotos-gratis/fotografia-vertical-de-foco-superficial-de-um-bonito-cachorro-de-golden-retriever-sentado-em-um-chao-de-grama_181624-27259.jpg?w=360";
     const locationText = useMemo(() => {
         const localizacaoValue = Array.isArray(localizacao) ? localizacao[0] : localizacao;
         if (localizacaoValue && localizacaoValue.trim().length > 0) return localizacaoValue;
@@ -59,7 +57,7 @@ export default function PerfilPet(){
         return dynamicParts || "Marapé, Santos - SP";
     }, [bairro, cidade, localizacao, uf]);
 
-    const [description] = useState<string>("É um pet muito carinhoso e cheio de energia, ideal para uma família que busca companhia no dia a dia. Já está vacinado e vermifugado, pronto para encontrar um lar seguro e cheio de amor.")
+    // const description = pet?.descricao || "Descrição não informada.";
     const IFrameTag = "iframe" as unknown as React.ElementType;
 
     useEffect(() => {
@@ -118,11 +116,15 @@ export default function PerfilPet(){
         return `https://www.openstreetmap.org/export/embed.html?bbox=${left}%2C${bottom}%2C${right}%2C${top}&layer=mapnik&marker=${coordinates.lat}%2C${coordinates.lon}`;
     }, [coordinates]);
 
-     const [isTogglingFavorite, setIsTogglingFavorite] = useState<boolean>(false);
+    const [isTogglingFavorite, setIsTogglingFavorite] = useState<boolean>(false);
     const [isPetFavorited, setIsPetFavorited] = useState<boolean>(false);
     const [pet, setPet] = useState<BuscarPetDTO | null>(null);
     const [isLoadingPet, setIsLoadingPet] = useState<boolean>(false);
     const [petError, setPetError] = useState<string | null>(null);
+    const [isAdopting, setIsAdopting] = useState<boolean>(false);
+
+    const petName = pet?.nome || (Array.isArray(nome) ? nome[0] : nome) || "Alfredo";
+    const petImage = pet?.link_foto || (Array.isArray(imagem) ? imagem[0] : imagem) || "https://img.freepik.com/fotos-gratis/fotografia-vertical-de-foco-superficial-de-um-bonito-Cão-de-golden-retriever-sentado-em-um-chao-de-grama_181624-27259.jpg?w=360";
 
     const params = useLocalSearchParams<{ id?: string }>();
     const petId = Array.isArray(params.id) ? params.id[0] : params.id;
@@ -138,14 +140,14 @@ export default function PerfilPet(){
             setPetError(null);
 
             try {
-                const response = await apiService.get<BuscarPetDTO>(`/pets/${petId}`);
+                const response = await getPetById(petId);
                 const favoritado =
-                    response.data.isFavoritado ??
-                    response.data.isFavorito ??
-                    (response.data as BuscarPetDTO & { favoritado?: boolean }).favoritado ??
+                    response.isFavoritado ??
+                    response.isFavorito ??
+                    (response as BuscarPetDTO & { favoritado?: boolean }).favoritado ??
                     false;
 
-                setPet({ ...response.data, isFavoritado: favoritado, isFavorito: favoritado });
+                setPet({ ...response, isFavoritado: favoritado, isFavorito: favoritado });
                 setIsPetFavorited(favoritado);
             } catch {
                 setPetError("Nao foi possivel carregar os dados do pet.");
@@ -180,7 +182,7 @@ export default function PerfilPet(){
         return date.toLocaleDateString("pt-BR");
     }, [pet?.dt_nasc]);
 
-    async function favoritePet(){
+    async function handleToggleFavorite(){
         if (!petId || !pet || isTogglingFavorite) {
             return;
         }
@@ -188,17 +190,38 @@ export default function PerfilPet(){
         setIsTogglingFavorite(true);
         try {
             if (isPetFavorited) {
-                await apiService.delete(`/pets/${petId}/favoritar`);
+                await unfavoritePet(petId);
                 setIsPetFavorited(false);
                 setPet((currentPet) => currentPet ? { ...currentPet, isFavoritado: false, isFavorito: false } : currentPet);
                 return;
             }
 
-            await apiService.post(`/pets/${petId}/favoritar`);
+            await favoritePet(petId);
             setIsPetFavorited(true);
             setPet((currentPet) => currentPet ? { ...currentPet, isFavoritado: true, isFavorito: true } : currentPet);
         } finally {
             setIsTogglingFavorite(false);
+        }
+    }
+
+    async function handleAdotar() {
+        if (!petId || !pet || isAdopting) {
+            return;
+        }
+
+        setIsAdopting(true);
+        try {
+            if (pet.formularioId) {
+                router.push(`/responder-formulario-stepper?formularioId=${pet.formularioId}&petId=${petId}`);
+            } else {
+                // Send adoption request directly
+                await createSolicitacaoDirect({ petId: petId });
+                router.back();
+            }
+        } catch (err) {
+            Alert.alert("Erro", "Não foi possível enviar a solicitação de adoção.");
+        } finally {
+            setIsAdopting(false);
         }
     }
 
@@ -223,8 +246,8 @@ export default function PerfilPet(){
                         <View style={style.headerSpacer} />
                     </SafeAreaView>
 
-                    <Pressable onPress={()=>favoritePet()} style={style.favoriteFloatingButton}>
-                        <IconMat name={heartIcon} size={29} color={colors.primary}></IconMat>
+                    <Pressable onPress={handleToggleFavorite} style={style.favoriteFloatingButton}>
+                        <IconMat name={isPetFavorited ? "heart" : "heart-outline"} size={29} color={colors.primary}></IconMat>
                     </Pressable>
                 </View>
 
@@ -240,17 +263,17 @@ export default function PerfilPet(){
                     <View style={style.caracteristicasContainer}>
                         <View style={style.caracteristicasCard}>
                             <Text style={style.kicker}>Idade</Text>
-                            <Text style={style.tituloCard}>9 meses</Text>
+                            <Text style={style.tituloCard}>{birthToAge(birthDateLabel)}</Text>
                         </View>
 
                         <View style={style.caracteristicasCard}>
                             <Text style={style.kicker}>Gênero</Text>
-                            <Text style={style.tituloCard}>Macho</Text>
+                            <Text style={style.tituloCard}>{pet?.especie || "Nao informado"}</Text>
                         </View>
 
                         <View style={style.caracteristicasCard}>
-                            <Text style={style.kicker}>Peso</Text>
-                            <Text style={style.tituloCard}>3.5kg</Text>
+                            <Text style={style.kicker}>Porte</Text>
+                            <Text style={style.tituloCard}>{pet?.porte || "Nao informado"}</Text>
                         </View>
                     </View>
 
@@ -259,7 +282,7 @@ export default function PerfilPet(){
                             <Text style={style.aboutTitle}>Sobre</Text>
                             <View style={style.divider}></View>
                         </View>
-                        <Text style={style.aboutText}>{description}</Text>
+                            {/* <Text style={style.aboutText}>{description}</Text> */}
 
                         <View style={style.publisher}>
                             <Image
@@ -312,15 +335,14 @@ export default function PerfilPet(){
                 </View>
             </ScrollView>
 
-            <View style={style.footer}>
-                <TouchableOpacity style={style.button}>
-                    <Text style={style.buttonText}>Quero adotar!</Text>
-                </TouchableOpacity>
-            </View>
+<View style={style.footer}>
+        <TouchableOpacity style={style.button} onPress={handleAdotar}>
+            <Text style={style.buttonText}>Quero adotar!</Text>
+        </TouchableOpacity>
+    </View>
         </View>
     )
 }
-
 const style = StyleSheet.create({
     container:{
         flex:1,

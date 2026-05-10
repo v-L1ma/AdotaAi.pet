@@ -14,8 +14,12 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.adotaai.adotaai.Application.DTO.AprovarReprovarRequestDTO;
 import com.adotaai.adotaai.Application.DTO.EventoDTO;
 import com.adotaai.adotaai.Application.Service.EventoService;
+import com.adotaai.adotaai.Application.Util.BaseResponse;
+
+import jakarta.validation.Valid;
 
 @RestController
 @RequestMapping(value = "/eventos")
@@ -30,9 +34,15 @@ public class EventoController {
         return eventoService.listarTodos();
     }
 
+    @GetMapping("/{id}")
+    public ResponseEntity<EventoDTO> buscarEvento(@PathVariable UUID id) {
+        return ResponseEntity.ok(eventoService.buscarPorId(id));
+    }
+
     @PostMapping
-    public void criarEvento(@RequestBody EventoDTO evento) {
-        eventoService.criarEvento(evento);
+    public ResponseEntity<EventoDTO> criarEvento(@RequestBody EventoDTO evento) {
+        EventoDTO criado = eventoService.criarEvento(evento);
+        return ResponseEntity.ok(criado);
     }
 
     @PutMapping("/{id}")
@@ -47,4 +57,40 @@ public class EventoController {
         return ResponseEntity.ok().build();
     }
 
+    @PostMapping("/{id}/presenca")
+    public ResponseEntity<Void> registrarPresenca(@PathVariable UUID id) {
+        eventoService.registrarPresenca(id);
+        return ResponseEntity.ok().build();
+    }
+
+    @DeleteMapping("/{id}/presenca")
+    public ResponseEntity<Void> removerPresenca(@PathVariable UUID id) {
+        eventoService.removerPresenca(id);
+        return ResponseEntity.ok().build();
+    }
+
+    @GetMapping("/pendentes")
+    public ResponseEntity<BaseResponse<EventoDTO>> listarEventosPendentes() {
+        List<EventoDTO> pendentes = eventoService.listarEventosPendentes();
+        BaseResponse<EventoDTO> response = new BaseResponse<>();
+        response.setMessage("Eventos pendentes listados com sucesso.");
+        response.setData(pendentes);
+        return ResponseEntity.ok(response);
+    }
+
+    @PostMapping("/{id}/aprovar")
+    public ResponseEntity<BaseResponse<String>> aprovarEvento(@PathVariable UUID id) {
+        eventoService.aprovarEvento(id);
+        BaseResponse<String> response = new BaseResponse<>();
+        response.setMessage("Evento aprovado com sucesso.");
+        return ResponseEntity.ok(response);
+    }
+
+    @PostMapping("/{id}/reprovar")
+    public ResponseEntity<BaseResponse<String>> reprovarEvento(@PathVariable UUID id, @Valid @RequestBody AprovarReprovarRequestDTO request) {
+        eventoService.reprovarEvento(id, request.getMotivo());
+        BaseResponse<String> response = new BaseResponse<>();
+        response.setMessage("Evento reprovado com sucesso.");
+        return ResponseEntity.ok(response);
+    }
 }

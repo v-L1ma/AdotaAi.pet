@@ -1,8 +1,7 @@
 import { useCallback, useState } from "react";
 import { Platform } from "react-native";
 import { getApiErrorMessages } from "../services/apiErrorService";
-import apiService from "../services/apiService";
-import type { ApiBaseResponse } from "@/types/ApiResponse";
+import { updateProfilePicture as updateProfilePictureService } from "../services/userService";
 
 export const MAX_PROFILE_PICTURE_SIZE_BYTES = 50 * 1024 * 1024;
 
@@ -73,14 +72,11 @@ export function useUpdateProfilePicture() {
 
       try {
         const formData = await buildFormData(input);
-        const response = await apiService.put<ApiBaseResponse<UpdateProfilePictureResponse>>(
-          "/usuario/foto-perfil",
-          formData
-        );
+        const response = await updateProfilePictureService(formData);
 
         return {
           ok: true,
-          data: response.data?.data?.[0] ?? {},
+          data: response.data?.[0] ?? {},
         };
       } catch (err) {
         const messages = getApiErrorMessages(err, "Falha ao atualizar foto de perfil");

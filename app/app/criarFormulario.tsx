@@ -1,8 +1,11 @@
-import React, { useState } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { FlatList, Pressable, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
 import * as Progress from 'react-native-progress';
 import AppHeader from '../components/AppHeader';
 import colors from '../styles/colors';
+import { getApiErrorMessage } from "../services/apiErrorService";
+import { useRouter, useLocalSearchParams } from "expo-router";
+import { createFormulario, getFormularioTemplateById, updateFormulario } from "../services/formularioService";
 
 
 interface Pergunta{
@@ -11,10 +14,13 @@ interface Pergunta{
 }
 
 export default function CriarFormulario(){
+    const router = useRouter();
+    const { id } = useLocalSearchParams();
+    const editId = id as string | undefined;
 
     const [perguntasFrequentes,setPerguntasFrequentes]=useState<Pergunta[]>([
         { id: 1, conteudo: "Qual seu endereço completo? Com nome da rua, número e cidade" },
-        { id: 2, conteudo: "Você mora em casa ou apto? É totalmente telada (o), incluindo todas as janelas, os cômodos e sacada? (Essa pergunta é primordial na Adoção de Gatos e alguns Cachorros específicos)." },
+        { id: 2, conteudo: "Você mora em casa ou apto? É totalmente telada (o), incluindo todas as janelas, os cômodos e sacada? (Essa pergunta é primordial na Adoção de Gatos e alguns Cãos específicos)." },
         { id: 3, conteudo: "Tem outros animais? Quais? São vacinados e castrados?" },
         { id: 4, conteudo: "Já teve outros animais? O que aconteceu com eles?" },
         { id: 5, conteudo: "Você é o responsável na sua residência?" },
@@ -27,26 +33,67 @@ export default function CriarFormulario(){
         { id: 12, conteudo: "Caso tenha que se mudar pra um local menor ou um local que não aceite animais, o que você faria com ele?" },
         { id: 13, conteudo: "Já devolveu algum animal adotado?" },
         { id: 14, conteudo: "Já teve que doar algum animal seu? Se sim, qual foi o motivo?" },
-        { id: 15, conteudo: "Caso o animal seja cachorro, e cresça mais do que o esperado, o que você faria?" },
+        { id: 15, conteudo: "Caso o animal seja Cão, e cresça mais do que o esperado, o que você faria?" },
         { id: 16, conteudo: "Você tem consciência de que o animal provavelmente viverá em torno de 15 anos, e que a partir do momento da adoção ele passará a fazer parte de todos os seus planos, como um membro da família?" },
         { id: 17, conteudo: "Caso o animal fique doente e você não tenha condições de levar no veterinário, o que faria?" },
         { id: 18, conteudo: "Quantas pessoas moram com você? Se tiver crianças, qual a idade delas? Como elas reagem com os animais?" },
         { id: 19, conteudo: "Se você descobrir que um membro da família é alérgico aos pêlos dele, o que você faria com o animal?" },
         { id: 20, conteudo: "Quantas horas por dia o animal passará sozinho?" },
-        { id: 21, conteudo: "Se o animal for cão, quantas vezes irá passear com o mesmo?" },
+        { id: 21, conteudo: "Se o animal for Cão, quantas vezes irá passear com o mesmo?" },
         { id: 22, conteudo: "Qual marca de ração irá oferecer ao animal? Quanto pretende gastar em um saco de 15 kg mais ou menos?" },
         { id: 23, conteudo: "Você possui imóvel próprio ou mora de aluguel? Pretende se mudar?" },
         { id: 24, conteudo: "Se o animal for gato, você é a favor dele dar voltinhas na rua?" },
         { id: 25, conteudo: "Qual veterinário você costuma ir?" },
         { id: 26, conteudo: "Qual a sua profissão? Atualmente está trabalhando?" },
-        { id: 27, conteudo: "Você está ciente e de acordo em doar 10kg ou 15kg de ração (cão ou gato) para a ONG no ato da adoção?" }
+        { id: 27, conteudo: "Você está ciente e de acordo em doar 10kg ou 15kg de ração (Cão ou gato) para a ONG no ato da adoção?" }
     ]);
 
     const [perguntasSelecionadas,setPerguntasSelecionadas]=useState<Pergunta[]>([]);
     const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
     const [perguntaInput, setPerguntaInput] = useState<string>("");
     const [erroMessage, setErroMessage] = useState<string | null>(null);
+    const [saveError, setSaveError] = useState<string | null>(null);
+    const [isSaving, setIsSaving] = useState(false);
+    const [isLoading, setIsLoading] = useState(false);
 
+    const loadFormulario = useCallback(async () => {
+        if (!editId) return;
+        setIsLoading(true);
+        try {
+            const response = await getFormularioTemplateById(editId);
+            const perguntasApi = response?.perguntas || [];
+            
+            const selecionadas: Pergunta[] = [];
+            const novasPerguntas: Pergunta[] = [];
+            
+            perguntasApi.forEach((item: { texto?: string }, idx: number) => {
+                const texto = item?.texto?.trim() || "";
+                if (!texto) return;
+                
+                const existente = perguntasFrequentes.find((p) => p.conteudo === texto);
+                if (existente) {
+                    selecionadas.push(existente);
+                } else {
+                    const nova: Pergunta = { id: Date.now() + idx, conteudo: texto };
+                    novasPerguntas.push(nova);
+                    selecionadas.push(nova);
+                }
+            });
+            
+            if (novasPerguntas.length > 0) {
+                setPerguntasFrequentes((prev) => [...prev, ...novasPerguntas]);
+            }
+            setPerguntasSelecionadas(selecionadas);
+        } catch {
+            setSaveError("Não foi possível carregar o formulário.");
+        } finally {
+            setIsLoading(false);
+        }
+    }, [editId]);
+
+    useEffect(() => {
+        loadFormulario();
+    }, [loadFormulario]);
 
     function selecionarPergunta(pergunta: Pergunta) {
         // já está selecionada? remove
@@ -54,7 +101,7 @@ export default function CriarFormulario(){
             setPerguntasSelecionadas((prev) => prev.filter((p) => p.id !== pergunta.id));
             return;
         } 
-        if(perguntasSelecionadas.length<=20){
+        if(perguntasSelecionadas.length < 20){
         // senão, adiciona
             setPerguntasSelecionadas((prev) => [...prev, pergunta]);
         }
@@ -65,7 +112,7 @@ export default function CriarFormulario(){
     }
 
     function handleChange(text:string){
-        setErroMessage(text.length > 120 ? "A pergunta pode ter no máximo 120 caracteres." : null);
+        setErroMessage(text.length > 120 ? "A pergunta pode ter no maximo 120 caracteres." : null);
         setPerguntaInput(text)
     }
 
@@ -75,11 +122,41 @@ export default function CriarFormulario(){
         setIsModalOpen(!isModalOpen);
     }
 
+    async function salvarFormulario() {
+        setSaveError(null);
+
+        if (perguntasSelecionadas.length === 0) {
+            setSaveError("Selecione ao menos uma pergunta para salvar o formulario.");
+            return;
+        }
+
+        const perguntas = perguntasSelecionadas.map((pergunta) => pergunta.conteudo.trim());
+
+        setIsSaving(true);
+        try {
+            if (editId) {
+                await updateFormulario(editId, { perguntas });
+            } else {
+                await createFormulario({ perguntas });
+            }
+            router.push("/gerenciar-formularios");
+        } catch (err) {
+            setSaveError(getApiErrorMessage(err, "Nao foi possivel salvar o formulario."));
+        } finally {
+            setIsSaving(false);
+        }
+    }
+
 
     function criarNovaPergunta(){
 
         if(perguntaInput.length<=0){
             setErroMessage("A pergunta não pode ser vazia.");
+            return;
+        }
+
+        if(perguntaInput.length > 120){
+            setErroMessage("A pergunta pode ter no maximo 120 caracteres.");
             return;
         }
 
@@ -103,7 +180,7 @@ export default function CriarFormulario(){
 
     return(
         <View style={style.screen}>
-            <AppHeader title="Criar Formulário" titleFontSize={20} />
+            <AppHeader title={editId ? "Editar Formulário" : "Criar Formulário"} titleFontSize={20} />
 
             <View style={style.main}>
                 <Text style={style.heroSubtitle}>Selecione até 20 perguntas para avaliar os adotantes de forma segura.</Text>
@@ -137,8 +214,15 @@ export default function CriarFormulario(){
                     <TouchableOpacity style={[style.button, style.secondaryButton]} onPress={()=>abrirFecharPopUp()}>
                         <Text style={style.secondaryButtonText}>Criar pergunta personalizada</Text>
                     </TouchableOpacity>
-                    <TouchableOpacity style={[style.button, style.primaryButton]}>
-                        <Text style={style.primaryButtonText}>Salvar questionário</Text>
+                    {saveError && <Text style={style.errorText}>{saveError}</Text>}
+                    <TouchableOpacity
+                        style={[style.button, style.primaryButton, isSaving && style.buttonDisabled]}
+                        onPress={salvarFormulario}
+                        disabled={isSaving}
+                    >
+                        <Text style={style.primaryButtonText}>
+                            {isSaving ? "Salvando..." : editId ? "Atualizar questionario" : "Salvar questionario"}
+                        </Text>
                     </TouchableOpacity>
                 </View>
             </View>
@@ -315,5 +399,8 @@ const style = StyleSheet.create({
     errorText: {
         color:"red",
         fontSize: 13,
-    }
+    },
+    buttonDisabled: {
+        opacity: 0.7,
+    },
 });

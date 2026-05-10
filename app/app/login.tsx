@@ -96,11 +96,11 @@ export default function LoginScreen() {
             <Text style={styles.buttonText}>{isLoading ? "Entrando..." : "Entrar"}</Text>
           </TouchableOpacity>
 
-          <Text style={{ marginVertical: 10 }}>Ou</Text>
+          {/* <Text style={{ marginVertical: 10 }}>Ou</Text>
 
           <TouchableOpacity style={styles.buttonLogin2} onPress={() => alert("Em desenvolvimento!")}>
             <Icon1 name="google" size={20} color="fff" />
-          </TouchableOpacity>
+          </TouchableOpacity> */}
 
           <TouchableOpacity onPress={() => router.replace("/cadastro")}>
             <Text style={{ marginVertical: 10 }}>Não possui uma conta?</Text>

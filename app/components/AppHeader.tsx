@@ -35,7 +35,7 @@ export default function AppHeader({ title, onBackPress, titleFontSize = 28, titl
             backgroundColor: '#fff',
             borderBottomLeftRadius: 30,
             borderBottomRightRadius: 30,
-            paddingTop: 34,
+            paddingTop: 54,
             paddingBottom: 18,
             shadowColor: '#000',
             shadowOpacity: 0.06,

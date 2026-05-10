@@ -1,5 +1,6 @@
 package com.adotaai.adotaai.WebApi.Controller;
 
+import java.util.List;
 import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,8 +19,13 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.adotaai.adotaai.Application.DTO.AtualizarUsuarioDTO;
 import com.adotaai.adotaai.Application.DTO.CadastrarUsuarioDTO;
+import com.adotaai.adotaai.Application.DTO.EventoDTO;
+import com.adotaai.adotaai.Application.DTO.PetDTO;
+import com.adotaai.adotaai.Application.DTO.UsuarioAdminDTO;
 import com.adotaai.adotaai.Application.DTO.UsuarioReponseDTO;
 import com.adotaai.adotaai.Application.DTO.UsuarioPublicoDTO;
+import com.adotaai.adotaai.Application.Service.EventoService;
+import com.adotaai.adotaai.Application.Service.PetService;
 import com.adotaai.adotaai.Application.Service.UsuarioService;
 import com.adotaai.adotaai.Application.Util.BaseResponse;
 
@@ -29,6 +35,12 @@ public class UsuarioController {
 
     @Autowired
     private UsuarioService usuarioService;
+
+    @Autowired
+    private EventoService eventoService;
+
+    @Autowired
+    private PetService petService;
 
     @GetMapping
     public ResponseEntity<BaseResponse<UsuarioReponseDTO>> buscarUsuarioLogado() {
@@ -74,6 +86,36 @@ public class UsuarioController {
             return ResponseEntity.badRequest().body(res);
         }
         return ResponseEntity.ok(res);
+    }
+
+    @GetMapping("/eventos")
+    public ResponseEntity<List<EventoDTO>> listarEventosUsuarioLogado() {
+        return ResponseEntity.ok(eventoService.listarEventosUsuarioLogado());
+    }
+
+    @GetMapping("/eventos-inscritos")
+    public ResponseEntity<List<EventoDTO>> listarEventosInscritos() {
+        return ResponseEntity.ok(eventoService.listarEventosInscritos());
+    }
+
+    @GetMapping("/pets")
+    public ResponseEntity<List<PetDTO>> listarPetsUsuarioLogado() {
+        return ResponseEntity.ok(petService.listarPetsUsuarioLogado());
+    }
+
+    @GetMapping("/admin/usuarios")
+    public ResponseEntity<BaseResponse<UsuarioAdminDTO>> listarTodosUsuarios() {
+        return ResponseEntity.ok(usuarioService.listarTodosUsuarios());
+    }
+
+    @PutMapping("/admin/{id}/ativar")
+    public ResponseEntity<BaseResponse<String>> ativarUsuario(@PathVariable UUID id) {
+        return ResponseEntity.ok(usuarioService.ativarUsuario(id));
+    }
+
+    @PutMapping("/admin/{id}/desativar")
+    public ResponseEntity<BaseResponse<String>> desativarUsuario(@PathVariable UUID id) {
+        return ResponseEntity.ok(usuarioService.desativarUsuario(id));
     }
 
 }

@@ -2,8 +2,11 @@ package com.adotaai.adotaai.Domain.Entity;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.ForeignKey;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
 
@@ -13,7 +16,7 @@ import java.util.UUID;
 @Table(
         name = "racas",
         uniqueConstraints = {
-                @UniqueConstraint(name = "uk_racas_nome_especie", columnNames = {"nome", "especie"})
+        @UniqueConstraint(name = "uk_racas_nome_especie", columnNames = {"nome", "especie_id"})
         }
 )
 public class RacaEntity extends AuditableEntity {
@@ -25,8 +28,10 @@ public class RacaEntity extends AuditableEntity {
     @Column(nullable = false)
     private String nome;
 
-    @Column(nullable = false)
-    private String especie;
+        @ManyToOne
+        @JoinColumn(name = "especie_id", nullable = false, foreignKey = @ForeignKey(name = "especie_id",
+            foreignKeyDefinition = "FOREIGN KEY (especie_id) REFERENCES especies(id)"))
+        private EspecieEntity especie;
 
     public UUID getId() {
         return id;
@@ -44,11 +49,15 @@ public class RacaEntity extends AuditableEntity {
         this.nome = nome;
     }
 
-    public String getEspecie() {
+    public EspecieEntity getEspecie() {
         return especie;
     }
 
-    public void setEspecie(String especie) {
+    public void setEspecie(EspecieEntity especie) {
         this.especie = especie;
+    }
+
+    public UUID getEspecieId() {
+        return especie != null ? especie.getId() : null;
     }
 }

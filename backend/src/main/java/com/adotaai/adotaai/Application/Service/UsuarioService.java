@@ -12,6 +12,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.adotaai.adotaai.Application.DTO.AtualizarUsuarioDTO;
 import com.adotaai.adotaai.Application.DTO.CadastrarUsuarioDTO;
+import com.adotaai.adotaai.Application.DTO.UsuarioAdminDTO;
 import com.adotaai.adotaai.Application.DTO.UsuarioReponseDTO;
 import com.adotaai.adotaai.Application.DTO.UsuarioPublicoDTO;
 import com.adotaai.adotaai.Application.Util.BaseResponse;
@@ -47,7 +48,7 @@ public class UsuarioService {
     }
 
     public BaseResponse<UsuarioReponseDTO> listarTodos() {
-        List<UsuarioEntity> usuario = usuarioRepository.findAll();
+        List<UsuarioEntity> usuario = usuarioRepository.findAllByFl_ativoTrue();
         List<UsuarioReponseDTO> dtos = usuario.stream().map(UsuarioReponseDTO::new).toList();
         return new BaseResponse<>("Sucesso", dtos, null);
     }
@@ -58,7 +59,7 @@ public class UsuarioService {
             throw new RegraDeNegocioException("Usuário não autenticado.");
         }
 
-        UsuarioEntity usuario = usuarioRepository.findByEmailIgnoreCase(auth.getName())
+        UsuarioEntity usuario = usuarioRepository.findByEmailIgnoreCaseAndFl_ativoTrue(auth.getName())
                 .orElseThrow(() -> new RecursoNaoEncontradoException("Usuário não encontrado para o email: " + auth.getName()));
 
         return new BaseResponse<>("Sucesso", List.of(new UsuarioReponseDTO(usuario)), null);
@@ -184,7 +185,6 @@ public class UsuarioService {
         user.setCidade(userDto.getCidade());
         user.setSg_estado(userDto.getSg_estado());
         user.setFl_ativo(true);
-        user.setCargo(Roles.USUARIO);
         user.setLast_modified_at(LocalDateTime.now());
         user.setLast_modified_by(user.getId());
 
@@ -233,7 +233,7 @@ public class UsuarioService {
         usuario.setLast_modified_at(LocalDateTime.now());
         usuario.setLast_modified_by(usuario.getId());
         usuarioRepository.save(usuario);
-        petRepository.deleteByUserId(usuario.getId());
+        petRepository.deactivateByUserId(usuario.getId());
 
         return new BaseResponse<>("Usuário excluído com sucesso.", null, null);
     }
@@ -246,6 +246,87 @@ public class UsuarioService {
         if (imagem.getSize() > MAX_FOTO_PERFIL_BYTES) {
             throw new RegraDeNegocioException("Imagem acima do limite permitido de 50 MB.");
         }
+    }
+
+    public BaseResponse<UsuarioAdminDTO> listarTodosUsuarios() {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        if (auth == null || !auth.isAuthenticated() || auth.getName().equals("anonymousUser")) {
+            throw new RegraDeNegocioException("Usuário não autenticado.");
+        }
+
+        UsuarioEntity admin = usuarioRepository.findByEmailIgnoreCase(auth.getName())
+                .orElseThrow(() -> new RecursoNaoEncontradoException("Administrador não encontrado."));
+
+        if (admin.getCargo() != Roles.ADMINISTRADOR) {
+            throw new RegraDeNegocioException("Acesso negado. Apenas administradores podem listar usuários.");
+        }
+
+        List<UsuarioEntity> usuarios = usuarioRepository.findAll();
+        List<UsuarioAdminDTO> dtos = usuarios.stream()
+                .filter(u -> u.getCargo() != Roles.ADMINISTRADOR)
+                .map(UsuarioAdminDTO::new)
+                .toList();
+
+        return new BaseResponse<>("Usuários listados com sucesso.", dtos, null);
+    }
+
+    @Transactional
+    public BaseResponse<String> ativarUsuario(UUID id) {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        if (auth == null || !auth.isAuthenticated() || auth.getName().equals("anonymousUser")) {
+            throw new RegraDeNegocioException("Usuário não autenticado.");
+        }
+
+        UsuarioEntity admin = usuarioRepository.findByEmailIgnoreCase(auth.getName())
+                .orElseThrow(() -> new RecursoNaoEncontradoException("Administrador não encontrado."));
+
+        if (admin.getCargo() != Roles.ADMINISTRADOR) {
+            throw new RegraDeNegocioException("Acesso negado. Apenas administradores podem ativar usuários.");
+        }
+
+        UsuarioEntity usuario = usuarioRepository.findById(id)
+                .orElseThrow(() -> new RecursoNaoEncontradoException("Usuário não encontrado com ID: " + id));
+
+        if (usuario.getCargo() == Roles.ADMINISTRADOR) {
+            throw new RegraDeNegocioException("Não é permitido alterar o status de administradores.");
+        }
+
+        usuario.setFl_ativo(true);
+        usuario.setLast_modified_at(LocalDateTime.now());
+        usuario.setLast_modified_by(admin.getId());
+        usuarioRepository.save(usuario);
+
+        return new BaseResponse<>("Usuário ativado com sucesso.", List.of("Usuário ativado com sucesso."), null);
+    }
+
+    @Transactional
+    public BaseResponse<String> desativarUsuario(UUID id) {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        if (auth == null || !auth.isAuthenticated() || auth.getName().equals("anonymousUser")) {
+            throw new RegraDeNegocioException("Usuário não autenticado.");
+        }
+
+        UsuarioEntity admin = usuarioRepository.findByEmailIgnoreCase(auth.getName())
+                .orElseThrow(() -> new RecursoNaoEncontradoException("Administrador não encontrado."));
+
+        if (admin.getCargo() != Roles.ADMINISTRADOR) {
+            throw new RegraDeNegocioException("Acesso negado. Apenas administradores podem desativar usuários.");
+        }
+
+        UsuarioEntity usuario = usuarioRepository.findById(id)
+                .orElseThrow(() -> new RecursoNaoEncontradoException("Usuário não encontrado com ID: " + id));
+
+        if (usuario.getCargo() == Roles.ADMINISTRADOR) {
+            throw new RegraDeNegocioException("Não é permitido alterar o status de administradores.");
+        }
+
+        usuario.setFl_ativo(false);
+        usuario.setLast_modified_at(LocalDateTime.now());
+        usuario.setLast_modified_by(admin.getId());
+        usuarioRepository.save(usuario);
+        petRepository.deactivateByUserId(usuario.getId());
+
+        return new BaseResponse<>("Usuário desativado com sucesso.", List.of("Usuário desativado com sucesso."), null);
     }
 
 }

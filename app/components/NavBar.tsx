@@ -1,4 +1,4 @@
-import { StyleSheet, View } from "react-native";
+import { TouchableOpacity, StyleSheet, View } from "react-native";
 import Icon from 'react-native-vector-icons/Octicons';
 import IconMat from 'react-native-vector-icons/MaterialCommunityIcons';
 import { colors } from "@/styles/variables";
@@ -6,7 +6,6 @@ import { usePathname } from "expo-router";
 import { BlurView } from "expo-blur";
 import React from "react";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { TouchableOpacity } from "react-native";
 import { useTabNavigation } from "@/hooks/useTabNavigation";
 
 export default function NavBar(){
@@ -20,6 +19,7 @@ export default function NavBar(){
     const isHomeSelected = normalizedPath === "/" || normalizedPath === "/Home";
     const isListagemSelected = normalizedPath === "/listagem-pets" || normalizedPath === "/listagempets";
     const isCreateSelected = normalizedPath === "/criar-anuncio" || normalizedPath === "/criaranuncio";
+    const isEventosSelected = normalizedPath === "/eventos" || normalizedPath === "/eventos";
     const isConfigSelected = normalizedPath === "/config";
 
     return(
@@ -42,6 +42,10 @@ export default function NavBar(){
 
                 <TouchableOpacity style={[styles.iconButton, isListagemSelected && styles.iconButtonSelected]} onPress={()=>navigateToTab("/listagem-pets") }>
                     <Icon style={styles.icon} name="search" size={30} color={colors.primary}></Icon>
+                </TouchableOpacity>
+
+                <TouchableOpacity style={[styles.iconButton, isEventosSelected && styles.iconButtonSelected]} onPress={()=>navigateToTab("/eventos") }>
+                    <Icon style={styles.icon} name="calendar" size={30} color={colors.primary}></Icon>
                 </TouchableOpacity>
 
                 <TouchableOpacity style={[styles.iconButton, isCreateSelected && styles.iconButtonSelected]} onPress={()=>navigateToTab("/criar-anuncio") }>

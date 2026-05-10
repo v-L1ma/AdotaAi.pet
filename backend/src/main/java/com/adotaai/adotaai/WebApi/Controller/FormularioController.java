@@ -28,6 +28,12 @@ public class FormularioController {
         return new ResponseEntity<>(formularioCriado, HttpStatus.CREATED);
     }
 
+    @PutMapping("/{id}")
+    public ResponseEntity<FormularioTemplateDTO> atualizarFormulario(@PathVariable UUID id, @Valid @RequestBody FormularioDTO dto) {
+        FormularioTemplateDTO formularioAtualizado = formularioService.atualizarFormulario(id, dto);
+        return ResponseEntity.ok(formularioAtualizado);
+    }
+
     @GetMapping("/{id}")
     public ResponseEntity<FormularioTemplateDTO> buscarFormularioPorId(@PathVariable UUID id) {
         FormularioTemplateDTO dto = formularioService.buscarFormularioPorId(id);

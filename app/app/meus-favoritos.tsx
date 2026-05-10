@@ -1,45 +1,79 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from "expo-router";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Alert, FlatList, Image, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import colors from '../styles/colors';
-
-// Mock temporário para exibição
-type Favorito = {
-  id: string;
-  nome: string;
-  especie: string;
-  idade: string;
-  imagem: any;
-};
-
-const initialFavoritos: Favorito[] = [
-  {
-    id: '1',
-    nome: 'Luna',
-    especie: 'Gato',
-    idade: '2 anos',
-    imagem: require('../assets/images/cat1.png'),
-  },
-  {
-    id: '2',
-    nome: 'Thor',
-    especie: 'Cachorro',
-    idade: '3 anos',
-    imagem: require('../assets/images/dog1.png'),
-  },
-];
+import { animal } from "@/types/TAnimal";
+import AppHeader from '@/components/AppHeader';
+import { getUserFavorites, unfavoritePet } from "@/services/petService";
 
 export default function MeusFavoritos() {
   const router = useRouter();
-  const [favoritos, setFavoritos] = useState<Favorito[]>(initialFavoritos);
+  const [favoritos, setFavoritos] = useState<animal[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [loadError, setLoadError] = useState<string | null>(null);
 
-  const handleDesfavoritar = (id: string) => {
-    setFavoritos(favoritos.filter(fav => fav.id !== id));
+  useEffect(() => {
+    let isMounted = true;
+
+    async function loadFavoritos() {
+      setIsLoading(true);
+      setLoadError(null);
+
+      try {
+        const response = await getUserFavorites();
+        if (isMounted) {
+          setFavoritos(response ?? []);
+        }
+      } catch {
+        if (isMounted) {
+          setLoadError("Nao foi possivel carregar seus favoritos.");
+        }
+      } finally {
+        if (isMounted) {
+          setIsLoading(false);
+        }
+      }
+    }
+
+    loadFavoritos();
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
+  const formatarIdade = (dtNasc?: string) => {
+    if (!dtNasc) {
+      return "Idade nao informada";
+    }
+
+    const date = new Date(dtNasc);
+    if (Number.isNaN(date.getTime())) {
+      return "Idade nao informada";
+    }
+
+    const diffMs = Date.now() - date.getTime();
+    const diffYears = Math.floor(diffMs / (1000 * 60 * 60 * 24 * 365.25));
+    if (diffYears > 0) {
+      return `${diffYears} ano${diffYears > 1 ? "s" : ""}`;
+    }
+
+    const diffMonths = Math.max(1, Math.floor(diffMs / (1000 * 60 * 60 * 24 * 30.5)));
+    return `${diffMonths} mes${diffMonths > 1 ? "es" : ""}`;
   };
 
-  const confirmDesfavoritar = (item: Favorito) => {
+  const handleDesfavoritar = async (id: string) => {
+    try {
+      await unfavoritePet(id);
+      setFavoritos((current) => current.filter((fav) => fav.id !== id));
+    } catch {
+      Alert.alert("Erro", "Nao foi possivel desfavoritar agora.");
+    }
+  };
+
+  const confirmDesfavoritar = (item: animal) => {
     Alert.alert(
       'Remover dos favoritos',
       `Deseja realmente desfavoritar ${item.nome}?`,
@@ -50,12 +84,17 @@ export default function MeusFavoritos() {
     );
   };
 
-  const renderItem = ({ item }: { item: Favorito }) => (
-    <View style={styles.card}>
-      <Image source={item.imagem} style={styles.petImage} />
+  const renderItem = ({ item }: { item: animal }) => (
+    <TouchableOpacity style={styles.card} onPress={() => router.push({
+                    pathname:"/perfil-pet",
+                    params:{
+                        id: item.id
+                    }
+                })}>
+      <Image source={{ uri: item.link_foto }} style={styles.petImage} />
       <View style={styles.content}>
         <Text style={styles.petName}>{item.nome}</Text>
-        <Text style={styles.petInfo}>{item.especie} • {item.idade}</Text>
+        <Text style={styles.petInfo}>{item.especie} • {formatarIdade(item.dt_nasc)}</Text>
         <Text style={styles.petDescription} numberOfLines={2}>
           Pronto para encontrar um novo lar com carinho e segurança.
         </Text>
@@ -63,20 +102,13 @@ export default function MeusFavoritos() {
       <TouchableOpacity style={styles.favoriteButton} onPress={() => confirmDesfavoritar(item)}>
         <Ionicons name="heart" size={22} color={colors.primary} />
       </TouchableOpacity>
-    </View>
+    </TouchableOpacity>
   );
 
   return (
     <>
       <SafeAreaView edges={['top']} style={{ backgroundColor: '#fff' }} />
-      <View style={styles.header}>
-        <TouchableOpacity onPress={() => router.back()} style={styles.backButton} hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
-          <Ionicons name="arrow-back" size={28} color={colors.primary} />
-        </TouchableOpacity>
-        <View style={{ flex: 1, alignItems: 'center' }}>
-          <Text style={styles.headerTitle}>Meus Favoritos</Text>
-        </View>
-      </View>
+      <AppHeader title="Meus Favoritos" onBackPress={() => router.back()} />
       <View style={styles.container}>
         <FlatList
           data={favoritos}
@@ -84,7 +116,15 @@ export default function MeusFavoritos() {
           renderItem={renderItem}
           contentContainerStyle={{ paddingBottom: 32, paddingTop: 12, paddingHorizontal: 2 }}
           showsVerticalScrollIndicator={false}
-          ListEmptyComponent={<Text style={styles.emptyText}>Nenhum animal favoritado ainda.</Text>}
+          ListEmptyComponent={
+            isLoading ? (
+              <Text style={styles.emptyText}>Carregando favoritos...</Text>
+            ) : loadError ? (
+              <Text style={styles.emptyText}>{loadError}</Text>
+            ) : (
+              <Text style={styles.emptyText}>Nenhum animal favoritado ainda.</Text>
+            )
+          }
         />
       </View>
     </>
@@ -124,7 +164,7 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#f6f7f9',
     paddingHorizontal: 16,
-    paddingTop: 12,
+    paddingTop: 70,
   },
   card: {
     flexDirection: 'row',

@@ -11,7 +11,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.adotaai.adotaai.Application.DTO.*;
 import com.adotaai.adotaai.Domain.Entity.*;
-import com.adotaai.adotaai.Domain.Enum.StatusSolicitacao;
+import com.adotaai.adotaai.Domain.Enum.Status;
 import com.adotaai.adotaai.Domain.Exception.RecursoNaoEncontradoException;
 import com.adotaai.adotaai.Domain.Exception.RegraDeNegocioException;
 import com.adotaai.adotaai.Infraestructure.Repository.*;
@@ -21,63 +21,85 @@ public class SolicitacaoAdocaoService implements ISolicitacaoAdocaoService {
 
     private final SolicitacaoAdocaoRepository solicitacaoRepository;
     private final UsuarioRepository usuarioRepository;
-    private final FormularioRepository formularioRepository;
-    private final PerguntaRepository perguntaRepository;
-    private final RespostaRepository respostaRepository;
+    private final PetRepository petRepository;
 
     public SolicitacaoAdocaoService(SolicitacaoAdocaoRepository solicitacaoRepository,
                                     UsuarioRepository usuarioRepository,
-                                    FormularioRepository formularioRepository,
-                                    PerguntaRepository perguntaRepository,
-                                    RespostaRepository respostaRepository) {
+                                    PetRepository petRepository) {
         this.solicitacaoRepository = solicitacaoRepository;
         this.usuarioRepository = usuarioRepository;
-        this.formularioRepository = formularioRepository;
-        this.perguntaRepository = perguntaRepository;
-        this.respostaRepository = respostaRepository;
+        this.petRepository = petRepository;
     }
 
     @Override
     @Transactional
     public SolicitacaoResponseDTO criarSolicitacao(SolicitacaoAdocaoDTO dto) {
         UsuarioEntity adotante = obterUsuarioAutenticado();
-        FormularioEntity formulario = formularioRepository.findById(dto.getFormularioId())
-                .orElseThrow(() -> new RecursoNaoEncontradoException("Formulário não encontrado"));
 
-        UsuarioEntity anunciante = formulario.getUsuarioCriador();
+        PetEntity pet = petRepository.findById(dto.getPetId())
+                .orElseThrow(() -> new RecursoNaoEncontradoException("Pet não encontrado"));
 
-        Optional<SolicitacaoAdocaoEntity> solicitacaoExistente =
-                solicitacaoRepository.findByAdotanteIdAndFormularioId(adotante.getId(), formulario.getId());
+        FormularioEntity formulario = pet.getFormulario();
 
+        if (formulario != null) {
+            if (dto.getRespostas() == null || dto.getRespostas().isEmpty()) {
+                throw new RegraDeNegocioException("Este pet possui formulário. Você deve responder as perguntas para fazer a solicitação.");
+            }
+
+            List<PerguntaEntity> perguntasFormulario = formulario.getPerguntas();
+            if (perguntasFormulario.size() != dto.getRespostas().size()) {
+                throw new RegraDeNegocioException("Você deve responder todas as perguntas do formulário.");
+            }
+
+            for (PerguntaRespostaDTO respostaDto : dto.getRespostas()) {
+                boolean perguntaEncontrada = perguntasFormulario.stream()
+                        .anyMatch(p -> p.getId().equals(respostaDto.getPerguntaId()));
+                if (!perguntaEncontrada) {
+                    throw new RegraDeNegocioException("Pergunta inválida: " + respostaDto.getPerguntaId());
+                }
+            }
+        } else if (dto.getRespostas() != null && !dto.getRespostas().isEmpty()) {
+            throw new RegraDeNegocioException("Este pet não possui formulário. Não é necessário enviar respostas.");
+        }
+
+        UsuarioEntity anunciante = pet.getUser();
+
+        Optional<SolicitacaoAdocaoEntity> solicitacaoExistente;
+        
+        solicitacaoExistente = solicitacaoRepository.findByAdotanteIdAndPetId(adotante.getId(), pet.getId());
         if (solicitacaoExistente.isPresent()) {
-            throw new RegraDeNegocioException("Você já enviou uma solicitação para este formulário.");
+            throw new RegraDeNegocioException("Você já enviou uma solicitação para este pet.");
         }
 
         SolicitacaoAdocaoEntity novaSolicitacao = new SolicitacaoAdocaoEntity();
         novaSolicitacao.setAdotante(adotante);
         novaSolicitacao.setAnunciante(anunciante);
-        novaSolicitacao.setFormulario(formulario);
+        novaSolicitacao.setPet(pet);
+
+        if (dto.getRespostas() != null && !dto.getRespostas().isEmpty()) {
+            List<PerguntaRespostaSnapshot> snapshots = dto.getRespostas().stream()
+                    .map(respostaDto -> {
+                        String textoPergunta = formulario.getPerguntas().stream()
+                                .filter(p -> p.getId().equals(respostaDto.getPerguntaId()))
+                                .map(PerguntaEntity::getTexto)
+                                .findFirst()
+                                .orElse(null);
+                        return new PerguntaRespostaSnapshot(
+                                respostaDto.getPerguntaId(),
+                                textoPergunta,
+                                respostaDto.getRespostaTexto()
+                        );
+                    })
+                    .toList();
+            novaSolicitacao.setPerguntasRespostas(snapshots);
+        }
+
+        novaSolicitacao.setFl_ativo(true);
+        novaSolicitacao.setCreated_at(java.time.LocalDateTime.now());
+        novaSolicitacao.setCreated_by(adotante.getId());
 
         SolicitacaoAdocaoEntity solicitacaoSalva = solicitacaoRepository.save(novaSolicitacao);
-        return new SolicitacaoResponseDTO(solicitacaoSalva);
-    }
-
-    @Override
-    @Transactional
-    public RespostaResponseDTO salvarResposta(RespostaDTO dto) {
-        SolicitacaoAdocaoEntity solicitacao = solicitacaoRepository.findById(dto.getSolicitacaoId())
-                .orElseThrow(() -> new RecursoNaoEncontradoException("Solicitação não encontrada"));
-
-        PerguntaEntity pergunta = perguntaRepository.findById(dto.getPerguntaId())
-                .orElseThrow(() -> new RecursoNaoEncontradoException("Pergunta não encontrada"));
-
-        RespostaEntity resposta = new RespostaEntity();
-        resposta.setSolicitacao(solicitacao);
-        resposta.setPergunta(pergunta);
-        resposta.setResposta(dto.getResposta());
-
-        RespostaEntity respostaSalva = respostaRepository.save(resposta);
-        return new RespostaResponseDTO(respostaSalva);
+        return new SolicitacaoResponseDTO(solicitacaoSalva, pet);
     }
 
     @Override
@@ -86,21 +108,12 @@ public class SolicitacaoAdocaoService implements ISolicitacaoAdocaoService {
         SolicitacaoAdocaoEntity solicitacao = solicitacaoRepository.findById(solicitacaoId)
                 .orElseThrow(() -> new RecursoNaoEncontradoException("Solicitação não encontrada"));
 
-        FormularioEntity formularioOriginal = solicitacao.getFormulario();
-
-        if (formularioOriginal == null) {
-            throw new RegraDeNegocioException("Não foi possível encontrar o formulário associado a esta solicitação.");
-        }
-
-        List<PerguntaRespostaDTO> perguntasRespostas = formularioOriginal.getPerguntas().stream()
-                .map(pergunta -> {
-                    String respostaTexto = solicitacao.getRespostas().stream()
-                            .filter(resposta -> resposta.getPergunta().getId().equals(pergunta.getId()))
-                            .map(RespostaEntity::getResposta)
-                            .findFirst()
-                            .orElse(null);
-                    return new PerguntaRespostaDTO(pergunta.getId(), pergunta.getTexto(), respostaTexto);
-                }).toList();
+        List<PerguntaRespostaDTO> perguntasRespostas = solicitacao.getPerguntasRespostas().stream()
+                .map(snapshot -> new PerguntaRespostaDTO(
+                        snapshot.getPerguntaId(),
+                        snapshot.getPerguntaTexto(),
+                        snapshot.getRespostaTexto()))
+                .toList();
 
         return new FormularioDetalhadoDTO(
                 solicitacao.getId(),
@@ -115,10 +128,12 @@ public class SolicitacaoAdocaoService implements ISolicitacaoAdocaoService {
     @Override
     @Transactional
     public SolicitacaoResponseDTO aprovarSolicitacao(UUID solicitacaoId) {
-        SolicitacaoAdocaoEntity solicitacao = solicitacaoRepository.findById(solicitacaoId)
+        SolicitacaoAdocaoEntity solicitacao = solicitacaoRepository.findByIdAndFl_ativoTrue(solicitacaoId)
                 .orElseThrow(() -> new RecursoNaoEncontradoException("Solicitação não encontrada"));
 
-        solicitacao.setStatus(StatusSolicitacao.APROVADO);
+        solicitacao.setStatus(Status.APROVADO);
+        solicitacao.setLast_modified_at(java.time.LocalDateTime.now());
+        solicitacao.setLast_modified_by(obterUsuarioAutenticado().getId());
         SolicitacaoAdocaoEntity solicitacaoSalva = solicitacaoRepository.save(solicitacao);
         return new SolicitacaoResponseDTO(solicitacaoSalva);
     }
@@ -126,21 +141,65 @@ public class SolicitacaoAdocaoService implements ISolicitacaoAdocaoService {
     @Override
     @Transactional
     public SolicitacaoResponseDTO recusarSolicitacao(UUID solicitacaoId) {
-        SolicitacaoAdocaoEntity solicitacao = solicitacaoRepository.findById(solicitacaoId)
+        SolicitacaoAdocaoEntity solicitacao = solicitacaoRepository.findByIdAndFl_ativoTrue(solicitacaoId)
                 .orElseThrow(() -> new RecursoNaoEncontradoException("Solicitação não encontrada"));
 
-        solicitacao.setStatus(StatusSolicitacao.RECUSADO);
+        solicitacao.setStatus(Status.REPROVADO);
+        solicitacao.setLast_modified_at(java.time.LocalDateTime.now());
+        solicitacao.setLast_modified_by(obterUsuarioAutenticado().getId());
         SolicitacaoAdocaoEntity solicitacaoSalva = solicitacaoRepository.save(solicitacao);
         return new SolicitacaoResponseDTO(solicitacaoSalva);
     }
 
+    @Override
+    @Transactional(readOnly = true)
+    public List<SolicitacaoResponseDTO> listarRecebidas() {
+        UsuarioEntity usuario = obterUsuarioAutenticado();
+        return solicitacaoRepository.findAllByAnuncianteId(usuario.getId())
+                .stream()
+                .map(this::toDtoWithPet)
+                .toList();
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<SolicitacaoResponseDTO> listarEnviadas() {
+        UsuarioEntity usuario = obterUsuarioAutenticado();
+        return solicitacaoRepository.findAllByAdotanteId(usuario.getId())
+                .stream()
+                .map(this::toDtoWithPet)
+                .toList();
+    }
+
+    private SolicitacaoResponseDTO toDtoWithPet(SolicitacaoAdocaoEntity entity) {
+        return new SolicitacaoResponseDTO(entity, entity.getPet());
+    }
+
     private UsuarioEntity obterUsuarioAutenticado() {
+        return obterUsuarioAutenticadoOpcional()
+                .orElseThrow(() -> new RegraDeNegocioException("Usuário não autenticado."));
+    }
+
+    private Optional<UsuarioEntity> obterUsuarioAutenticadoOpcional() {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         if (auth == null || !auth.isAuthenticated() || "anonymousUser".equals(auth.getName())) {
-            throw new RegraDeNegocioException("Usuário não autenticado.");
+            return Optional.empty();
         }
 
-        return usuarioRepository.findByEmail(auth.getName())
-                .orElseThrow(() -> new RecursoNaoEncontradoException("Usuário não encontrado para o email: " + auth.getName()));
+        Object details = auth.getDetails();
+        if (details instanceof UUID userId) {
+            return usuarioRepository.findById(userId);
+        }
+
+        if (details instanceof String userIdStr) {
+            try {
+                UUID userId = UUID.fromString(userIdStr);
+                return usuarioRepository.findById(userId);
+            } catch (IllegalArgumentException ignored) {
+                // Fallback para autenticações antigas baseadas em email.
+            }
+        }
+
+        return usuarioRepository.findByEmail(auth.getName());
     }
 }

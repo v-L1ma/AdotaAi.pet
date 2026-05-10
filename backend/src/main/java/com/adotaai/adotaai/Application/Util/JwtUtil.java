@@ -72,6 +72,18 @@ public class JwtUtil {
         return validateToken(token, email) && "refresh".equals(extractTokenType(token));
     }
 
+    public Roles extractCargo(String token) {
+        Object cargo = extractAllClaims(token).get("cargo");
+        if (cargo == null) {
+            return null;
+        }
+        try {
+            return Roles.valueOf(cargo.toString());
+        } catch (IllegalArgumentException e) {
+            return null;
+        }
+    }
+
     private String buildToken(String email, UUID id, Roles cargo, Long expirationMs, String tokenType) {
         return Jwts.builder()
                 .subject(email)

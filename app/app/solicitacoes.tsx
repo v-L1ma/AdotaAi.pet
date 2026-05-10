@@ -1,124 +1,221 @@
-import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from "expo-router";
-import React, { useMemo, useState } from "react";
-import { Image, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import React, { useEffect, useMemo, useState } from "react";
+import { ActivityIndicator, Image, Pressable, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from 'react-native-safe-area-context';
-import colors from '../styles/colors';
+import { colors } from '../styles/variables';
+import {
+  getDetalhesSolicitacao,
+  getSolicitacoesEnviadas,
+  getSolicitacoesRecebidas,
+} from "@/services/solicitacaoService";
+import AppHeader from '@/components/AppHeader';
+import { Ionicons } from "@expo/vector-icons";
 
-type Solicitacao = {
-  id: number;
-  usuario: {
-    nome: string;
-    email: string;
-    telefone: string;
-  };
-  triagem: {
-    motivo: string;
-    experiencia: string;
-    ambiente: string;
-    outrosPets: string;
-    tempoDisponivel: string;
-  };
-  animal: {
-    nome: string;
-    imagem: any;
-    status: 'Nova' | 'Pendente';
-    tempo: string;
-  };
-  usuarioImagem: any;
+type SolicitacaoDTO = {
+  id: string;
+  status: string;
+  dataSolicitacao?: string;
+  petId?: string;
+  petNome?: string;
+  petFoto?: string;
+  adotanteNome?: string;
+  adotanteEmail?: string;
+  adotanteTelefone?: string;
+  anuncianteNome?: string;
+  anuncianteEmail?: string;
+  anuncianteTelefone?: string;
 };
 
-const recebidos: Solicitacao[] = [
-  {
-    id: 1,
-    usuario: { nome: "João Silva", email: "joao@email.com", telefone: "(11) 91234-5678" },
-    triagem: {
-      motivo: "Quero adotar para companhia.",
-      experiencia: "Já tive cães antes.",
-      ambiente: "Casa com quintal fechado.",
-      outrosPets: "Sim, tenho um gato.",
-      tempoDisponivel: "Tarde e noite.",
-    },
-    animal: { nome: "Rex", imagem: require("../assets/images/dog1.png"), status: 'Nova', tempo: 'há 2 horas' },
-    usuarioImagem: require("../assets/images/icon.jpg"),
-  },
-  {
-    id: 3,
-    usuario: { nome: "Carlos Souza", email: "carlos@email.com", telefone: "(31) 99888-1234" },
-    triagem: {
-      motivo: "Quero adotar para companhia dos meus pais.",
-      experiencia: "Já tive gatos.",
-      ambiente: "Casa grande com jardim.",
-      outrosPets: "Não.",
-      tempoDisponivel: "Noite.",
-    },
-    animal: { nome: "Luna", imagem: require("../assets/images/cat1.png"), status: 'Pendente', tempo: 'ontem' },
-    usuarioImagem: require("../assets/images/icon.jpg"),
-  },
-];
+type PerguntaRespostaDTO = {
+  perguntaId: string;
+  perguntaTexto: string;
+  respostaTexto?: string | null;
+};
 
-const enviados: Solicitacao[] = [
-  {
-    id: 2,
-    usuario: { nome: "Maria Oliveira", email: "maria@email.com", telefone: "(21) 99876-5432" },
-    triagem: {
-      motivo: "Quero adotar para meus filhos.",
-      experiencia: "Nunca tive pets.",
-      ambiente: "Apartamento médio.",
-      outrosPets: "Não.",
-      tempoDisponivel: "Manhã e fim de semana.",
-    },
-    animal: { nome: "Mimi", imagem: require("../assets/images/cat1.png"), status: 'Pendente', tempo: '2 dias' },
-    usuarioImagem: require("../assets/images/icon.jpg"),
-  },
-  {
-    id: 5,
-    usuario: { nome: "Bruno Lima", email: "bruno@email.com", telefone: "(51) 98765-4321" },
-    triagem: {
-      motivo: "Quero adotar para companhia.",
-      experiencia: "Já tive cachorros.",
-      ambiente: "Casa com quintal.",
-      outrosPets: "Sim, tenho um peixe.",
-      tempoDisponivel: "Tarde.",
-    },
-    animal: { nome: "Mel", imagem: require("../assets/images/dog1.png"), status: 'Pendente', tempo: '4 dias' },
-    usuarioImagem: require("../assets/images/icon.jpg"),
-  },
-];
+type FormularioDetalhadoDTO = {
+  formularioId: string;
+  usuarioCriadorId: string;
+  usuarioCriadorNome: string;
+  usuarioRespondenteId: string;
+  usuarioRespondenteNome: string;
+  perguntasRespostas: PerguntaRespostaDTO[];
+};
 
 export default function Solicitacoes() {
   const router = useRouter();
   const [tab, setTab] = useState<'recebidos' | 'enviados'>('recebidos');
-  const [aberta, setAberta] = useState<number | null>(null);
+  const [aberta, setAberta] = useState<string | null>(null);
+  const [recebidos, setRecebidos] = useState<SolicitacaoDTO[]>([]);
+  const [enviados, setEnviados] = useState<SolicitacaoDTO[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [loadError, setLoadError] = useState<string | null>(null);
+  const [detalhes, setDetalhes] = useState<FormularioDetalhadoDTO | null>(null);
+  const [isLoadingDetalhes, setIsLoadingDetalhes] = useState(false);
+  const [detalhesError, setDetalhesError] = useState<string | null>(null);
 
-  const data = useMemo(() => (tab === 'recebidos' ? recebidos : enviados), [tab]);
+  useEffect(() => {
+    let isMounted = true;
+
+    async function loadSolicitacoes() {
+      setIsLoading(true);
+      setLoadError(null);
+
+      try {
+        const [recebidosRes, enviadosRes] = await Promise.all([
+          getSolicitacoesRecebidas(),
+          getSolicitacoesEnviadas(),
+        ]);
+
+        if (isMounted) {
+          setRecebidos(recebidosRes ?? []);
+          setEnviados(enviadosRes ?? []);
+        }
+      } catch {
+        if (isMounted) {
+          setLoadError("Nao foi possivel carregar as solicitacoes.");
+        }
+      } finally {
+        if (isMounted) {
+          setIsLoading(false);
+        }
+      }
+    }
+
+    loadSolicitacoes();
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!aberta) {
+      setDetalhes(null);
+      setDetalhesError(null);
+      return;
+    }
+
+    let isMounted = true;
+
+    async function loadDetalhes() {
+      setIsLoadingDetalhes(true);
+      setDetalhesError(null);
+
+      try {
+        const response = await getDetalhesSolicitacao(aberta ?? "");
+        if (isMounted) {
+          setDetalhes(response);
+        }
+      } catch {
+        if (isMounted) {
+          setDetalhesError("Nao foi possivel carregar o formulario.");
+        }
+      } finally {
+        if (isMounted) {
+          setIsLoadingDetalhes(false);
+        }
+      }
+    }
+
+    loadDetalhes();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [aberta]);
+
+  const data = useMemo(() => (tab === 'recebidos' ? recebidos : enviados), [tab, recebidos, enviados]);
   const selecionada = data.find((item) => item.id === aberta) || null;
+
+  const formatarTempo = (value?: string) => {
+    if (!value) {
+      return "agora";
+    }
+
+    const date = new Date(value);
+    if (Number.isNaN(date.getTime())) {
+      return "agora";
+    }
+
+    const diffMs = Date.now() - date.getTime();
+    const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
+    if (diffHours < 24) {
+      return `ha ${Math.max(1, diffHours)} horas`;
+    }
+
+    const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+    return `ha ${diffDays} dias`;
+  };
+
+  const statusLabel = (status?: string) => {
+    if (!status) {
+      return "Pendente";
+    }
+
+    const normalized = status.toUpperCase();
+    if (normalized === "PENDENTE") {
+      return "Nova";
+    }
+
+    if (normalized === "APROVADO") {
+      return "Aprovada";
+    }
+
+    if (normalized === "RECUSADO") {
+      return "Recusada";
+    }
+
+    return status;
+  };
 
   if (selecionada) {
     return (
       <SafeAreaView style={styles.screen} edges={['top', 'left', 'right', 'bottom']}>
-        <View style={styles.header}>
-          <TouchableOpacity onPress={() => setAberta(null)} style={styles.backButton}>
-            <Ionicons name="arrow-back" size={28} color={colors.primary} />
-          </TouchableOpacity>
-          <Text style={styles.headerTitle}>Formulário de Triagem</Text>
-        </View>
+        <AppHeader title="Solicitações" onBackPress={() => router.back()} />
 
         <ScrollView contentContainerStyle={styles.formContent}>
           <View style={styles.formCard}>
             <Text style={styles.formSectionTitle}>Solicitante</Text>
-            <Text style={styles.formText}>Nome: {selecionada.usuario.nome}</Text>
-            <Text style={styles.formText}>Email: {selecionada.usuario.email}</Text>
-            <Text style={styles.formText}>Telefone: {selecionada.usuario.telefone}</Text>
+            <View style={styles.publisher}>
+                <Image
+                    source={{uri: "https://images.unsplash.com/photo-1544723795-3fb6469f5b39?w=300"}}
+                    style={styles.publisherImage}
+                ></Image>
+                <View>
+                    <Text style={styles.publisherName}>
+                      {selecionada.adotanteNome || "Nao informado"}
+                    </Text>
+                    <Text>
+                      <Ionicons name="mail" size={14} color={colors.primary} />{" "}
+                      {selecionada.adotanteEmail || "Nao informado"}
+                    </Text>
+                    <Text>
+                      <Ionicons name="phone-portrait-sharp" size={14} color={colors.primary} />{" "}
+                      {selecionada.adotanteTelefone || "Nao informado"}
+                    </Text>
+                </View>
+            </View>
           </View>
 
           <View style={styles.formCard}>
             <Text style={styles.formSectionTitle}>Respostas</Text>
-            <Text style={styles.formText}>Motivo: {selecionada.triagem.motivo}</Text>
-            <Text style={styles.formText}>Experiência: {selecionada.triagem.experiencia}</Text>
-            <Text style={styles.formText}>Ambiente: {selecionada.triagem.ambiente}</Text>
-            <Text style={styles.formText}>Outros pets: {selecionada.triagem.outrosPets}</Text>
-            <Text style={styles.formText}>Tempo disponível: {selecionada.triagem.tempoDisponivel}</Text>
+            {isLoadingDetalhes && (
+              <View style={styles.formLoading}>
+                <ActivityIndicator size="small" color={colors.primary} />
+                <Text style={styles.formText}>Carregando respostas...</Text>
+              </View>
+            )}
+            {!isLoadingDetalhes && detalhesError && (
+              <Text style={styles.formText}>{detalhesError}</Text>
+            )}
+            {!isLoadingDetalhes && !detalhesError && detalhes?.perguntasRespostas?.length ? (
+              detalhes.perguntasRespostas.map((item) => (
+                <View key={item.perguntaId} style={styles.formRow}>
+                  <Text style={styles.formText}>{item.perguntaTexto}</Text>
+                  <Text style={styles.formAnswer}>{item.respostaTexto || "Sem resposta"}</Text>
+                </View>
+              ))
+            ) : null}
           </View>
         </ScrollView>
       </SafeAreaView>
@@ -128,12 +225,7 @@ export default function Solicitacoes() {
   return (
     <>
       <SafeAreaView edges={['top']} style={{ backgroundColor: '#fff' }} />
-      <View style={styles.header}>
-        <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
-          <Ionicons name="arrow-back" size={28} color={colors.primary} />
-        </TouchableOpacity>
-        <Text style={styles.headerTitle}>Solicitações</Text>
-      </View>
+        <AppHeader title="Solicitações" onBackPress={() => router.back()} />
 
       <View style={styles.screen}>
         <View style={styles.tabsWrap}>
@@ -146,32 +238,50 @@ export default function Solicitacoes() {
         </View>
 
         <ScrollView contentContainerStyle={styles.cardsContent} showsVerticalScrollIndicator={false}>
-          {data.map((item) => (
+          {isLoading && (
+            <View style={styles.loadingWrap}>
+              <ActivityIndicator size="small" color={colors.primary} />
+              <Text style={styles.loadingText}>Carregando solicitacoes...</Text>
+            </View>
+          )}
+
+          {!isLoading && loadError && (
+            <Text style={styles.emptyText}>{loadError}</Text>
+          )}
+
+          {!isLoading && !loadError && data.length === 0 && (
+            <Text style={styles.emptyText}>Nenhuma solicitacao encontrada.</Text>
+          )}
+
+          {!isLoading && !loadError && data.map((item) => (
             <View key={item.id} style={styles.card}>
               <View style={styles.cardTop}>
-                <Image source={item.animal.imagem} style={styles.petImage} />
+                <Image
+                  source={{ uri: item.petFoto || "https://images.unsplash.com/photo-1517849845537-4d257902454a?w=1200" }}
+                  style={styles.petImage}
+                />
                 <View style={{ alignItems: 'flex-end' }}>
-                  <View style={[styles.statusBadge, item.animal.status === 'Nova' ? styles.statusNew : styles.statusPending]}>
-                    <Text style={styles.statusText}>{item.animal.status}</Text>
+                  <View style={[styles.statusBadge, item.status?.toUpperCase() === "PENDENTE" ? styles.statusNew : styles.statusPending]}>
+                    <Text style={styles.statusText}>{statusLabel(item.status)}</Text>
                   </View>
-                  <Text style={styles.timeText}>{item.animal.tempo}</Text>
+                  <Text style={styles.timeText}>{formatarTempo(item.dataSolicitacao)}</Text>
                 </View>
               </View>
 
-              <Text style={styles.petName}>{item.animal.nome}</Text>
-              <Text style={styles.requesterLabel}>Dados do solicitante</Text>
+              <Text style={styles.petName}>{item.petNome || "Pet sem nome"}</Text>
+              <Text style={styles.requesterLabel}>{tab === "recebidos" ? "Dados do solicitante" : "Dados do anunciante"}</Text>
 
               <View style={styles.requesterRow}>
-                <Image source={item.usuarioImagem} style={styles.userImage} />
+                <Image source={{ uri: "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=400" }} style={styles.userImage} />
                 <View>
-                  <Text style={styles.requesterText}>{item.usuario.nome}</Text>
-                  <Text style={styles.requesterSub}>{item.usuario.email}</Text>
-                  <Text style={styles.requesterSub}>{item.usuario.telefone}</Text>
+                  <Text style={styles.requesterText}>{tab === "recebidos" ? (item.adotanteNome || "Nao informado") : (item.anuncianteNome || "Nao informado")}</Text>
+                  <Text style={styles.requesterSub}>{tab === "recebidos" ? (item.adotanteEmail || "Nao informado") : (item.anuncianteEmail || "Nao informado")}</Text>
+                  <Text style={styles.requesterSub}>{tab === "recebidos" ? (item.adotanteTelefone || "Nao informado") : (item.anuncianteTelefone || "Nao informado")}</Text>
                 </View>
               </View>
 
               <TouchableOpacity style={styles.viewButton} onPress={() => setAberta(item.id)}>
-                <Text style={styles.viewButtonText}>Ver formulário</Text>
+                <Text style={styles.viewButtonText}>Ver formulario</Text>
               </TouchableOpacity>
             </View>
           ))}
@@ -186,6 +296,7 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#f6f7f9',
     paddingHorizontal: 16,
+    paddingTop: 100,
   },
   header: {
     width: '100%',
@@ -244,6 +355,16 @@ const styles = StyleSheet.create({
     paddingBottom: 28,
     gap: 10,
   },
+  loadingWrap: {
+    alignItems: "center",
+    gap: 6,
+    marginTop: 16,
+  },
+  loadingText: {
+    fontSize: 13,
+    color: '#666',
+    fontWeight: '600',
+  },
   card: {
     backgroundColor: '#fff',
     borderRadius: 16,
@@ -258,99 +379,154 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   petImage: {
-    width: 72,
-    height: 72,
-    borderRadius: 14,
+    width: 82,
+    height: 64,
+    borderRadius: 12,
+    backgroundColor: '#eee',
   },
   statusBadge: {
-    borderRadius: 999,
     paddingHorizontal: 10,
     paddingVertical: 4,
+    borderRadius: 12,
+    marginBottom: 4,
   },
   statusNew: {
-    backgroundColor: '#d8f5df',
+    backgroundColor: '#eaf8f0',
   },
   statusPending: {
-    backgroundColor: '#ececec',
+    backgroundColor: '#fff3e0',
   },
   statusText: {
-    fontSize: 10,
-    fontWeight: '800',
-    textTransform: 'uppercase',
-    color: '#334',
+    fontSize: 12,
+    fontWeight: '700',
+    color: '#333',
   },
   timeText: {
-    marginTop: 4,
     fontSize: 11,
-    color: '#777',
+    color: '#8a8a8a',
   },
   petName: {
-    fontSize: 20,
+    fontSize: 18,
     fontWeight: '800',
-    color: '#202020',
+    color: '#333',
+    marginBottom: 6,
   },
   requesterLabel: {
-    marginTop: 4,
-    fontSize: 10,
+    fontSize: 13,
     fontWeight: '700',
-    textTransform: 'uppercase',
-    letterSpacing: 0.6,
-    color: '#7a7a7a',
+    color: '#666',
+    marginBottom: 6,
   },
   requesterRow: {
-    marginTop: 6,
     flexDirection: 'row',
-    gap: 10,
     alignItems: 'center',
+    gap: 10,
   },
   userImage: {
     width: 40,
     height: 40,
     borderRadius: 20,
+    backgroundColor: '#eee',
   },
   requesterText: {
-    color: '#222',
-    fontWeight: '700',
     fontSize: 14,
+    fontWeight: '700',
+    color: '#333',
   },
   requesterSub: {
-    color: '#666',
-    fontSize: 11,
+    fontSize: 12,
+    color: '#8a8a8a',
   },
   viewButton: {
     marginTop: 10,
-    backgroundColor: colors.primary,
+    backgroundColor: '#fff1f0',
+    paddingVertical: 10,
     borderRadius: 10,
-    minHeight: 40,
     alignItems: 'center',
-    justifyContent: 'center',
   },
   viewButtonText: {
-    color: '#fff',
+    color: colors.primary,
     fontWeight: '700',
-    fontSize: 14,
+    fontSize: 13,
   },
   formContent: {
-    padding: 16,
-    gap: 10,
-    paddingBottom: 30,
+    paddingTop: 16,
+    paddingBottom: 28,
+    gap: 12,
   },
   formCard: {
     backgroundColor: '#fff',
-    borderRadius: 18,
+    borderRadius: 14,
+    padding: 12,
     borderWidth: 1,
-    borderColor: '#ececec',
-    padding: 14,
-    gap: 6,
+    borderColor: '#ebedf0',
   },
   formSectionTitle: {
-    color: '#202020',
-    fontWeight: '900',
-    fontSize: 18,
-    marginBottom: 4,
+    fontSize: 16,
+    fontWeight: '800',
+    color: '#333',
+    marginBottom: 8,
   },
   formText: {
-    color: '#555',
-    lineHeight: 20,
+    fontSize: 14,
+    color: colors.primary,
+    fontWeight: "bold",
+    marginBottom: 6,
   },
+  formRow: {
+    marginBottom: 10,
+    backgroundColor: '#e4e2e277',
+    padding: 10,
+    borderRadius: 10,
+  },
+  formAnswer: {
+    fontSize: 13,
+    color: '#666',
+    backgroundColor: '#ffffff',
+    padding: 8,
+    borderRadius: 8,
+    marginTop: 4,
+  },
+  formLoading: {
+    alignItems: "flex-start",
+    gap: 6,
+  },
+  emptyText: {
+    textAlign: 'center',
+    color: '#888',
+    fontSize: 16,
+    marginTop: 40,
+  },
+    publisher: {
+        marginTop: 4,
+        backgroundColor: "#F7F7F7",
+        borderRadius: 16,
+        padding: 12,
+        flexDirection: "row",
+        alignItems: "center",
+        gap: 10,
+    },
+    publisherImage: {
+        width: 46,
+        height: 46,
+        borderRadius: 12,
+    },
+    publisherLabel: {
+        fontSize: 12,
+        color: "#666",
+    },
+    publisherName: {
+        fontSize: 15,
+        fontWeight: "700",
+        color: "#222",
+    },
+    chatButton: {
+        marginLeft: "auto",
+        width: 40,
+        height: 40,
+        borderRadius: 20,
+        backgroundColor: "#FFE9E6",
+        justifyContent: "center",
+        alignItems: "center",
+    },
 });

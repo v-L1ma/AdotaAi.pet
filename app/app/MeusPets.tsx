@@ -1,10 +1,12 @@
 import { Entypo, Ionicons, MaterialIcons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
-import React, { useMemo, useState } from "react";
-import { Alert, Image, ScrollView, StyleSheet, Text, TouchableOpacity, View, useWindowDimensions } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
+import React, { useEffect, useMemo, useState } from "react";
+import { ActivityIndicator, Alert, Image, ScrollView, StyleSheet, Text, TouchableOpacity, View, useWindowDimensions } from "react-native";
 import colors from "../styles/colors";
 import { useTabNavigation } from "@/hooks/useTabNavigation";
+import { animal } from "@/types/TAnimal";
+import AppHeader from "@/components/AppHeader";
+import { deletePet, getUserPets } from "@/services/petService";
 
 export default function MeusPets() {
   const router = useRouter();
@@ -30,109 +32,86 @@ export default function MeusPets() {
     };
   }, [isSmall, isTablet, width]);
 
-  const [pets, setPets] = useState([
-    {
-      id: 1,
-      nome: 'Rex',
-      idade: '2 anos',
-      especie: 'Cachorro',
-      imagem: require('../assets/images/dog1.png'),
-    },
-    {
-      id: 2,
-      nome: 'Luna',
-      idade: '1 ano',
-      especie: 'Gato',
-      imagem: require('../assets/images/cat1.png'),
-    },
-    {
-      id: 3,
-      nome: 'Toby',
-      idade: '3 anos',
-      especie: 'Cachorro',
-      imagem: require('../assets/images/dog1.png'),
-    },
-    {
-      id: 4,
-      nome: 'Mimi',
-      idade: '6 meses',
-      especie: 'Gato',
-      imagem: require('../assets/images/cat1.png'),
-    },
-    {
-      id: 5,
-      nome: 'Thor',
-      idade: '4 anos',
-      especie: 'Cachorro',
-      imagem: require('../assets/images/dog1.png'),
-    },
-    {
-      id: 6,
-      nome: 'Nina',
-      idade: '8 meses',
-      especie: 'Gato',
-      imagem: require('../assets/images/cat1.png'),
-    },
-    {
-      id: 7,
-      nome: 'Bidu',
-      idade: '5 anos',
-      especie: 'Cachorro',
-      imagem: require('../assets/images/dog1.png'),
-    },
-    {
-      id: 8,
-      nome: 'Mel',
-      idade: '2 anos',
-      especie: 'Gato',
-      imagem: require('../assets/images/cat1.png'),
-    },
-    {
-      id: 9,
-      nome: 'Simba',
-      idade: '1 ano',
-      especie: 'Cachorro',
-      imagem: require('../assets/images/dog1.png'),
-    },
-    {
-      id: 10,
-      nome: 'Lili',
-      idade: '3 anos',
-      especie: 'Gato',
-      imagem: require('../assets/images/cat1.png'),
-    },
-  ]);
+  const [pets, setPets] = useState<animal[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [loadError, setLoadError] = useState<string | null>(null);
+  const [popoverPetId, setPopoverPetId] = useState<string | null>(null);
 
-  const handleDelete = (id: number) => {
-    console.log('Clicou para excluir o pet de id:', id);
+  useEffect(() => {
+    let isMounted = true;
+
+    async function loadPets() {
+      setIsLoading(true);
+      setLoadError(null);
+
+      try {
+        const response = await getUserPets();
+        if (isMounted) {
+          setPets(response ?? []);
+        }
+      } catch {
+        if (isMounted) {
+          setLoadError("Nao foi possivel carregar seus pets.");
+        }
+      } finally {
+        if (isMounted) {
+          setIsLoading(false);
+        }
+      }
+    }
+
+    loadPets();
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
+  const formatarIdade = (dtNasc?: string) => {
+    if (!dtNasc) {
+      return "Idade nao informada";
+    }
+
+    const date = new Date(dtNasc);
+    if (Number.isNaN(date.getTime())) {
+      return "Idade nao informada";
+    }
+
+    const diffMs = Date.now() - date.getTime();
+    const diffYears = Math.floor(diffMs / (1000 * 60 * 60 * 24 * 365.25));
+    if (diffYears > 0) {
+      return `${diffYears} ano${diffYears > 1 ? "s" : ""}`;
+    }
+
+    const diffMonths = Math.max(1, Math.floor(diffMs / (1000 * 60 * 60 * 24 * 30.5)));
+    return `${diffMonths} mes${diffMonths > 1 ? "es" : ""}`;
+  };
+
+  const handleDelete = (id: string) => {
     Alert.alert(
-      'Excluir anúncio',
-      'Deseja realmente apagar este anúncio de animal?',
+      "Excluir anuncio",
+      "Deseja realmente apagar este anuncio de animal?",
       [
-        { text: 'Cancelar', style: 'cancel' },
+        { text: "Cancelar", style: "cancel" },
         {
-          text: 'Excluir',
-          style: 'destructive',
-          onPress: () => setPets(pets.filter(pet => pet.id !== id)),
+          text: "Excluir",
+          style: "destructive",
+          onPress: async () => {
+            try {
+              await deletePet(id);
+              setPets((current) => current.filter((pet) => pet.id !== id));
+            } catch {
+              Alert.alert("Erro", "Nao foi possivel excluir este pet.");
+            }
+          },
         },
       ]
     );
   };
 
   return (
-    <SafeAreaView style={styles.screen} edges={["top", "left", "right", "bottom"]}>
-      <View style={styles.header}>
-        <TouchableOpacity
-          onPress={() => router.back()}
-          style={styles.backButton}
-          hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
-        >
-            <Ionicons name="arrow-back" size={28} color={colors.primary} />
-        </TouchableOpacity>
-        <View style={styles.headerTitleWrap}>
-          <Text style={styles.headerTitle}>Meus Pets</Text>
-        </View>
-      </View>
+    <View style={styles.screen}>
+      <AppHeader title="Meus Pets" onBackPress={() => router.back()} />
 
       <ScrollView
         contentContainerStyle={[
@@ -150,13 +129,32 @@ export default function MeusPets() {
           <Text style={[styles.addButtonText, { fontSize: isSmall ? 16 : 17 }]}>Adicionar novo pet</Text>
         </TouchableOpacity>
 
+        {isLoading && (
+          <View style={styles.loadingWrap}>
+            <ActivityIndicator size="small" color={colors.primary} />
+            <Text style={styles.loadingText}>Carregando seus pets...</Text>
+          </View>
+        )}
+
+        {!isLoading && loadError && (
+          <Text style={styles.errorText}>{loadError}</Text>
+        )}
+
+        {!isLoading && !loadError && pets.length === 0 && (
+          <Text style={styles.emptyText}>Voce ainda nao cadastrou pets.</Text>
+        )}
+
         {pets.map((pet) => (
             <View
               key={pet.id}
-              style={[styles.card, { width: metrics.cardWidth }]}
+              style={[
+                styles.card, 
+                { width: metrics.cardWidth },
+                popoverPetId === pet.id && { zIndex: 100 }
+              ]}
             >
               <Image
-                source={pet.imagem}
+                source={{ uri: pet.link_foto }}
                 style={[
                   styles.petImage,
                   {
@@ -168,34 +166,58 @@ export default function MeusPets() {
                 resizeMode="cover"
               />
               <View style={styles.petInfo}>
+                {pet.mensagemReprovado && (
+                  <View style={styles.warningBox}>
+                    <Text style={styles.warningText}>Atenção: {pet.mensagemReprovado}</Text>
+                  </View>
+                )}
                 <Text numberOfLines={1} style={[styles.petName, { fontSize: metrics.titleSize }]}>{pet.nome}</Text>
-                <Text numberOfLines={1} style={[styles.petAge, { fontSize: metrics.subtitleSize }]}>{pet.idade}</Text>
+                <Text numberOfLines={1} style={[styles.petAge, { fontSize: metrics.subtitleSize }]}>{formatarIdade(pet.dt_nasc)}</Text>
                 <View style={styles.speciesBadge}>
                   <Text style={[styles.speciesText, { fontSize: metrics.speciesSize }]}>{pet.especie}</Text>
                 </View>
               </View>
 
               <View style={styles.actionsColumn}>
-                <TouchableOpacity
-                  onPress={() => navigateToTab("/criar-anuncio")}
-                  style={[styles.actionButton, { width: metrics.actionSize, height: metrics.actionSize }]}
-                  hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
-                >
-                  <Entypo name="dots-three-vertical" size={metrics.iconSize} color={colors.primary} />
-                </TouchableOpacity>
+                <View style={{ position: "relative" }}>
+                  <TouchableOpacity
+                    onPress={() => setPopoverPetId(popoverPetId === pet.id ? null : pet.id)}
+                    style={[styles.actionButton, { width: metrics.actionSize, height: metrics.actionSize }]}
+                    hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+                  >
+                    <Entypo name="dots-three-vertical" size={metrics.iconSize} color={colors.primary} />
+                  </TouchableOpacity>
 
-                <TouchableOpacity
-                  onPress={() => handleDelete(pet.id)}
-                  style={[styles.actionButton, { width: metrics.actionSize, height: metrics.actionSize }]}
-                  hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
-                >
-                  <MaterialIcons name="delete" size={metrics.iconSize + 1} color={colors.primary} />
-                </TouchableOpacity>
+                  {popoverPetId === pet.id && (
+                    <View style={styles.popover}>
+                      <TouchableOpacity
+                        style={styles.popoverItem}
+                        onPress={() => {
+                          setPopoverPetId(null);
+                          navigateToTab(`/criar-anuncio?petId=${pet.id}`);
+                        }}
+                      >
+                        <Ionicons name="create-outline" size={18} color={colors.primary} />
+                        <Text style={styles.popoverText}>Editar</Text>
+                      </TouchableOpacity>
+                      <TouchableOpacity
+                        style={styles.popoverItem}
+                        onPress={() => {
+                          setPopoverPetId(null);
+                          handleDelete(pet.id);
+                        }}
+                      >
+                        <MaterialIcons name="delete" size={18} color="#E74C3C" />
+                        <Text style={[styles.popoverText, { color: "#E74C3C" }]}>Excluir</Text>
+                      </TouchableOpacity>
+                    </View>
+                  )}
+                </View>
               </View>
             </View>
           ))}
       </ScrollView>
-    </SafeAreaView>
+    </View>
   );
 }
 
@@ -238,7 +260,7 @@ const styles = StyleSheet.create({
     color: "#E74C3C",
   },
   content: {
-    paddingTop: 20,
+    paddingTop: 130,
     paddingBottom: 28,
     alignItems: "center",
     gap: 12,
@@ -247,6 +269,30 @@ const styles = StyleSheet.create({
     alignSelf: "center",
     width: "100%",
     maxWidth: 960,
+  },
+  loadingWrap: {
+    alignItems: "center",
+    gap: 6,
+    marginTop: 12,
+  },
+  loadingText: {
+    fontSize: 13,
+    color: "#6b6b6b",
+    fontWeight: "600",
+  },
+  errorText: {
+    textAlign: "center",
+    color: "#b00020",
+    fontSize: 13,
+    marginTop: 12,
+    fontWeight: "600",
+  },
+  emptyText: {
+    textAlign: "center",
+    color: "#6b6b6b",
+    fontSize: 14,
+    marginTop: 12,
+    fontWeight: "600",
   },
   addButton: {
     minHeight: 58,
@@ -278,6 +324,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: "#ECECEC",
     gap: 12,
+    zIndex: 1,
   },
   petImage: {
     backgroundColor: colors.buttonBackground,
@@ -317,5 +364,51 @@ const styles = StyleSheet.create({
     backgroundColor: `${colors.secondary}55`,
     alignItems: "center",
     justifyContent: "center",
+  },
+  modalOverlay: {
+    flex: 1,
+    zIndex:0,
+    backgroundColor: "rgba(0, 0, 0, 0.3)",
+  },
+  popover: {
+    position: "absolute",
+    right: 0,
+    top: "100%",
+    marginTop: 8,
+    backgroundColor: "#fff",
+    borderRadius: 12,
+    paddingVertical: 6,
+    minWidth: 120,
+    shadowColor: "#000",
+    shadowOpacity: 0.15,
+    shadowRadius: 10,
+    zIndex: 150,
+  },
+  popoverItem: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+    paddingVertical: 10,
+    paddingHorizontal: 14,
+    elevation: 8,
+  },
+  popoverText: {
+    fontSize: 14,
+    fontWeight: "600",
+    color: colors.primary,
+  },
+  warningBox: {
+    backgroundColor: "#FFF3CD",
+    borderRadius: 8,
+    paddingHorizontal: 8,
+    paddingVertical: 6,
+    marginBottom: 6,
+    borderLeftWidth: 3,
+    borderLeftColor: "#FFC107",
+  },
+  warningText: {
+    color: "#856404",
+    fontSize: 12,
+    fontWeight: "600",
   },
 });

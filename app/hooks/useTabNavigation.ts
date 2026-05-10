@@ -1,6 +1,6 @@
 import { usePathname, useRouter } from "expo-router";
 
-type TabRoute = "/Home" | "/listagem-pets" | "/criar-anuncio" | "/config" | "/meus-pets" | "/perfil-user";
+type TabRoute = "/Home" | "/listagem-pets" | "/criar-anuncio" | "/config" | "/meus-pets" | "/perfil-user" | "/eventos" | `/criar-anuncio?petId=${string}`;
 
 /**
  * Hook para gerenciar navegação entre as abas principais
@@ -27,7 +27,8 @@ export function useTabNavigation() {
       (route === "/criar-anuncio" && (normalizedPath === "/criar-anuncio" || normalizedPath === "/criaranuncio")) ||
       (route === "/config" && normalizedPath === "/config") ||
       (route === "/meus-pets" && (normalizedPath === "/meus-pets" || normalizedPath === "/meuspets")) ||
-      (route === "/perfil-user" && normalizedPath === "/perfil-user");
+      (route === "/perfil-user" && normalizedPath === "/perfil-user") ||
+      (route === "/eventos" && normalizedPath === "/eventos")
 
     if (isOnSameTab) {
       // Já está na aba atual: não navega para evitar animação/flash da mesma tela.

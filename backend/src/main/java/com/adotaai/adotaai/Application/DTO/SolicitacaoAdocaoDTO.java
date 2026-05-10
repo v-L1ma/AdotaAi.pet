@@ -1,29 +1,29 @@
 package com.adotaai.adotaai.Application.DTO;
 
 import jakarta.validation.constraints.NotNull;
+import java.util.List;
 import java.util.UUID;
 
 public class SolicitacaoAdocaoDTO {
 
-    @NotNull(message = "O ID do adotante é obrigatório.")
-    private UUID adotanteId;
+    @NotNull(message = "O ID do pet é obrigatório.")
+    private UUID petId;
 
-    @NotNull(message = "O ID do formulário é obrigatório.")
-    private UUID formularioId;
+    private List<PerguntaRespostaDTO> respostas;
 
-    public UUID getAdotanteId() {
-        return adotanteId;
+    public UUID getPetId() {
+        return petId;
     }
 
-    public void setAdotanteId(UUID adotanteId) {
-        this.adotanteId = adotanteId;
+    public void setPetId(UUID petId) {
+        this.petId = petId;
     }
 
-    public UUID getFormularioId() {
-        return formularioId;
+    public List<PerguntaRespostaDTO> getRespostas() {
+        return respostas;
     }
 
-    public void setFormularioId(UUID formularioId) {
-        this.formularioId = formularioId;
+    public void setRespostas(List<PerguntaRespostaDTO> respostas) {
+        this.respostas = respostas;
     }
 }

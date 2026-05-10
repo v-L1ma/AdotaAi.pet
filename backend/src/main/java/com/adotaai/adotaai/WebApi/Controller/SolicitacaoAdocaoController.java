@@ -6,6 +6,7 @@ import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import java.util.List;
 import java.util.UUID;
 
 @RestController
@@ -24,12 +25,6 @@ public class SolicitacaoAdocaoController {
         return new ResponseEntity<>(novaSolicitacaoDTO, HttpStatus.CREATED);
     }
 
-    @PostMapping("/respostas")
-    public ResponseEntity<RespostaResponseDTO> salvarResposta(@Valid @RequestBody RespostaDTO dto) {
-        RespostaResponseDTO novaRespostaDTO = solicitacaoService.salvarResposta(dto);
-        return new ResponseEntity<>(novaRespostaDTO, HttpStatus.CREATED);
-    }
-
     @GetMapping("/{id}")
     public ResponseEntity<FormularioDetalhadoDTO> buscarSolicitacaoDetalhada(@PathVariable UUID id) {
         FormularioDetalhadoDTO dto = solicitacaoService.buscarSolicitacaoDetalhada(id);
@@ -46,5 +41,15 @@ public class SolicitacaoAdocaoController {
     public ResponseEntity<SolicitacaoResponseDTO> recusarSolicitacao(@PathVariable UUID id) {
         SolicitacaoResponseDTO solicitacaoRecusadaDTO = solicitacaoService.recusarSolicitacao(id);
         return ResponseEntity.ok(solicitacaoRecusadaDTO);
+    }
+
+    @GetMapping("/recebidas")
+    public ResponseEntity<List<SolicitacaoResponseDTO>> listarRecebidas() {
+        return ResponseEntity.ok(solicitacaoService.listarRecebidas());
+    }
+
+    @GetMapping("/enviadas")
+public ResponseEntity<List<SolicitacaoResponseDTO>> listarEnviadas() {
+        return ResponseEntity.ok(solicitacaoService.listarEnviadas());
     }
 }

@@ -1,31 +1,46 @@
 package com.adotaai.adotaai.Application.DTO;
 
 import com.adotaai.adotaai.Domain.Entity.EventoEntity;
+import com.adotaai.adotaai.Domain.Enum.Status;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import java.time.LocalDate;
-import java.sql.Time;
+import java.time.LocalTime;
 import java.util.UUID;
 
 public class EventoDTO {
 
+    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     private UUID id;
     private String nome;
     private String endereco;
     private String bairro;
     private String cidade;
     private String cep;
-    private Time hrinicio;
-    private String hrfim;
+    @JsonFormat(pattern = "HH:mm")
+    private LocalTime hrinicio;
+    @JsonFormat(pattern = "HH:mm")
+    private LocalTime hrfim;
     private String descricao;
     @JsonFormat(pattern = "yyyy-MM-dd")
     private LocalDate data;
-    private String status = "PENDENTE";
+    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
+    private String status = Status.PENDENTE.name();
+
+    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     private String nmorganizador;
 
-    @JsonProperty("user_id")
+    @JsonProperty(value = "user_id", access = JsonProperty.Access.READ_ONLY)
     private UUID user_id;
+
+    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
+    private Long contagemPresencas;
+
+    private Boolean isInscrito;
+
+    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
+    private String mensagemReprovado;
 
     public EventoDTO(EventoEntity evento) {
         this.id = evento.getId();
@@ -44,6 +59,7 @@ public class EventoDTO {
         if (evento.getUser() != null) {
             this.user_id = evento.getUser().getId();
         }
+        this.mensagemReprovado = evento.getMensagemReprovado();
     }
 
     public EventoDTO() {
@@ -97,12 +113,12 @@ public class EventoDTO {
         this.cep = cep;
     }
 
-    public Time getHrinicio() {
-        return hrinicio;
+    public String getHrInicio() {
+        return hrinicio != null ? hrinicio.toString() : null;
     }
 
-    public void setHrinicio(Time hrinicio) {
-        this.hrinicio = hrinicio;
+    public void setHrInicio(String hrinicio) {
+        this.hrinicio = hrinicio != null && !hrinicio.isEmpty() ? LocalTime.parse(hrinicio) : null;
     }
 
     public String getStatus() {
@@ -129,14 +145,14 @@ public class EventoDTO {
         this.descricao = descricao;
     }
 
-    public String getHrfim() {
-        return hrfim;
+    public String getHrFim() {
+        return hrfim != null ? hrfim.toString() : null;
     }
 
-    public void setHrfim(String hrfim) {
-        this.hrfim = hrfim;
+    public void setHrFim(String hrfim) {
+        this.hrfim = hrfim != null && !hrfim.isEmpty() ? LocalTime.parse(hrfim) : null;
     }
-
+    
     public String getNmorganizador() {
         return nmorganizador;
     }
@@ -152,4 +168,28 @@ public class EventoDTO {
     public void setUser_id(UUID user_id) {
         this.user_id = user_id;
     }
+
+    public Long getContagemPresencas() {
+        return contagemPresencas;
+    }
+
+    public void setContagemPresencas(Long contagemPresencas) {
+        this.contagemPresencas = contagemPresencas;
+    }
+
+    public Boolean getIsInscrito() {
+        return isInscrito;
+    }
+    public void setIsInscrito(Boolean isInscrito) {
+        this.isInscrito = isInscrito;
+    }
+
+    public String getMensagemReprovado() {
+        return mensagemReprovado;
+    }
+
+    public void setMensagemReprovado(String mensagemReprovado) {
+        this.mensagemReprovado = mensagemReprovado;
+    }
+    
 }

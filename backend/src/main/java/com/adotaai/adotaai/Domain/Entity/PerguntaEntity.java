@@ -12,7 +12,7 @@ public class PerguntaEntity extends AuditableEntity {
     @GeneratedValue
     private UUID id;
 
-    @Column(length = 30, nullable = false)
+    @Column(length = 120, nullable = false)
     private String texto;
 
     @JsonBackReference("formulario-perguntas")
@@ -36,8 +36,8 @@ public class PerguntaEntity extends AuditableEntity {
         if (texto == null || texto.trim().isEmpty()) {
             throw new IllegalArgumentException("O texto da pergunta não pode estar vazio.");
         }
-        if (texto.length() > 30) {
-            throw new IllegalArgumentException("O texto da pergunta deve conter no máximo 30 caracteres.");
+        if (texto.length() > 120) {
+            throw new IllegalArgumentException("O texto da pergunta deve conter no máximo 50 caracteres.");
         }
         this.texto = texto;
     }

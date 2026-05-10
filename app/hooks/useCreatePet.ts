@@ -2,17 +2,17 @@ import { useCallback, useState } from "react";
 import { Platform } from "react-native";
 import { getSession } from "../lib/session";
 import { getApiErrorMessages } from "../services/apiErrorService";
-import apiService from "../services/apiService";
-import { especie } from "@/types/TEspecie";
+import { createPetFromFormData } from "../services/petService";
 import { porte } from "@/types/TPorte";
 
 export type CreatePetInput = {
   nome: string;
   dt_nasc: string; // formato esperado: "2026-04-04"
-  especie: especie; // enum uppercase para bater com o backend
+  especieId: string;
   porte: porte; // enum uppercase
-  raca: string;
+  racaId: string;
   descricao: string;
+  formularioId?: string | null;
   imagem: {
     uri: string;
     fileName?: string | null;
@@ -25,8 +25,9 @@ type CreatePetPayload = {
   descricao: string;
   dtNasc: string;
   porte: porte;
-  raca: string;
-  especie: especie;
+  racaId: string;
+  especieId: string;
+  formularioId: string | null;
 };
 
 type HookSuccessResult<T> = {
@@ -58,8 +59,9 @@ function toPayload(input: CreatePetInput): CreatePetPayload {
     descricao: input.descricao,
     dtNasc: normalizeDate(input.dt_nasc),
     porte: input.porte,
-    raca: input.raca,
-    especie: input.especie,
+    racaId: input.racaId,
+    especieId: input.especieId,
+    formularioId: input.formularioId ?? null,
   };
 }
 
@@ -120,11 +122,11 @@ export function useCreatePet() {
       const formData = await buildFormData(payload, input.imagem);
 
       // Nao forcar Content-Type: o axios define boundary corretamente.
-      const response = await apiService.post("/pets", formData);
+      const pet = await createPetFromFormData(formData);
 
       return {
         ok: true,
-        data: response.data,
+        data: pet,
       };
     } catch (err) {
       const messages = getApiErrorMessages(err, "Falha ao criar pet");

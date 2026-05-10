@@ -13,11 +13,13 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.adotaai.adotaai.Application.DTO.AprovarReprovarRequestDTO;
 import com.adotaai.adotaai.Application.DTO.BuscarPetDTO;
 import com.adotaai.adotaai.Application.DTO.CadastrarPetDTO;
 import com.adotaai.adotaai.Application.DTO.PetDTO;
@@ -27,8 +29,7 @@ import com.adotaai.adotaai.Domain.Exception.RegraDeNegocioException;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import jakarta.validation.ConstraintViolation;
-import jakarta.validation.Validator;
+import jakarta.validation.Valid;
 
 @RestController
 @RequestMapping(value = "/pets")
@@ -39,9 +40,6 @@ public class PetController {
 
     @Autowired
     private ObjectMapper objectMapper;
-
-    @Autowired
-    private Validator validator;
 
     @GetMapping
     public List<PetDTO> listarTodosPets() {
@@ -63,12 +61,23 @@ public class PetController {
         return ResponseEntity.ok(encontrado);
     }
 
-    @PutMapping(value = "/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PutMapping(value = "/{id}")
     public ResponseEntity<PetDTO> atualizarPet(
             @PathVariable UUID id,
-            @RequestPart("dados") String dadosJson,
+            @RequestPart(value = "dados", required = false) String dadosJson,
+            @RequestBody(required = false) CadastrarPetDTO dadosBody,
             @RequestPart(value = "imagem", required = false) MultipartFile imagem) {
-        CadastrarPetDTO dados = parseDados(dadosJson);
+        
+        CadastrarPetDTO dados;
+        
+        if (dadosJson != null) {
+            dados = parseDados(dadosJson);
+        } else if (dadosBody != null) {
+            dados = dadosBody;
+        } else {
+            dados = new CadastrarPetDTO();
+        }
+        
         PetDTO atualizado = petService.atualizarPet(id, dados, imagem);
         return ResponseEntity.ok(atualizado);
     }
@@ -109,6 +118,31 @@ public class PetController {
         BaseResponse<PetDTO> response = new BaseResponse<>();
         response.setMessage("Favoritos listados com sucesso.");
         response.setData(favoritos);
+        return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/pendentes")
+    public ResponseEntity<BaseResponse<PetDTO>> listarPetsPendentes() {
+        List<PetDTO> pendentes = petService.listarPetsPendentes();
+        BaseResponse<PetDTO> response = new BaseResponse<>();
+        response.setMessage("Pets pendentes listados com sucesso.");
+        response.setData(pendentes);
+        return ResponseEntity.ok(response);
+    }
+
+    @PostMapping("/{id}/aprovar")
+    public ResponseEntity<BaseResponse<String>> aprovarPet(@PathVariable UUID id) {
+        petService.aprovarPet(id);
+        BaseResponse<String> response = new BaseResponse<>();
+        response.setMessage("Pet aprovado com sucesso.");
+        return ResponseEntity.ok(response);
+    }
+
+    @PostMapping("/{id}/reprovar")
+    public ResponseEntity<BaseResponse<String>> reprovarPet(@PathVariable UUID id, @Valid @RequestBody AprovarReprovarRequestDTO request) {
+        petService.reprovarPet(id, request.getMotivo());
+        BaseResponse<String> response = new BaseResponse<>();
+        response.setMessage("Pet reprovado com sucesso.");
         return ResponseEntity.ok(response);
     }
 }

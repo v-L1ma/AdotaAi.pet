@@ -1,14 +1,22 @@
-import { date, z } from "zod";
+import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Controller, useForm } from "react-hook-form";
-import DateTimePicker, { DateTimePickerEvent } from "@react-native-community/datetimepicker";
+import DateTimePicker from "@react-native-community/datetimepicker";
 import { useCreatePet } from "../hooks/useCreatePet";
+import { useEditPet } from "../hooks/useEditPet";
+import { useRacas } from "../hooks/useRacas";
+import { useEspecies } from "../hooks/useEspecies";
 import * as ImagePicker from "expo-image-picker";
-import { useRouter } from "expo-router";
-import React, { useRef, useState } from "react";
-import { Alert, Image, InputAccessoryView, Keyboard, Linking, Platform, Pressable, SafeAreaView, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
+import { useLocalSearchParams, useRouter } from "expo-router";
+import React, { useEffect, useRef, useState } from "react";
+import { Alert, Image, InputAccessoryView, Keyboard, Linking, Modal, Platform, Pressable, SafeAreaView, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
 import Icon1 from "react-native-vector-icons/Ionicons";
 import { colors } from "@/styles/variables";
+import SelecionarFormularioModal from "@/components/SelecionarFormularioModal";
+import { Formulario } from "@/types/Formulario";
+import { animal } from "@/types/TAnimal";
+import AppHeader from "@/components/AppHeader";
+import { getPetById } from "@/services/petService";
 
 const criarAnuncioSchema = z.object({
     nome: z.string().trim().min(2, "Nome deve ter pelo menos 2 caracteres"),
@@ -17,13 +25,11 @@ const criarAnuncioSchema = z.object({
         .trim()
         .refine((valor) => !Number.isNaN(Date.parse(valor)), "Informe uma data de nascimento valida")
         .refine((valor) => new Date(valor) <= new Date(), "Data de nascimento nao pode ser no futuro"),
-    especie: z.enum(["Gato", "Cão"], {
-        message: "Selecione a especie",
-    }),
+    especieId: z.string().uuid("Selecione a especie"),
     porte: z.enum(["pequeno", "medio", "grande"], {
         message: "Selecione o porte",
     }),
-    raca: z.string().trim().min(2, "Raca deve ter pelo menos 2 caracteres"),
+    racaId: z.string().uuid("Selecione uma raça"),
     descricao: z.string().trim().min(10, "Descricao deve ter pelo menos 10 caracteres"),
 });
 
@@ -31,29 +37,101 @@ type CriarAnuncioFormData = z.infer<typeof criarAnuncioSchema>;
 
 export default function CriarAnuncioScreen() {
     const [showDatePicker, setShowDatePicker] = useState(false);
+    const [isModalFormulariosOpen, setIsModalFormulariosOpen] = useState(false);
+    const [isRacaSelectOpen, setIsRacaSelectOpen] = useState(false);
+    const [formularioSelecionado, setFormularioSelecionado] = useState<Formulario | null>(null);
+    const [selectedEspecieId, setSelectedEspecieId] = useState<string | undefined>(undefined);
+    const { racas, isLoading, refetch: refetchRacas } = useRacas(selectedEspecieId);
+    const { especies } = useEspecies();
+
+    const params = useLocalSearchParams<{ petId?: string }>();
+    const isEditing = !!params.petId;
+    const [petData, setPetData] = useState<animal | null>(null);
+    const [isLoadingPet, setIsLoadingPet] = useState(false);
+
+    const onClose = () => setIsModalFormulariosOpen(false);
+
     const { createPet, isCreating } = useCreatePet();
+    const { editPet, isEditing: isEditingPet } = useEditPet();
+
+    useEffect(() => {
+        const petId = Array.isArray(params.petId) ? params.petId[0] : params.petId;
+        if (!isEditing || !petId) {
+            return;
+        }
+
+        async function loadPet() {
+            setIsLoadingPet(true);
+            try {
+                const response = await getPetById(petId);
+                setPetData(response);
+            } catch {
+                Alert.alert("Erro", "Nao foi carregar os dados do pet.");
+            } finally {
+                setIsLoadingPet(false);
+            }
+        }
+
+        loadPet();
+    }, [isEditing, params.petId]);
+
+    const getDefaultValues = () => {
+        if (petData) {
+            return {
+                nome: petData.nome,
+                dt_nasc: petData.dt_nasc,
+                especieId: (petData as any).especieId || "",
+                porte: petData.porte as "pequeno" | "medio" | "grande",
+                racaId: (petData as any).racaId || "",
+                descricao: petData.descricao,
+            };
+        }
+        return {
+            nome: "",
+            dt_nasc: "2026-04-24",
+            especieId: "",
+            porte: undefined,
+            racaId: "",
+            descricao: "",
+        };
+    };
 
     const {
         control,
         handleSubmit,
         setValue,
-        watch,
         reset,
         formState: { errors },
     } = useForm<CriarAnuncioFormData>({
         resolver: zodResolver(criarAnuncioSchema),
-        defaultValues: {
-            nome: "",
-            dt_nasc: "2026-04-24",
-            especie: undefined,
-            porte: undefined,
-            raca: "",
-            descricao: "",
-        },
+        defaultValues: getDefaultValues(),
     });
+
+    useEffect(() => {
+        if (petData) {
+            reset({
+                nome: petData.nome,
+                dt_nasc: petData.dt_nasc,
+                especieId: (petData as any).especieId || "",
+                porte: petData.porte as "pequeno" | "medio" | "grande",
+                racaId: (petData as any).racaId || "",
+                descricao: petData.descricao,
+            });
+            setSelectedEspecieId((petData as any).especieId || "");
+            setExistingPhotoUrl(petData.link_foto);
+            setFormularioSelecionado(null);
+        }
+    }, [petData, reset]);
+
+    useEffect(() => {
+        if (selectedEspecieId) {
+            refetchRacas();
+        }
+    }, [selectedEspecieId, refetchRacas]);
 
     const router = useRouter();
     const [image, setImage] = useState<ImagePicker.ImagePickerAsset | null>(null);
+    const [existingPhotoUrl, setExistingPhotoUrl] = useState<string | null>(null);
     const [focusedField, setFocusedField] = useState<"nome" | "idade" | "peso" | null>(null);
 
     const nomeRef = useRef<TextInput>(null);
@@ -91,6 +169,11 @@ export default function CriarAnuncioScreen() {
                 { text: "Abrir configurações", onPress: () => Linking.openSettings() },
             ]
         );
+    };
+
+    const handleSelecionarFormulario = (formulario: Formulario | null) => {
+        setFormularioSelecionado(formulario);
+        setIsModalFormulariosOpen(false);
     };
 
     const pickImageFromCamera = async () => {
@@ -194,6 +277,32 @@ export default function CriarAnuncioScreen() {
     };
 
     const handleSave = async (data: CriarAnuncioFormData) => {
+        if (isEditing) {
+            const result = await editPet({
+                petId: params.petId!,
+                nome: data.nome,
+                dt_nasc: data.dt_nasc,
+                especieId: data.especieId,
+                porte: data.porte as "pequeno" | "medio" | "grande",
+                racaId: data.racaId,
+                descricao: data.descricao,
+                formularioId: formularioSelecionado?.id ?? null,
+                imagem: image ? {
+                    uri: image.uri,
+                    fileName: image.fileName,
+                    mimeType: image.mimeType,
+                } : null,
+            });
+
+            if (!result.ok) {
+                Alert.alert("Erro", result.messages.join("\n"));
+                return;
+            }
+
+            router.back();
+            return;
+        }
+
         if (!image?.uri) {
             Alert.alert("Imagem obrigatória", "Adicione uma foto do pet para criar o anúncio.");
             return;
@@ -201,6 +310,7 @@ export default function CriarAnuncioScreen() {
 
         const result = await createPet({
             ...data,
+            formularioId: formularioSelecionado?.id ?? null,
             imagem: {
                 uri: image.uri,
                 fileName: image.fileName,
@@ -213,9 +323,9 @@ export default function CriarAnuncioScreen() {
             return;
         }
 
-        Alert.alert("Sucesso", "Anuncio criado com sucesso!");
         reset();
         setImage(null);
+        setFormularioSelecionado(null);
     };
 
     const renderError = (message?: string) =>
@@ -234,12 +344,7 @@ export default function CriarAnuncioScreen() {
     return (
         <View style={styles.screen}>
             <SafeAreaView style={styles.safeTop} />
-            <View style={styles.header}>
-                <TouchableOpacity onPress={() => router.back()} style={styles.headerButton}>
-                    <Icon1 name="arrow-back" size={22} color={colors.primary} />
-                </TouchableOpacity>
-                <View style={styles.headerSpacer} />
-            </View>
+            <AppHeader title="Criar Anúncio" onBackPress={() => router.back()} />
 
             <ScrollView                style={styles.scroll}
                 contentContainerStyle={styles.content}
@@ -249,6 +354,8 @@ export default function CriarAnuncioScreen() {
                     <Pressable style={styles.avatarUploader} onPress={pickImage}>
                         {image?.uri ? (
                             <Image source={{ uri: image.uri }} style={styles.avatarImage} />
+                        ) : existingPhotoUrl ? (
+                            <Image source={{ uri: existingPhotoUrl }} style={styles.avatarImage} />
                         ) : (
                             <View style={styles.avatarPlaceholder}>
                                 <Icon1 name="camera-outline" size={30} color="#8c8c8c" />
@@ -260,8 +367,8 @@ export default function CriarAnuncioScreen() {
                         </View>
                     </Pressable>
 
-                    <Text style={styles.heroTitle}>Nova História</Text>
-                    <Text style={styles.heroSubtitle}>Dê voz a um novo companheiro</Text>
+                    <Text style={styles.heroTitle}>{isEditing ? "Editar História" : "Nova História"}</Text>
+                    <Text style={styles.heroSubtitle}>{isEditing ? "Atualize as informações do seu companheiro" : "Dê voz a um novo companheiro"}</Text>
                 </View>
 
                 <View style={styles.formCard}>
@@ -286,24 +393,24 @@ export default function CriarAnuncioScreen() {
                     {renderError(errors.nome?.message)}
 
                     <View style={styles.gridTwo}>
-                        <Controller
-                            control={control}
-                            name="raca"
-                            render={({ field: { onChange, onBlur, value } }) => (
-                                <Field
-                                    label="Raça"
-                                    value={value}
-                                    onChangeText={onChange}
-                                    onBlur={onBlur}
-                                    placeholder="Ex.: SRD"
-                                    inputRef={idadeRef}
-                                    returnKeyType="next"
-                                    onSubmitEditing={() => pesoRef.current?.focus()}
-                                    onFocus={() => setFocusedField("idade")}
-                                    inputAccessoryViewID={Platform.OS === "ios" ? toolbarId : undefined}
-                                />
-                            )}
-                        />
+                        <View style={styles.fieldWrap}>
+                            <Text style={styles.label}>Raça</Text>
+                            <Controller
+                                control={control}
+                                name="racaId"
+                                render={({ field: { onChange, value } }) => (
+                                    <TouchableOpacity 
+                                        style={styles.htmlSelect}
+                                        onPress={() => setIsRacaSelectOpen(true)}
+                                    >
+                                        <Text style={[styles.htmlSelectText, !value && styles.htmlSelectPlaceholder]}>
+                                            {value ? racas.find(r => r.id === value)?.nome : "Selecione"}
+                                        </Text>
+                                        <Icon1 name="chevron-down" size={18} color={colors.textMuted} />
+                                    </TouchableOpacity>
+                                )}
+                            />
+                        </View>
                         <Field
                             label="Peso (kg) - Opcional"
                             value={""}
@@ -317,22 +424,79 @@ export default function CriarAnuncioScreen() {
                             inputAccessoryViewID={Platform.OS === "ios" ? toolbarId : undefined}
                         />
                     </View>
-                    {renderError(errors.raca?.message)}
+
+                    <Modal
+                        visible={isRacaSelectOpen}
+                        transparent
+                        animationType="fade"
+                        onRequestClose={() => setIsRacaSelectOpen(false)}
+                    >
+                        <View style={styles.modalOverlay}>
+                            <View style={styles.racaModalContent}>
+                                <View style={styles.racaModalHeader}>
+                                    <Text style={styles.racaModalTitle}>Selecione a Raça</Text>
+                                    <TouchableOpacity onPress={() => setIsRacaSelectOpen(false)}>
+                                        <Icon1 name="close" size={24} color={colors.text} />
+                                    </TouchableOpacity>
+                                </View>
+                                <ScrollView style={styles.racaModalScroll}>
+                                    {racas.length === 0 && selectedEspecieId && (
+                                        <Text style={styles.racaModalEmpty}>
+                                            {isLoading ? "Carregando..." : "Nenhuma raça encontrada"}
+                                        </Text>
+                                    )}
+                                    <Controller
+                                        control={control}
+                                        name="racaId"
+                                        render={({ field: { onChange, value } }) => (
+                                            <>
+                                                {racas.map((r) => (
+                                                    <TouchableOpacity
+                                                        key={r.id}
+                                                        style={[styles.racaModalOption, value === r.id && styles.racaModalOptionSelected]}
+                                                        onPress={() => {
+                                                            onChange(r.id);
+                                                            setIsRacaSelectOpen(false);
+                                                        }}
+                                                    >
+                                                        <Text style={[styles.racaModalOptionText, value === r.id && styles.racaModalOptionTextSelected]}>
+                                                            {r.nome}
+                                                        </Text>
+                                                        {value === r.id && <Icon1 name="checkmark" size={20} color={colors.primary} />}
+                                                    </TouchableOpacity>
+                                                ))}
+                                            </>
+                                        )}
+                                    />
+                                </ScrollView>
+                            </View>
+                        </View>
+                    </Modal>
+                    {renderError(errors.racaId?.message)}
                 </View>
 
                 <View style={styles.block}>
                     <Text style={styles.blockTitle}>Espécie</Text>
                     <Controller
                         control={control}
-                        name="especie"
+                        name="especieId"
                         render={({ field: { onChange, value } }) => (
                             <View style={styles.row}>
-                                <Chip label="Cão" selected={value === "Cão"} onPress={() => onChange("Cão")} />
-                                <Chip label="Gato" selected={value === "Gato"} onPress={() => onChange("Gato")} />
+                                {especies.map((esp) => (
+                                    <Chip 
+                                        key={esp.id} 
+                                        label={esp.nome} 
+                                        selected={value === esp.id} 
+                                        onPress={() => { 
+                                            onChange(esp.id); 
+                                            setSelectedEspecieId(esp.id); 
+                                        }} 
+                                    />
+                                ))}
                             </View>
                         )}
                     />
-                    {renderError(errors.especie?.message)}
+                    {renderError(errors.especieId?.message)}
                 </View>
 
                 <View style={styles.block}>
@@ -407,19 +571,39 @@ export default function CriarAnuncioScreen() {
                     />
                     {renderError(errors.descricao?.message)}
 
-                    <TouchableOpacity style={styles.secondaryButton} onPress={() => router.push("/criarFormulario") }>
-                        <Text style={styles.secondaryButtonText}>Escolher formulário</Text>
-                    </TouchableOpacity>
+                    {formularioSelecionado ? (
+                        <View style={styles.formularioCard}>
+                            <View style={styles.formularioInfo}>
+                                <View style={styles.formularioIcon}>
+                                    <Icon1 name="list-outline" size={20} color={colors.primary} />
+                                </View>
+                                <View style={styles.formularioText}>
+                                    <Text style={styles.formularioLabel}>Formulario selecionado</Text>
+                                    <Text style={styles.formularioTitle}>{formularioSelecionado.titulo}</Text>
+                                </View>
+                            </View>
+                            <TouchableOpacity
+                                style={styles.formularioChangeButton}
+                                onPress={() => setIsModalFormulariosOpen(true)}
+                            >
+                                <Text style={styles.formularioChangeText}>Mudar</Text>
+                            </TouchableOpacity>
+                        </View>
+                    ) : (
+                        <TouchableOpacity style={styles.secondaryButton} onPress={() => setIsModalFormulariosOpen(true)}>
+                            <Text style={styles.secondaryButtonText}>Escolher formulario</Text>
+                        </TouchableOpacity>
+                    )}
                 </View>
 
                 <TouchableOpacity 
-                    style={[styles.primaryButton, isCreating && { opacity: 0.7 }]} 
+                    style={[styles.primaryButton, (isCreating || isEditingPet) && { opacity: 0.7 }]} 
                     onPress={handleSubmit(handleSave)}
-                    disabled={isCreating}
+                    disabled={isCreating || isEditingPet || isLoadingPet}
                 >
                     <Icon1 name="sparkles-outline" size={18} color="#fff" />
                     <Text style={styles.primaryButtonText}>
-                        {isCreating ? "Criando..." : "Criar anúncio"}
+                        {isLoadingPet ? "Carregando..." : isEditing ? (isEditingPet ? "Salvando..." : "Salvar alteracoes") : (isCreating ? "Criando..." : "Criar anúncio")}
                     </Text>
                 </TouchableOpacity>
             </ScrollView>
@@ -439,6 +623,12 @@ export default function CriarAnuncioScreen() {
                     </View>
                 </InputAccessoryView>
             )}
+
+            <SelecionarFormularioModal
+                visible={isModalFormulariosOpen}
+                onClose={onClose}
+                onFormularioSelecionado={handleSelecionarFormulario}
+            />
         </View>
     );
 }
@@ -540,7 +730,7 @@ const styles = StyleSheet.create({
         flex: 1,
     },
     content: {
-        paddingTop: 10,
+        paddingTop: 70,
         paddingHorizontal: 20,
         paddingBottom: 90,
         gap: 16,
@@ -690,6 +880,59 @@ const styles = StyleSheet.create({
         fontWeight: "700",
         fontSize: 14,
     },
+    formularioCard: {
+        flexDirection: "row",
+        alignItems: "center",
+        justifyContent: "space-between",
+        gap: 12,
+        paddingVertical: 12,
+        paddingHorizontal: 14,
+        borderRadius: 16,
+        backgroundColor: colors.surfaceLow,
+        borderWidth: 1,
+        borderColor: colors.surfaceLowest,
+    },
+    formularioInfo: {
+        flexDirection: "row",
+        alignItems: "center",
+        gap: 10,
+        flex: 1,
+    },
+    formularioIcon: {
+        width: 34,
+        height: 34,
+        borderRadius: 12,
+        alignItems: "center",
+        justifyContent: "center",
+        backgroundColor: colors.secondaryContainer,
+    },
+    formularioText: {
+        flex: 1,
+    },
+    formularioLabel: {
+        fontSize: 11,
+        letterSpacing: 0.6,
+        textTransform: "uppercase",
+        color: colors.textMuted,
+        fontWeight: "700",
+    },
+    formularioTitle: {
+        fontSize: 15,
+        fontWeight: "800",
+        color: colors.text,
+        marginTop: 2,
+    },
+    formularioChangeButton: {
+        paddingHorizontal: 12,
+        paddingVertical: 8,
+        borderRadius: 999,
+        backgroundColor: colors.primary,
+    },
+    formularioChangeText: {
+        color: "#fff",
+        fontSize: 12,
+        fontWeight: "800",
+    },
     keyboardToolbar: {
         backgroundColor: "#F5F5F7",
         borderTopWidth: 1,
@@ -723,5 +966,82 @@ const styles = StyleSheet.create({
         color: '#fff',
         fontWeight: "800",
         fontSize: 17,
+    },
+    htmlSelect: {
+        borderRadius: 14,
+        backgroundColor: colors.surfaceLowest,
+        paddingHorizontal: 14,
+        paddingVertical: 13,
+        flexDirection: "row",
+        justifyContent: "space-between",
+        alignItems: "center",
+        minHeight: 46,
+    },
+    htmlSelectText: {
+        color: colors.text,
+        fontSize: 14,
+        fontWeight: "500",
+        textOverflow: "ellipsis",
+        overflow: "hidden",
+        maxWidth: "90%",
+    },
+    htmlSelectPlaceholder: {
+        color: colors.textMuted,
+    },
+    modalOverlay: {
+        flex: 1,
+        backgroundColor: "rgba(0, 0, 0, 0.5)",
+        justifyContent: "center",
+        alignItems: "center",
+        padding: 40,
+    },
+    racaModalContent: {
+        backgroundColor: colors.surfaceLow,
+        borderRadius: 20,
+        width: "100%",
+        maxHeight: "70%",
+        overflow: "hidden",
+    },
+    racaModalHeader: {
+        flexDirection: "row",
+        justifyContent: "space-between",
+        alignItems: "center",
+        padding: 16,
+        borderBottomWidth: 1,
+        borderBottomColor: colors.surfaceLowest,
+    },
+    racaModalTitle: {
+        fontSize: 18,
+        fontWeight: "800",
+        color: colors.text,
+    },
+    racaModalScroll: {
+        maxHeight: 400,
+    },
+    racaModalEmpty: {
+        color: colors.textMuted,
+        fontSize: 14,
+        padding: 20,
+        textAlign: "center",
+    },
+    racaModalOption: {
+        flexDirection: "row",
+        justifyContent: "space-between",
+        alignItems: "center",
+        paddingHorizontal: 16,
+        paddingVertical: 14,
+        borderBottomWidth: 1,
+        borderBottomColor: colors.surfaceLowest,
+    },
+    racaModalOptionSelected: {
+        backgroundColor: colors.secondaryContainer,
+    },
+    racaModalOptionText: {
+        color: colors.text,
+        fontSize: 15,
+    },
+    racaModalOptionTextSelected: {
+        color: colors.primary,
+        fontWeight: "700",
     },
 });
