@@ -13,85 +13,83 @@ export default function Home() {
   const router = useRouter();
   const { navigateToTab } = useTabNavigation();
 
-  const pets :animal[] = [
+  const pets :any[] = [
     {
       nome: "Alfredo",
-      imagem:
-      "https://img.freepik.com/fotos-gratis/fotografia-vertical-de-foco-superficial-de-um-bonito-cachorro-de-golden-retriever-sentado-em-um-chao-de-grama_181624-27259.jpg?w=360",
+      link_foto:
+      "https://img.freepik.com/fotos-gratis/fotografia-vertical-de-foco-superficial-de-um-bonito-Cão-de-golden-retriever-sentado-em-um-chao-de-grama_181624-27259.jpg?w=360",
       genero: "M",
-      especie: "cachorro",
+      especie: "Cão",
       porte: "medio",
   },
   {
       nome: "Luna",
-      imagem:
-      "https://www.petz.com.br/blog/wp-content/uploads/2019/07/vida-de-gato.jpg",
+      link_foto:"https://www.petz.com.br/blog/wp-content/uploads/2019/07/vida-de-gato.jpg",
       genero: "F",
-      especie: "gato",
+      especie: "Gato",
       porte: "pequeno",
   },
   {
       nome: "Thor",
-      imagem:
-      "https://img.freepik.com/fotos-gratis/fotografia-vertical-de-foco-superficial-de-um-bonito-cachorro-de-golden-retriever-sentado-em-um-chao-de-grama_181624-27259.jpg?w=360",
+      link_foto:
+      "https://img.freepik.com/fotos-gratis/fotografia-vertical-de-foco-superficial-de-um-bonito-Cão-de-golden-retriever-sentado-em-um-chao-de-grama_181624-27259.jpg?w=360",
       genero: "M",
-      especie: "cachorro",
+      especie: "Cão",
       porte: "grande",
   },
   {
       nome: "Mimi",
-      imagem:
+      link_foto:
       "https://www.petz.com.br/blog/wp-content/uploads/2019/07/vida-de-gato.jpg",
       genero: "F",
-      especie: "gato",
+      especie: "Gato",
       porte: "pequeno",
   },
   {
       nome: "Rex",
-      imagem:
-      "https://img.freepik.com/fotos-gratis/fotografia-vertical-de-foco-superficial-de-um-bonito-cachorro-de-golden-retriever-sentado-em-um-chao-de-grama_181624-27259.jpg?w=360",
+      link_foto:
+      "https://img.freepik.com/fotos-gratis/fotografia-vertical-de-foco-superficial-de-um-bonito-Cão-de-golden-retriever-sentado-em-um-chao-de-grama_181624-27259.jpg?w=360",
       genero: "M",
-      especie: "cachorro",
+      especie: "Cão",
       porte: "medio",
   },
   {
       nome: "Mel",
-      imagem:
-      "https://img.freepik.com/fotos-gratis/fotografia-vertical-de-foco-superficial-de-um-bonito-cachorro-de-golden-retriever-sentado-em-um-chao-de-grama_181624-27259.jpg?w=360",
+      link_foto:
+      "https://img.freepik.com/fotos-gratis/fotografia-vertical-de-foco-superficial-de-um-bonito-Cão-de-golden-retriever-sentado-em-um-chao-de-grama_181624-27259.jpg?w=360",
       genero: "F",
-      especie: "cachorro",
+      especie: "Cão",
       porte: "pequeno",
   },
   {
       nome: "Simba",
-      imagem:
+      link_foto:
       "https://www.petz.com.br/blog/wp-content/uploads/2019/07/vida-de-gato.jpg",
       genero: "M",
-      especie: "gato",
+      especie: "Gato",
       porte: "medio",
   },
   {
       nome: "Bela",
-      imagem:
-      "https://img.freepik.com/fotos-gratis/fotografia-vertical-de-foco-superficial-de-um-bonito-cachorro-de-golden-retriever-sentado-em-um-chao-de-grama_181624-27259.jpg?w=360",
+      link_foto:
+      "https://img.freepik.com/fotos-gratis/fotografia-vertical-de-foco-superficial-de-um-bonito-Cão-de-golden-retriever-sentado-em-um-chao-de-grama_181624-27259.jpg?w=360",
       genero: "F",
-      especie: "cachorro",
+      especie: "Cão",
       porte: "grande",
   },
   {
       nome: "Nina",
-      imagem:
+      link_foto:
       "https://www.petz.com.br/blog/wp-content/uploads/2019/07/vida-de-gato.jpg",
       genero: "F",
-      especie: "gato",
+      especie: "Gato",
       porte: "pequeno",
   },
   {
       nome: "Max",
-      imagem:
-      "https://img.freepik.com/fotos-gratis/fotografia-vertical-de-foco-superficial-de-um-bonito-cachorro-de-golden-retriever-sentado-em-um-chao-de-grama_181624-27259.jpg?w=360",
+      link_foto:"https://img.freepik.com/fotos-gratis/fotografia-vertical-de-foco-superficial-de-um-bonito-Cão-de-golden-retriever-sentado-em-um-chao-de-grama_181624-27259.jpg?w=360",
       genero: "M",
-      especie: "cachorro",
+      especie: "Cão",
       porte: "medio",
   }
   ]
