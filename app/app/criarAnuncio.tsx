@@ -981,6 +981,9 @@ const styles = StyleSheet.create({
         color: colors.text,
         fontSize: 14,
         fontWeight: "500",
+        textOverflow: "ellipsis",
+        overflow: "hidden",
+        maxWidth: "90%",
     },
     htmlSelectPlaceholder: {
         color: colors.textMuted,
