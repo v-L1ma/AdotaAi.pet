@@ -147,7 +147,11 @@ export default function MeusPets() {
         {pets.map((pet) => (
             <View
               key={pet.id}
-              style={[styles.card, { width: metrics.cardWidth }]}
+              style={[
+                styles.card, 
+                { width: metrics.cardWidth },
+                popoverPetId === pet.id && { zIndex: 100 }
+              ]}
             >
               <Image
                 source={{ uri: pet.link_foto }}
@@ -162,6 +166,11 @@ export default function MeusPets() {
                 resizeMode="cover"
               />
               <View style={styles.petInfo}>
+                {pet.mensagemReprovado && (
+                  <View style={styles.warningBox}>
+                    <Text style={styles.warningText}>Atenção: {pet.mensagemReprovado}</Text>
+                  </View>
+                )}
                 <Text numberOfLines={1} style={[styles.petName, { fontSize: metrics.titleSize }]}>{pet.nome}</Text>
                 <Text numberOfLines={1} style={[styles.petAge, { fontSize: metrics.subtitleSize }]}>{formatarIdade(pet.dt_nasc)}</Text>
                 <View style={styles.speciesBadge}>
@@ -315,6 +324,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: "#ECECEC",
     gap: 12,
+    zIndex: 1,
   },
   petImage: {
     backgroundColor: colors.buttonBackground,
@@ -386,5 +396,19 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: "600",
     color: colors.primary,
+  },
+  warningBox: {
+    backgroundColor: "#FFF3CD",
+    borderRadius: 8,
+    paddingHorizontal: 8,
+    paddingVertical: 6,
+    marginBottom: 6,
+    borderLeftWidth: 3,
+    borderLeftColor: "#FFC107",
+  },
+  warningText: {
+    color: "#856404",
+    fontSize: 12,
+    fontWeight: "600",
   },
 });

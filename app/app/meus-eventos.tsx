@@ -193,10 +193,19 @@ export default function MeusEventos() {
               />
 
               <View style={styles.cardBody}>
-                <View style={styles.tag}>
-                  <Text style={styles.tagText}>{item.status || "Evento"}</Text>
+                {item.mensagemReprovado && (
+                  <View style={styles.warningBox}>
+                    <Ionicons name="warning" size={14} color="#856404" />
+                    <Text style={styles.warningText}>Atenção: {item.mensagemReprovado}</Text>
+                  </View>
+                )}
+                <View style={{ display: "flex", flexDirection: "row", justifyContent: "space-between", alignItems: "center", gap: 8 }}>
+                  <Text style={styles.title}>{item.nome}</Text>
+                  <Text style={[styles.meta, {color: colors.primary}]}>
+                    <Ionicons name="people" size={16} color={colors.primary} /> 
+                    {item.contagemPresencas}
+                  </Text>
                 </View>
-              <Text style={styles.title}>{item.nome}</Text>
               <Text style={styles.meta}>{formatarData(item.data, formatarHoraDisplay(item.hrinicio))}</Text>
               <Text style={styles.meta}>{formatarLocal(item)}</Text>
             </View>
@@ -395,5 +404,23 @@ const styles = StyleSheet.create({
   addButtonText: {
     color: colors.primary,
     fontWeight: "800",
+  },
+  warningBox: {
+    display: "flex",
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
+    backgroundColor: "#FFF3CD",
+    borderRadius: 2,
+    paddingHorizontal: 8,
+    paddingVertical: 6,
+    marginBottom: 6,
+    borderLeftWidth: 3,
+    borderLeftColor: "#FFC107",
+  },
+  warningText: {
+    color: "#856404",
+    fontSize: 12,
+    fontWeight: "600",
   },
 });
