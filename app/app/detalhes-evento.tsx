@@ -145,10 +145,6 @@ const horarioLabel = useMemo(() => {
 
           {!isLoading && !loadError && evento && (
             <>
-              <View style={styles.badge}>
-                <Text style={styles.badgeText}>{evento.status || "Evento"}</Text>
-              </View>
-
               <Text style={styles.title}>{evento.nome}</Text>
 
               <View style={styles.infoGrid}>
