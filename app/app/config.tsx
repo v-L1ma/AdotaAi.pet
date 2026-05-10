@@ -5,28 +5,46 @@ import { ScrollView, StyleSheet, Text, TouchableOpacity, View, useWindowDimensio
 import { SafeAreaView } from "react-native-safe-area-context";
 import { colors } from "@/styles/variables";
 import AppHeader from "@/components/AppHeader";
+import { getSession } from "@/lib/session";
+import { useAuth } from "@/hooks/useAuth";
 
 type SettingItem = {
     title: string;
     icon: keyof typeof Ionicons.glyphMap;
     route: string;
     badge?: string;
+    requiresAdmin?: boolean;
 };
 
 export default function ConfigScreen() {
     const router = useRouter();
+    const auth = useAuth();
     const { width } = useWindowDimensions();
     const isTablet = width >= 768;
+    const session = getSession();
+    const isAdmin = session?.cargo === "ADMINISTRADOR";
+
+    const handleLogout = () => {
+        auth.logout();
+        router.replace("/login");
+    }
 
     const accountItems: SettingItem[] = [
         { title: "Conta", icon: "person-circle-outline", route: "/perfil-user" },
-        { title: "Meus pets", icon: "paw-outline", route: "/meus-pets" },
-        { title: "Solicitações", icon: "notifications-outline", route: "/solicitacoes", badge: "3" },
+        { title: "Meus pet", icon: "paw-outline", route: "/meus-pets" },
+        { title: "Solicitações", icon: "notifications-outline", route: "/solicitacoes" },
         { title: "Meus favoritos", icon: "heart-outline", route: "/meus-favoritos" },
         { title: "Formulários", icon: "document-text-outline", route: "/gerenciar-formularios" },
         { title: "Meus Eventos", icon: "calendar-outline", route: "/meus-eventos" },
         { title: "Eventos Inscritos", icon: "calendar-outline", route: "/eventos-inscritos" },
     ];
+
+    const adminItems: SettingItem[] = [
+        { title: "Administrativo", icon: "shield-outline", route: "/admin-menu", requiresAdmin: true },
+    ];
+
+    const filteredAccountItems = accountItems.filter(item => !item.requiresAdmin || isAdmin);
+    const filteredAdminItems = adminItems.filter(item => !item.requiresAdmin || isAdmin);
 
     const infoItems: SettingItem[] = [
         { title: "Sobre nós", icon: "help-circle-outline", route: "/sobre-nos" },
@@ -77,18 +95,25 @@ export default function ConfigScreen() {
                     </View>
 
                     <View style={styles.profileTextWrap}>
-                        <Text style={styles.profileName}>Fulano</Text>
-                        <Text style={styles.profileSub}>Santos • São Paulo</Text>
+                        <Text style={styles.profileName}>{session?.nome || "Usuário"}</Text>
+                        <Text style={styles.profileSub}>{session?.cargo}</Text>
                     </View>
                 </View>
 
+                {isAdmin && (
+                    <>
+                        <Text style={styles.sectionLabel}>Administrativo</Text>
+                        <View style={styles.cardsWrap}>{filteredAdminItems.map(renderItem)}</View>
+                    </>
+                )}
+
                 <Text style={styles.sectionLabel}>Preferências da conta</Text>
-                <View style={styles.cardsWrap}>{accountItems.map(renderItem)}</View>
+                <View style={styles.cardsWrap}>{filteredAccountItems.map(renderItem)}</View>
 
                 <Text style={styles.sectionLabel}>Informações</Text>
                 <View style={styles.cardsWrap}>{infoItems.map(renderItem)}</View>
 
-                <TouchableOpacity style={styles.logout} onPress={() => router.replace("/login") }>
+                <TouchableOpacity style={styles.logout} onPress={() => handleLogout()}>
                     <Ionicons name="exit-outline" size={20} color="#A31A14" />
                     <Text style={styles.logoutText}>Sair da conta</Text>
                 </TouchableOpacity>
