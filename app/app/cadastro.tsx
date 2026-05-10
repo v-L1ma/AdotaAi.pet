@@ -120,7 +120,7 @@ export default function CadastroScreen() {
 
             {erro ? <Text style={{ color: "#b00020", marginBottom: 8 }}>{erro}</Text> : null}
 
-            <TouchableOpacity style={styles.buttonLogin} onPress={handleCadastro} disabled={isLoading}>
+            <TouchableOpacity style={styles.buttonCadastro} onPress={handleCadastro} disabled={isLoading}>
               <Text style={styles.buttonText}>{isLoading ? "Cadastrando..." : "Cadastrar"}</Text>
             </TouchableOpacity>
           </View>
