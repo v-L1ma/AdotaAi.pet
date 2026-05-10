@@ -16,7 +16,7 @@ public class FormularioTemplateDTO {
         this.id = entity.getId();
         this.usuarioCriadorId = entity.getUsuarioCriador().getId();
         this.perguntas = entity.getPerguntas().stream()
-                .map(pergunta -> new PerguntaDTO(pergunta.getId(), pergunta.getTexto()))
+                .map(pergunta -> new PerguntaDTO(pergunta.getId(), pergunta.getTexto(), pergunta.getFl_ativo()))
                 .collect(Collectors.toList());
     }
 

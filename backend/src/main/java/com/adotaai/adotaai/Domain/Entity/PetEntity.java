@@ -36,6 +36,9 @@ public class PetEntity extends AuditableEntity {
     @Column(nullable = false)
     private String descricao;
 
+    @Column(nullable = true)
+    private String mensagemReprovado;
+
     @Column(nullable = false)
     private LocalDate dt_nasc;
 
@@ -195,5 +198,13 @@ public class PetEntity extends AuditableEntity {
 
     public void setUser(UsuarioEntity user) {
         this.user = user;
+    }
+
+    public String getMensagemReprovado() {
+        return mensagemReprovado;
+    }
+
+    public void setMensagemReprovado(String mensagemReprovado) {
+        this.mensagemReprovado = mensagemReprovado;
     }
 }

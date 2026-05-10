@@ -1,7 +1,7 @@
 package com.adotaai.adotaai.Domain.Enum;
 
-public enum StatusSolicitacao {
+public enum Status {
     PENDENTE,
     APROVADO,
-    RECUSADO
+    REPROVADO
 }

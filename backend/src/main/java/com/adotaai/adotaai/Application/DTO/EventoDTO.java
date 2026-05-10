@@ -1,6 +1,7 @@
 package com.adotaai.adotaai.Application.DTO;
 
 import com.adotaai.adotaai.Domain.Entity.EventoEntity;
+import com.adotaai.adotaai.Domain.Enum.Status;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
@@ -25,7 +26,7 @@ public class EventoDTO {
     @JsonFormat(pattern = "yyyy-MM-dd")
     private LocalDate data;
     @JsonProperty(access = JsonProperty.Access.READ_ONLY)
-    private String status = "PENDENTE";
+    private String status = Status.PENDENTE.name();
 
     @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     private String nmorganizador;
@@ -37,6 +38,9 @@ public class EventoDTO {
     private Long contagemPresencas;
 
     private Boolean isInscrito;
+
+    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
+    private String mensagemReprovado;
 
     public EventoDTO(EventoEntity evento) {
         this.id = evento.getId();
@@ -55,6 +59,7 @@ public class EventoDTO {
         if (evento.getUser() != null) {
             this.user_id = evento.getUser().getId();
         }
+        this.mensagemReprovado = evento.getMensagemReprovado();
     }
 
     public EventoDTO() {
@@ -177,6 +182,14 @@ public class EventoDTO {
     }
     public void setIsInscrito(Boolean isInscrito) {
         this.isInscrito = isInscrito;
+    }
+
+    public String getMensagemReprovado() {
+        return mensagemReprovado;
+    }
+
+    public void setMensagemReprovado(String mensagemReprovado) {
+        this.mensagemReprovado = mensagemReprovado;
     }
     
 }

@@ -5,14 +5,15 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 import colors from "@/styles/colors";
 import { getFormularioTemplateById } from "@/services/formularioService";
-import { submitSolicitacaoRespostas } from "@/services/solicitacaoService";
+import { createSolicitacaoComRespostas } from "@/services/solicitacaoService";
 import type { FormularioTemplateDTO } from "@/types/Formulario";
 
 export default function ResponderFormularioStepper() {
   const router = useRouter();
-  const params = useLocalSearchParams<{ formularioId?: string; solicitacaoId?: string }>();
+  const params = useLocalSearchParams<{ formularioId?: string; solicitacaoId?: string; petId?: string }>();
   const formularioId = Array.isArray(params.formularioId) ? params.formularioId[0] : params.formularioId;
   const solicitacaoId = Array.isArray(params.solicitacaoId) ? params.solicitacaoId[0] : params.solicitacaoId;
+  const petId = Array.isArray(params.petId) ? params.petId[0] : params.petId;
 
   const [formulario, setFormulario] = useState<FormularioTemplateDTO | null>(null);
   const [respostas, setRespostas] = useState<Record<string, string>>({});
@@ -74,8 +75,8 @@ export default function ResponderFormularioStepper() {
   };
 
   const handleSubmit = async () => {
-    if (!solicitacaoId) {
-      Alert.alert("Erro", "Solicitacao nao informada.");
+    if (!petId) {
+      Alert.alert("Erro", "Pet não informado.");
       return;
     }
 
@@ -93,13 +94,14 @@ export default function ResponderFormularioStepper() {
     setIsSubmitting(true);
 
     try {
-      await submitSolicitacaoRespostas(
-        formulario.perguntas.map((pergunta) => ({
-          solicitacaoId,
+      await createSolicitacaoComRespostas({
+        petId,
+        respostas: formulario.perguntas.map((pergunta) => ({
           perguntaId: pergunta.id,
-          resposta: respostas[pergunta.id],
-        }))
-      );
+          perguntaTexto: pergunta.texto,
+          respostaTexto: respostas[pergunta.id],
+        })),
+      });
       router.back();
     } catch {
       Alert.alert("Erro", "Nao foi possivel enviar suas respostas.");
@@ -110,6 +112,7 @@ export default function ResponderFormularioStepper() {
 
   const totalQuestions = formulario?.perguntas?.length || 0;
   const currentQuestion = formulario?.perguntas?.[currentIndex] || null;
+  const progress = totalQuestions > 0 ? (currentIndex + 1) / totalQuestions : 0;
 
   return (
     <SafeAreaView style={styles.screen} edges={["top", "left", "right", "bottom"]}>
@@ -117,10 +120,23 @@ export default function ResponderFormularioStepper() {
         <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
           <Ionicons name="arrow-back" size={24} color={colors.primary} />
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>Responder formulario</Text>
+        {/* <Ionicons name="pets" size={24} color={colors.primary} style={{ marginRight: 8 }} /> */}
+        <Text style={styles.headerTitle}>Formulário</Text>
+       
       </View>
 
       <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
+        {/* Barra de Progresso */}
+        <View style={styles.progressContainer}>
+          <View style={styles.progressInfo}>
+            <Text style={styles.progressLabel}>Progresso da Adoção</Text>
+            <Text style={styles.progressPercentage}>{Math.round(progress * 100)}% completo</Text>
+          </View>
+          <View style={styles.progressBarBackground}>
+            <View style={[styles.progressBarFill, { width: `${progress * 100}%` }]} />
+          </View>
+        </View>
+
         {isLoading && (
           <View style={styles.feedbackWrap}>
             <ActivityIndicator size="small" color={colors.primary} />
@@ -133,45 +149,52 @@ export default function ResponderFormularioStepper() {
         )}
 
         {!isLoading && !error && formulario?.perguntas && currentQuestion && (
-          <View key={currentQuestion.id} style={styles.card}>
-            <Text style={styles.questionLabel}>Pergunta {currentIndex + 1} de {totalQuestions}</Text>
-            <Text style={styles.questionText}>{currentQuestion.texto}</Text>
-            <TextInput
-              style={styles.input}
-              placeholder="Digite sua resposta"
-              value={respostas[currentQuestion.id] || ""}
-              onChangeText={(value) => handleAnswerChange(currentQuestion.id, value)}
-              multiline
-            />
+          <View style={styles.questionSection}>
+
+            <View style={styles.textContainer}>
+              <Text style={styles.questionTitle}>{currentQuestion.texto}</Text>
+              <Text style={styles.questionDescription}>
+                Compartilhe sua motivação para darmos o próximo passo juntos.
+              </Text>
+            </View>
+
+            <View style={styles.inputWrapper}>
+              <TextInput
+                style={styles.input}
+                placeholder="Coloque sua resposta aqui..."
+                value={respostas[currentQuestion.id] || ""}
+                onChangeText={(value) => handleAnswerChange(currentQuestion.id, value)}
+                multiline
+                numberOfLines={6}
+                textAlignVertical="top"
+              />
+            </View>
           </View>
         )}
       </ScrollView>
 
       <View style={styles.footer}>
-        <View style={styles.navigation}>
-          {currentIndex > 0 && (
-            <TouchableOpacity style={styles.navButton} onPress={handleBack}>
-              <Ionicons name="arrow-back" size={20} color={colors.primary} />
-              <Text style={styles.navButtonText}>Voltar</Text>
-            </TouchableOpacity>
-          )}
-          {currentIndex < totalQuestions - 1 ? (
-            <TouchableOpacity style={styles.navButton} onPress={handleNext}>
-              <Text style={styles.navButtonText}>Próximo</Text>
-              <Ionicons name="arrow-forward" size={20} color={colors.primary} />
-            </TouchableOpacity>
-          ) : (
-            <TouchableOpacity
-              style={[styles.submitButton, isSubmitting && styles.submitButtonDisabled]}
-              onPress={handleSubmit}
-              disabled={isSubmitting}
-            >
-              <Text style={styles.submitButtonText}>
-                {isSubmitting ? "Enviando..." : "Enviar respostas"}
-              </Text>
-            </TouchableOpacity>
-          )}
-        </View>
+        {currentIndex < totalQuestions - 1 ? (
+          <TouchableOpacity style={styles.primaryButton} onPress={handleNext}>
+            <Text style={styles.primaryButtonText}>Próximo</Text>
+            <Ionicons name="arrow-forward" size={20} color="#fff" />
+          </TouchableOpacity>
+        ) : (
+          <TouchableOpacity
+            style={[styles.primaryButton, isSubmitting && styles.submitButtonDisabled]}
+            onPress={handleSubmit}
+            disabled={isSubmitting}
+          >
+            <Text style={styles.primaryButtonText}>
+              {isSubmitting ? "Enviando..." : "Enviar respostas"}
+            </Text>
+          </TouchableOpacity>
+        )}
+
+        <TouchableOpacity style={styles.secondaryButton} onPress={currentIndex > 0 ? handleBack : () => router.back()}>
+          <Ionicons name="arrow-back" size={20} color="#6f595a" />
+          <Text style={styles.secondaryButtonText}>Voltar</Text>
+        </TouchableOpacity>
       </View>
     </SafeAreaView>
   );
@@ -180,19 +203,13 @@ export default function ResponderFormularioStepper() {
 const styles = StyleSheet.create({
   screen: {
     flex: 1,
-    backgroundColor: "#f6f7f9",
+    backgroundColor: "#fff8f7",
   },
   header: {
     width: "100%",
     backgroundColor: "#fff",
-    borderBottomLeftRadius: 20,
-    borderBottomRightRadius: 20,
     paddingTop: 42,
     paddingBottom: 14,
-    shadowColor: "#000",
-    shadowOpacity: 0.05,
-    shadowRadius: 6,
-    elevation: 1,
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
@@ -202,95 +219,171 @@ const styles = StyleSheet.create({
     position: "absolute",
     left: 16,
     top: 44,
-    zIndex: 2,
+  },
+  profileButton: {
+    position: "absolute",
+    right: 16,
+    top: 42,
   },
   headerTitle: {
-    fontSize: 20,
-    fontWeight: "800",
+    fontSize: 24,
+    fontWeight: "700",
     color: colors.primary,
-    textAlign: "center",
+    letterSpacing: -0.5,
   },
   content: {
     padding: 16,
-    paddingBottom: 120,
-    gap: 12,
+    paddingBottom: 160,
   },
-  card: {
-    backgroundColor: "#fff",
-    borderRadius: 14,
-    padding: 12,
-    borderWidth: 1,
-    borderColor: "#ebedf0",
-    gap: 8,
+  progressContainer: {
+    marginBottom: 32,
   },
-  questionLabel: {
+  progressInfo: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "flex-end",
+    marginBottom: 8,
+  },
+  progressLabel: {
     fontSize: 12,
     fontWeight: "700",
-    color: "#888",
-    textTransform: "uppercase",
+    color: colors.primary,
   },
-  questionText: {
-    fontSize: 16,
+  progressPercentage: {
+    fontSize: 12,
+    color: "#6B6B6B",
+  },
+  progressBarBackground: {
+    height: 12,
+    backgroundColor: "#f6dddc",
+    borderRadius: 6,
+    overflow: "hidden",
+  },
+  progressBarFill: {
+    height: "100%",
+    backgroundColor: colors.primary,
+    borderRadius: 6,
+  },
+  questionSection: {
+    gap: 24,
+  },
+  imageCard: {
+    width: "100%",
+    aspectRatio: 4 / 3,
+    borderRadius: 28,
+    backgroundColor: "#ce434b",
+    overflow: "hidden",
+    elevation: 4,
+    shadowColor: "#000",
+    shadowOpacity: 0.1,
+    shadowRadius: 10,
+    shadowOffset: { width: 0, height: 4 },
+  },
+  imagePlaceholder: {
+    flex: 1,
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "#ac2a35",
+  },
+  imageOverlay: {
+    position: "absolute",
+    bottom: 0,
+    left: 0,
+    right: 0,
+    padding: 20,
+    backgroundColor: "rgba(0,0,0,0.3)",
+  },
+  imageTitle: {
+    fontSize: 24,
     fontWeight: "700",
-    color: "#333",
+    color: "#fff",
+  },
+  imageSubtitle: {
+    fontSize: 14,
+    color: "rgba(255,255,255,0.9)",
+  },
+  textContainer: {
+    gap: 8,
+  },
+  questionTitle: {
+    fontSize: 20,
+    fontWeight: "600",
+    color: "#251818",
+  },
+  questionDescription: {
+    fontSize: 14,
+    color: "#594140",
+    lineHeight: 20,
+  },
+  inputWrapper: {
+    position: "relative",
   },
   input: {
-    minHeight: 64,
-    borderRadius: 12,
+    minHeight: 160,
+    backgroundColor: "#fff",
+    borderRadius: 28,
     borderWidth: 1,
-    borderColor: "#e0e0e0",
-    paddingHorizontal: 12,
-    paddingVertical: 10,
-    backgroundColor: "#fdfdfd",
-    fontSize: 14,
-    color: "#333",
+    borderColor: "#ECECEC",
+    padding: 24,
+    fontSize: 16,
+    color: "#251818",
+    shadowColor: "#000",
+    shadowOpacity: 0.05,
+    shadowRadius: 4,
+    elevation: 2,
+  },
+  inputIcon: {
+    position: "absolute",
+    bottom: 16,
+    right: 16,
   },
   footer: {
     position: "absolute",
+    bottom: 0,
     left: 0,
     right: 0,
-    bottom: 0,
     padding: 16,
-    backgroundColor: "#fff",
-    borderTopWidth: 1,
-    borderTopColor: "#f0f0f0",
+    paddingBottom: 40,
+    backgroundColor: "#fff8f7",
+    gap: 12,
   },
-  navigation: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-  },
-  navButton: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 8,
-    padding: 12,
-  },
-  navButtonText: {
-    fontSize: 14,
-    fontWeight: "600",
-    color: colors.primary,
-  },
-  submitButton: {
+  primaryButton: {
+    paddingVertical: 6,
     backgroundColor: colors.primary,
-    paddingVertical: 12,
-    paddingHorizontal: 24,
-    borderRadius: 12,
+    borderRadius: 8,
+    flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
+    gap: 8,
+    shadowColor: colors.primary,
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    shadowOffset: { width: 0, height: 4 },
+    elevation: 4,
+  },
+  primaryButtonText: {
+    color: "#fff",
+    fontSize: 20,
+    fontWeight: "600",
+  },
+  secondaryButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 8,
+  },
+  secondaryButtonText: {
+    color: "#6f595a",
+    fontSize: 18,
+    fontWeight: "400",
   },
   submitButtonDisabled: {
     opacity: 0.6,
   },
-  submitButtonText: {
-    color: "#fff",
-    fontSize: 16,
-    fontWeight: "800",
-  },
   feedbackWrap: {
     alignItems: "center",
     gap: 6,
-    marginTop: 12,
+    marginTop: 24,
   },
   feedbackText: {
     fontSize: 13,
@@ -300,6 +393,6 @@ const styles = StyleSheet.create({
     textAlign: "center",
     color: "#b00020",
     fontSize: 14,
-    marginTop: 12,
+    marginTop: 24,
   },
 });

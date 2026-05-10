@@ -6,7 +6,6 @@ import java.util.UUID;
 
 public interface ISolicitacaoAdocaoService {
     SolicitacaoResponseDTO criarSolicitacao(SolicitacaoAdocaoDTO dto);
-    RespostaResponseDTO salvarResposta(RespostaDTO dto);
     FormularioDetalhadoDTO buscarSolicitacaoDetalhada(UUID solicitacaoId);
     SolicitacaoResponseDTO aprovarSolicitacao(UUID solicitacaoId);
     SolicitacaoResponseDTO recusarSolicitacao(UUID solicitacaoId);

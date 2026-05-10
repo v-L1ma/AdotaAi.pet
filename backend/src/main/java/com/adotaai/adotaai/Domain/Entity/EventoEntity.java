@@ -56,6 +56,9 @@ public class EventoEntity extends AuditableEntity {
     @Column(nullable = false)
     private String status;
 
+    @Column(nullable = true)
+    private String mensagemReprovado;
+
     @Column(nullable = false)
     private String nmorganizador;
 
@@ -175,6 +178,14 @@ public class EventoEntity extends AuditableEntity {
 
     public void setUser(UsuarioEntity user) {
         this.user = user;
+    }
+
+    public String getMensagemReprovado() {
+        return mensagemReprovado;
+    }
+
+    public void setMensagemReprovado(String mensagemReprovado) {
+        this.mensagemReprovado = mensagemReprovado;
     }
 
     @Override

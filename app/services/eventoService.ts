@@ -16,6 +16,7 @@ export type EventoDTO = {
   nmorganizador?: string;
   contagemPresencas?: number;
   isInscrito?: boolean;
+  mensagemReprovado?: string | null;
 };
 
 export async function getEventos(): Promise<EventoDTO[]> {

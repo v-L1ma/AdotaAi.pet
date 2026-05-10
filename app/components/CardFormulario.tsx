@@ -74,6 +74,8 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 6 },
     shadowRadius: 12,
     elevation: 3,
+    borderWidth: 1,
+    borderColor: colors.surfaceHigh,
   },
   cover: {
     width: "100%",

@@ -1,6 +1,7 @@
 package com.adotaai.adotaai.Application.DTO;
 
 import com.adotaai.adotaai.Domain.Entity.PetEntity;
+import com.adotaai.adotaai.Domain.Enum.Status;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import java.time. LocalDate;
@@ -9,7 +10,7 @@ import java.util.UUID;
 public class PetDTO {
 
     private UUID id;
-    private String status = "PENDENTE";
+    private String status = Status.PENDENTE.name();
     private String descricao;
     private  LocalDate dt_nasc;
     private String nome;
@@ -19,6 +20,7 @@ public class PetDTO {
     private String especie;
     private String link_foto;
     private UUID formularioId;
+    private String mensagemReprovado;
 
     @JsonProperty(value = "user_id", access = JsonProperty.Access.READ_ONLY)
     private UUID user_id;
@@ -43,6 +45,7 @@ public class PetDTO {
         if (pet.getUser() != null) {
             this.user_id = pet.getUser().getId();
         }
+        this.mensagemReprovado = pet.getMensagemReprovado();
     }
 
     public PetDTO() {
@@ -142,5 +145,13 @@ public class PetDTO {
 
     public void setUser_id(UUID user_id) {
         this.user_id = user_id;
+    }
+
+    public String getMensagemReprovado() {
+        return mensagemReprovado;
+    }
+
+    public void setMensagemReprovado(String mensagemReprovado) {
+        this.mensagemReprovado = mensagemReprovado;
     }
 }

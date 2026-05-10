@@ -212,11 +212,7 @@ export default function PerfilPet(){
         setIsAdopting(true);
         try {
             if (pet.formularioId) {
-                // First create a solicitation, then redirect to stepper
-                const solicitacaoResponse = await createSolicitacaoDirect({ petId: petId });
-                const solicitacaoId = solicitacaoResponse.id;
-                // Redirect to step-by-step form responder
-                router.push(`/responder-formulario-stepper?formularioId=${pet.formularioId}&solicitacaoId=${solicitacaoId}`);
+                router.push(`/responder-formulario-stepper?formularioId=${pet.formularioId}&petId=${petId}`);
             } else {
                 // Send adoption request directly
                 await createSolicitacaoDirect({ petId: petId });

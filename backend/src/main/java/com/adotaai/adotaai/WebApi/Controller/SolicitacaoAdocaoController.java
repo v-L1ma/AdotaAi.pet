@@ -25,12 +25,6 @@ public class SolicitacaoAdocaoController {
         return new ResponseEntity<>(novaSolicitacaoDTO, HttpStatus.CREATED);
     }
 
-    @PostMapping("/respostas")
-    public ResponseEntity<RespostaResponseDTO> salvarResposta(@Valid @RequestBody RespostaDTO dto) {
-        RespostaResponseDTO novaRespostaDTO = solicitacaoService.salvarResposta(dto);
-        return new ResponseEntity<>(novaRespostaDTO, HttpStatus.CREATED);
-    }
-
     @GetMapping("/{id}")
     public ResponseEntity<FormularioDetalhadoDTO> buscarSolicitacaoDetalhada(@PathVariable UUID id) {
         FormularioDetalhadoDTO dto = solicitacaoService.buscarSolicitacaoDetalhada(id);
@@ -55,7 +49,7 @@ public class SolicitacaoAdocaoController {
     }
 
     @GetMapping("/enviadas")
-    public ResponseEntity<List<SolicitacaoResponseDTO>> listarEnviadas() {
+public ResponseEntity<List<SolicitacaoResponseDTO>> listarEnviadas() {
         return ResponseEntity.ok(solicitacaoService.listarEnviadas());
     }
 }

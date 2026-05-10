@@ -19,6 +19,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.adotaai.adotaai.Application.DTO.AprovarReprovarRequestDTO;
 import com.adotaai.adotaai.Application.DTO.BuscarPetDTO;
 import com.adotaai.adotaai.Application.DTO.CadastrarPetDTO;
 import com.adotaai.adotaai.Application.DTO.PetDTO;
@@ -28,8 +29,7 @@ import com.adotaai.adotaai.Domain.Exception.RegraDeNegocioException;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import jakarta.validation.ConstraintViolation;
-import jakarta.validation.Validator;
+import jakarta.validation.Valid;
 
 @RestController
 @RequestMapping(value = "/pets")
@@ -40,9 +40,6 @@ public class PetController {
 
     @Autowired
     private ObjectMapper objectMapper;
-
-    @Autowired
-    private Validator validator;
 
     @GetMapping
     public List<PetDTO> listarTodosPets() {
@@ -121,6 +118,31 @@ public class PetController {
         BaseResponse<PetDTO> response = new BaseResponse<>();
         response.setMessage("Favoritos listados com sucesso.");
         response.setData(favoritos);
+        return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/pendentes")
+    public ResponseEntity<BaseResponse<PetDTO>> listarPetsPendentes() {
+        List<PetDTO> pendentes = petService.listarPetsPendentes();
+        BaseResponse<PetDTO> response = new BaseResponse<>();
+        response.setMessage("Pets pendentes listados com sucesso.");
+        response.setData(pendentes);
+        return ResponseEntity.ok(response);
+    }
+
+    @PostMapping("/{id}/aprovar")
+    public ResponseEntity<BaseResponse<String>> aprovarPet(@PathVariable UUID id) {
+        petService.aprovarPet(id);
+        BaseResponse<String> response = new BaseResponse<>();
+        response.setMessage("Pet aprovado com sucesso.");
+        return ResponseEntity.ok(response);
+    }
+
+    @PostMapping("/{id}/reprovar")
+    public ResponseEntity<BaseResponse<String>> reprovarPet(@PathVariable UUID id, @Valid @RequestBody AprovarReprovarRequestDTO request) {
+        petService.reprovarPet(id, request.getMotivo());
+        BaseResponse<String> response = new BaseResponse<>();
+        response.setMessage("Pet reprovado com sucesso.");
         return ResponseEntity.ok(response);
     }
 }

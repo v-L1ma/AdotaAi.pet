@@ -152,7 +152,7 @@ export default function SelecionarPetModal({ visible, onClose, formulario }: Sel
         </View>
       }
     >
-      <ScrollView>
+      <ScrollView contentContainerStyle={{ paddingVertical: 20, gap: 6 }} showsVerticalScrollIndicator={false}>
         {isLoading && <Text style={styles.feedbackText}>Carregando pets...</Text>}
         {!isLoading && error && <Text style={styles.feedbackText}>{error}</Text>}
         {!isLoading && !error && pets.length === 0 && (

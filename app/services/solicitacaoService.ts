@@ -47,6 +47,17 @@ export interface RespostaInputDTO {
   resposta: string;
 }
 
+export interface RespostaSolicitacaoDTO {
+  perguntaId: string;
+  perguntaTexto: string;
+  respostaTexto: string;
+}
+
+export interface CreateSolicitacaoWithRespostasData {
+  petId: string;
+  respostas: RespostaSolicitacaoDTO[];
+}
+
 export async function getSolicitacoesRecebidas(): Promise<SolicitacaoDTO[]> {
   const response = await apiService.get<SolicitacaoDTO[]>("/solicitacoes/recebidas");
   return response.data;
@@ -88,6 +99,12 @@ export async function submitSolicitacaoRespostas(respostas: RespostaInputDTO[]):
   showSuccessToast("Respostas enviadas com sucesso!");
 }
 
+export async function createSolicitacaoComRespostas(data: CreateSolicitacaoWithRespostasData): Promise<SolicitacaoDTO> {
+  const response = await apiService.post<SolicitacaoDTO>("/solicitacoes", data);
+  showSuccessToast("Solicitação enviada com sucesso!");
+  return response.data;
+}
+
 export async function getDetalhesSolicitacao(id: string): Promise<FormularioDetalhadoDTO> {
   const response = await apiService.get<FormularioDetalhadoDTO>(`/solicitacoes/${id}`);
   return response.data;
@@ -102,6 +119,7 @@ export const solicitacaoService = {
   submitFormRespostas,
   submitSolicitacaoResposta,
   submitSolicitacaoRespostas,
+  createSolicitacaoComRespostas,
   getDetalhesSolicitacao,
 };
 

@@ -46,6 +46,9 @@ public class FormularioService implements IFormularioService {
 
         FormularioEntity formulario = new FormularioEntity();
         formulario.setUsuarioCriador(criador);
+        formulario.setFl_ativo(true);
+        formulario.setCreated_at(java.time.LocalDateTime.now());
+        formulario.setCreated_by(criador.getId());
 
         List<PerguntaEntity> perguntas = new ArrayList<>();
         if (dto.getPerguntas() != null) {
@@ -53,6 +56,9 @@ public class FormularioService implements IFormularioService {
                 PerguntaEntity p = new PerguntaEntity();
                 p.setTexto(textoPergunta);
                 p.setFormulario(formulario);
+                p.setFl_ativo(true);
+                p.setCreated_at(java.time.LocalDateTime.now());
+                p.setCreated_by(criador.getId());
                 perguntas.add(p);
             }
         }
@@ -79,15 +85,34 @@ public class FormularioService implements IFormularioService {
             throw new RegraDeNegocioException("Apenas o criador do formulário pode editá-lo");
         }
 
-        formulario.getPerguntas().clear();
+        formulario.getPerguntas().replaceAll(p -> {
+            if(!dto.getPerguntas().contains(p.getTexto())) {
+                p.setFl_ativo(false);
+                p.setLast_modified_at(java.time.LocalDateTime.now());
+                p.setLast_modified_by(usuarioAutenticado.getId());
+            }
+            return p;
+        });
+
+        List<PerguntaEntity> novasPerguntas = dto.getPerguntas().stream()
+                .filter(texto -> formulario.getPerguntas().stream().noneMatch(p -> p.getTexto().equals(texto)))
+                .map(texto -> {
+                    PerguntaEntity p = new PerguntaEntity();
+                    p.setTexto(texto);
+                    p.setFormulario(formulario);
+                    p.setFl_ativo(true);
+                    p.setCreated_at(java.time.LocalDateTime.now());
+                    p.setCreated_by(usuarioAutenticado.getId());
+                    return p;
+                })
+                .collect(Collectors.toList());
         
-        for (String textoPergunta : dto.getPerguntas()) {
-            PerguntaEntity p = new PerguntaEntity();
-            p.setTexto(textoPergunta);
-            p.setFormulario(formulario);
-            formulario.getPerguntas().add(p);
+        if (novasPerguntas.size() > 0) {
+            formulario.getPerguntas().addAll(novasPerguntas);
         }
-        
+
+        formulario.setLast_modified_at(java.time.LocalDateTime.now());
+        formulario.setLast_modified_by(usuarioAutenticado.getId());
         formularioRepository.save(formulario);
         return new FormularioTemplateDTO(formulario);
     }
@@ -95,7 +120,7 @@ public class FormularioService implements IFormularioService {
     @Override
     public List<FormularioTemplateDTO> listarFormularios() {
         UsuarioEntity usuarioAutenticado = obterUsuarioAutenticado();
-        return formularioRepository.findAllByUsuarioCriadorId(usuarioAutenticado.getId())
+        return formularioRepository.findAllByFl_ativoTrueAndUsuarioCriadorId(usuarioAutenticado.getId())
                 .stream()
                 .map(FormularioTemplateDTO::new)
                 .collect(Collectors.toList());
@@ -103,15 +128,18 @@ public class FormularioService implements IFormularioService {
 
     @Override
     public FormularioTemplateDTO buscarFormularioPorId(UUID id) {
-        return formularioRepository.findById(id)
+        FormularioTemplateDTO formulario = formularioRepository.findByIdAndFl_ativoTrue(id)
                 .map(FormularioTemplateDTO::new)
                 .orElseThrow(() -> new RecursoNaoEncontradoException("Formulário não encontrado"));
+
+        formulario.getPerguntas().removeIf(p -> !p.getFl_ativo());
+        return formulario;
     }
 
     @Override
     @Transactional
     public void deletarFormulario(UUID formularioId) {
-        FormularioEntity formulario = formularioRepository.findById(formularioId)
+        FormularioEntity formulario = formularioRepository.findByIdAndFl_ativoTrue(formularioId)
                 .orElseThrow(() -> new RecursoNaoEncontradoException("Formulário não encontrado"));
 
         UsuarioEntity usuarioAutenticado = obterUsuarioAutenticado();
@@ -120,7 +148,10 @@ public class FormularioService implements IFormularioService {
             throw new RegraDeNegocioException("Apenas o criador do formulário pode deletá-lo");
         }
 
-        formularioRepository.delete(formulario);
+        formulario.setFl_ativo(false);
+        formulario.setLast_modified_at(java.time.LocalDateTime.now());
+        formulario.setLast_modified_by(usuarioAutenticado.getId());
+        formularioRepository.save(formulario);
     }
 
     private UsuarioEntity obterUsuarioAutenticado() {

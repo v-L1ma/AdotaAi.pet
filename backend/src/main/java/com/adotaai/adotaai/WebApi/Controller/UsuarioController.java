@@ -21,6 +21,7 @@ import com.adotaai.adotaai.Application.DTO.AtualizarUsuarioDTO;
 import com.adotaai.adotaai.Application.DTO.CadastrarUsuarioDTO;
 import com.adotaai.adotaai.Application.DTO.EventoDTO;
 import com.adotaai.adotaai.Application.DTO.PetDTO;
+import com.adotaai.adotaai.Application.DTO.UsuarioAdminDTO;
 import com.adotaai.adotaai.Application.DTO.UsuarioReponseDTO;
 import com.adotaai.adotaai.Application.DTO.UsuarioPublicoDTO;
 import com.adotaai.adotaai.Application.Service.EventoService;
@@ -100,6 +101,21 @@ public class UsuarioController {
     @GetMapping("/pets")
     public ResponseEntity<List<PetDTO>> listarPetsUsuarioLogado() {
         return ResponseEntity.ok(petService.listarPetsUsuarioLogado());
+    }
+
+    @GetMapping("/admin/usuarios")
+    public ResponseEntity<BaseResponse<UsuarioAdminDTO>> listarTodosUsuarios() {
+        return ResponseEntity.ok(usuarioService.listarTodosUsuarios());
+    }
+
+    @PutMapping("/admin/{id}/ativar")
+    public ResponseEntity<BaseResponse<String>> ativarUsuario(@PathVariable UUID id) {
+        return ResponseEntity.ok(usuarioService.ativarUsuario(id));
+    }
+
+    @PutMapping("/admin/{id}/desativar")
+    public ResponseEntity<BaseResponse<String>> desativarUsuario(@PathVariable UUID id) {
+        return ResponseEntity.ok(usuarioService.desativarUsuario(id));
     }
 
 }

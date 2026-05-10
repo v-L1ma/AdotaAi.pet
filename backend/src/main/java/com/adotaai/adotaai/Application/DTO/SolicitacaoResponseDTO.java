@@ -1,18 +1,18 @@
 package com.adotaai.adotaai.Application.DTO;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.UUID;
 
 import com.adotaai.adotaai.Domain.Entity.PetEntity;
 import com.adotaai.adotaai.Domain.Entity.SolicitacaoAdocaoEntity;
-import com.adotaai.adotaai.Domain.Enum.StatusSolicitacao;
+import com.adotaai.adotaai.Domain.Enum.Status;
 
 public class SolicitacaoResponseDTO {
 
     private UUID id;
     private UUID adotanteId;
     private UUID anuncianteId;
-    private UUID formularioId;
     private String adotanteNome;
     private String adotanteEmail;
     private String adotanteTelefone;
@@ -22,8 +22,9 @@ public class SolicitacaoResponseDTO {
     private UUID petId;
     private String petNome;
     private String petFoto;
-    private StatusSolicitacao status;
+    private Status status;
     private LocalDateTime dataSolicitacao;
+    private List<PerguntaRespostaDTO> perguntasRespostas;
 
     public SolicitacaoResponseDTO(SolicitacaoAdocaoEntity entity) {
         this(entity, null);
@@ -33,9 +34,6 @@ public class SolicitacaoResponseDTO {
         this.id = entity.getId();
         this.adotanteId = entity.getAdotante().getId();
         this.anuncianteId = entity.getAnunciante().getId();
-        if (entity.getFormulario() != null) {
-            this.formularioId = entity.getFormulario().getId();
-        }
         if (entity.getAdotante() != null) {
             this.adotanteNome = entity.getAdotante().getNome();
             this.adotanteEmail = entity.getAdotante().getEmail();
@@ -53,6 +51,9 @@ public class SolicitacaoResponseDTO {
         }
         this.status = entity.getStatus();
         this.dataSolicitacao = entity.getDataSolicitacao();
+        this.perguntasRespostas = entity.getPerguntasRespostas().stream()
+                .map(snapshot -> new PerguntaRespostaDTO(snapshot.getPerguntaId(), snapshot.getPerguntaTexto(), snapshot.getRespostaTexto()))
+                .toList();
     }
 
     public UUID getId() {
@@ -65,10 +66,6 @@ public class SolicitacaoResponseDTO {
 
     public UUID getAnuncianteId() {
         return anuncianteId;
-    }
-
-    public UUID getFormularioId() {
-        return formularioId;
     }
 
     public String getAdotanteNome() {
@@ -107,11 +104,15 @@ public class SolicitacaoResponseDTO {
         return petFoto;
     }
 
-    public StatusSolicitacao getStatus() {
+    public Status getStatus() {
         return status;
     }
 
     public LocalDateTime getDataSolicitacao() {
         return dataSolicitacao;
+    }
+
+    public List<PerguntaRespostaDTO> getPerguntasRespostas() {
+        return perguntasRespostas;
     }
 }

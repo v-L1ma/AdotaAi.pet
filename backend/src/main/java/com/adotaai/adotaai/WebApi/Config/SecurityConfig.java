@@ -5,6 +5,7 @@ import java.util.List;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
@@ -12,6 +13,7 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.HttpStatusEntryPoint;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
@@ -53,7 +55,24 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.GET, "/uploads/**").permitAll()
                 .requestMatchers(HttpMethod.POST, "/pets").permitAll()
                 .requestMatchers("/swagger-ui/**", "/v3/api-docs/**", "/swagger-ui.html").permitAll()
+                .requestMatchers(HttpMethod.GET, "/pets/pendentes").hasRole("ADMINISTRADOR")
+                .requestMatchers(HttpMethod.POST, "/pets/*/aprovar").hasRole("ADMINISTRADOR")
+                .requestMatchers(HttpMethod.POST, "/pets/*/reprovar").hasRole("ADMINISTRADOR")
+                .requestMatchers(HttpMethod.GET, "/eventos/pendentes").hasRole("ADMINISTRADOR")
+                .requestMatchers(HttpMethod.POST, "/eventos/*/aprovar").hasRole("ADMINISTRADOR")
+                .requestMatchers(HttpMethod.POST, "/eventos/*/reprovar").hasRole("ADMINISTRADOR")
+                .requestMatchers(HttpMethod.GET, "/usuario/admin/usuarios").hasRole("ADMINISTRADOR")
+                .requestMatchers(HttpMethod.PUT, "/usuario/admin/*/ativar").hasRole("ADMINISTRADOR")
+                .requestMatchers(HttpMethod.PUT, "/usuario/admin/*/desativar").hasRole("ADMINISTRADOR")
                 .anyRequest().authenticated()
+            )
+            .exceptionHandling(ex -> ex
+                .authenticationEntryPoint(new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED))
+                .accessDeniedHandler((request, response, accessDeniedException) -> {
+                    response.setStatus(HttpStatus.FORBIDDEN.value());
+                    response.setContentType("application/json");
+                    response.getWriter().write("{\"message\":\"Acesso negado. Apenas administradores podem acessar este recurso.\"}");
+                })
             )
             .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
             .addFilterAfter(cadastroCompletoFilter, JwtAuthFilter.class);

@@ -18,6 +18,7 @@ export type animal = {
     racaId?: string;
     especieId?: string;
     formularioId?: string | null;
+    mensagemReprovado?: string | null;
     isFavoritado?: boolean;
     isFavorito?: boolean;
     dono?: {

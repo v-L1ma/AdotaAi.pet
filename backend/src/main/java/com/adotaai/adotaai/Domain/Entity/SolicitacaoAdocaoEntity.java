@@ -5,8 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-import com.adotaai.adotaai.Domain.Enum.StatusSolicitacao;
-import com.fasterxml.jackson.annotation.JsonManagedReference;
+import com.adotaai.adotaai.Domain.Enum.Status;
 
 import jakarta.persistence.*;
 
@@ -27,26 +26,22 @@ public class SolicitacaoAdocaoEntity extends AuditableEntity {
     private UsuarioEntity anunciante;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "formulario_id", nullable = true)
-    private FormularioEntity formulario;
-
-    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "pet_id", nullable = false)
     private PetEntity pet;
 
-    @JsonManagedReference("solicitacao-respostas")
-    @OneToMany(mappedBy = "solicitacao", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<RespostaEntity> respostas = new ArrayList<>();
+    @ElementCollection
+    @CollectionTable(name = "solicitacao_perguntas_respostas", joinColumns = @JoinColumn(name = "solicitacao_id"))
+    private List<PerguntaRespostaSnapshot> perguntasRespostas = new ArrayList<>();
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private StatusSolicitacao status;
+    private Status status;
 
     @Column(nullable = false)
     private LocalDateTime dataSolicitacao;
 
     public SolicitacaoAdocaoEntity() {
-        this.status = StatusSolicitacao.PENDENTE;
+        this.status = Status.PENDENTE;
         this.dataSolicitacao = LocalDateTime.now();
     }
 
@@ -80,14 +75,6 @@ public class SolicitacaoAdocaoEntity extends AuditableEntity {
         this.anunciante = anunciante;
     }
 
-    public FormularioEntity getFormulario() {
-        return formulario;
-    }
-
-    public void setFormulario(FormularioEntity formulario) {
-        this.formulario = formulario;
-    }
-
     public PetEntity getPet() {
         return pet;
     }
@@ -99,23 +86,23 @@ public class SolicitacaoAdocaoEntity extends AuditableEntity {
         this.pet = pet;
     }
 
-    public List<RespostaEntity> getRespostas() {
-        return respostas;
+    public List<PerguntaRespostaSnapshot> getPerguntasRespostas() {
+        return perguntasRespostas;
     }
 
-    public void setRespostas(List<RespostaEntity> respostas) {
-        if (respostas == null) {
-            this.respostas = new ArrayList<>();
+    public void setPerguntasRespostas(List<PerguntaRespostaSnapshot> perguntasRespostas) {
+        if (perguntasRespostas == null) {
+            this.perguntasRespostas = new ArrayList<>();
         } else {
-            this.respostas = respostas;
+            this.perguntasRespostas = perguntasRespostas;
         }
     }
 
-    public StatusSolicitacao getStatus() {
+    public Status getStatus() {
         return status;
     }
 
-    public void setStatus(StatusSolicitacao status) {
+    public void setStatus(Status status) {
         if (status == null) {
             throw new IllegalArgumentException("O status não pode ser nulo.");
         }

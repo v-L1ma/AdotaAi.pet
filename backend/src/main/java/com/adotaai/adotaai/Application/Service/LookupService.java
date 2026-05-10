@@ -24,15 +24,15 @@ public class LookupService {
     public List<RacaDTO> listarRacas(UUID especieId) {
         List<RacaEntity> racas;
         if (especieId != null) {
-            racas = racaRepository.findByEspecie_IdOrderByNomeAsc(especieId);
+            racas = racaRepository.findByFl_ativoTrueAndEspecie_IdOrderByNomeAsc(especieId);
         } else {
-            racas = racaRepository.findAllByOrderByNomeAsc();
+            racas = racaRepository.findAllByFl_ativoTrueOrderByNomeAsc();
         }
         return racas.stream().map(RacaDTO::new).toList();
     }
 
     public List<EspecieDTO> listarEspecies() {
-        List<EspecieEntity> especies = especieRepository.findAll();
+        List<EspecieEntity> especies = especieRepository.findAllByFl_ativoTrue();
         return especies.stream().map(EspecieDTO::new).toList();
     }
 }

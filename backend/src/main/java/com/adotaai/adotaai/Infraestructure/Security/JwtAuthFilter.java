@@ -1,5 +1,6 @@
 package com.adotaai.adotaai.Infraestructure.Security;
 
+import com.adotaai.adotaai.Domain.Entity.Roles;
 import com.adotaai.adotaai.Infraestructure.Repository.UsuarioRepository;
 
 import jakarta.servlet.FilterChain;
@@ -10,6 +11,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -17,7 +19,8 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
-import java.util.Collections;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 import com.adotaai.adotaai.Application.Util.JwtUtil;
@@ -48,6 +51,7 @@ public class JwtAuthFilter extends OncePerRequestFilter {
             try {
                 String email = jwtUtil.extractEmail(token);
                 UUID userId = jwtUtil.extractUserId(token);
+                Roles cargo = jwtUtil.extractCargo(token);
 
                 if (email != null && SecurityContextHolder.getContext().getAuthentication() == null) {
                     var usuarioOpt = usuarioRepository.findById(userId);
@@ -55,10 +59,16 @@ public class JwtAuthFilter extends OncePerRequestFilter {
                     if (usuarioOpt.isPresent()
                             && email.equalsIgnoreCase(usuarioOpt.get().getEmail())
                             && jwtUtil.validateToken(token, email)) {
+                        
+                        List<SimpleGrantedAuthority> authorities = new ArrayList<>();
+                        if (cargo != null) {
+                            authorities.add(new SimpleGrantedAuthority("ROLE_" + cargo.name()));
+                        }
+
                         UserDetails userDetails = User.builder()
                                 .username(email)
                                 .password("")
-                                .authorities(Collections.emptyList())
+                                .authorities(authorities)
                                 .build();
 
                         UsernamePasswordAuthenticationToken authToken =

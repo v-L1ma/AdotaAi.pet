@@ -1,14 +1,15 @@
 import { useRouter } from "expo-router";
 import React, { useEffect, useMemo, useState } from "react";
-import { ActivityIndicator, Image, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { ActivityIndicator, Image, Pressable, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from 'react-native-safe-area-context';
-import colors from '../styles/colors';
+import { colors } from '../styles/variables';
 import {
   getDetalhesSolicitacao,
   getSolicitacoesEnviadas,
   getSolicitacoesRecebidas,
 } from "@/services/solicitacaoService";
 import AppHeader from '@/components/AppHeader';
+import { Ionicons } from "@expo/vector-icons";
 
 type SolicitacaoDTO = {
   id: string;
@@ -175,9 +176,25 @@ export default function Solicitacoes() {
         <ScrollView contentContainerStyle={styles.formContent}>
           <View style={styles.formCard}>
             <Text style={styles.formSectionTitle}>Solicitante</Text>
-            <Text style={styles.formText}>Nome: {selecionada.adotanteNome || "Nao informado"}</Text>
-            <Text style={styles.formText}>Email: {selecionada.adotanteEmail || "Nao informado"}</Text>
-            <Text style={styles.formText}>Telefone: {selecionada.adotanteTelefone || "Nao informado"}</Text>
+            <View style={styles.publisher}>
+                <Image
+                    source={{uri: "https://images.unsplash.com/photo-1544723795-3fb6469f5b39?w=300"}}
+                    style={styles.publisherImage}
+                ></Image>
+                <View>
+                    <Text style={styles.publisherName}>
+                      {selecionada.adotanteNome || "Nao informado"}
+                    </Text>
+                    <Text>
+                      <Ionicons name="mail" size={14} color={colors.primary} />{" "}
+                      {selecionada.adotanteEmail || "Nao informado"}
+                    </Text>
+                    <Text>
+                      <Ionicons name="phone-portrait-sharp" size={14} color={colors.primary} />{" "}
+                      {selecionada.adotanteTelefone || "Nao informado"}
+                    </Text>
+                </View>
+            </View>
           </View>
 
           <View style={styles.formCard}>
@@ -279,7 +296,7 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#f6f7f9',
     paddingHorizontal: 16,
-    paddingTop: 60,
+    paddingTop: 100,
   },
   header: {
     width: '100%',
@@ -452,15 +469,23 @@ const styles = StyleSheet.create({
   },
   formText: {
     fontSize: 14,
-    color: '#444',
+    color: colors.primary,
+    fontWeight: "bold",
     marginBottom: 6,
   },
   formRow: {
     marginBottom: 10,
+    backgroundColor: '#e4e2e277',
+    padding: 10,
+    borderRadius: 10,
   },
   formAnswer: {
     fontSize: 13,
     color: '#666',
+    backgroundColor: '#ffffff',
+    padding: 8,
+    borderRadius: 8,
+    marginTop: 4,
   },
   formLoading: {
     alignItems: "flex-start",
@@ -472,4 +497,36 @@ const styles = StyleSheet.create({
     fontSize: 16,
     marginTop: 40,
   },
+    publisher: {
+        marginTop: 4,
+        backgroundColor: "#F7F7F7",
+        borderRadius: 16,
+        padding: 12,
+        flexDirection: "row",
+        alignItems: "center",
+        gap: 10,
+    },
+    publisherImage: {
+        width: 46,
+        height: 46,
+        borderRadius: 12,
+    },
+    publisherLabel: {
+        fontSize: 12,
+        color: "#666",
+    },
+    publisherName: {
+        fontSize: 15,
+        fontWeight: "700",
+        color: "#222",
+    },
+    chatButton: {
+        marginLeft: "auto",
+        width: 40,
+        height: 40,
+        borderRadius: 20,
+        backgroundColor: "#FFE9E6",
+        justifyContent: "center",
+        alignItems: "center",
+    },
 });

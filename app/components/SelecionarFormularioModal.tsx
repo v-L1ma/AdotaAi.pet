@@ -70,7 +70,7 @@ export default function SelecionarFormularioModal({
           </View>
         }
         children={
-        <ScrollView>
+        <ScrollView contentContainerStyle={{ paddingVertical: 24 }} showsVerticalScrollIndicator={false}>
             {isLoading && <Text style={styles.feedbackText}>Carregando formularios...</Text>}
             {!isLoading && error && <Text style={styles.feedbackText}>{error}</Text>}
             {!isLoading && !error && formularios.length === 0 && (

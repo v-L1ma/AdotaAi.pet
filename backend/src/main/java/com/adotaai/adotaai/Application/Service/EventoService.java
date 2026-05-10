@@ -4,6 +4,7 @@ import com.adotaai.adotaai.Application.DTO.EventoDTO;
 import com.adotaai.adotaai.Domain.Entity.EventoEntity;
 import com.adotaai.adotaai.Domain.Entity.PresencaEventoEntity;
 import com.adotaai.adotaai.Domain.Entity.UsuarioEntity;
+import com.adotaai.adotaai.Domain.Enum.Status;
 import com.adotaai.adotaai.Domain.Exception.RecursoNaoEncontradoException;
 import com.adotaai.adotaai.Domain.Exception.RegraDeNegocioException;
 import com.adotaai.adotaai.Infraestructure.Repository.EventoRepository;
@@ -16,6 +17,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
+import java.lang.Thread.State;
 import java.time.LocalTime;
 import java.util.List;
 import java.util.Optional;
@@ -34,19 +36,19 @@ public class EventoService {
     private PresencaEventoRepository presencaEventoRepository;
 
     public List<EventoDTO> listarTodos() {
-        List<EventoEntity> eventos = eventoRepository.findAll();
+        List<EventoEntity> eventos = eventoRepository.findAllVisible();
         return eventos.stream().map(this::toDtoComPresencas).toList();
     }
 
     public EventoDTO buscarPorId(UUID id) {
-        EventoEntity evento = eventoRepository.findById(id)
+        EventoEntity evento = eventoRepository.findByIdAndFl_ativoTrue(id)
                 .orElseThrow(() -> new RecursoNaoEncontradoException("Evento não encontrado"));
         return toDtoComPresencas(evento);
     }
 
     public List<EventoDTO> listarEventosUsuarioLogado() {
         UsuarioEntity usuario = obterUsuarioAutenticado();
-        return eventoRepository.findAllByUserId(usuario.getId())
+        return eventoRepository.findAllByFl_ativoTrueAndUserId(usuario.getId())
                 .stream()
                 .map(this::toDtoComPresencas)
                 .toList();
@@ -59,14 +61,18 @@ public class EventoService {
         return dto;
     }
 
+    @Transactional
     public void excluir(UUID id) {
         UsuarioEntity usuario = obterUsuarioAutenticado();
-        EventoEntity evento = eventoRepository.findById(id)
+        EventoEntity evento = eventoRepository.findByIdAndFl_ativoTrue(id)
                 .orElseThrow(() -> new RecursoNaoEncontradoException("Evento não encontrado"));
         if (evento.getUser() == null || !evento.getUser().getId().equals(usuario.getId())) {
             throw new RegraDeNegocioException("Apenas o organizador pode excluir o evento.");
         }
-        eventoRepository.delete(evento);
+        evento.setFl_ativo(false);
+        evento.setLast_modified_at(java.time.LocalDateTime.now());
+        evento.setLast_modified_by(usuario.getId());
+        eventoRepository.save(evento);
     }
 
     public EventoDTO criarEvento(EventoDTO eventoDTO) {
@@ -83,7 +89,10 @@ public class EventoService {
         UsuarioEntity usuario = obterUsuarioAutenticado();
         evento.setUser(usuario);
         evento.setNmorganizador(usuario.getNome());
-        evento.setStatus("PENDENTE");
+        evento.setStatus(Status.PENDENTE.name());
+        evento.setFl_ativo(true);
+        evento.setCreated_at(java.time.LocalDateTime.now());
+        evento.setCreated_by(usuario.getId());
 
         evento = eventoRepository.save(evento);
 
@@ -111,6 +120,9 @@ public class EventoService {
         evento.setHrfim(eventoDto.getHrFim().isEmpty() ? null : LocalTime.parse(eventoDto.getHrFim()));
         evento.setDescricao(eventoDto.getDescricao());
         evento.setData(eventoDto.getData());
+        evento.setLast_modified_at(java.time.LocalDateTime.now());
+        evento.setLast_modified_by(usuario.getId());
+        evento.setStatus(Status.PENDENTE.name());
 
         EventoEntity eventoatualizado = eventoRepository.save(evento);
 
@@ -166,6 +178,46 @@ public class EventoService {
                     return dto;
                 })
                 .toList();
+    }
+
+    public List<EventoDTO> listarEventosPendentes() {
+        List<EventoEntity> eventos = eventoRepository.findAll();
+        return eventos.stream().map(this::toDtoComPresencas).toList();
+    }
+
+    @Transactional
+    public void aprovarEvento(UUID id) {
+        UsuarioEntity admin = obterUsuarioAutenticado();
+        if (admin.getCargo() != com.adotaai.adotaai.Domain.Entity.Roles.ADMINISTRADOR) {
+            throw new RegraDeNegocioException("Acesso negado. Apenas administradores podem aprovar eventos.");
+        }
+
+        EventoEntity evento = eventoRepository.findById(id)
+                .orElseThrow(() -> new RecursoNaoEncontradoException("Evento não encontrado com ID: " + id));
+
+        evento.setStatus(Status.APROVADO.name());
+        evento.setLast_modified_at(java.time.LocalDateTime.now());
+        evento.setLast_modified_by(admin.getId());
+        eventoRepository.save(evento);
+    }
+
+    @Transactional
+    public void reprovarEvento(UUID id, String motivo) {
+        UsuarioEntity admin = obterUsuarioAutenticado();
+        if (admin.getCargo() != com.adotaai.adotaai.Domain.Entity.Roles.ADMINISTRADOR) {
+            throw new RegraDeNegocioException("Acesso negado. Apenas administradores podem reprovar eventos.");
+        }
+
+        EventoEntity evento = eventoRepository.findById(id)
+                .orElseThrow(() -> new RecursoNaoEncontradoException("Evento não encontrado com ID: " + id));
+
+        evento.setStatus(Status.REPROVADO.name());
+        if (motivo != null && !motivo.isBlank()) {
+            evento.setMensagemReprovado(motivo);
+        }
+        evento.setLast_modified_at(java.time.LocalDateTime.now());
+        evento.setLast_modified_by(admin.getId());
+        eventoRepository.save(evento);
     }
 
     private UsuarioEntity obterUsuarioAutenticado() {

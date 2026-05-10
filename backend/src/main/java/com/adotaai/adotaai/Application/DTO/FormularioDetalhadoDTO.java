@@ -5,17 +5,17 @@ import java.util.UUID;
 
 public class FormularioDetalhadoDTO {
 
-    private UUID formularioId;
+    private UUID solicitacaoId;
     private UUID usuarioCriadorId;
     private String usuarioCriadorNome;
     private UUID usuarioRespondenteId;
     private String usuarioRespondenteNome;
     private List<PerguntaRespostaDTO> perguntasRespostas;
 
-    public FormularioDetalhadoDTO(UUID formularioId, UUID usuarioCriadorId, String usuarioCriadorNome,
+    public FormularioDetalhadoDTO(UUID solicitacaoId, UUID usuarioCriadorId, String usuarioCriadorNome,
             UUID usuarioRespondenteId, String usuarioRespondenteNome,
             List<PerguntaRespostaDTO> perguntasRespostas) {
-        this.formularioId = formularioId;
+        this.solicitacaoId = solicitacaoId;
         this.usuarioCriadorId = usuarioCriadorId;
         this.usuarioCriadorNome = usuarioCriadorNome;
         this.usuarioRespondenteId = usuarioRespondenteId;
@@ -23,8 +23,8 @@ public class FormularioDetalhadoDTO {
         this.perguntasRespostas = perguntasRespostas;
     }
 
-    public UUID getFormularioId() {
-        return formularioId;
+    public UUID getSolicitacaoId() {
+        return solicitacaoId;
     }
 
     public UUID getUsuarioCriadorId() {
@@ -43,7 +43,7 @@ public class FormularioDetalhadoDTO {
         return usuarioRespondenteNome;
     }
 
-    public List<PerguntaRespostaDTO> getPerguntasRespostas() {
+public List<PerguntaRespostaDTO> getPerguntasRespostas() {
         return perguntasRespostas;
     }
 }
