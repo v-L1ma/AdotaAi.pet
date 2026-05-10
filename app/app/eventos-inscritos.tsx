@@ -164,10 +164,13 @@ export default function EventosInscritos() {
               />
 
               <View style={styles.cardBody}>
-                <View style={styles.tag}>
-                  <Text style={styles.tagText}>{item.status || "Evento"}</Text>
+                <View style={{ display: "flex", flexDirection: "row", justifyContent: "space-between", alignItems: "center", gap: 8 }}>
+                  <Text style={styles.title}>{item.nome}</Text>
+                  <Text style={[styles.meta, {color: colors.primary}]}>
+                    <Ionicons name="people" size={16} color={colors.primary} /> 
+                    {item.contagemPresencas}
+                  </Text>
                 </View>
-                <Text style={styles.title}>{item.nome}</Text>
                 <Text style={styles.meta}>{formatarData(item.data, formatarHoraDisplay(item.hrinicio))}</Text>
                 <Text style={styles.meta}>{formatarLocal(item)}</Text>
                 {item.contagemPresencas !== undefined && (
@@ -335,10 +338,10 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
-    backgroundColor: "#b00020",
+    backgroundColor: "#e0032c",
     borderRadius: 4,
     paddingHorizontal: 10,
-    paddingVertical: 6,
+    paddingVertical: 10,
     gap: 4,
     shadowColor: "#191C1D",
     shadowOpacity: 0.1,

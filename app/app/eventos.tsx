@@ -5,6 +5,7 @@ import { useEffect, useMemo, useState } from "react";
 import { ActivityIndicator, FlatList, Image, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { EventoDTO, getEventos } from "@/services/eventoService";
 import NavBar from "@/components/NavBar";
+import { Ionicons } from "@expo/vector-icons";
 
 const timeRegex = /^([01]\d|2[0-3]):[0-5]\d$/;
 
@@ -121,10 +122,13 @@ export default function Eventos() {
             />
 
             <View style={styles.cardBody}>
-              <View style={styles.tag}>
-                <Text style={styles.tagText}>{item.status || "Evento"}</Text>
+              <View style={{ display: "flex", flexDirection: "row", justifyContent: "space-between", alignItems: "center", gap: 8 }}>
+                <Text style={styles.title}>{item.nome}</Text>
+                <Text style={[styles.meta, {color: colors.primary}]}>
+                  <Ionicons name="people" size={16} color={colors.primary} /> 
+                  {item.contagemPresencas}
+                </Text>
               </View>
-              <Text style={styles.title}>{item.nome}</Text>
               <Text style={styles.meta}>{formatarData(item.data, formatarHoraDisplay(item.hrinicio))}</Text>
               <Text style={styles.meta}>{formatarLocal(item)}</Text>
             </View>
