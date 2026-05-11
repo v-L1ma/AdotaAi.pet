@@ -13,16 +13,24 @@ export default function CardPet({animal,index, onlyPicture}:Props){
     const router = useRouter();
     const locationText = animal.localizacao || [animal.bairro, animal.cidade, animal.uf].filter(Boolean).join(", ") || "Santos";
 
+    function goToPetProfile() {
+        router.push({
+            pathname:"/perfil-pet",
+            params:{
+                id: animal.id,
+                nome: animal.nome,
+                imagem: animal.imagem,
+                localizacao: animal.localizacao,
+                bairro: animal.bairro,
+                cidade: animal.cidade,
+                uf: animal.uf,
+            }
+        });
+    }
+
     if(!onlyPicture){
         return(
-            <TouchableOpacity style={styles.container} onPress={()=>(router.push(
-                {
-                    pathname:"/perfil-pet",
-                    params:{
-                        id: animal.id
-                    }
-                })
-                )}>
+            <TouchableOpacity style={styles.container} onPress={goToPetProfile}>
                 <Image style={styles.image} source={{uri:animal.imagem}}></Image>
 
                 <View style={styles.info}>
@@ -33,14 +41,7 @@ export default function CardPet({animal,index, onlyPicture}:Props){
         );
     } else {
         return(
-            <TouchableOpacity style={styles.onlyPictureContainer} onPress={()=>(router.push(
-                {
-                    pathname:"/perfil-pet",
-                    params:{
-                        id: animal.id
-                    }
-                })
-            )}>
+            <TouchableOpacity style={styles.onlyPictureContainer} onPress={goToPetProfile}>
                 <Image style={styles.onlyPictureImage} resizeMode="cover" source={{uri:animal.imagem}}></Image>
             </TouchableOpacity>
         )

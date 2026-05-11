@@ -1,12 +1,12 @@
 import React, { useEffect, useRef, useState } from "react";
-import { SafeAreaView, Text, TextInput, TouchableOpacity, View, KeyboardAvoidingView, Platform } from "react-native";
+import { Text, TextInput, TouchableOpacity, View, ScrollView, Dimensions } from "react-native";
 import { Image } from "react-native";
 import { Animated, Easing } from "react-native";
 import Icon1 from "react-native-vector-icons/AntDesign";
 import styles from "../styles/AppStyles";
 import { useAuth } from "../hooks/useAuth";
-import { useTabNavigation } from "@/hooks/useTabNavigation";
 import { router } from "expo-router";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function LoginScreen() {
   const slideAnim = useRef(new Animated.Value(1000)).current;
@@ -14,6 +14,7 @@ export default function LoginScreen() {
   const [email, setEmail] = useState("");
   const [senha, setSenha] = useState("");
   const [erro, setErro] = useState<string | null>(null);
+  const [screenHeight] = useState(Dimensions.get("window").height);
 
   useEffect(() => {
     Animated.timing(slideAnim, {
@@ -46,15 +47,13 @@ export default function LoginScreen() {
     }
   };
 
-
   return (
-
-    <KeyboardAvoidingView
-          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-          style={{ flex: 1 }}
-        >
-
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView edges={["top"]} style={[styles.container, { alignItems: "stretch" }]}>
+      <ScrollView
+        keyboardShouldPersistTaps="handled"
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={{ minHeight: screenHeight }}
+      >
       <Animated.View style={{ flex: 1, width: "100%", transform: [{ translateY: slideAnim }], }}>
         {/* <Icon2 name="pets" size={30} color="rgba(255, 255, 255, 1)" style={{ position: "absolute", top: "30%", left: "90%", transform: [{ rotate: "-20deg" }]}}/>*/}
 
@@ -64,50 +63,52 @@ export default function LoginScreen() {
         />
 
         <View style={styles.square}>
-          <Text style={styles.inputText}>E-mail</Text>
-          <TextInput
-            style={styles.input}
-            value={email}
-            onChangeText={setEmail}
-            keyboardType="email-address"
-            autoCapitalize="none"
-            autoCorrect={false}
-            placeholder="Digite seu e-mail"
-          />
+          <View style={{ width: "100%", alignItems: "center", marginTop: -24 }}>
+            <Text style={styles.inputText}>E-mail</Text>
+            <TextInput
+              style={styles.input}
+              value={email}
+              onChangeText={setEmail}
+              keyboardType="email-address"
+              autoCapitalize="none"
+              autoCorrect={false}
+              placeholder="Digite seu e-mail"
+            />
 
-          <Text style={styles.inputText}>Senha</Text>
-          <TextInput
-            style={styles.input}
-            value={senha}
-            onChangeText={setSenha}
-            secureTextEntry
-            autoCapitalize="none"
-            autoCorrect={false}
-            placeholder="Digite sua senha"
-          />
+            <Text style={styles.inputText}>Senha</Text>
+            <TextInput
+              style={styles.input}
+              value={senha}
+              onChangeText={setSenha}
+              secureTextEntry
+              autoCapitalize="none"
+              autoCorrect={false}
+              placeholder="Digite sua senha"
+            />
 
-          {erro ? <Text style={{ color: "#b00020", marginBottom: 8 }}>{erro}</Text> : null}
+            {erro ? <Text style={{ color: "#b00020", marginBottom: 8 }}>{erro}</Text> : null}
 
-          <TouchableOpacity onPress={() => alert("Em desenvolvimento!")}>
-            <Text style={{ marginLeft: 150 }}>Esqueceu a senha?</Text>
-          </TouchableOpacity>
+            <TouchableOpacity onPress={() => alert("Em desenvolvimento!")}>
+              <Text style={{ marginLeft: 80 }}>Esqueceu a senha?</Text>
+            </TouchableOpacity>
 
-          <TouchableOpacity style={styles.buttonLogin} onPress={handleLogin} disabled={isLoading}>
-            <Text style={styles.buttonText}>{isLoading ? "Entrando..." : "Entrar"}</Text>
-          </TouchableOpacity>
+            <TouchableOpacity style={styles.buttonLogin} onPress={handleLogin} disabled={isLoading}>
+              <Text style={styles.buttonText}>{isLoading ? "Entrando..." : "Entrar"}</Text>
+            </TouchableOpacity>
 
-          <Text style={{ marginVertical: 10 }}>Ou</Text>
+            <Text style={{ marginVertical: 10 }}>Ou</Text>
 
-          <TouchableOpacity style={styles.buttonLogin2} onPress={() => alert("Em desenvolvimento!")}>
-            <Icon1 name="google" size={20} color="fff" />
-          </TouchableOpacity>
+            <TouchableOpacity style={styles.buttonLogin2} onPress={() => alert("Em desenvolvimento!")}>
+              <Icon1 name="google" size={20} color="fff" />
+            </TouchableOpacity>
 
-          <TouchableOpacity onPress={() => router.replace("/cadastro")}>
-            <Text style={{ marginVertical: 10 }}>Não possui uma conta?</Text>
-          </TouchableOpacity>
+            <TouchableOpacity onPress={() => router.replace("/cadastro")}>
+              <Text style={{ marginVertical: 10 }}>Não possui uma conta?</Text>
+            </TouchableOpacity>
+          </View>
         </View>
       </Animated.View>
+      </ScrollView>
     </SafeAreaView>
-    </KeyboardAvoidingView>
   );
 }

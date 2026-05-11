@@ -3,6 +3,9 @@ import { FlatList, Pressable, StyleSheet, Text, TextInput, TouchableOpacity, Vie
 import * as Progress from 'react-native-progress';
 import AppHeader from '../components/AppHeader';
 import colors from '../styles/colors';
+import { Alert } from "react-native";
+import { formularioService } from "@/services/formularioService";
+import { useRouter } from "expo-router";
 
 
 interface Pergunta{
@@ -11,6 +14,8 @@ interface Pergunta{
 }
 
 export default function CriarFormulario(){
+    const router = useRouter();
+    const [isSaving, setIsSaving] = useState(false);
 
     const [perguntasFrequentes,setPerguntasFrequentes]=useState<Pergunta[]>([
         { id: 1, conteudo: "Qual seu endereço completo? Com nome da rua, número e cidade" },
@@ -54,10 +59,13 @@ export default function CriarFormulario(){
             setPerguntasSelecionadas((prev) => prev.filter((p) => p.id !== pergunta.id));
             return;
         } 
-        if(perguntasSelecionadas.length<=20){
+        if(perguntasSelecionadas.length<20){
         // senão, adiciona
             setPerguntasSelecionadas((prev) => [...prev, pergunta]);
+            return;
         }
+
+        setErroMessage("Você pode selecionar no máximo 20 perguntas.");
     }
 
     function isPerguntaSelecionada(idRecebido:number):boolean{
@@ -101,6 +109,34 @@ export default function CriarFormulario(){
         abrirFecharPopUp()
     }
 
+    async function salvarFormulario() {
+        if (isSaving) {
+            return;
+        }
+
+        const perguntas = perguntasSelecionadas
+            .map((item) => item.conteudo.trim())
+            .filter((item) => item.length > 0);
+
+        if (perguntas.length === 0) {
+            Alert.alert("Formulário", "Selecione pelo menos uma pergunta para salvar.");
+            return;
+        }
+
+        try {
+            setIsSaving(true);
+            const payload = formularioService.buildCreatePayload(perguntas);
+            await formularioService.create(payload);
+            Alert.alert("Sucesso", "Formulário criado com sucesso!");
+            router.back();
+        } catch (error) {
+            const message = error instanceof Error ? error.message : "Não foi possível salvar o formulário.";
+            Alert.alert("Erro", message);
+        } finally {
+            setIsSaving(false);
+        }
+    }
+
     return(
         <View style={style.screen}>
             <AppHeader title="Criar Formulário" titleFontSize={20} />
@@ -137,8 +173,12 @@ export default function CriarFormulario(){
                     <TouchableOpacity style={[style.button, style.secondaryButton]} onPress={()=>abrirFecharPopUp()}>
                         <Text style={style.secondaryButtonText}>Criar pergunta personalizada</Text>
                     </TouchableOpacity>
-                    <TouchableOpacity style={[style.button, style.primaryButton]}>
-                        <Text style={style.primaryButtonText}>Salvar questionário</Text>
+                    <TouchableOpacity
+                        style={[style.button, style.primaryButton, isSaving && { opacity: 0.7 }]}
+                        onPress={salvarFormulario}
+                        disabled={isSaving}
+                    >
+                        <Text style={style.primaryButtonText}>{isSaving ? "Salvando..." : "Salvar questionário"}</Text>
                     </TouchableOpacity>
                 </View>
             </View>

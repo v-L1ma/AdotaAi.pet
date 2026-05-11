@@ -73,7 +73,6 @@ type PerfilUsuarioFormData = z.infer<typeof perfilUsuarioSchema>;
 export default function UserScreen() {
     const [isSaving, setIsSaving] = useState(false);
     const [image, setImage] = useState<string | null>(null);
-    const [userLogado, setUserLogado] = useState<UsuarioAtualizacaoDTO | null>(null);
 
     const {
         control,
@@ -81,7 +80,7 @@ export default function UserScreen() {
         reset,
         setValue,
         watch,
-        formState: { errors, dirtyFields },
+        formState: { errors, dirtyFields, isDirty },
     } = useForm<PerfilUsuarioFormData>({
         resolver: zodResolver(perfilUsuarioSchema),
         defaultValues: {
@@ -144,6 +143,8 @@ export default function UserScreen() {
         void carregarUsuario();
     }, [reset, setValue]);
 
+    const nome = watch("nome");
+
     const onSubmit = async (data: PerfilUsuarioFormData) => {
         if (isSaving) {
             return;
@@ -184,14 +185,7 @@ export default function UserScreen() {
         }
     };
 
-    const hasUnsavedChanges =
-        watch("nome").trim().length > 0 ||
-        watch("email").trim().length > 0 ||
-        watch("telefone")!.trim().length > 0 ||
-        watch("senha")!.trim().length > 0 ||
-        watch("endereco")!.trim().length > 0 ||
-        watch("cep")!.trim().length > 0 ||
-        !!image;
+    const hasUnsavedChanges = isDirty;
 
     const handleBackPress = () => {
         if (!hasUnsavedChanges) {
@@ -249,12 +243,16 @@ export default function UserScreen() {
             });
 
             if (!result.canceled && result.assets && result.assets.length > 0) {
-                setImage(result.assets[0].uri);
+                const uri = result.assets[0].uri;
+                setImage(uri);
+                setValue("link_foto", uri, { shouldDirty: true, shouldValidate: true });
             }
         } catch {
             Alert.alert("Erro", "Não foi possível abrir a câmera agora.");
         }
     };
+
+    const profilePhotoUri = image || linkFoto || null;
 
     const renderError = (message?: string) =>
         message ? <Text style={{ color: "#b00020", marginBottom: 8, width: "100%" }}>{message}</Text> : null;
@@ -266,8 +264,8 @@ export default function UserScreen() {
             <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
                 <View style={styles.heroCard}>
                     <Pressable style={styles.avatarWrap} onPress={pickImage}>
-                        {image ? (
-                            <Image source={{ uri: image }} style={styles.avatarImage} />
+                        {profilePhotoUri ? (
+                            <Image source={{ uri: profilePhotoUri }} style={styles.avatarImage} />
                         ) : (
                             <Icon1 name="image" size={40} color="#868585ff" />
                         )}
@@ -276,7 +274,7 @@ export default function UserScreen() {
                         </View>
                     </Pressable>
 
-                    <Text style={styles.profileTitle}>{userLogado?.nome || ""}</Text>
+                    <Text style={styles.profileTitle}>{nome?.trim() || "Seu perfil"}</Text>
                 </View>
 
                 <SafeAreaView style={styles.formCard}>
@@ -369,6 +367,63 @@ export default function UserScreen() {
                                 onBlur={onBlur}
                                 placeholder="Digite seu endereço..."
                                 multiline
+                            />
+                        )}
+                    />
+
+                    <Controller
+                        control={control}
+                        name="cep"
+                        render={({ field: { onChange, onBlur, value } }) => (
+                            <Field
+                                label="CEP"
+                                value={value || ""}
+                                onChangeText={onChange}
+                                onBlur={onBlur}
+                                placeholder="00000-000"
+                                keyboardType="numeric"
+                            />
+                        )}
+                    />
+
+                    <Controller
+                        control={control}
+                        name="bairro"
+                        render={({ field: { onChange, onBlur, value } }) => (
+                            <Field
+                                label="Bairro"
+                                value={value || ""}
+                                onChangeText={onChange}
+                                onBlur={onBlur}
+                                placeholder="Digite seu bairro"
+                            />
+                        )}
+                    />
+
+                    <Controller
+                        control={control}
+                        name="cidade"
+                        render={({ field: { onChange, onBlur, value } }) => (
+                            <Field
+                                label="Cidade"
+                                value={value || ""}
+                                onChangeText={onChange}
+                                onBlur={onBlur}
+                                placeholder="Digite sua cidade"
+                            />
+                        )}
+                    />
+
+                    <Controller
+                        control={control}
+                        name="sg_estado"
+                        render={({ field: { onChange, onBlur, value } }) => (
+                            <Field
+                                label="UF"
+                                value={value || ""}
+                                onChangeText={onChange}
+                                onBlur={onBlur}
+                                placeholder="Ex.: SP"
                             />
                         )}
                     />

@@ -1,63 +1,66 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from "expo-router";
-import React, { useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { Alert, FlatList, Image, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import colors from '../styles/colors';
+import { PetDTO } from '@/types/pet';
+import { getPetImageUrl, petService } from '@/services/petService';
 
-// Mock temporário para exibição
-type Favorito = {
-  id: string;
-  nome: string;
-  especie: string;
-  idade: string;
-  imagem: any;
-};
-
-const initialFavoritos: Favorito[] = [
-  {
-    id: '1',
-    nome: 'Luna',
-    especie: 'Gato',
-    idade: '2 anos',
-    imagem: require('../assets/images/cat1.png'),
-  },
-  {
-    id: '2',
-    nome: 'Thor',
-    especie: 'Cachorro',
-    idade: '3 anos',
-    imagem: require('../assets/images/dog1.png'),
-  },
-];
+type Favorito = PetDTO;
 
 export default function MeusFavoritos() {
   const router = useRouter();
-  const [favoritos, setFavoritos] = useState<Favorito[]>(initialFavoritos);
+  const [favoritos, setFavoritos] = useState<Favorito[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  const handleDesfavoritar = (id: string) => {
-    setFavoritos(favoritos.filter(fav => fav.id !== id));
+  const loadFavorites = useCallback(async () => {
+    setIsLoading(true);
+    setError(null);
+
+    try {
+      const response = await petService.listFavorites();
+      setFavoritos(response);
+    } catch {
+      setError("Não foi possível carregar seus favoritos.");
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    void loadFavorites();
+  }, [loadFavorites]);
+
+  const handleDesfavoritar = async (id: string) => {
+    try {
+      await petService.unfavorite(id);
+      setFavoritos((current) => current.filter(fav => fav.id !== id));
+    } catch {
+      Alert.alert("Erro", "Não foi possível desfavoritar este pet agora.");
+    }
   };
 
   const confirmDesfavoritar = (item: Favorito) => {
     Alert.alert(
       'Remover dos favoritos',
-      `Deseja realmente desfavoritar ${item.nome}?`,
+      `Deseja realmente desfavoritar ${item.nome || "este pet"}?`,
       [
         { text: 'Cancelar', style: 'cancel' },
-        { text: 'Desfavoritar', style: 'destructive', onPress: () => handleDesfavoritar(item.id) },
+        { text: 'Desfavoritar', style: 'destructive', onPress: () => item.id && handleDesfavoritar(item.id) },
       ]
     );
   };
 
   const renderItem = ({ item }: { item: Favorito }) => (
     <View style={styles.card}>
-      <Image source={item.imagem} style={styles.petImage} />
+      <Image source={{ uri: getPetImageUrl(item.link_foto) }} style={styles.petImage} />
       <View style={styles.content}>
-        <Text style={styles.petName}>{item.nome}</Text>
-        <Text style={styles.petInfo}>{item.especie} • {item.idade}</Text>
+        <Text style={styles.petName}>{item.nome || "Pet sem nome"}</Text>
+        <Text style={styles.petInfo}>{item.especie || "Espécie não informada"} • {item.porte || "Porte não informado"}</Text>
         <Text style={styles.petDescription} numberOfLines={2}>
-          Pronto para encontrar um novo lar com carinho e segurança.
+          {item.descricao || "Pronto para encontrar um novo lar com carinho e segurança."}
         </Text>
       </View>
       <TouchableOpacity style={styles.favoriteButton} onPress={() => confirmDesfavoritar(item)}>
@@ -78,14 +81,25 @@ export default function MeusFavoritos() {
         </View>
       </View>
       <View style={styles.container}>
+        {isLoading ? (
+          <Text style={styles.emptyText}>Carregando favoritos...</Text>
+        ) : error ? (
+          <View style={{ alignItems: "center", marginTop: 30 }}>
+            <Text style={styles.emptyText}>{error}</Text>
+            <TouchableOpacity style={styles.retryButton} onPress={() => void loadFavorites()}>
+              <Text style={styles.retryButtonText}>Tentar novamente</Text>
+            </TouchableOpacity>
+          </View>
+        ) : (
         <FlatList
           data={favoritos}
-          keyExtractor={item => item.id}
+          keyExtractor={(item, index) => item.id || `${item.nome || 'pet'}-${index}`}
           renderItem={renderItem}
           contentContainerStyle={{ paddingBottom: 32, paddingTop: 12, paddingHorizontal: 2 }}
           showsVerticalScrollIndicator={false}
           ListEmptyComponent={<Text style={styles.emptyText}>Nenhum animal favoritado ainda.</Text>}
         />
+        )}
       </View>
     </>
   );
@@ -184,5 +198,18 @@ const styles = StyleSheet.create({
     color: '#888',
     fontSize: 16,
     marginTop: 40,
+  },
+  retryButton: {
+    marginTop: 12,
+    borderWidth: 1,
+    borderColor: '#f1c9c4',
+    backgroundColor: '#fff3f1',
+    paddingHorizontal: 14,
+    paddingVertical: 10,
+    borderRadius: 12,
+  },
+  retryButtonText: {
+    color: colors.primary,
+    fontWeight: '700',
   },
 });

@@ -1,12 +1,25 @@
 import { useRouter } from "expo-router";
-import { Text, TouchableOpacity, View, Image, StyleSheet, Animated, Easing } from "react-native";
+import { Text, TouchableOpacity, View, Image, StyleSheet, Animated, Easing, useWindowDimensions } from "react-native";
 import React, { useEffect, useRef } from "react";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 export default function HomeScreen() {
   const router = useRouter();
+  const insets = useSafeAreaInsets();
+  const { width, height } = useWindowDimensions();
   const logoOpacity = useRef(new Animated.Value(0)).current;
   const drawerTranslateY = useRef(new Animated.Value(260)).current;
   const drawerOpacity = useRef(new Animated.Value(0)).current;
+  const logoTopPadding = Math.round(insets.top + height * 0.25);
+
+  const drawerHeight = Math.round(Math.max(170, Math.min(240, height * 0.25)));
+  const drawerRadius = Math.round(Math.max(42, Math.min(64, width * 0.16)));
+
+  const primaryButtonWidth = Math.round(Math.max(180, Math.min(80, width * 0.6)));
+  const primaryButtonHeight = Math.round(Math.max(46, Math.min(56, height * 0.06)));
+
+  const secondaryButtonWidth = Math.round(Math.max(170, Math.min(250, width * 0.5)));
+  const secondaryButtonHeight = Math.round(Math.max(38, Math.min(46, height * 0.045)));
 
   useEffect(() => {
     Animated.sequence([
@@ -35,7 +48,7 @@ export default function HomeScreen() {
 
   return (
     <View style={styles.container}>
-      <Animated.View style={[styles.logoSection, { opacity: logoOpacity }]}> 
+      <Animated.View style={[styles.logoSection, { opacity: logoOpacity, paddingTop: logoTopPadding }]}> 
         <Image
           source={require("../assets/images/letra.png")}
           style={styles.logo}
@@ -43,17 +56,24 @@ export default function HomeScreen() {
         <Text style={styles.title}>Adotaí</Text>
       </Animated.View>
 
-      <Animated.View style={[styles.actionsBackground, { opacity: drawerOpacity, transform: [{ translateY: drawerTranslateY }] }]}> 
+      <Animated.View style={[styles.actionsBackground, {
+        opacity: drawerOpacity,
+        transform: [{ translateY: drawerTranslateY }],
+        height: drawerHeight,
+        borderTopLeftRadius: drawerRadius,
+        borderTopRightRadius: drawerRadius,
+        paddingBottom: 0 + insets.bottom * 0.0,
+      }]}> 
         <View style={styles.actionsSection}>
           <TouchableOpacity
-            style={styles.primaryButton}
+            style={[styles.primaryButton, { width: primaryButtonWidth, height: primaryButtonHeight }]}
             onPress={() => router.push("/login")}
           >
             <Text style={styles.buttonText}>Entre</Text>
           </TouchableOpacity>
 
           <TouchableOpacity
-            style={styles.secondaryButton}
+            style={[styles.secondaryButton, { width: secondaryButtonWidth, height: secondaryButtonHeight }]}
             onPress={() => router.push("/cadastro")}
           >
             <Text style={styles.buttonText}>Crie sua conta</Text>
@@ -76,7 +96,6 @@ const styles = StyleSheet.create({
     width: "100%",
     justifyContent: "flex-start",
     alignItems: "center",
-    paddingTop: 170,
   },
   logo: {
     height: 180,
@@ -96,9 +115,6 @@ const styles = StyleSheet.create({
     right: 0,
     bottom: 0,
     width: "100%",
-    height: 190,
-    borderTopLeftRadius: 60,
-    borderTopRightRadius: 60,
     backgroundColor: "#fff",
     justifyContent: "center",
     alignItems: "center",
@@ -113,14 +129,10 @@ const styles = StyleSheet.create({
   primaryButton: {
     backgroundColor: "#ffb49b",
     borderRadius: 12,
-    width: 196,
-    height: 58,
     justifyContent: "center",
     alignItems: "center",
   },
   secondaryButton: {
-    width: 180,
-    height: 44,
     justifyContent: "center",
     alignItems: "center",
   },

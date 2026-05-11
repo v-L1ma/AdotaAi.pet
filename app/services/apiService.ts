@@ -1,7 +1,8 @@
 import axios from "axios";
 import type { AxiosError, InternalAxiosRequestConfig } from "axios";
 import { API_BASE_URL } from "../lib/api";
-import { clearSession, getSession, updateSessionToken } from "../lib/session";
+import { isCadastroIncompletoPayload, notifyCadastroIncompleto } from "../lib/cadastroIncomplete";
+import { clearSessionPersistent, getSession, updateSessionToken } from "../lib/session";
 import { tokenService } from "./tokenService";
 
 type RetryableRequestConfig = InternalAxiosRequestConfig & {
@@ -59,8 +60,13 @@ apiService.interceptors.response.use(
   (response) => response,
   async (error: AxiosError) => {
     const originalRequest = error.config as RetryableRequestConfig | undefined;
+    const statusCode = error.response?.status;
 
-    if (!originalRequest || error.response?.status !== 401 || originalRequest._retry) {
+    if (statusCode === 403 && isCadastroIncompletoPayload(error.response?.data)) {
+      notifyCadastroIncompleto();
+    }
+
+    if (!originalRequest || statusCode !== 401 || originalRequest._retry) {
       return Promise.reject(error);
     }
 
@@ -75,7 +81,7 @@ apiService.interceptors.response.use(
     const newAccessToken = await refreshInFlight;
     if (!newAccessToken) {
       await tokenService.clearTokens();
-      clearSession();
+      await clearSessionPersistent();
       return Promise.reject(error);
     }
 

@@ -1,10 +1,13 @@
 import { Entypo, Ionicons, MaterialIcons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
-import React, { useMemo, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { Alert, Image, ScrollView, StyleSheet, Text, TouchableOpacity, View, useWindowDimensions } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import colors from "../styles/colors";
 import { useTabNavigation } from "@/hooks/useTabNavigation";
+import { getSession } from "@/lib/session";
+import { getPetImageUrl, petService } from "@/services/petService";
+import { PetDTO } from "@/types/pet";
 
 export default function MeusPets() {
   const router = useRouter();
@@ -30,81 +33,34 @@ export default function MeusPets() {
     };
   }, [isSmall, isTablet, width]);
 
-  const [pets, setPets] = useState([
-    {
-      id: 1,
-      nome: 'Rex',
-      idade: '2 anos',
-      especie: 'Cachorro',
-      imagem: require('../assets/images/dog1.png'),
-    },
-    {
-      id: 2,
-      nome: 'Luna',
-      idade: '1 ano',
-      especie: 'Gato',
-      imagem: require('../assets/images/cat1.png'),
-    },
-    {
-      id: 3,
-      nome: 'Toby',
-      idade: '3 anos',
-      especie: 'Cachorro',
-      imagem: require('../assets/images/dog1.png'),
-    },
-    {
-      id: 4,
-      nome: 'Mimi',
-      idade: '6 meses',
-      especie: 'Gato',
-      imagem: require('../assets/images/cat1.png'),
-    },
-    {
-      id: 5,
-      nome: 'Thor',
-      idade: '4 anos',
-      especie: 'Cachorro',
-      imagem: require('../assets/images/dog1.png'),
-    },
-    {
-      id: 6,
-      nome: 'Nina',
-      idade: '8 meses',
-      especie: 'Gato',
-      imagem: require('../assets/images/cat1.png'),
-    },
-    {
-      id: 7,
-      nome: 'Bidu',
-      idade: '5 anos',
-      especie: 'Cachorro',
-      imagem: require('../assets/images/dog1.png'),
-    },
-    {
-      id: 8,
-      nome: 'Mel',
-      idade: '2 anos',
-      especie: 'Gato',
-      imagem: require('../assets/images/cat1.png'),
-    },
-    {
-      id: 9,
-      nome: 'Simba',
-      idade: '1 ano',
-      especie: 'Cachorro',
-      imagem: require('../assets/images/dog1.png'),
-    },
-    {
-      id: 10,
-      nome: 'Lili',
-      idade: '3 anos',
-      especie: 'Gato',
-      imagem: require('../assets/images/cat1.png'),
-    },
-  ]);
+  const [pets, setPets] = useState<PetDTO[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  const handleDelete = (id: number) => {
-    console.log('Clicou para excluir o pet de id:', id);
+  const loadPets = useCallback(async () => {
+    setIsLoading(true);
+    setError(null);
+
+    try {
+      const allPets = await petService.listAll();
+      const userId = getSession()?.userId;
+      const filteredPets = userId
+        ? allPets.filter((pet) => pet.user_id === userId)
+        : allPets;
+
+      setPets(filteredPets);
+    } catch {
+      setError("Não foi possível carregar seus pets.");
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    void loadPets();
+  }, [loadPets]);
+
+  const handleDelete = (id: string) => {
     Alert.alert(
       'Excluir anúncio',
       'Deseja realmente apagar este anúncio de animal?',
@@ -113,7 +69,14 @@ export default function MeusPets() {
         {
           text: 'Excluir',
           style: 'destructive',
-          onPress: () => setPets(pets.filter(pet => pet.id !== id)),
+          onPress: async () => {
+            try {
+              await petService.remove(id);
+              setPets((current) => current.filter((pet) => pet.id !== id));
+            } catch {
+              Alert.alert("Erro", "Não foi possível excluir este anúncio agora.");
+            }
+          },
         },
       ]
     );
@@ -150,13 +113,24 @@ export default function MeusPets() {
           <Text style={[styles.addButtonText, { fontSize: isSmall ? 16 : 17 }]}>Adicionar novo pet</Text>
         </TouchableOpacity>
 
-        {pets.map((pet) => (
+        {isLoading ? (
+          <Text style={styles.feedbackText}>Carregando seus pets...</Text>
+        ) : error ? (
+          <View style={styles.feedbackWrap}>
+            <Text style={styles.feedbackText}>{error}</Text>
+            <TouchableOpacity style={styles.feedbackButton} onPress={() => void loadPets()}>
+              <Text style={styles.feedbackButtonText}>Tentar novamente</Text>
+            </TouchableOpacity>
+          </View>
+        ) : pets.length === 0 ? (
+          <Text style={styles.feedbackText}>Você ainda não possui pets anunciados.</Text>
+        ) : pets.map((pet) => (
             <View
-              key={pet.id}
+              key={pet.id || pet.nome}
               style={[styles.card, { width: metrics.cardWidth }]}
             >
               <Image
-                source={pet.imagem}
+                source={{ uri: getPetImageUrl(pet.link_foto) }}
                 style={[
                   styles.petImage,
                   {
@@ -169,15 +143,15 @@ export default function MeusPets() {
               />
               <View style={styles.petInfo}>
                 <Text numberOfLines={1} style={[styles.petName, { fontSize: metrics.titleSize }]}>{pet.nome}</Text>
-                <Text numberOfLines={1} style={[styles.petAge, { fontSize: metrics.subtitleSize }]}>{pet.idade}</Text>
+                <Text numberOfLines={1} style={[styles.petAge, { fontSize: metrics.subtitleSize }]}>{pet.raca || "Raça não informada"}</Text>
                 <View style={styles.speciesBadge}>
-                  <Text style={[styles.speciesText, { fontSize: metrics.speciesSize }]}>{pet.especie}</Text>
+                  <Text style={[styles.speciesText, { fontSize: metrics.speciesSize }]}>{pet.especie || "N/A"}</Text>
                 </View>
               </View>
 
               <View style={styles.actionsColumn}>
                 <TouchableOpacity
-                  onPress={() => navigateToTab("/criar-anuncio")}
+                  onPress={() => pet.id && router.push({ pathname: "/criar-anuncio", params: { id: pet.id } })}
                   style={[styles.actionButton, { width: metrics.actionSize, height: metrics.actionSize }]}
                   hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
                 >
@@ -185,7 +159,7 @@ export default function MeusPets() {
                 </TouchableOpacity>
 
                 <TouchableOpacity
-                  onPress={() => handleDelete(pet.id)}
+                  onPress={() => pet.id && handleDelete(pet.id)}
                   style={[styles.actionButton, { width: metrics.actionSize, height: metrics.actionSize }]}
                   hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
                 >
@@ -311,6 +285,30 @@ const styles = StyleSheet.create({
     gap: 8,
     alignItems: "center",
     justifyContent: "center",
+  },
+  feedbackWrap: {
+    alignItems: "center",
+    marginTop: 24,
+    gap: 10,
+  },
+  feedbackText: {
+    textAlign: "center",
+    color: "#777",
+    fontSize: 15,
+    marginTop: 10,
+    fontWeight: "600",
+  },
+  feedbackButton: {
+    borderRadius: 12,
+    borderColor: "#f0c4bf",
+    borderWidth: 1,
+    paddingHorizontal: 14,
+    paddingVertical: 8,
+    backgroundColor: "#fff3f1",
+  },
+  feedbackButtonText: {
+    color: colors.primary,
+    fontWeight: "700",
   },
   actionButton: {
     borderRadius: 999,

@@ -1,10 +1,12 @@
 import CardPet from "@/components/CardPet";
 import NavBar from "@/components/NavBar";
-import apiService from "@/services/apiService";
+import { mapPetToAnimalCard, petService } from "@/services/petService";
 import { colors } from "@/styles/variables";
+import { PetDTO } from "@/types/pet";
 import { animal } from "@/types/TAnimal";
+import { useLocalSearchParams } from "expo-router";
 import React, { useEffect, useMemo, useState } from "react";
-import { Animated, Dimensions, Easing, Image, Pressable, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
+import { ActivityIndicator, Animated, Dimensions, Easing, Image, Pressable, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
 import Icon from "react-native-vector-icons/FontAwesome5";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
@@ -12,16 +14,11 @@ const width = Dimensions.get("window").width
 const columnGap = 12;
 const columnWidth = (width - 40 - columnGap) / 2;
 
-type PetApiDTO = {
-    id: string;
-    nome: string;
-    especie: string;
-    porte: string;
-    link_foto: string;
-};
-
 export default function ListagemPets(){
     const insets = useSafeAreaInsets();
+    const params = useLocalSearchParams<{ ownerId?: string | string[]; ownerName?: string | string[] }>();
+    const ownerId = Array.isArray(params.ownerId) ? params.ownerId[0] : params.ownerId;
+    const ownerName = Array.isArray(params.ownerName) ? params.ownerName[0] : params.ownerName;
     const [isPopUpOpen, setIsPopUpOpen] = useState<boolean>(false);
     const [isPopUpMounted, setIsPopUpMounted] = useState<boolean>(false);
     const [genero, setGenero] = useState<"M" | "F" | null>(null);
@@ -33,35 +30,23 @@ export default function ListagemPets(){
     const [petsError, setPetsError] = useState<string | null>(null);
     const width = Dimensions.get(`window`).width;
 
+    function applyOwnerFilter(items: PetDTO[]) {
+        if (!ownerId) {
+            return items;
+        }
+
+        return items.filter((pet) => pet.user_id === ownerId);
+    }
+
     useEffect(() => {
         async function loadPets() {
             setIsLoadingPets(true);
             setPetsError(null);
 
             try {
-                const response = await apiService.get<PetApiDTO[]>("/pets");
-                const parsedPets = response.data
-                    .map((pet): animal | null => {
-                        const especieNormalizada = pet.especie?.toLowerCase();
-                        const porteNormalizado = pet.porte?.toLowerCase();
-
-                        if ((especieNormalizada !== "cachorro" && especieNormalizada !== "gato") ||
-                            (porteNormalizado !== "pequeno" && porteNormalizado !== "medio" && porteNormalizado !== "grande")) {
-                            return null;
-                        }
-
-                        return {
-                            id: pet.id,
-                            nome: pet.nome,
-                            imagem: pet.link_foto,
-                            especie: especieNormalizada,
-                            porte: porteNormalizado,
-                            genero: null,
-                        };
-                    })
-                    .filter((pet): pet is animal => Boolean(pet));
-
-                setPets(parsedPets);
+                const petsFromApi = await petService.listAll();
+                const filteredByOwner = applyOwnerFilter(petsFromApi);
+                setPets(filteredByOwner.map(mapPetToAnimalCard));
             } catch {
                 setPetsError("Nao foi possivel carregar os pets.");
             } finally {
@@ -70,7 +55,7 @@ export default function ListagemPets(){
         }
 
         void loadPets();
-    }, []);
+    }, [ownerId]);
     const [imageRatios, setImageRatios] = useState<Record<string, number>>({});
     const sheetTranslateY = useMemo(() => new Animated.Value(460), []);
     const backdropOpacity = useMemo(() => new Animated.Value(0), []);
@@ -214,7 +199,7 @@ export default function ListagemPets(){
         <View style={styles.screenWrapper}>
             <View style={styles.content}>
                 <View style={styles.searchZone}>
-                    <Text style={styles.title}>Buscar pets</Text>
+                    <Text style={styles.title}>{ownerId ? `Pets de ${ownerName || "usuário"}` : "Buscar pets"}</Text>
 
                 <View style={styles.inputContainer}>
                     <TextInput 
@@ -253,7 +238,29 @@ export default function ListagemPets(){
                 </ScrollView>
             </View>
 
-            {filteredPets.length === 0 ? (
+            {isLoadingPets ? (
+                <View style={styles.feedbackWrap}>
+                    <ActivityIndicator color={colors.primary} />
+                    <Text style={styles.feedbackText}>Carregando pets...</Text>
+                </View>
+            ) : petsError ? (
+                <View style={styles.feedbackWrap}>
+                    <Text style={styles.feedbackText}>{petsError}</Text>
+                    <TouchableOpacity style={styles.retryButton} onPress={() => {
+                        setIsLoadingPets(true);
+                        setPetsError(null);
+                        petService.listAll()
+                            .then((petsFromApi) => {
+                                const filteredByOwner = applyOwnerFilter(petsFromApi);
+                                setPets(filteredByOwner.map(mapPetToAnimalCard));
+                            })
+                            .catch(() => setPetsError("Nao foi possivel carregar os pets."))
+                            .finally(() => setIsLoadingPets(false));
+                    }}>
+                        <Text style={styles.retryText}>Tentar novamente</Text>
+                    </TouchableOpacity>
+                </View>
+            ) : filteredPets.length === 0 ? (
                     <View style={styles.emptyWrap}>
                         <Image source={require("../assets/images/nothingfound.png")} style={styles.emptyImage}></Image>
                         <Text style={styles.emptyText}>Não encontramos nenhum animal com esses filtros.</Text>
@@ -386,6 +393,32 @@ const styles = StyleSheet.create({
         flex: 1,
         backgroundColor: "#F8F9FA",
         position: "relative",
+    },
+    feedbackWrap: {
+        flex: 1,
+        alignItems: "center",
+        justifyContent: "center",
+        gap: 10,
+        paddingHorizontal: 22,
+    },
+    feedbackText: {
+        color: "#5F5F5F",
+        textAlign: "center",
+        fontSize: 15,
+        fontWeight: "600",
+    },
+    retryButton: {
+        marginTop: 4,
+        backgroundColor: "#fff",
+        borderRadius: 14,
+        paddingHorizontal: 14,
+        paddingVertical: 10,
+        borderWidth: 1,
+        borderColor: "#E7E7E7",
+    },
+    retryText: {
+        color: colors.primary,
+        fontWeight: "700",
     },
     content: {
         paddingHorizontal: 20,

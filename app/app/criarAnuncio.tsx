@@ -1,14 +1,19 @@
-import { date, z } from "zod";
+import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Controller, useForm } from "react-hook-form";
 import DateTimePicker, { DateTimePickerEvent } from "@react-native-community/datetimepicker";
 import { useCreatePet } from "../hooks/useCreatePet";
 import * as ImagePicker from "expo-image-picker";
-import { useRouter } from "expo-router";
-import React, { useRef, useState } from "react";
-import { Alert, Image, InputAccessoryView, Keyboard, Linking, Platform, Pressable, SafeAreaView, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
+import { useLocalSearchParams, useRouter } from "expo-router";
+import React, { useEffect, useRef, useState } from "react";
+import { ActivityIndicator, Alert, Image, InputAccessoryView, Keyboard, Linking, Platform, Pressable, SafeAreaView, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
 import Icon1 from "react-native-vector-icons/Ionicons";
 import { colors } from "@/styles/variables";
+import { petFormLinkStore } from "@/lib/petFormLinkStore";
+import { formularioService } from "@/services/formularioService";
+import { petService } from "@/services/petService";
+import { FormularioTemplateDTO } from "@/types/formulario";
+import { PetDTO } from "@/types/pet";
 
 const criarAnuncioSchema = z.object({
     nome: z.string().trim().min(2, "Nome deve ter pelo menos 2 caracteres"),
@@ -29,9 +34,16 @@ const criarAnuncioSchema = z.object({
 
 type CriarAnuncioFormData = z.infer<typeof criarAnuncioSchema>;
 
+function toUtcMidnightIso(date: Date) {
+    return new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate())).toISOString();
+}
+
 export default function CriarAnuncioScreen() {
     const [showDatePicker, setShowDatePicker] = useState(false);
     const { createPet, isCreating } = useCreatePet();
+    const params = useLocalSearchParams<{ id?: string | string[] }>();
+    const petId = Array.isArray(params.id) ? params.id[0] : params.id;
+    const isEditMode = Boolean(petId);
 
     const {
         control,
@@ -44,7 +56,7 @@ export default function CriarAnuncioScreen() {
         resolver: zodResolver(criarAnuncioSchema),
         defaultValues: {
             nome: "",
-            dt_nasc: new Date().toISOString().slice(0, 10),
+            dt_nasc: toUtcMidnightIso(new Date()),
             especie: undefined,
             porte: undefined,
             raca: "",
@@ -54,12 +66,23 @@ export default function CriarAnuncioScreen() {
 
     const router = useRouter();
     const [image, setImage] = useState<string | undefined>(undefined);
+    const [peso, setPeso] = useState<string>("");
+    const [petStatus, setPetStatus] = useState<string>("PENDENTE");
+    const [isLoadingPet, setIsLoadingPet] = useState(false);
+    const [isUpdating, setIsUpdating] = useState(false);
+    const [wantsTriagemForm, setWantsTriagemForm] = useState<boolean>(false);
+    const [selectedFormId, setSelectedFormId] = useState<string | null>(null);
+    const [isFormModalOpen, setIsFormModalOpen] = useState(false);
+    const [isLoadingForms, setIsLoadingForms] = useState(false);
+    const [formError, setFormError] = useState<string | null>(null);
+    const [userForms, setUserForms] = useState<FormularioTemplateDTO[]>([]);
     const [focusedField, setFocusedField] = useState<"nome" | "idade" | "peso" | null>(null);
 
     const nomeRef = useRef<TextInput>(null);
     const idadeRef = useRef<TextInput>(null);
     const pesoRef = useRef<TextInput>(null);
     const toolbarId = "pet-form-toolbar";
+    const selectedForm = userForms.find((form) => form.id === selectedFormId) || null;
 
     const focusNextField = () => {
         if (focusedField === "nome") {
@@ -146,20 +169,127 @@ export default function CriarAnuncioScreen() {
 
     const onWebDateChange = (rawDate: string) => {
         if(rawDate.length === 10) {
-             const isoDate = new Date(`${rawDate}T12:00:00`).toISOString();
+             const isoDate = `${rawDate}T00:00:00.000Z`;
             setValue("dt_nasc", isoDate, { shouldValidate: true });
         }
     };
 
+    async function loadMyForms() {
+        setIsLoadingForms(true);
+        setFormError(null);
+
+        try {
+            const forms = await formularioService.listMine();
+            setUserForms(forms);
+        } catch {
+            setFormError("Não foi possível carregar seus formulários.");
+        } finally {
+            setIsLoadingForms(false);
+        }
+    }
+
+    async function openFormModal() {
+        setIsFormModalOpen(true);
+        await loadMyForms();
+    }
+
+    useEffect(() => {
+        async function loadPetForEdit() {
+            if (!petId) {
+                return;
+            }
+
+            setIsLoadingPet(true);
+            try {
+                const pet = await petService.getById(petId);
+                const especie = pet.especie === "gato" || pet.especie === "cachorro" ? pet.especie : undefined;
+                const porte = pet.porte === "pequeno" || pet.porte === "medio" || pet.porte === "grande" ? pet.porte : undefined;
+
+                reset({
+                    nome: pet.nome || "",
+                    dt_nasc: pet.dt_nasc || toUtcMidnightIso(new Date()),
+                    especie,
+                    porte,
+                    raca: pet.raca || "",
+                    descricao: pet.descricao || "",
+                });
+
+                setImage(pet.link_foto || undefined);
+                setPeso("");
+                setPetStatus(pet.status || "PENDENTE");
+
+                const linkedFormId = await petFormLinkStore.getFormIdByPetId(petId);
+                setSelectedFormId(linkedFormId);
+                setWantsTriagemForm(Boolean(linkedFormId));
+            } catch {
+                Alert.alert("Erro", "Não foi possível carregar os dados do pet para edição.");
+                router.back();
+            } finally {
+                setIsLoadingPet(false);
+            }
+        }
+
+        void loadPetForEdit();
+    }, [petId, reset, router]);
+
     const handleSave = async (data: CriarAnuncioFormData) => {
         try {
-            await createPet(data);
+            if (wantsTriagemForm && !selectedFormId) {
+                Alert.alert("Formulário de triagem", "Selecione um formulário para continuar.");
+                return;
+            }
+
+            if (isEditMode && petId) {
+                setIsUpdating(true);
+
+                const payload: PetDTO = {
+                    status: petStatus || "PENDENTE",
+                    nome: data.nome,
+                    descricao: data.descricao,
+                    dt_nasc: data.dt_nasc,
+                    porte: data.porte,
+                    raca: data.raca,
+                    especie: data.especie,
+                    link_foto: image,
+                };
+
+                await petService.update(petId, payload);
+
+                if (wantsTriagemForm && selectedFormId) {
+                    await petFormLinkStore.setLink(petId, selectedFormId);
+                } else {
+                    await petFormLinkStore.removeLink(petId);
+                }
+
+                Alert.alert("Sucesso", "Informações do pet atualizadas com sucesso!");
+                router.back();
+                return;
+            }
+
+            const createdPet = await createPet({
+                ...data,
+                link_foto: image,
+            });
+
+            if (createdPet?.id) {
+                if (wantsTriagemForm && selectedFormId) {
+                    await petFormLinkStore.setLink(createdPet.id, selectedFormId);
+                } else {
+                    await petFormLinkStore.removeLink(createdPet.id);
+                }
+            }
 
             Alert.alert("Sucesso", "Anuncio criado com sucesso!");
             reset();
+            setImage(undefined);
+            setPeso("");
+            setWantsTriagemForm(false);
+            setSelectedFormId(null);
         } catch (error) {
             const errorMessage = error instanceof Error ? error.message : "Falha ao criar anuncio";
             Alert.alert("Erro", errorMessage);
+        } finally {
+            setIsUpdating(false);
         }
     };
 
@@ -205,9 +335,16 @@ export default function CriarAnuncioScreen() {
                         </View>
                     </Pressable>
 
-                    <Text style={styles.heroTitle}>Nova História</Text>
-                    <Text style={styles.heroSubtitle}>Dê voz a um novo companheiro</Text>
+                    <Text style={styles.heroTitle}>{isEditMode ? "Editar Pet" : "Nova História"}</Text>
+                    <Text style={styles.heroSubtitle}>{isEditMode ? "Atualize as informações do seu pet" : "Dê voz a um novo companheiro"}</Text>
                 </View>
+
+                {isLoadingPet && (
+                    <View style={styles.loadingCard}>
+                        <ActivityIndicator color={colors.primary} />
+                        <Text style={styles.loadingText}>Carregando informações do pet...</Text>
+                    </View>
+                )}
 
                 <View style={styles.formCard}>
                     <Controller
@@ -251,8 +388,8 @@ export default function CriarAnuncioScreen() {
                         />
                         <Field
                             label="Peso (kg) - Opcional"
-                            value={""}
-                            onChangeText={() => {}}
+                            value={peso}
+                            onChangeText={setPeso}
                             placeholder="Ex.: 5"
                             keyboardType="numeric"
                             inputRef={pesoRef}
@@ -322,7 +459,7 @@ export default function CriarAnuncioScreen() {
                                         maximumDate={new Date()}
                                         onChange={(event, date) => {
                                             setShowDatePicker(false);
-                                            if (date) onChange(date.toISOString());
+                                            if (date) onChange(toUtcMidnightIso(date));
                                         }}
                                     />
                                 )}
@@ -352,19 +489,54 @@ export default function CriarAnuncioScreen() {
                     />
                     {renderError(errors.descricao?.message)}
 
-                    <TouchableOpacity style={styles.secondaryButton} onPress={() => router.push("/criarFormulario") }>
-                        <Text style={styles.secondaryButtonText}>Escolher formulário</Text>
-                    </TouchableOpacity>
+                    <View style={styles.triagemSection}>
+                        <Text style={styles.blockTitle}>Adicionar formulário de triagem?</Text>
+
+                        <View style={styles.row}>
+                            <Chip
+                                label="Sim"
+                                selected={wantsTriagemForm}
+                                onPress={() => setWantsTriagemForm(true)}
+                            />
+                            <Chip
+                                label="Não"
+                                selected={!wantsTriagemForm}
+                                onPress={() => {
+                                    setWantsTriagemForm(false);
+                                    setSelectedFormId(null);
+                                }}
+                            />
+                        </View>
+
+                        {wantsTriagemForm && (
+                            <View style={styles.triagemActions}>
+                                <TouchableOpacity style={styles.secondaryButton} onPress={openFormModal}>
+                                    <Text style={styles.secondaryButtonText}>
+                                        {selectedForm
+                                            ? `Formulário selecionado (${selectedForm.perguntas.length} perguntas)`
+                                            : "Selecionar formulário"}
+                                    </Text>
+                                </TouchableOpacity>
+
+                                <TouchableOpacity
+                                    style={styles.tertiaryButton}
+                                    onPress={() => router.push("/criarFormulario")}
+                                >
+                                    <Text style={styles.tertiaryButtonText}>Criar novo formulário</Text>
+                                </TouchableOpacity>
+                            </View>
+                        )}
+                    </View>
                 </View>
 
                 <TouchableOpacity 
-                    style={[styles.primaryButton, isCreating && { opacity: 0.7 }]} 
+                    style={[styles.primaryButton, (isCreating || isUpdating || isLoadingPet) && { opacity: 0.7 }]} 
                     onPress={handleSubmit(handleSave)}
-                    disabled={isCreating}
+                    disabled={isCreating || isUpdating || isLoadingPet}
                 >
                     <Icon1 name="sparkles-outline" size={18} color="#fff" />
                     <Text style={styles.primaryButtonText}>
-                        {isCreating ? "Criando..." : "Criar anúncio"}
+                        {isLoadingPet ? "Carregando..." : isCreating ? "Criando..." : isUpdating ? "Salvando..." : isEditMode ? "Salvar alterações" : "Criar anúncio"}
                     </Text>
                 </TouchableOpacity>
             </ScrollView>
@@ -383,6 +555,65 @@ export default function CriarAnuncioScreen() {
                         )}
                     </View>
                 </InputAccessoryView>
+            )}
+
+            {isFormModalOpen && (
+                <Pressable style={styles.modalBackdrop} onPress={() => setIsFormModalOpen(false)}>
+                    <Pressable style={styles.modalCard} onPress={(event) => event.stopPropagation()}>
+                        <Text style={styles.modalTitle}>Selecionar formulário</Text>
+                        <Text style={styles.modalSubtitle}>Escolha um formulário para usar na triagem deste pet.</Text>
+
+                        {isLoadingForms ? (
+                            <View style={styles.modalStatusRow}>
+                                <ActivityIndicator color={colors.primary} />
+                                <Text style={styles.modalStatusText}>Carregando formulários...</Text>
+                            </View>
+                        ) : formError ? (
+                            <View style={styles.modalStatusRow}>
+                                <Text style={styles.modalStatusText}>{formError}</Text>
+                                <TouchableOpacity style={styles.tertiaryButton} onPress={loadMyForms}>
+                                    <Text style={styles.tertiaryButtonText}>Tentar novamente</Text>
+                                </TouchableOpacity>
+                            </View>
+                        ) : userForms.length === 0 ? (
+                            <View style={styles.modalStatusRow}>
+                                <Text style={styles.modalStatusText}>Você ainda não possui formulários.</Text>
+                                <TouchableOpacity
+                                    style={styles.secondaryButton}
+                                    onPress={() => {
+                                        setIsFormModalOpen(false);
+                                        router.push("/criarFormulario");
+                                    }}
+                                >
+                                    <Text style={styles.secondaryButtonText}>Criar formulário</Text>
+                                </TouchableOpacity>
+                            </View>
+                        ) : (
+                            <ScrollView style={styles.formsList} contentContainerStyle={styles.formsListContent}>
+                                {userForms.map((form) => {
+                                    const selected = selectedFormId === form.id;
+                                    return (
+                                        <TouchableOpacity
+                                            key={form.id}
+                                            style={[styles.formOption, selected && styles.formOptionSelected]}
+                                            onPress={() => {
+                                                setSelectedFormId(form.id);
+                                                setIsFormModalOpen(false);
+                                            }}
+                                        >
+                                            <Text style={[styles.formOptionTitle, selected && styles.formOptionTitleSelected]}>
+                                                Formulário #{form.id.slice(0, 8)}
+                                            </Text>
+                                            <Text style={[styles.formOptionSubtitle, selected && styles.formOptionSubtitleSelected]}>
+                                                {form.perguntas.length} perguntas
+                                            </Text>
+                                        </TouchableOpacity>
+                                    );
+                                })}
+                            </ScrollView>
+                        )}
+                    </Pressable>
+                </Pressable>
             )}
         </View>
     );
@@ -635,6 +866,99 @@ const styles = StyleSheet.create({
         fontWeight: "700",
         fontSize: 14,
     },
+    triagemSection: {
+        marginTop: 8,
+        gap: 10,
+    },
+    triagemActions: {
+        gap: 8,
+    },
+    tertiaryButton: {
+        borderRadius: 12,
+        borderWidth: 1,
+        borderColor: colors.primary,
+        minHeight: 44,
+        justifyContent: "center",
+        alignItems: "center",
+        paddingHorizontal: 12,
+        backgroundColor: "#fff",
+    },
+    tertiaryButtonText: {
+        color: colors.primary,
+        fontWeight: "700",
+        fontSize: 13,
+    },
+    modalBackdrop: {
+        position: "absolute",
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        backgroundColor: "rgba(0, 0, 0, 0.35)",
+        justifyContent: "center",
+        paddingHorizontal: 16,
+    },
+    modalCard: {
+        backgroundColor: "#fff",
+        borderRadius: 18,
+        padding: 16,
+        maxHeight: "76%",
+        gap: 10,
+    },
+    modalTitle: {
+        fontSize: 20,
+        color: colors.primary,
+        fontWeight: "800",
+    },
+    modalSubtitle: {
+        color: colors.textMuted,
+        fontSize: 13,
+    },
+    modalStatusRow: {
+        alignItems: "center",
+        justifyContent: "center",
+        gap: 10,
+        paddingVertical: 10,
+    },
+    modalStatusText: {
+        color: "#666",
+        textAlign: "center",
+        fontWeight: "600",
+    },
+    formsList: {
+        maxHeight: 320,
+    },
+    formsListContent: {
+        gap: 8,
+    },
+    formOption: {
+        borderRadius: 14,
+        borderWidth: 1,
+        borderColor: "#E7E7E7",
+        backgroundColor: "#F9F9F9",
+        paddingHorizontal: 12,
+        paddingVertical: 10,
+        gap: 2,
+    },
+    formOptionSelected: {
+        borderColor: colors.primary,
+        backgroundColor: "#FFE9E6",
+    },
+    formOptionTitle: {
+        fontSize: 14,
+        fontWeight: "700",
+        color: "#222",
+    },
+    formOptionTitleSelected: {
+        color: colors.primary,
+    },
+    formOptionSubtitle: {
+        fontSize: 12,
+        color: "#666",
+    },
+    formOptionSubtitleSelected: {
+        color: colors.primary,
+    },
     keyboardToolbar: {
         backgroundColor: "#F5F5F7",
         borderTopWidth: 1,
@@ -668,5 +992,21 @@ const styles = StyleSheet.create({
         color: '#fff',
         fontWeight: "800",
         fontSize: 17,
+    },
+    loadingCard: {
+        paddingVertical: 14,
+        paddingHorizontal: 12,
+        borderRadius: 14,
+        borderWidth: 1,
+        borderColor: "#ececec",
+        backgroundColor: "#fff",
+        alignItems: "center",
+        justifyContent: "center",
+        gap: 8,
+    },
+    loadingText: {
+        color: colors.textMuted,
+        textAlign: "center",
+        fontWeight: "600",
     },
 });

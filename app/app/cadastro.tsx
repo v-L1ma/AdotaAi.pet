@@ -1,12 +1,16 @@
 import { router } from "expo-router";
 import React, { useEffect, useRef, useState } from "react";
 import { useAuth } from "../hooks/useAuth";
-import { SafeAreaView, Text, TextInput, Image, TouchableOpacity, KeyboardAvoidingView, View, Platform, Animated, Easing } from "react-native";
+import { Text, TextInput, Image, TouchableOpacity, KeyboardAvoidingView, View, Platform, Animated, Easing } from "react-native";
 import styles from "../styles/AppStyles";
 import { useTabNavigation } from "@/hooks/useTabNavigation";
+import { useWindowDimensions } from "react-native";
+import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
 
 export default function CadastroScreen() {
   const { navigateToTab } = useTabNavigation();
+  const insets = useSafeAreaInsets();
+  const { height } = useWindowDimensions();
   const slideAnim = useRef(new Animated.Value(1000)).current;
   const { register, isLoading } = useAuth();
   const [nome, setNome] = useState("");
@@ -63,7 +67,7 @@ export default function CadastroScreen() {
       behavior={Platform.OS === "ios" ? "padding" : "height"}
       style={{ flex: 1 }}
     >
-      <SafeAreaView style={styles.container}>
+      <SafeAreaView style={styles.container} edges={["top", "left", "right"]}>
         <Animated.View style={{ flex: 1, width: "100%", transform: [{ translateY: slideAnim }], marginTop: 0 }}>
           <Image
             source={require("../assets/images/dog1.png")}

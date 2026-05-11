@@ -97,7 +97,10 @@ bottomCircle: {
   },
   square: {
     backgroundColor: "#ffffffff",
-    borderRadius: 40,
+    borderTopLeftRadius: 40,
+    borderTopRightRadius: 40,
+    borderBottomLeftRadius: 0,
+    borderBottomRightRadius: 0,
     padding: 20,
     width: "100%",
     height: "80%",
@@ -132,6 +135,7 @@ bottomCircle: {
     margin: 12,
     padding: 10,
     borderRadius: 20,
+    fontSize: 16,
   },
   inputPerfil: {
     backgroundColor: "#f3f2f2ff",
@@ -140,6 +144,7 @@ bottomCircle: {
     margin: 10,
     padding: 10,
     borderRadius: 20,
+    fontSize: 16,
 },
   buttonLogin: {
     backgroundColor: "#ffafa8ff",

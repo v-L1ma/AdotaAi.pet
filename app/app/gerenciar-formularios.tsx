@@ -1,24 +1,65 @@
 import AppHeader from "@/components/AppHeader";
+import { formularioService } from "@/services/formularioService";
 import { colors } from "@/styles/variables";
+import { FormularioTemplateDTO } from "@/types/formulario";
 import { useRouter } from "expo-router";
-import { Image, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
-
-type Formulario = {
-  id: number;
-  titulo: string;
-  perguntas: number;
-  status: "Publicado" | "Rascunho";
-  atualizadoEm: string;
-};
-
-const formularios: Formulario[] = [
-  { id: 1, titulo: "Questionário padrão de adoção", perguntas: 20, status: "Publicado", atualizadoEm: "18/03/2026" },
-  { id: 2, titulo: "Triagem para cães de grande porte", perguntas: 16, status: "Rascunho", atualizadoEm: "14/03/2026" },
-  { id: 3, titulo: "Formulário para gatos", perguntas: 18, status: "Publicado", atualizadoEm: "10/03/2026" },
-];
+import { Image, ScrollView, StyleSheet, Text, TouchableOpacity, View, Alert, ActivityIndicator } from "react-native";
+import React, { useCallback, useEffect, useState } from "react";
 
 export default function GerenciarFormularios() {
   const router = useRouter();
+  const [formularios, setFormularios] = useState<FormularioTemplateDTO[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  const loadFormularios = useCallback(async () => {
+    setIsLoading(true);
+    setError(null);
+
+    try {
+      const forms = await formularioService.listMine();
+      setFormularios(forms);
+    } catch {
+      setError("Não foi possível carregar seus formulários.");
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    void loadFormularios();
+  }, [loadFormularios]);
+
+  function getFormTitle(item: FormularioTemplateDTO) {
+    const firstQuestion = item.perguntas?.[0]?.texto?.trim();
+    if (firstQuestion) {
+      return firstQuestion.length > 42 ? `${firstQuestion.slice(0, 42)}...` : firstQuestion;
+    }
+
+    return `Formulário #${item.id.slice(0, 8)}`;
+  }
+
+  function handleDelete(id: string) {
+    Alert.alert(
+      "Excluir formulário",
+      "Deseja realmente excluir este formulário?",
+      [
+        { text: "Cancelar", style: "cancel" },
+        {
+          text: "Excluir",
+          style: "destructive",
+          onPress: async () => {
+            try {
+              await formularioService.remove(id);
+              setFormularios((current) => current.filter((item) => item.id !== id));
+            } catch {
+              Alert.alert("Erro", "Não foi possível excluir o formulário agora.");
+            }
+          },
+        },
+      ]
+    );
+  }
 
   return (
     <View style={styles.screen}>
@@ -29,25 +70,41 @@ export default function GerenciarFormularios() {
           <Text style={styles.heroSubtitle}>Edite e organize os formulários que os candidatos irão responder.</Text>
         </View>
 
-        {formularios.map((item) => (
+        {isLoading ? (
+          <View style={styles.feedbackWrap}>
+            <ActivityIndicator color={colors.primary} />
+            <Text style={styles.feedbackText}>Carregando formulários...</Text>
+          </View>
+        ) : error ? (
+          <View style={styles.feedbackWrap}>
+            <Text style={styles.feedbackText}>{error}</Text>
+            <TouchableOpacity style={styles.secondaryButton} onPress={() => void loadFormularios()}>
+              <Text style={styles.secondaryText}>Tentar novamente</Text>
+            </TouchableOpacity>
+          </View>
+        ) : formularios.length === 0 ? (
+          <View style={styles.feedbackWrap}>
+            <Text style={styles.feedbackText}>Você ainda não possui formulários cadastrados.</Text>
+          </View>
+        ) : formularios.map((item, index) => (
           <View key={item.id} style={styles.card}>
             <Image
-              source={{ uri: item.id % 2 === 0 ? "https://images.unsplash.com/photo-1537151625747-768eb6cf92b2?w=1200" : "https://images.unsplash.com/photo-1548199973-03cce0bbc87b?w=1200" }}
+              source={{ uri: index % 2 === 0 ? "https://images.unsplash.com/photo-1537151625747-768eb6cf92b2?w=1200" : "https://images.unsplash.com/photo-1548199973-03cce0bbc87b?w=1200" }}
               style={styles.cover}
             />
 
             <View style={styles.headerRow}>
-              <Text style={styles.title}>{item.titulo}</Text>
-              <View style={[styles.badge, item.status === "Publicado" ? styles.badgePublished : styles.badgeDraft]}>
-                <Text style={styles.badgeText}>{item.status}</Text>
+              <Text style={styles.title}>{getFormTitle(item)}</Text>
+              <View style={[styles.badge, styles.badgePublished]}>
+                <Text style={styles.badgeText}>Publicado</Text>
               </View>
             </View>
 
-            <Text style={styles.info}>{item.perguntas} perguntas • atualizado em {item.atualizadoEm}</Text>
+            <Text style={styles.info}>{item.perguntas?.length || 0} perguntas</Text>
 
             <View style={styles.actions}>
-              <TouchableOpacity style={styles.secondaryButton} onPress={() => router.push("/criarFormulario") }>
-                <Text style={styles.secondaryText}>Editar</Text>
+              <TouchableOpacity style={styles.secondaryButton} onPress={() => handleDelete(item.id)}>
+                <Text style={styles.secondaryText}>Excluir</Text>
               </TouchableOpacity>
 
               <TouchableOpacity style={styles.primaryButton} onPress={() => router.push("/criarAnuncio") }>
@@ -194,5 +251,18 @@ const styles = StyleSheet.create({
     color: "white",
     fontSize: 17,
     fontWeight: "700",
+  },
+  feedbackWrap: {
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 10,
+    marginTop: 10,
+    marginBottom: 10,
+  },
+  feedbackText: {
+    color: colors.textMuted,
+    fontSize: 14,
+    textAlign: "center",
+    fontWeight: "600",
   },
 });

@@ -1,5 +1,5 @@
 import { useCallback, useState } from "react";
-import { AuthSession, clearSession, setSession } from "../lib/session";
+import { AuthSession, clearSessionPersistent, saveSession } from "../lib/session";
 import apiService from "../services/apiService";
 import { tokenService } from "../services/tokenService";
 
@@ -55,7 +55,7 @@ export function useAuth() {
       };
 
       await tokenService.saveTokens(loginResponse.token, loginResponse.refreshToken ?? null);
-      setSession(session);
+      await saveSession(session);
       return session;
     } catch (err) {
       // const message = isApiServiceError(err)
@@ -72,7 +72,7 @@ export function useAuth() {
 
   const logout = useCallback(async () => {
     await tokenService.clearTokens();
-    clearSession();
+    await clearSessionPersistent();
   }, []);
 
   const register = useCallback(async (input: RegisterInput) => {

@@ -1,40 +1,60 @@
 import { LinearGradient } from "expo-linear-gradient";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useEffect, useMemo, useState } from "react";
-import { ActivityIndicator, Image, Platform, Pressable, SafeAreaView, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { ActivityIndicator, Alert, Image, Platform, Pressable, SafeAreaView, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import IconMat from "react-native-vector-icons/MaterialCommunityIcons";
 import IconIonic from "react-native-vector-icons/Ionicons";
 import { colors } from "@/styles/variables";
 import React from "react";
-import apiService from "../services/apiService";
+import { petFormLinkStore } from "@/lib/petFormLinkStore";
+import { sentSolicitacoesStore } from "@/lib/sentSolicitacoesStore";
+import { getPetImageUrl, petService } from "../services/petService";
+import { solicitacaoService } from "@/services/solicitacaoService";
 import { WebView } from "react-native-webview";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { BuscarPetDTO } from "@/types/pet";
+import apiService from "@/services/apiService";
 
-type BuscarPetDTO = {
-    id: string;
-    descricao?: string;
-    dt_nasc?: string;
+type UsuarioResumoDTO = {
+    id?: string;
     nome?: string;
-    porte?: string;
-    raca?: string;
-    especie?: string;
     link_foto?: string;
-    isFavoritado?: boolean;
-    isFavorito?: boolean;
-    dono?: {
-        id: string;
-        nome: string;
-    };
+    endereco?: string;
+    bairro?: string;
+    cidade?: string;
+    sg_estado?: string;
+};
+
+type ApiResponse<T> = {
+    data?: T[];
 };
 
 export default function PerfilPet(){
 
+    function formatWithFirstUpper(value?: string) {
+        if (!value) {
+            return "Nao informado";
+        }
+
+        const normalized = value.trim().toLowerCase();
+        if (!normalized) {
+            return "Nao informado";
+        }
+
+        if (normalized === "medio") {
+            return "Médio";
+        }
+
+        return normalized.charAt(0).toUpperCase() + normalized.slice(1);
+    }
+
     const router = useRouter();
     const insets = useSafeAreaInsets();
-    const [heartIcon, setHeartIcon]=useState<string>("heart-outline")
     const [mapLoading, setMapLoading] = useState<boolean>(true);
     const [mapError, setMapError] = useState<string | null>(null);
     const [coordinates, setCoordinates] = useState<{ lat: number; lon: number } | null>(null);
+    const [ownerLocation, setOwnerLocation] = useState<string | null>(null);
+    const [ownerPhoto, setOwnerPhoto] = useState<string | null>(null);
 
     const {nome, imagem, localizacao, bairro, cidade, uf} = useLocalSearchParams<{
         nome?: string | string[];
@@ -45,9 +65,13 @@ export default function PerfilPet(){
         uf?: string | string[];
     }>();
 
-    const petName = Array.isArray(nome) ? nome[0] : nome || "Alfredo";
-    const petImage = Array.isArray(imagem) ? imagem[0] : imagem || "https://img.freepik.com/fotos-gratis/fotografia-vertical-de-foco-superficial-de-um-bonito-cachorro-de-golden-retriever-sentado-em-um-chao-de-grama_181624-27259.jpg?w=360";
+    const paramPetName = Array.isArray(nome) ? nome[0] : nome;
+    const paramPetImage = Array.isArray(imagem) ? imagem[0] : imagem;
     const locationText = useMemo(() => {
+        if (ownerLocation && ownerLocation.trim().length > 0) {
+            return ownerLocation;
+        }
+
         const localizacaoValue = Array.isArray(localizacao) ? localizacao[0] : localizacao;
         if (localizacaoValue && localizacaoValue.trim().length > 0) return localizacaoValue;
 
@@ -56,10 +80,9 @@ export default function PerfilPet(){
         const ufValue = Array.isArray(uf) ? uf[0] : uf;
 
         const dynamicParts = [bairroValue, cidadeValue, ufValue].filter(Boolean).join(", ");
-        return dynamicParts || "Marapé, Santos - SP";
-    }, [bairro, cidade, localizacao, uf]);
+        return dynamicParts || "Localizacao nao informada";
+    }, [bairro, cidade, localizacao, ownerLocation, uf]);
 
-    const [description] = useState<string>("É um pet muito carinhoso e cheio de energia, ideal para uma família que busca companhia no dia a dia. Já está vacinado e vermifugado, pronto para encontrar um lar seguro e cheio de amor.")
     const IFrameTag = "iframe" as unknown as React.ElementType;
 
     useEffect(() => {
@@ -122,6 +145,7 @@ export default function PerfilPet(){
     const [isPetFavorited, setIsPetFavorited] = useState<boolean>(false);
     const [pet, setPet] = useState<BuscarPetDTO | null>(null);
     const [isLoadingPet, setIsLoadingPet] = useState<boolean>(false);
+    const [isCreatingSolicitacao, setIsCreatingSolicitacao] = useState<boolean>(false);
     const [petError, setPetError] = useState<string | null>(null);
 
     const params = useLocalSearchParams<{ id?: string }>();
@@ -138,14 +162,14 @@ export default function PerfilPet(){
             setPetError(null);
 
             try {
-                const response = await apiService.get<BuscarPetDTO>(`/pets/${petId}`);
+                const data = await petService.getById(petId);
                 const favoritado =
-                    response.data.isFavoritado ??
-                    response.data.isFavorito ??
-                    (response.data as BuscarPetDTO & { favoritado?: boolean }).favoritado ??
+                    data.isFavoritado ??
+                    (data as BuscarPetDTO & { isFavorito?: boolean }).isFavorito ??
+                    (data as BuscarPetDTO & { favoritado?: boolean }).favoritado ??
                     false;
 
-                setPet({ ...response.data, isFavoritado: favoritado, isFavorito: favoritado });
+                setPet({ ...data, isFavoritado: favoritado });
                 setIsPetFavorited(favoritado);
             } catch {
                 setPetError("Nao foi possivel carregar os dados do pet.");
@@ -163,21 +187,89 @@ export default function PerfilPet(){
             return;
         }
 
-        const favoritado = pet.isFavoritado ?? pet.isFavorito ?? false;
+        const favoritado = pet.isFavoritado ?? false;
         setIsPetFavorited(favoritado);
     }, [pet]);
 
-    const birthDateLabel = useMemo(() => {
+    useEffect(() => {
+        async function loadOwnerLocation() {
+            const ownerId = pet?.dono?.id;
+            if (!ownerId) {
+                setOwnerLocation(null);
+                setOwnerPhoto(null);
+                return;
+            }
+
+            try {
+                const response = await apiService.get<ApiResponse<UsuarioResumoDTO>>("/usuario");
+                const usuarios = response.data?.data ?? [];
+                const owner = usuarios.find((usuario) => usuario.id === ownerId);
+
+                if (!owner) {
+                    setOwnerLocation(null);
+                    setOwnerPhoto(null);
+                    return;
+                }
+
+                const location = [owner.bairro, owner.cidade, owner.sg_estado].filter(Boolean).join(", ");
+                setOwnerLocation(location || owner.endereco || null);
+                setOwnerPhoto(owner.link_foto?.trim() || null);
+            } catch {
+                setOwnerLocation(null);
+                setOwnerPhoto(null);
+            }
+        }
+
+        void loadOwnerLocation();
+    }, [pet?.dono?.id]);
+
+    const ageLabel = useMemo(() => {
         if (!pet?.dt_nasc) {
             return "Nao informado";
         }
 
-        const date = new Date(pet.dt_nasc);
-        if (Number.isNaN(date.getTime())) {
+        const birthDate = new Date(pet.dt_nasc);
+        if (Number.isNaN(birthDate.getTime())) {
             return "Nao informado";
         }
 
-        return date.toLocaleDateString("pt-BR");
+        const today = new Date();
+
+        if (birthDate > today) {
+            return "Nao informado";
+        }
+
+        let years = today.getFullYear() - birthDate.getFullYear();
+        let months = today.getMonth() - birthDate.getMonth();
+
+        if (today.getDate() < birthDate.getDate()) {
+            months -= 1;
+        }
+
+        if (months < 0) {
+            years -= 1;
+            months += 12;
+        }
+
+        if (years < 0) {
+            return "Nao informado";
+        }
+
+        const parts: string[] = [];
+
+        if (years > 0) {
+            parts.push(`${years} ${years === 1 ? "ano" : "anos"}`);
+        }
+
+        if (months > 0) {
+            parts.push(`${months} ${months === 1 ? "mes" : "meses"}`);
+        }
+
+        if (parts.length === 0) {
+            return "0 meses";
+        }
+
+        return parts.join(" e ");
     }, [pet?.dt_nasc]);
 
     async function favoritePet(){
@@ -188,25 +280,75 @@ export default function PerfilPet(){
         setIsTogglingFavorite(true);
         try {
             if (isPetFavorited) {
-                await apiService.delete(`/pets/${petId}/favoritar`);
+                await petService.unfavorite(petId);
                 setIsPetFavorited(false);
-                setPet((currentPet) => currentPet ? { ...currentPet, isFavoritado: false, isFavorito: false } : currentPet);
+                setPet((currentPet) => currentPet ? { ...currentPet, isFavoritado: false } : currentPet);
                 return;
             }
 
-            await apiService.post(`/pets/${petId}/favoritar`);
+            await petService.favorite(petId);
             setIsPetFavorited(true);
-            setPet((currentPet) => currentPet ? { ...currentPet, isFavoritado: true, isFavorito: true } : currentPet);
+            setPet((currentPet) => currentPet ? { ...currentPet, isFavoritado: true } : currentPet);
         } finally {
             setIsTogglingFavorite(false);
         }
+    }
+
+    async function startAdoptionFlow() {
+        if (!petId || isCreatingSolicitacao) {
+            return;
+        }
+
+        setIsCreatingSolicitacao(true);
+        try {
+            const formularioId = await petFormLinkStore.getFormIdByPetId(petId);
+            if (!formularioId) {
+                Alert.alert("Adoção", "Este pet ainda não possui formulário de triagem vinculado.");
+                return;
+            }
+
+            const solicitacao = await solicitacaoService.criar(formularioId);
+            await sentSolicitacoesStore.add(solicitacao.id);
+
+            router.push({
+                pathname: "/responder-formulario",
+                params: {
+                    solicitacaoId: solicitacao.id,
+                },
+            });
+        } catch (error) {
+            const message = error instanceof Error ? error.message : "Não foi possível iniciar a adoção.";
+            Alert.alert("Erro", message);
+        } finally {
+            setIsCreatingSolicitacao(false);
+        }
+    }
+
+    const petName = pet?.nome || paramPetName || "Pet";
+    const petImage = getPetImageUrl(pet?.link_foto || paramPetImage);
+    const petDescription = pet?.descricao || "Sem descricao no momento.";
+    const petOwnerName = pet?.dono?.nome || "Responsavel nao informado";
+
+    function goToOwnerPets() {
+        const ownerId = pet?.dono?.id;
+        if (!ownerId) {
+            return;
+        }
+
+        router.push({
+            pathname: "/listagem-pets",
+            params: {
+                ownerId,
+                ownerName: petOwnerName,
+            },
+        });
     }
 
     return(
         <View style={style.container}>
             <ScrollView contentContainerStyle={style.scrollContent} showsVerticalScrollIndicator={false}>
                 <View style={style.heroWrapper}>
-                    <Image style={style.heroImage} resizeMode="cover" source={{uri:petImage}}></Image>
+                    <Image style={style.heroImage} resizeMode="cover" source={{uri:petImage ?? "../assets/images/dog1.png"}}></Image>
                     <LinearGradient
                         pointerEvents="none"
                         colors={["rgba(248, 249, 250, 0)", "rgba(248, 249, 250, 0.12)", "rgba(248, 249, 250, 0.35)", "rgba(248, 249, 250, 0.7)", "#F8F9FA"]}
@@ -224,7 +366,7 @@ export default function PerfilPet(){
                     </SafeAreaView>
 
                     <Pressable onPress={()=>favoritePet()} style={style.favoriteFloatingButton}>
-                        <IconMat name={heartIcon} size={29} color={colors.primary}></IconMat>
+                        <IconMat name={isPetFavorited ? "heart" : "heart-outline"} size={29} color={colors.primary}></IconMat>
                     </Pressable>
                 </View>
 
@@ -240,17 +382,17 @@ export default function PerfilPet(){
                     <View style={style.caracteristicasContainer}>
                         <View style={style.caracteristicasCard}>
                             <Text style={style.kicker}>Idade</Text>
-                            <Text style={style.tituloCard}>9 meses</Text>
+                            <Text style={style.tituloCard}>{ageLabel}</Text>
                         </View>
 
                         <View style={style.caracteristicasCard}>
-                            <Text style={style.kicker}>Gênero</Text>
-                            <Text style={style.tituloCard}>Macho</Text>
+                            <Text style={style.kicker}>Espécie</Text>
+                            <Text style={style.tituloCard}>{formatWithFirstUpper(pet?.especie)}</Text>
                         </View>
 
                         <View style={style.caracteristicasCard}>
-                            <Text style={style.kicker}>Peso</Text>
-                            <Text style={style.tituloCard}>3.5kg</Text>
+                            <Text style={style.kicker}>Porte</Text>
+                            <Text style={style.tituloCard}>{formatWithFirstUpper(pet?.porte)}</Text>
                         </View>
                     </View>
 
@@ -259,22 +401,45 @@ export default function PerfilPet(){
                             <Text style={style.aboutTitle}>Sobre</Text>
                             <View style={style.divider}></View>
                         </View>
-                        <Text style={style.aboutText}>{description}</Text>
+                        <Text style={style.aboutText}>{petDescription}</Text>
 
                         <View style={style.publisher}>
-                            <Image
-                                source={{uri: "https://images.unsplash.com/photo-1544723795-3fb6469f5b39?w=300"}}
-                                style={style.publisherImage}
-                            ></Image>
-                            <View>
+                            {ownerPhoto ? (
+                                <Image source={{ uri: ownerPhoto }} style={style.publisherImage}></Image>
+                            ) : (
+                                <View style={[style.publisherImage, style.publisherImageFallback]}>
+                                    <IconIonic name="person-outline" size={22} color={colors.primary} />
+                                </View>
+                            )}
+
+                            <View style={style.publisherInfo}>
                                 <Text style={style.publisherLabel}>Publicado por</Text>
-                                <Text style={style.publisherName}>Ricardo Silva</Text>
+                                <Text style={style.publisherName}>{petOwnerName}</Text>
                             </View>
-                            <Pressable style={style.chatButton}>
-                                <IconIonic name="chatbubble-ellipses-outline" size={20} color={colors.primary}></IconIonic>
-                            </Pressable>
+
+                            <TouchableOpacity
+                                style={[style.ownerPetsButton, !pet?.dono?.id && style.ownerPetsButtonDisabled]}
+                                onPress={goToOwnerPets}
+                                disabled={!pet?.dono?.id}
+                                activeOpacity={0.8}
+                            >
+                                <IconMat name="paw" size={20} color={colors.primary}></IconMat>
+                            </TouchableOpacity>
                         </View>
                     </View>
+
+                    {isLoadingPet && (
+                        <View style={style.statusCard}>
+                            <ActivityIndicator size="small" color={colors.primary} />
+                            <Text style={style.statusText}>Carregando dados do pet...</Text>
+                        </View>
+                    )}
+
+                    {petError && (
+                        <View style={style.statusCard}>
+                            <Text style={style.statusText}>{petError}</Text>
+                        </View>
+                    )}
 
                     <View style={style.mapSection}>
                         <Text style={style.mapTitle}>Encontre o {petName}</Text>
@@ -313,8 +478,12 @@ export default function PerfilPet(){
             </ScrollView>
 
             <View style={style.footer}>
-                <TouchableOpacity style={style.button}>
-                    <Text style={style.buttonText}>Quero adotar!</Text>
+                <TouchableOpacity
+                    style={[style.button, isCreatingSolicitacao && { opacity: 0.7 }]}
+                    onPress={startAdoptionFlow}
+                    disabled={isCreatingSolicitacao}
+                >
+                    <Text style={style.buttonText}>{isCreatingSolicitacao ? "Iniciando..." : "Quero adotar!"}</Text>
                 </TouchableOpacity>
             </View>
         </View>
@@ -361,6 +530,21 @@ const style = StyleSheet.create({
         width: 44,
         height: 44,
     },
+        statusCard: {
+            backgroundColor: "#FFFFFF",
+            borderRadius: 16,
+            borderWidth: 1,
+            borderColor: "#EDEDED",
+            padding: 14,
+            alignItems: "center",
+            justifyContent: "center",
+            gap: 8,
+        },
+        statusText: {
+            color: "#666",
+            textAlign: "center",
+            fontWeight: "600",
+        },
     favoriteFloatingButton: {
         position: "absolute",
         right: 10,
@@ -465,6 +649,14 @@ const style = StyleSheet.create({
         height: 46,
         borderRadius: 12,
     },
+    publisherImageFallback: {
+        backgroundColor: "#FFE9E6",
+        alignItems: "center",
+        justifyContent: "center",
+    },
+    publisherInfo: {
+        flex: 1,
+    },
     publisherLabel: {
         fontSize: 12,
         color: "#666",
@@ -474,7 +666,7 @@ const style = StyleSheet.create({
         fontWeight: "700",
         color: "#222",
     },
-    chatButton: {
+    ownerPetsButton: {
         marginLeft: "auto",
         width: 40,
         height: 40,
@@ -482,6 +674,9 @@ const style = StyleSheet.create({
         backgroundColor: "#FFE9E6",
         justifyContent: "center",
         alignItems: "center",
+    },
+    ownerPetsButtonDisabled: {
+        opacity: 0.5,
     },
     mapSection: {
         gap: 10,
