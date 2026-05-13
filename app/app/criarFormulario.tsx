@@ -112,7 +112,7 @@ export default function CriarFormulario(){
     }
 
     function handleChange(text:string){
-        setErroMessage(text.length > 120 ? "A pergunta pode ter no maximo 120 caracteres." : null);
+        setErroMessage(text.length > 200 ? "A pergunta pode ter no maximo 200 caracteres." : null);
         setPerguntaInput(text)
     }
 
@@ -155,8 +155,8 @@ export default function CriarFormulario(){
             return;
         }
 
-        if(perguntaInput.length > 120){
-            setErroMessage("A pergunta pode ter no maximo 120 caracteres.");
+        if(perguntaInput.length > 200){
+            setErroMessage("A pergunta pode ter no maximo 200 caracteres.");
             return;
         }
 
