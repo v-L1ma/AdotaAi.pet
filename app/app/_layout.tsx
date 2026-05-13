@@ -8,6 +8,7 @@ import {
 import { Stack, useRouter, useSegments } from "expo-router";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { ActivityIndicator, View } from "react-native";
+import Toast from "react-native-toast-message";
 import CadastroIncompletoModal from "@/components/CadastroIncompletoModal";
 import { getSession } from "../lib/session";
 import { registerCadastroIncompletoHandler } from "../services/apiService";
@@ -106,6 +107,8 @@ export default function RootLayout() {
           router.push("/perfil-user");
         }}
       />
+
+      <Toast />
     </>
   );
 }
