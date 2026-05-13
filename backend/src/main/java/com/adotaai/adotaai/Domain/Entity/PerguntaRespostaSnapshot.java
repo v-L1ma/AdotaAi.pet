@@ -10,7 +10,7 @@ public class PerguntaRespostaSnapshot {
     @Column(name = "pergunta_id")
     private UUID perguntaId;
 
-    @Column(name = "pergunta_texto", length = 120)
+    @Column(name = "pergunta_texto", length = 200)
     private String perguntaTexto;
 
     @Column(name = "resposta_texto", length = 500)

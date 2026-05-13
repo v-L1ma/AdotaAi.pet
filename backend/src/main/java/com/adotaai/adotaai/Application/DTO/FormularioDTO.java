@@ -9,7 +9,7 @@ public class FormularioDTO {
     @Size(min = 1, max = 20, message = "A lista de perguntas deve conter entre 1 e 20 itens.")
     private List<
             @NotBlank(message = "A pergunta não pode estar vazia.")
-            @Size(max = 120, message = "A pergunta deve conter no máximo 120 caracteres.")
+            @Size(max = 200, message = "A pergunta deve conter no máximo 200 caracteres.")
             String
             > perguntas;
 
