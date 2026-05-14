@@ -4,12 +4,14 @@ import { getSession } from "../lib/session";
 import { getApiErrorMessages } from "../services/apiErrorService";
 import { createPetFromFormData } from "../services/petService";
 import { porte } from "@/types/TPorte";
+import type { genero } from "@/types/TGenero";
 
 export type CreatePetInput = {
   nome: string;
   dt_nasc: string; // formato esperado: "2026-04-04"
   especieId: string;
   porte: porte; // enum uppercase
+  genero: genero;
   racaId: string;
   descricao: string;
   formularioId?: string | null;
@@ -25,6 +27,7 @@ type CreatePetPayload = {
   descricao: string;
   dtNasc: string;
   porte: porte;
+  genero: genero;
   racaId: string;
   especieId: string;
   formularioId: string | null;
@@ -59,6 +62,7 @@ function toPayload(input: CreatePetInput): CreatePetPayload {
     descricao: input.descricao,
     dtNasc: normalizeDate(input.dt_nasc),
     porte: input.porte,
+    genero: input.genero,
     racaId: input.racaId,
     especieId: input.especieId,
     formularioId: input.formularioId ?? null,

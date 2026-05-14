@@ -46,6 +46,9 @@ public class PetEntity extends AuditableEntity {
     private String porte;
 
     @Column(nullable = false)
+    private String genero;
+
+    @Column(nullable = false)
     private String raca;
 
     @ManyToOne
@@ -128,6 +131,14 @@ public class PetEntity extends AuditableEntity {
 
     public void setPorte(String porte) {
         this.porte = porte;
+    }
+
+    public String getGenero() {
+        return genero;
+    }
+
+    public void setGenero(String genero) {
+        this.genero = genero;
     }
 
     public String getRaca() {

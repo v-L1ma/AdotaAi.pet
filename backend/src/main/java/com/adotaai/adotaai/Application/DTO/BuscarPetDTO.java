@@ -11,6 +11,7 @@ public class BuscarPetDTO {
     private LocalDate dt_nasc;
     private String nome;
     private String porte;
+    private String genero;
     private String raca;
     private UUID racaId;
     private String especie;
@@ -24,7 +25,7 @@ public class BuscarPetDTO {
 
     public BuscarPetDTO(UUID id, String status, String descricao,
                         LocalDate dataNascimento, String nome, String porte,
-                        String raca, UUID racaId, String especie, String linkFoto, UUID formularioId,
+                        String genero, String raca, UUID racaId, String especie, String linkFoto, UUID formularioId,
                         boolean isFavoritado, DonoDTO dono) {
         this.id = id;
         this.status = status;
@@ -32,6 +33,7 @@ public class BuscarPetDTO {
         this.dt_nasc = dataNascimento;
         this.nome = nome;
         this.porte = porte;
+        this.genero = genero;
         this.raca = raca;
         this.racaId = racaId;
         this.especie = especie;
@@ -87,6 +89,14 @@ public class BuscarPetDTO {
 
     public void setPorte(String porte) {
         this.porte = porte;
+    }
+
+    public String getGenero() {
+        return genero;
+    }
+
+    public void setGenero(String genero) {
+        this.genero = genero;
     }
 
     public String getRaca() {

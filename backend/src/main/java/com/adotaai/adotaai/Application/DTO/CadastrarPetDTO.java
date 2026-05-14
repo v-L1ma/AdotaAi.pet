@@ -27,6 +27,9 @@ public class CadastrarPetDTO {
     @NotBlank
     private String porte;
 
+    @NotBlank
+    private String genero;
+
     @NotNull
     private UUID racaId;
 
@@ -65,6 +68,14 @@ public class CadastrarPetDTO {
 
     public void setPorte(String porte) {
         this.porte = porte;
+    }
+
+    public String getGenero() {
+        return genero;
+    }
+
+    public void setGenero(String genero) {
+        this.genero = genero;
     }
 
     public UUID getRacaId() {

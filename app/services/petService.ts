@@ -4,11 +4,12 @@ import type { ApiBaseResponse } from "../types/ApiResponse";
 import type { animal } from "../types/TAnimal";
 import type { especie } from "../types/TEspecie";
 import type { porte } from "../types/TPorte";
+import type { genero } from "../types/TGenero";
 
 export interface PetFilters {
   especie?: especie;
   porte?: porte;
-  genero?: "M" | "F";
+  genero?: genero;
 }
 
 export type PetOwner = {
@@ -31,6 +32,7 @@ export interface PetUpsertData {
   descricao: string;
   dtNasc: string;
   porte: porte;
+  genero?: genero;
   racaId?: string;
   especieId?: string;
   formularioId?: string | null;

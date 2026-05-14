@@ -17,6 +17,7 @@ import { Formulario } from "@/types/Formulario";
 import { animal } from "@/types/TAnimal";
 import AppHeader from "@/components/AppHeader";
 import { getPetById } from "@/services/petService";
+import { genero } from "@/types/TGenero";
 
 const criarAnuncioSchema = z.object({
     nome: z.string().trim().min(2, "Nome deve ter pelo menos 2 caracteres"),
@@ -28,6 +29,9 @@ const criarAnuncioSchema = z.object({
     especieId: z.string().uuid("Selecione a especie"),
     porte: z.enum(["pequeno", "medio", "grande"], {
         message: "Selecione o porte",
+    }),
+    genero: z.enum(["M", "F"], {
+        message: "Selecione o gênero",
     }),
     racaId: z.string().uuid("Selecione uma raça"),
     descricao: z.string().trim().min(10, "Descricao deve ter pelo menos 10 caracteres"),
@@ -82,6 +86,7 @@ export default function CriarAnuncioScreen() {
                 dt_nasc: petData.dt_nasc,
                 especieId: (petData as any).especieId || "",
                 porte: petData.porte as "pequeno" | "medio" | "grande",
+                genero: (petData as any).genero as genero,
                 racaId: (petData as any).racaId || "",
                 descricao: petData.descricao,
             };
@@ -91,6 +96,7 @@ export default function CriarAnuncioScreen() {
             dt_nasc: "2026-04-24",
             especieId: "",
             porte: undefined,
+            genero: undefined,
             racaId: "",
             descricao: "",
         };
@@ -114,6 +120,7 @@ export default function CriarAnuncioScreen() {
                 dt_nasc: petData.dt_nasc,
                 especieId: (petData as any).especieId || "",
                 porte: petData.porte as "pequeno" | "medio" | "grande",
+                genero: (petData as any).genero as genero,
                 racaId: (petData as any).racaId || "",
                 descricao: petData.descricao,
             });
@@ -132,6 +139,7 @@ export default function CriarAnuncioScreen() {
     const router = useRouter();
     const [image, setImage] = useState<ImagePicker.ImagePickerAsset | null>(null);
     const [existingPhotoUrl, setExistingPhotoUrl] = useState<string | null>(null);
+    const [peso, setPeso] = useState<string>("");
     const [focusedField, setFocusedField] = useState<"nome" | "idade" | "peso" | null>(null);
 
     const nomeRef = useRef<TextInput>(null);
@@ -284,6 +292,7 @@ export default function CriarAnuncioScreen() {
                 dt_nasc: data.dt_nasc,
                 especieId: data.especieId,
                 porte: data.porte as "pequeno" | "medio" | "grande",
+                genero: data.genero,
                 racaId: data.racaId,
                 descricao: data.descricao,
                 formularioId: formularioSelecionado?.id ?? null,
@@ -413,8 +422,8 @@ export default function CriarAnuncioScreen() {
                         </View>
                         <Field
                             label="Peso (kg) - Opcional"
-                            value={""}
-                            onChangeText={() => {}}
+                            value={peso}
+                            onChangeText={setPeso}
                             placeholder="Ex.: 5"
                             keyboardType="numeric"
                             inputRef={pesoRef}
@@ -513,6 +522,21 @@ export default function CriarAnuncioScreen() {
                         )}
                     />
                     {renderError(errors.porte?.message)}
+                </View>
+
+                <View style={styles.block}>
+                    <Text style={styles.blockTitle}>Gênero</Text>
+                    <Controller
+                        control={control}
+                        name="genero"
+                        render={({ field: { onChange, value } }) => (
+                            <View style={styles.row}>
+                                <Chip label="Macho" selected={value === "M"} onPress={() => onChange("M")} />
+                                <Chip label="Fêmea" selected={value === "F"} onPress={() => onChange("F")} />
+                            </View>
+                        )}
+                    />
+                    {renderError(errors.genero?.message)}
                 </View>
 
                 <View style={styles.block}>

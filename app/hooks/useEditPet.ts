@@ -4,6 +4,7 @@ import { getSession } from "../lib/session";
 import { getApiErrorMessages } from "../services/apiErrorService";
 import { updatePet, updatePetFromFormData } from "../services/petService";
 import { porte } from "@/types/TPorte";
+import type { genero } from "@/types/TGenero";
 
 export type EditPetInput = {
   petId: string;
@@ -11,6 +12,7 @@ export type EditPetInput = {
   dt_nasc: string;
   especieId: string;
   porte: porte;
+  genero: genero;
   racaId: string;
   descricao: string;
   formularioId?: string | null;
@@ -26,6 +28,7 @@ type EditPetPayload = {
   descricao: string;
   dtNasc: string;
   porte: porte;
+  genero: genero;
   racaId: string;
   especieId: string;
   formularioId: string | null;
@@ -59,6 +62,7 @@ function toPayload(input: EditPetInput): EditPetPayload {
     descricao: input.descricao,
     dtNasc: normalizeDate(input.dt_nasc),
     porte: input.porte,
+    genero: input.genero,
     racaId: input.racaId,
     especieId: input.especieId,
     formularioId: input.formularioId ?? null,

@@ -68,7 +68,7 @@ public class PetService {
 
     public List<PetDTO> listarPetsUsuarioLogado() {
         UsuarioEntity usuarioAutenticado = obterUsuarioAutenticado();
-        List<PetEntity> pets = petRepository.findAllByFl_ativoTrueAndUserId(usuarioAutenticado.getId());
+        List<PetEntity> pets = petRepository.findAllByFl_ativoTrueAndUserIdVisible(usuarioAutenticado.getId());
         return pets.stream().map(PetDTO::new).toList();
     }
 
@@ -99,6 +99,7 @@ public class PetService {
             pet.getDt_nasc(),
             pet.getNome(),
             pet.getPorte(),
+            pet.getGenero(),
             pet.getRaca(),
             racaId,
             pet.getEspecie(),
@@ -177,6 +178,7 @@ public class PetService {
                 pet.setDt_nasc(date);
             }
             if (petDto.getPorte() != null) pet.setPorte(petDto.getPorte());
+            if (petDto.getGenero() != null) pet.setGenero(petDto.getGenero());
             if (petDto.getEspecieId() != null) {
                 EspecieEntity especie = especieRepository.findById(petDto.getEspecieId())
                         .orElseThrow(() -> new RecursoNaoEncontradoException("Espécie não encontrada com ID: " + petDto.getEspecieId()));

@@ -1,5 +1,6 @@
 import { especie } from "./TEspecie";
 import { porte } from "./TPorte";
+import { genero } from "./TGenero";
 
 export type animal = {
     id: string;
@@ -9,6 +10,7 @@ export type animal = {
     nome: string;
     especie: especie;
     porte: porte;
+    genero?: genero;
     raca:string;
     link_foto: string;
     user_id:string;

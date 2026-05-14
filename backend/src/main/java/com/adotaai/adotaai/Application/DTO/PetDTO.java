@@ -15,6 +15,7 @@ public class PetDTO {
     private  LocalDate dt_nasc;
     private String nome;
     private String porte;
+    private String genero;
     private String raca;
     private UUID racaId;
     private String especie;
@@ -32,6 +33,7 @@ public class PetDTO {
         this.dt_nasc = pet.getDt_nasc();
         this.nome = pet.getNome();
         this.porte = pet.getPorte();
+        this.genero = pet.getGenero();
         this.raca = pet.getRaca();
         if (pet.getRacaEntity() != null) {
             this.racaId = pet.getRacaEntity().getId();
@@ -97,6 +99,14 @@ public class PetDTO {
 
     public void setPorte(String porte) {
         this.porte = porte;
+    }
+
+    public String getGenero() {
+        return genero;
+    }
+
+    public void setGenero(String genero) {
+        this.genero = genero;
     }
 
     public String getRaca() {
