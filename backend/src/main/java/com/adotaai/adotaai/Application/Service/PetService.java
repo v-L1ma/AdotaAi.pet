@@ -68,7 +68,7 @@ public class PetService {
 
     public List<PetDTO> listarPetsUsuarioLogado() {
         UsuarioEntity usuarioAutenticado = obterUsuarioAutenticado();
-        List<PetEntity> pets = petRepository.findAllByFl_ativoTrueAndUserIdVisible(usuarioAutenticado.getId());
+        List<PetEntity> pets = petRepository.findAllByFl_ativoTrueAndUserId(usuarioAutenticado.getId());
         return pets.stream().map(PetDTO::new).toList();
     }
 

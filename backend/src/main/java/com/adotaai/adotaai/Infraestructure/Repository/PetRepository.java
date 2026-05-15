@@ -22,9 +22,6 @@ public interface PetRepository extends JpaRepository<PetEntity, UUID> {
     @Query("SELECT p FROM PetEntity p WHERE p.fl_ativo = true AND p.user.id = :userId")
     List<PetEntity> findAllByFl_ativoTrueAndUserId(@Param("userId") UUID userId);
 
-    @Query("SELECT p FROM PetEntity p WHERE p.fl_ativo = true AND p.user.id = :userId AND p.status = 'APROVADO'")
-    List<PetEntity> findAllByFl_ativoTrueAndUserIdVisible(@Param("userId") UUID userId);
-
     @Query("SELECT p FROM PetEntity p WHERE p.id = :id AND p.fl_ativo = true")
     Optional<PetEntity> findByIdAndFl_ativoTrue(@Param("id") UUID id);
 
