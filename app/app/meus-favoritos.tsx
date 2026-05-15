@@ -2,10 +2,11 @@ import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from "expo-router";
 import React, { useEffect, useState } from "react";
 import { Alert, FlatList, Image, StyleSheet, Text, TouchableOpacity, View } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
+import { SafeAreaView } from 'react-native-safe-area-context';
 import colors from '../styles/colors';
 import { animal } from "@/types/TAnimal";
 import AppHeader from '@/components/AppHeader';
+import Skeleton from '@/components/Skeleton';
 import { getUserFavorites, unfavoritePet } from "@/services/petService";
 
 export default function MeusFavoritos() {
@@ -118,7 +119,11 @@ export default function MeusFavoritos() {
           showsVerticalScrollIndicator={false}
           ListEmptyComponent={
             isLoading ? (
-              <Text style={styles.emptyText}>Carregando favoritos...</Text>
+              <View style={{ paddingHorizontal: 2 }}>
+                {[1, 2, 3, 4].map((i) => (
+                  <Skeleton.ListItem key={i} />
+                ))}
+              </View>
             ) : loadError ? (
               <Text style={styles.emptyText}>{loadError}</Text>
             ) : (

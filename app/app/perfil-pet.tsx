@@ -10,6 +10,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { favoritePet, getPetById, unfavoritePet } from "../services/petService";
 import { createSolicitacaoDirect } from "../services/solicitacaoService";
 import { birthToAge } from "@/utils/birthToAge";
+import Skeleton from "@/components/Skeleton";
 
 type BuscarPetDTO = {
     id: string;
@@ -223,6 +224,21 @@ export default function PerfilPet(){
         } finally {
             setIsAdopting(false);
         }
+    }
+
+    if (isLoadingPet) {
+        return (
+            <View style={style.container}>
+                <ScrollView contentContainerStyle={style.scrollContent} showsVerticalScrollIndicator={false}>
+                    <Skeleton.PetProfile />
+                </ScrollView>
+                <View style={style.footer}>
+                    <TouchableOpacity style={[style.button, { opacity: 0.5 }]} disabled>
+                        <Text style={style.buttonText}>Quero adotar!</Text>
+                    </TouchableOpacity>
+                </View>
+            </View>
+        );
     }
 
     return(

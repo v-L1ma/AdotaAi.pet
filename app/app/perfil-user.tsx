@@ -8,6 +8,7 @@ import Icon1 from "react-native-vector-icons/Ionicons";
 import { getSession } from "../lib/session";
 import { router } from "expo-router";
 import AppHeader from "@/components/AppHeader";
+import Skeleton from "@/components/Skeleton";
 import { colors } from "@/styles/variables";
 import { MAX_PROFILE_PICTURE_SIZE_BYTES, useUpdateProfilePicture } from "../hooks/useUpdateProfilePicture";
 import { getCurrentUser, updateUser } from "../services/userService";
@@ -69,6 +70,7 @@ type PerfilUsuarioFormData = z.infer<typeof perfilUsuarioSchema>;
 
 export default function UserScreen() {
     const [isSaving, setIsSaving] = useState(false);
+    const [isLoading, setIsLoading] = useState(true);
     const [image, setImage] = useState<ImagePicker.ImagePickerAsset | null>(null);
     const [userLogado, setUserLogado] = useState<UsuarioAtualizacaoDTO | null>(null);
     const { updateProfilePicture, isUpdatingProfilePicture } = useUpdateProfilePicture();
@@ -133,6 +135,8 @@ export default function UserScreen() {
                 });
             } catch {
                 setValue("email", session.email);
+            } finally {
+                setIsLoading(false);
             }
         };
 
@@ -328,6 +332,17 @@ export default function UserScreen() {
 
     const renderError = (message?: string) =>
         message ? <Text style={{ color: "#b00020", marginBottom: 8, width: "100%" }}>{message}</Text> : null;
+
+    if (isLoading) {
+        return (
+            <View style={styles.screen}>
+                <AppHeader title="Perfil" onBackPress={() => router.back()} />
+                <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
+                    <Skeleton.UserProfile />
+                </ScrollView>
+            </View>
+        );
+    }
 
     return (
         <View style={styles.screen}>

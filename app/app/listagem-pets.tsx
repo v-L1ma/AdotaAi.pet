@@ -1,5 +1,6 @@
 import CardPet from "@/components/CardPet";
 import NavBar from "@/components/NavBar";
+import Skeleton from "@/components/Skeleton";
 import { colors } from "@/styles/variables";
 import { animal } from "@/types/TAnimal";
 import React, { useEffect, useMemo, useState } from "react";
@@ -227,7 +228,14 @@ export default function ListagemPets(){
                 </ScrollView>
             </View>
 
-            {filteredPets.length === 0 ? (
+            {isLoadingPets ? (
+                <ScrollView
+                    contentContainerStyle={styles.listContent}
+                    showsVerticalScrollIndicator={false}
+                >
+                    <Skeleton.MasonryGrid />
+                </ScrollView>
+            ) : filteredPets.length === 0 ? (
                     <View style={styles.emptyWrap}>
                         <Image source={require("../assets/images/nothingfound.png")} style={styles.emptyImage}></Image>
                         <Text style={styles.emptyText}>Não encontramos nenhum animal com esses filtros.</Text>

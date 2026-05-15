@@ -1,6 +1,7 @@
 import AppHeader from "@/components/AppHeader";
 import CardFormulario from "@/components/CardFormulario";
 import SelecionarPetModal from "@/components/SelecionarPetModal";
+import Skeleton from "@/components/Skeleton";
 import { colors } from "@/styles/variables";
 import { Formulario } from "@/types/Formulario";
 import { useRouter } from "expo-router";
@@ -68,7 +69,13 @@ export default function GerenciarFormularios() {
           <Text style={styles.heroSubtitle}>Edite e organize os formulários que os candidatos irão responder.</Text>
         </View>
 
-        {isLoading && <Text style={styles.feedbackText}>Carregando formularios...</Text>}
+        {isLoading && (
+          <View>
+            {[1, 2, 3].map((i) => (
+              <Skeleton.FormularioCard key={i} />
+            ))}
+          </View>
+        )}
         {!isLoading && error && <Text style={styles.feedbackText}>{error}</Text>}
         {!isLoading && !error && formularios.length === 0 && (
           <Text style={styles.feedbackText}>Nenhum formulario encontrado.</Text>

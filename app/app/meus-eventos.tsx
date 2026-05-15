@@ -1,8 +1,9 @@
 import AppHeader from "@/components/AppHeader";
+import Skeleton from "@/components/Skeleton";
 import { colors } from "@/styles/variables";
 import { useRouter } from "expo-router";
 import { useEffect, useMemo, useState } from "react";
-import { ActivityIndicator, Alert, FlatList, Image, Pressable, StyleSheet, Text, TouchableOpacity, useWindowDimensions, View } from "react-native";
+import { Alert, FlatList, Image, Pressable, StyleSheet, Text, TouchableOpacity, useWindowDimensions, View } from "react-native";
 import { deleteEvento, EventoDTO, getEventosUsuario } from "@/services/eventoService";
 import Ionicons from "@expo/vector-icons/build/Ionicons";
 
@@ -164,8 +165,9 @@ export default function MeusEventos() {
         ListEmptyComponent={
           isLoading ? (
             <View style={styles.loadingWrap}>
-              <ActivityIndicator size="small" color={colors.primary} />
-              <Text style={styles.loadingText}>Carregando eventos...</Text>
+              {[1, 2, 3, 4].map((i) => (
+                <Skeleton.EventoCard key={i} />
+              ))}
             </View>
           ) : loadError ? (
             <Text style={styles.emptyText}>{loadError}</Text>

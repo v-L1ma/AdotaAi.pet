@@ -1,4 +1,5 @@
 import AppHeader from "@/components/AppHeader";
+import Skeleton from "@/components/Skeleton";
 import { colors } from "@/styles/variables";
 import { useRouter } from "expo-router";
 import { useEffect, useMemo, useState } from "react";
@@ -124,8 +125,9 @@ export default function EventosInscritos() {
         ListEmptyComponent={
           isLoading ? (
             <View style={styles.loadingWrap}>
-              <ActivityIndicator size="small" color={colors.primary} />
-              <Text style={styles.loadingText}>Carregando...</Text>
+              {[1, 2, 3, 4].map((i) => (
+                <Skeleton.EventoCard key={i} />
+              ))}
             </View>
           ) : error ? (
             <Text style={styles.emptyText}>{error}</Text>

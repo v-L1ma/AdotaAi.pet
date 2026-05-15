@@ -3,6 +3,7 @@ import React, { useEffect, useMemo, useState } from "react";
 import { ActivityIndicator, Image, Pressable, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { colors } from '../styles/variables';
+import Skeleton from "@/components/Skeleton";
 import {
   getDetalhesSolicitacao,
   getSolicitacoesEnviadas,
@@ -240,8 +241,9 @@ export default function Solicitacoes() {
         <ScrollView contentContainerStyle={styles.cardsContent} showsVerticalScrollIndicator={false}>
           {isLoading && (
             <View style={styles.loadingWrap}>
-              <ActivityIndicator size="small" color={colors.primary} />
-              <Text style={styles.loadingText}>Carregando solicitacoes...</Text>
+              {[1, 2, 3].map((i) => (
+                <Skeleton.SolicitacaoCard key={i} />
+              ))}
             </View>
           )}
 

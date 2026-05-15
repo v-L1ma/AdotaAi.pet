@@ -12,6 +12,7 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import AppHeader from "@/components/AppHeader";
+import Skeleton from "@/components/Skeleton";
 import { colors } from "@/styles/variables";
 import adminService, { type UsuarioAdminDTO } from "@/services/adminService";
 
@@ -147,9 +148,13 @@ export default function GerenciarUsuariosScreen() {
     return (
       <SafeAreaView style={styles.screen}>
         <AppHeader title="Gerenciar Usuários" onBackPress={() => router.back()} />
-        <View style={styles.loadingContainer}>
-          <ActivityIndicator size="large" color={colors.primary} />
-        </View>
+        <FlatList
+          data={Array.from({ length: 5 }).map((_, i) => i)}
+          keyExtractor={(i) => `sk-${i}`}
+          renderItem={() => <Skeleton.AdminUsuarioCard />}
+          contentContainerStyle={styles.list}
+          showsVerticalScrollIndicator={false}
+        />
       </SafeAreaView>
     );
   }
