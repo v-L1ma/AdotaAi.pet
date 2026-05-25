@@ -11,6 +11,7 @@ import { favoritePet, getPetById, unfavoritePet } from "../services/petService";
 import { createSolicitacaoDirect } from "../services/solicitacaoService";
 import { birthToAge } from "@/utils/birthToAge";
 import Skeleton from "@/components/Skeleton";
+import { Ionicons } from "@expo/vector-icons";
 
 type BuscarPetDTO = {
     id: string;
@@ -18,6 +19,7 @@ type BuscarPetDTO = {
     dt_nasc?: string;
     nome?: string;
     porte?: string;
+    genero?: string;
     raca?: string;
     especie?: string;
     link_foto?: string;
@@ -26,6 +28,7 @@ type BuscarPetDTO = {
     dono?: {
         id: string;
         nome: string;
+        linkFotoPerfil?: string;
     };
     formularioId?: string | null;
 };
@@ -126,6 +129,8 @@ export default function PerfilPet(){
 
     const petName = pet?.nome || (Array.isArray(nome) ? nome[0] : nome) || "Alfredo";
     const petImage = pet?.link_foto || (Array.isArray(imagem) ? imagem[0] : imagem) || "https://img.freepik.com/fotos-gratis/fotografia-vertical-de-foco-superficial-de-um-bonito-Cão-de-golden-retriever-sentado-em-um-chao-de-grama_181624-27259.jpg?w=360";
+    const petGenero = pet?.genero?.trim().toUpperCase();
+    const genderIconName = petGenero === "F" ? "female" : petGenero === "M" ? "male" : null;
 
     const params = useLocalSearchParams<{ id?: string }>();
     const petId = Array.isArray(params.id) ? params.id[0] : params.id;
@@ -269,7 +274,12 @@ export default function PerfilPet(){
 
                 <View style={style.content}>
                     <View style={style.identity}>
-                        <Text style={style.name}>{petName}</Text>
+                        <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
+                            <Text style={style.name}>{petName}</Text>
+                            {genderIconName ? (
+                                <IconIonic name={genderIconName} size={20} color={colors.primary} />
+                            ) : null}
+                        </View>
                         <View style={style.locationRow}>
                             <IconIonic name="location-outline" size={18} color={colors.primary}></IconIonic>
                             <Text style={style.locationText}>{locationText}</Text>
@@ -298,20 +308,26 @@ export default function PerfilPet(){
                             <Text style={style.aboutTitle}>Sobre</Text>
                             <View style={style.divider}></View>
                         </View>
-                            {/* <Text style={style.aboutText}>{description}</Text> */}
+                            <Text style={style.aboutText}>{pet?.descricao}</Text>
 
                         <View style={style.publisher}>
-                            <Image
-                                source={{uri: "https://images.unsplash.com/photo-1544723795-3fb6469f5b39?w=300"}}
-                                style={style.publisherImage}
-                            ></Image>
+                            {pet?.dono?.linkFotoPerfil===null ? (
+                                <View style={style.avatar}>
+                                    <Ionicons name="person" size={24} color={colors.primary} />
+                                </View>
+                            ) : (
+                                <Image
+                                    source={{uri: pet?.dono?.linkFotoPerfil}}
+                                    style={style.publisherImage}
+                                ></Image>
+                            )}
                             <View>
                                 <Text style={style.publisherLabel}>Publicado por</Text>
-                                <Text style={style.publisherName}>Ricardo Silva</Text>
+                                <Text style={style.publisherName}>{pet?.dono?.nome}</Text>
                             </View>
-                            <Pressable style={style.chatButton}>
+                            {/* <Pressable style={style.chatButton}>
                                 <IconIonic name="chatbubble-ellipses-outline" size={20} color={colors.primary}></IconIonic>
-                            </Pressable>
+                            </Pressable> */}
                         </View>
                     </View>
 
@@ -590,5 +606,12 @@ const style = StyleSheet.create({
         position: "relative",
         backgroundColor: "#FFFFFF",
     },
-    
+    avatar: {
+        width: 58,
+        height: 58,
+        borderRadius: 18,
+        backgroundColor: "#FFE5E2",
+        alignItems: "center",
+        justifyContent: "center",
+    },
 });
