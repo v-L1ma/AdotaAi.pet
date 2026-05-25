@@ -97,6 +97,13 @@ export async function getUserPets(): Promise<animal[]> {
   return response.data;
 }
 
+export async function getRecentApprovedPets(limit = 5): Promise<animal[]> {
+  const response = await apiService.get<animal[]>("/pets/destaques", {
+    params: { limit },
+  });
+  return response.data;
+}
+
 export async function linkFormToPet(petId: string, data: PetUpsertData): Promise<animal> {
   const successMessage = data.formularioId
     ? "Formulário vinculado ao pet!"

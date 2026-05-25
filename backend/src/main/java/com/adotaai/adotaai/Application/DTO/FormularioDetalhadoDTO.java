@@ -10,16 +10,18 @@ public class FormularioDetalhadoDTO {
     private String usuarioCriadorNome;
     private UUID usuarioRespondenteId;
     private String usuarioRespondenteNome;
+    private String linkFotoPerfil;
     private List<PerguntaRespostaDTO> perguntasRespostas;
 
     public FormularioDetalhadoDTO(UUID solicitacaoId, UUID usuarioCriadorId, String usuarioCriadorNome,
-            UUID usuarioRespondenteId, String usuarioRespondenteNome,
-            List<PerguntaRespostaDTO> perguntasRespostas) {
+            UUID usuarioRespondenteId, String usuarioRespondenteNome, String linkFotoPerfil,
+        List<PerguntaRespostaDTO> perguntasRespostas) {
         this.solicitacaoId = solicitacaoId;
         this.usuarioCriadorId = usuarioCriadorId;
         this.usuarioCriadorNome = usuarioCriadorNome;
         this.usuarioRespondenteId = usuarioRespondenteId;
         this.usuarioRespondenteNome = usuarioRespondenteNome;
+        this.linkFotoPerfil = linkFotoPerfil;
         this.perguntasRespostas = perguntasRespostas;
     }
 
@@ -43,7 +45,11 @@ public class FormularioDetalhadoDTO {
         return usuarioRespondenteNome;
     }
 
-public List<PerguntaRespostaDTO> getPerguntasRespostas() {
+    public String getLinkFotoPerfil() {
+        return linkFotoPerfil;
+    }
+
+    public List<PerguntaRespostaDTO> getPerguntasRespostas() {
         return perguntasRespostas;
     }
 }

@@ -14,6 +14,7 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 import AppHeader from "@/components/AppHeader";
 import AppModal from "@/components/AppModal";
+import Skeleton from "@/components/Skeleton";
 import { colors } from "@/styles/variables";
 import adminService, { type PetAdminDTO } from "@/services/adminService";
 import StatusBadge from "@/components/StatusBadgeFactory";
@@ -118,9 +119,13 @@ export default function GerenciarAnimaisScreen() {
     return (
       <SafeAreaView style={styles.screen}>
         <AppHeader title="Gerenciar Animais" onBackPress={() => router.back()} />
-        <View style={styles.loadingContainer}>
-          <ActivityIndicator size="large" color={colors.primary} />
-        </View>
+        <FlatList
+          data={Array.from({ length: 5 }).map((_, i) => i)}
+          keyExtractor={(i) => `sk-${i}`}
+          renderItem={() => <Skeleton.AdminPetCard />}
+          contentContainerStyle={styles.list}
+          showsVerticalScrollIndicator={false}
+        />
       </SafeAreaView>
     );
   }
@@ -199,7 +204,7 @@ const styles = StyleSheet.create({
   screen: {
     flex: 1,
     backgroundColor: colors.surface,
-    paddingTop: 50,
+    paddingTop: 100,
   },
   loadingContainer: {
     flex: 1,

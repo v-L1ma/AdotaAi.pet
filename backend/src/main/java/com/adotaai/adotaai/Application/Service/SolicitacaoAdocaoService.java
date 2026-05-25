@@ -105,8 +105,26 @@ public class SolicitacaoAdocaoService implements ISolicitacaoAdocaoService {
     @Override
     @Transactional(readOnly = true)
     public FormularioDetalhadoDTO buscarSolicitacaoDetalhada(UUID solicitacaoId) {
+        UsuarioEntity usuario = obterUsuarioAutenticado();
         SolicitacaoAdocaoEntity solicitacao = solicitacaoRepository.findById(solicitacaoId)
                 .orElseThrow(() -> new RecursoNaoEncontradoException("Solicitação não encontrada"));
+
+        UUID usuarioId = usuario.getId();
+        boolean isAnunciante = solicitacao.getAnunciante() != null
+            && solicitacao.getAnunciante().getId().equals(usuarioId);
+        boolean isAdotante = solicitacao.getAdotante() != null
+            && solicitacao.getAdotante().getId().equals(usuarioId);
+
+        if (!isAnunciante && !isAdotante) {
+            throw new RegraDeNegocioException("Usuário não autorizado a visualizar esta solicitação.");
+        }
+
+        String linkFotoPerfil = null;
+        if (isAnunciante && solicitacao.getAdotante() != null) {
+            linkFotoPerfil = solicitacao.getAdotante().getLink_foto();
+        } else if (isAdotante && solicitacao.getAnunciante() != null) {
+            linkFotoPerfil = solicitacao.getAnunciante().getLink_foto();
+        }
 
         List<PerguntaRespostaDTO> perguntasRespostas = solicitacao.getPerguntasRespostas().stream()
                 .map(snapshot -> new PerguntaRespostaDTO(
@@ -121,6 +139,7 @@ public class SolicitacaoAdocaoService implements ISolicitacaoAdocaoService {
                 solicitacao.getAnunciante().getNome(),
                 solicitacao.getAdotante().getId(),
                 solicitacao.getAdotante().getNome(),
+                linkFotoPerfil,
                 perguntasRespostas
         );
     }
@@ -157,7 +176,8 @@ public class SolicitacaoAdocaoService implements ISolicitacaoAdocaoService {
         UsuarioEntity usuario = obterUsuarioAutenticado();
         return solicitacaoRepository.findAllByAnuncianteId(usuario.getId())
                 .stream()
-                .map(this::toDtoWithPet)
+            .map(entity -> toDtoWithPetAndFoto(entity,
+                entity.getAdotante() != null ? entity.getAdotante().getLink_foto() : null))
                 .toList();
     }
 
@@ -167,12 +187,13 @@ public class SolicitacaoAdocaoService implements ISolicitacaoAdocaoService {
         UsuarioEntity usuario = obterUsuarioAutenticado();
         return solicitacaoRepository.findAllByAdotanteId(usuario.getId())
                 .stream()
-                .map(this::toDtoWithPet)
+                .map(entity -> toDtoWithPetAndFoto(entity,
+                        entity.getAnunciante() != null ? entity.getAnunciante().getLink_foto() : null))
                 .toList();
     }
 
-    private SolicitacaoResponseDTO toDtoWithPet(SolicitacaoAdocaoEntity entity) {
-        return new SolicitacaoResponseDTO(entity, entity.getPet());
+    private SolicitacaoResponseDTO toDtoWithPetAndFoto(SolicitacaoAdocaoEntity entity, String linkFotoPerfil) {
+        return new SolicitacaoResponseDTO(entity, entity.getPet(), linkFotoPerfil);
     }
 
     private UsuarioEntity obterUsuarioAutenticado() {

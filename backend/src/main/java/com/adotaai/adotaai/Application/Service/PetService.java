@@ -11,6 +11,8 @@ import java.util.UUID;
 
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -66,9 +68,17 @@ public class PetService {
         return pet.stream().map(PetDTO::new).toList();
     }
 
+    public List<PetDTO> listarDestaques(int limit) {
+        int safeLimit = limit <= 0 ? 5 : Math.min(limit, 20);
+        Pageable pageable = PageRequest.of(0, safeLimit);
+        return petRepository.findRecentApproved(pageable).stream()
+                .map(PetDTO::new)
+                .toList();
+    }
+
     public List<PetDTO> listarPetsUsuarioLogado() {
         UsuarioEntity usuarioAutenticado = obterUsuarioAutenticado();
-        List<PetEntity> pets = petRepository.findAllByFl_ativoTrueAndUserIdVisible(usuarioAutenticado.getId());
+        List<PetEntity> pets = petRepository.findAllByFl_ativoTrueAndUserId(usuarioAutenticado.getId());
         return pets.stream().map(PetDTO::new).toList();
     }
 
@@ -92,6 +102,8 @@ public class PetService {
         UUID formularioId = pet.getFormulario() != null ? pet.getFormulario().getId() : null;
         UUID racaId = pet.getRacaEntity() != null ? pet.getRacaEntity().getId() : null;
 
+        String genero = normalizeGenero(pet.getGenero());
+
         return new BuscarPetDTO(
             pet.getId(),
             pet.getStatus(),
@@ -99,7 +111,7 @@ public class PetService {
             pet.getDt_nasc(),
             pet.getNome(),
             pet.getPorte(),
-            pet.getGenero(),
+            genero,
             pet.getRaca(),
             racaId,
             pet.getEspecie(),
@@ -258,6 +270,27 @@ public class PetService {
         } catch (DateTimeParseException exception) {
             throw new RegraDeNegocioException("Data de nascimento inválida. Use o formato yyyy-MM-dd.");
         }
+    }
+
+    private String normalizeGenero(String genero) {
+        if (genero == null) {
+            return null;
+        }
+
+        String trimmed = genero.trim();
+        if (trimmed.isEmpty()) {
+            return null;
+        }
+
+        String upper = trimmed.toUpperCase(Locale.ROOT);
+        if (upper.startsWith("F")) {
+            return "F";
+        }
+        if (upper.startsWith("M")) {
+            return "M";
+        }
+
+        return null;
     }
 
     private FormularioEntity resolveFormulario(CadastrarPetDTO petDTO) {

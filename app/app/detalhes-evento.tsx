@@ -1,4 +1,5 @@
 import AppHeader from "@/components/AppHeader";
+import Skeleton from "@/components/Skeleton";
 import { colors } from "@/styles/variables";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useEffect, useMemo, useState } from "react";
@@ -121,6 +122,17 @@ const horarioLabel = useMemo(() => {
     return "Localizacao nao informada";
   }, [evento]);
 
+  if (isLoading) {
+    return (
+      <View style={styles.screen}>
+        <AppHeader title="Detalhes do Evento" titleFontSize={20} />
+        <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
+          <Skeleton.EventoDetail />
+        </ScrollView>
+      </View>
+    );
+  }
+
   return (
     <View style={styles.screen}>
       <AppHeader title="Detalhes do Evento" titleFontSize={20} />
@@ -132,14 +144,7 @@ const horarioLabel = useMemo(() => {
         </View>
 
         <View style={styles.coverCard}>
-          {isLoading && (
-            <View style={styles.loadingWrap}>
-              <ActivityIndicator size="small" color={colors.primary} />
-              <Text style={styles.loadingText}>Carregando evento...</Text>
-            </View>
-          )}
-
-          {!isLoading && loadError && (
+          {loadError && (
             <Text style={styles.errorText}>{loadError}</Text>
           )}
 

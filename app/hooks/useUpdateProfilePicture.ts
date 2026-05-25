@@ -2,6 +2,7 @@ import { useCallback, useState } from "react";
 import { Platform } from "react-native";
 import { getApiErrorMessages } from "../services/apiErrorService";
 import { updateProfilePicture as updateProfilePictureService } from "../services/userService";
+import { compressAvatarImage, validateCompressedSize, getCompressionStats } from "../services/imageCompressionService";
 
 export const MAX_PROFILE_PICTURE_SIZE_BYTES = 50 * 1024 * 1024;
 
@@ -39,9 +40,11 @@ async function buildFormData(input: UpdateProfilePictureInput): Promise<FormData
   validateFileSize(input.fileSize);
 
   const formData = new FormData();
+  
+  // Use the provided URI and fileName (which should be from compression result)
   const filename = input.fileName || input.uri.split("/").pop() || `perfil-${Date.now()}.jpg`;
   const extension = filename.split(".").pop()?.toLowerCase();
-  const mimeType = input.mimeType || (extension === "png" ? "image/png" : "image/jpeg");
+  const mimeType = input.mimeType || (extension === "png" ? "image/png" : extension === "webp" ? "image/webp" : "image/jpeg");
 
   if (Platform.OS === "web") {
     const imageResponse = await fetch(input.uri);
@@ -71,7 +74,31 @@ export function useUpdateProfilePicture() {
       setErrorMessages([]);
 
       try {
-        const formData = await buildFormData(input);
+        // Step 1: Compress the avatar image
+        const compressionResult = await compressAvatarImage(input.uri, input.fileSize ?? undefined);
+        
+        // Step 2: Validate compressed size is within acceptable range (50 KB target)
+        const isValidSize = validateCompressedSize(compressionResult.compressedSize, 50);
+        if (!isValidSize) {
+          console.warn(
+            `Imagem comprimida excede o alvo de 50 KB: ${(compressionResult.compressedSize / 1024).toFixed(2)} KB. Prosseguindo com upload.`
+          );
+        }
+        
+        // Log compression stats for debugging
+        console.log(`[Image Compression] ${getCompressionStats(compressionResult)}`);
+
+        // Step 3: Build form data with compressed image
+        const compressedInput: UpdateProfilePictureInput = {
+          uri: compressionResult.uri,
+          fileName: compressionResult.fileName,
+          mimeType: compressionResult.mimeType,
+          fileSize: compressionResult.compressedSize,
+        };
+        
+        const formData = await buildFormData(compressedInput);
+        
+        // Step 4: Upload the compressed image
         const response = await updateProfilePictureService(formData);
 
         return {

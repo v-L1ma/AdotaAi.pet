@@ -12,8 +12,9 @@ export interface SolicitacaoDTO {
   adotanteEmail?: string;
   adotanteTelefone?: string;
   anuncianteNome?: string;
-  influencianteEmail?: string;
-  influencianteTelefone?: string;
+  anuncianteEmail?: string;
+  anuncianteTelefone?: string;
+  linkFotoPerfil?: string;
 }
 
 export interface PerguntaRespostaDTO {
@@ -23,11 +24,12 @@ export interface PerguntaRespostaDTO {
 }
 
 export interface FormularioDetalhadoDTO {
-  formularioId: string;
+  solicitacaoId: string;
   usuarioCriadorId: string;
   usuarioCriadorNome: string;
   usuarioRespondenteId: string;
   usuarioRespondenteNome: string;
+  linkFotoPerfil?: string;
   perguntasRespostas: PerguntaRespostaDTO[];
 }
 

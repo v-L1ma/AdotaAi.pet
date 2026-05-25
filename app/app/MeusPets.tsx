@@ -6,6 +6,7 @@ import colors from "../styles/colors";
 import { useTabNavigation } from "@/hooks/useTabNavigation";
 import { animal } from "@/types/TAnimal";
 import AppHeader from "@/components/AppHeader";
+import Skeleton from "@/components/Skeleton";
 import { deletePet, getUserPets } from "@/services/petService";
 
 export default function MeusPets() {
@@ -131,8 +132,9 @@ export default function MeusPets() {
 
         {isLoading && (
           <View style={styles.loadingWrap}>
-            <ActivityIndicator size="small" color={colors.primary} />
-            <Text style={styles.loadingText}>Carregando seus pets...</Text>
+            {[1, 2, 3, 4].map((i) => (
+              <Skeleton.ListItem key={i} />
+            ))}
           </View>
         )}
 
@@ -274,6 +276,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     gap: 6,
     marginTop: 12,
+    width: "100%",
   },
   loadingText: {
     fontSize: 13,

@@ -1,7 +1,6 @@
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Controller, useForm } from "react-hook-form";
-import DateTimePicker from "@react-native-community/datetimepicker";
 import { useCreatePet } from "../hooks/useCreatePet";
 import { useEditPet } from "../hooks/useEditPet";
 import { useRacas } from "../hooks/useRacas";
@@ -9,23 +8,62 @@ import { useEspecies } from "../hooks/useEspecies";
 import * as ImagePicker from "expo-image-picker";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import React, { useEffect, useRef, useState } from "react";
-import { Alert, Image, InputAccessoryView, Keyboard, Linking, Modal, Platform, Pressable, SafeAreaView, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
+import { Alert, Image, InputAccessoryView, Keyboard, Linking, Modal, Platform, Pressable, SafeAreaView, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View, ActivityIndicator } from "react-native";
 import Icon1 from "react-native-vector-icons/Ionicons";
 import { colors } from "@/styles/variables";
 import SelecionarFormularioModal from "@/components/SelecionarFormularioModal";
+import { formatFileSize } from "@/utils/imageUtils";
+import { compressAvatarImage } from "@/services/imageCompressionService";
 import { Formulario } from "@/types/Formulario";
 import { animal } from "@/types/TAnimal";
 import AppHeader from "@/components/AppHeader";
 import { getPetById } from "@/services/petService";
 import { genero } from "@/types/TGenero";
 
+const applyDateMask = (value: string) => {
+    const cleaned = value.replace(/\D/g, "");
+    let masked = cleaned;
+    if (cleaned.length > 2) {
+        masked = `${cleaned.slice(0, 2)}/${cleaned.slice(2)}`;
+    }
+    if (cleaned.length > 4) {
+        masked = `${cleaned.slice(0, 2)}/${cleaned.slice(2, 4)}/${cleaned.slice(4, 8)}`;
+    }
+    return masked.slice(0, 10);
+};
+
+const convertISOToDisplay = (isoDate: string) => {
+    if (!isoDate) return "";
+    const date = new Date(isoDate);
+    if (isNaN(date.getTime())) return "";
+    const day = date.getUTCDate().toString().padStart(2, "0");
+    const month = (date.getUTCMonth() + 1).toString().padStart(2, "0");
+    const year = date.getUTCFullYear();
+    return `${day}/${month}/${year}`;
+};
+
+const convertDisplayToISO = (displayDate: string) => {
+    if (displayDate.length !== 10) return "";
+    const [day, month, year] = displayDate.split("/");
+    return `${year}-${month.padStart(2, "0")}-${day.padStart(2, "0")}`;
+};
+
 const criarAnuncioSchema = z.object({
     nome: z.string().trim().min(2, "Nome deve ter pelo menos 2 caracteres"),
     dt_nasc: z
         .string()
         .trim()
-        .refine((valor) => !Number.isNaN(Date.parse(valor)), "Informe uma data de nascimento valida")
-        .refine((valor) => new Date(valor) <= new Date(), "Data de nascimento nao pode ser no futuro"),
+        .regex(/^\d{2}\/\d{2}\/\d{4}$/, "Informe a data no formato DD/MM/AAAA")
+        .refine((valor) => {
+            const [d, m, y] = valor.split("/").map(Number);
+            const date = new Date(y, m - 1, d);
+            return !isNaN(date.getTime()) && date.getFullYear() === y && date.getMonth() === m - 1 && date.getDate() === d;
+        }, "Informe uma data de nascimento válida")
+        .refine((valor) => {
+            const [d, m, y] = valor.split("/").map(Number);
+            const date = new Date(y, m - 1, d);
+            return date <= new Date();
+        }, "Data de nascimento não pode ser no futuro"),
     especieId: z.string().uuid("Selecione a especie"),
     porte: z.enum(["pequeno", "medio", "grande"], {
         message: "Selecione o porte",
@@ -40,7 +78,6 @@ const criarAnuncioSchema = z.object({
 type CriarAnuncioFormData = z.infer<typeof criarAnuncioSchema>;
 
 export default function CriarAnuncioScreen() {
-    const [showDatePicker, setShowDatePicker] = useState(false);
     const [isModalFormulariosOpen, setIsModalFormulariosOpen] = useState(false);
     const [isRacaSelectOpen, setIsRacaSelectOpen] = useState(false);
     const [formularioSelecionado, setFormularioSelecionado] = useState<Formulario | null>(null);
@@ -83,7 +120,7 @@ export default function CriarAnuncioScreen() {
         if (petData) {
             return {
                 nome: petData.nome,
-                dt_nasc: petData.dt_nasc,
+                dt_nasc: convertISOToDisplay(petData.dt_nasc),
                 especieId: (petData as any).especieId || "",
                 porte: petData.porte as "pequeno" | "medio" | "grande",
                 genero: (petData as any).genero as genero,
@@ -93,7 +130,7 @@ export default function CriarAnuncioScreen() {
         }
         return {
             nome: "",
-            dt_nasc: "2026-04-24",
+            dt_nasc: "",
             especieId: "",
             porte: undefined,
             genero: undefined,
@@ -117,7 +154,7 @@ export default function CriarAnuncioScreen() {
         if (petData) {
             reset({
                 nome: petData.nome,
-                dt_nasc: petData.dt_nasc,
+                dt_nasc: convertISOToDisplay(petData.dt_nasc),
                 especieId: (petData as any).especieId || "",
                 porte: petData.porte as "pequeno" | "medio" | "grande",
                 genero: (petData as any).genero as genero,
@@ -138,6 +175,7 @@ export default function CriarAnuncioScreen() {
 
     const router = useRouter();
     const [image, setImage] = useState<ImagePicker.ImagePickerAsset | null>(null);
+    const [isCompressingImage, setIsCompressingImage] = useState<boolean>(false);
     const [existingPhotoUrl, setExistingPhotoUrl] = useState<string | null>(null);
     const [peso, setPeso] = useState<string>("");
     const [focusedField, setFocusedField] = useState<"nome" | "idade" | "peso" | null>(null);
@@ -201,7 +239,9 @@ export default function CriarAnuncioScreen() {
             });
 
             if (!result.canceled && result.assets && result.assets.length > 0) {
-                setImage(result.assets[0]);
+                const selectedImage = result.assets[0];
+                setImage(selectedImage);
+                await compressImageIfNeeded(selectedImage);
             }
         } catch {
             Alert.alert("Erro", "Não foi possível abrir a câmera agora.");
@@ -225,10 +265,31 @@ export default function CriarAnuncioScreen() {
             });
 
             if (!result.canceled && result.assets && result.assets.length > 0) {
-                setImage(result.assets[0]);
+                const selectedImage = result.assets[0];
+                setImage(selectedImage);
+                await compressImageIfNeeded(selectedImage);
             }
         } catch {
             Alert.alert("Erro", "Não foi possível abrir a galeria agora.");
+        }
+    };
+
+    const compressImageIfNeeded = async (imageToCompress: ImagePicker.ImagePickerAsset) => {
+        if (!imageToCompress.fileSize || imageToCompress.fileSize <= 100 * 1024) {
+            // Image is small enough, no compression needed
+            console.log(`[Image] Size: ${formatFileSize(imageToCompress.fileSize || 0)} - No compression needed`);
+            return;
+        }
+
+        setIsCompressingImage(true);
+        try {
+            const compressedResult = await compressAvatarImage(imageToCompress.uri, imageToCompress.fileSize);
+            console.log(`[Image Compression] ${formatFileSize(compressedResult.originalSize)} → ${formatFileSize(compressedResult.compressedSize)} (${compressedResult.compressionRatio.toFixed(1)}% reduction)`);
+        } catch (error) {
+            console.warn("Image compression warning:", error);
+            // Continue with original image if compression fails
+        } finally {
+            setIsCompressingImage(false);
         }
     };
 
@@ -248,48 +309,14 @@ export default function CriarAnuncioScreen() {
         );
     };
 
-    const formatarData = (value: string) => {
-        if (!value) {
-            return "Selecionar data";
-        }
-
-        const date = new Date(value);
-        if (Number.isNaN(date.getTime())) {
-            return "Selecionar data";
-        }
-
-        return date.toLocaleDateString("pt-BR");
-    };
-
-    const formatarDataWebInput = (value: string) => {
-        if (value.length === 10) {
-            if(Number.isNaN(value)) {
-                return "";
-            }
-
-            const date = new Date(value);
-            if (Number.isNaN(date.getTime())) {
-                return "";
-            }
-    
-            return date.toISOString().slice(0, 10);
-        }
-
-    };
-
-    const onWebDateChange = (rawDate: string) => {
-        if(rawDate.length === 10) {
-             const isoDate = new Date(`${rawDate}T12:00:00`).toISOString();
-            setValue("dt_nasc", isoDate, { shouldValidate: true });
-        }
-    };
-
     const handleSave = async (data: CriarAnuncioFormData) => {
+        const isoDate = convertDisplayToISO(data.dt_nasc);
+
         if (isEditing) {
             const result = await editPet({
                 petId: params.petId!,
                 nome: data.nome,
-                dt_nasc: data.dt_nasc,
+                dt_nasc: isoDate,
                 especieId: data.especieId,
                 porte: data.porte as "pequeno" | "medio" | "grande",
                 genero: data.genero,
@@ -319,6 +346,7 @@ export default function CriarAnuncioScreen() {
 
         const result = await createPet({
             ...data,
+            dt_nasc: isoDate,
             formularioId: formularioSelecionado?.id ?? null,
             imagem: {
                 uri: image.uri,
@@ -340,16 +368,6 @@ export default function CriarAnuncioScreen() {
     const renderError = (message?: string) =>
         message ? <Text style={{ color: "#b00020", marginBottom: 8, width: "100%" }}>{message}</Text> : null;
 
-    const datePickerButtonStyle = {
-        backgroundColor: "#f3f2f2ff",
-        width: "105%" as const,
-        minHeight: 44,
-        margin: 10,
-        paddingHorizontal: 10,
-        borderRadius: 20,
-        justifyContent: "center" as const,
-    };
-
     return (
         <View style={styles.screen}>
             <SafeAreaView style={styles.safeTop} />
@@ -360,22 +378,31 @@ export default function CriarAnuncioScreen() {
                 showsVerticalScrollIndicator={false}
             >
                 <View style={styles.identitySection}>
-                    <Pressable style={styles.avatarUploader} onPress={pickImage}>
-                        {image?.uri ? (
-                            <Image source={{ uri: image.uri }} style={styles.avatarImage} />
-                        ) : existingPhotoUrl ? (
-                            <Image source={{ uri: existingPhotoUrl }} style={styles.avatarImage} />
-                        ) : (
-                            <View style={styles.avatarPlaceholder}>
-                                <Icon1 name="camera-outline" size={30} color="#8c8c8c" />
-                                <Text style={styles.avatarHint}>ADICIONAR FOTO</Text>
-                            </View>
-                        )}
-                        <View style={styles.avatarEditBadge}>
-                            <Icon1 name="pencil" size={14} color="#fff" />
+<Pressable style={styles.avatarUploader} onPress={pickImage} disabled={isCompressingImage}>
+                    {image?.uri ? (
+                        <Image source={{ uri: image.uri }} style={styles.avatarImage} />
+                    ) : existingPhotoUrl ? (
+                        <Image source={{ uri: existingPhotoUrl }} style={styles.avatarImage} />
+                    ) : (
+                        <View style={styles.avatarPlaceholder}>
+                            <Icon1 name="camera-outline" size={30} color="#8c8c8c" />
+                            <Text style={styles.avatarHint}>ADICIONAR FOTO</Text>
                         </View>
-                    </Pressable>
-
+                    )}
+                    {isCompressingImage && (
+                        <View style={styles.avatarLoadingOverlay}>
+                            <ActivityIndicator size="small" color="#FFF" />
+                        </View>
+                    )}
+                    <View style={styles.avatarEditBadge}>
+                        <Icon1 name="pencil" size={14} color="#fff" />
+                    </View>
+                </Pressable>
+                {(image?.fileSize ?? 0) > 50000000 && (
+                    <Text style={styles.imageSizeHint}>
+                        A imagem não pode ser maior que 50MB. Tamanho atual: {formatFileSize(image?.fileSize || 0)}
+                    </Text>
+                )}
                     <Text style={styles.heroTitle}>{isEditing ? "Editar História" : "Nova História"}</Text>
                     <Text style={styles.heroSubtitle}>{isEditing ? "Atualize as informações do seu companheiro" : "Dê voz a um novo companheiro"}</Text>
                 </View>
@@ -546,30 +573,20 @@ export default function CriarAnuncioScreen() {
                     <Controller
                         control={control}
                         name="dt_nasc"
-                        render={({ field: { onChange, value } }) => (
-                            <>
-                                <TouchableOpacity style={datePickerButtonStyle} onPress={() => setShowDatePicker(true)}>
-                                    <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
-                                        <Icon1 name="calendar-outline" size={20} color={colors.primary} />
-                                        <Text style={{ color: value ? colors.text : colors.textMuted }}>
-                                            {formatarData(value)}
-                                        </Text>
-                                    </View>
-                                </TouchableOpacity>
-
-                                {showDatePicker && (
-                                    <DateTimePicker
-                                        value={value ? new Date(value) : new Date()}
-                                        mode="date"
-                                        display="default"
-                                        maximumDate={new Date()}
-                                        onChange={(event, date) => {
-                                            setShowDatePicker(false);
-                                            if (date) onChange(date.toISOString());
-                                        }}
-                                    />
-                                )}
-                            </>
+                        render={({ field: { onChange, onBlur, value } }) => (
+                            <Field
+                                label=""
+                                value={value}
+                                onChangeText={(text) => onChange(applyDateMask(text))}
+                                onBlur={onBlur}
+                                placeholder="DD/MM/AAAA"
+                                keyboardType="numeric"
+                                inputRef={idadeRef}
+                                returnKeyType="next"
+                                onSubmitEditing={() => pesoRef.current?.focus()}
+                                onFocus={() => setFocusedField("idade")}
+                                inputAccessoryViewID={Platform.OS === "ios" ? toolbarId : undefined}
+                            />
                         )}
                     />
                     {renderError(errors.dt_nasc?.message)}
@@ -721,6 +738,7 @@ const styles = StyleSheet.create({
     screen: {
         flex: 1,
         backgroundColor: colors.surface,
+        paddingTop: 50
     },
     safeTop: {
         backgroundColor: colors.surface,
@@ -800,6 +818,24 @@ const styles = StyleSheet.create({
         backgroundColor: colors.primary,
         alignItems: "center",
         justifyContent: "center"
+    },
+    avatarLoadingOverlay: {
+        position: "absolute",
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        borderRadius: 72,
+        backgroundColor: "rgba(0, 0, 0, 0.5)",
+        alignItems: "center",
+        justifyContent: "center",
+    },
+    imageSizeHint: {
+        marginTop: 8,
+        fontSize: 12,
+        color: "red",
+        fontWeight: "500",
+        textAlign: "center",
     },
     heroTitle: {
         marginTop: 14,

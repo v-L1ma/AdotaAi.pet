@@ -4,14 +4,33 @@ import { FlatList, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "
 import { colors } from "@/styles/variables";
 import CardPet from "@/components/CardPet";
 import NavBar from "@/components/NavBar";
+import Skeleton from "@/components/Skeleton";
 import { animal } from "@/types/TAnimal";
-import React from "react";
+import React, { useEffect, useState } from "react";
 import Svg, { Circle, Ellipse } from "react-native-svg";
 import { useTabNavigation } from "@/hooks/useTabNavigation";
+import { getRecentApprovedPets } from "@/services/petService";
 
 export default function Home() {
   const router = useRouter();
   const { navigateToTab } = useTabNavigation();
+  const [destaques, setDestaques] = useState<animal[]>([]);
+  const [isLoadingDestaques, setIsLoadingDestaques] = useState(true);
+
+  useEffect(() => {
+    async function loadDestaques() {
+      try {
+        const pets = await getRecentApprovedPets(5);
+        setDestaques(pets);
+      } catch {
+        setDestaques([]);
+      } finally {
+        setIsLoadingDestaques(false);
+      }
+    }
+
+    void loadDestaques();
+  }, []);
 
   const pets :any[] = [
     {
@@ -132,24 +151,41 @@ export default function Home() {
           </TouchableOpacity>
         </View>
 
-        <View style={style.sectionHeader}>
-          <Text style={style.sectionTitle}>Destaques</Text>
-          <TouchableOpacity onPress={() => navigateToTab("/listagem-pets") }>
-            <Text style={style.sectionLink}>Ver todos</Text>
-          </TouchableOpacity>
-        </View>
-
-        <FlatList
-          data={pets.slice(0, 6)}
-          contentContainerStyle={style.gallery}
-          renderItem={({ item, index }) => (
-            <View style={style.cardWrap}>
-              <CardPet animal={item} index={index} onlyPicture={false}></CardPet>
+        {isLoadingDestaques ? (
+          <>
+            <View style={style.sectionHeader}>
+              <Skeleton width={120} height={22} borderRadius={6} />
             </View>
-          )}
-          horizontal
-          showsHorizontalScrollIndicator={false}
-        />
+            <View style={style.gallery}>
+              {[1, 2, 3].map((i) => (
+                <View key={i} style={style.cardWrap}>
+                  <Skeleton.CardPet />
+                </View>
+              ))}
+            </View>
+          </>
+        ) : destaques.length > 0 && (
+          <>
+            <View style={style.sectionHeader}>
+              <Text style={style.sectionTitle}>Destaques</Text>
+              <TouchableOpacity onPress={() => router.push("/destaques")}>
+                <Text style={style.sectionLink}>Ver todos</Text>
+              </TouchableOpacity>
+            </View>
+
+            <FlatList
+              data={destaques}
+              contentContainerStyle={style.gallery}
+              renderItem={({ item, index }) => (
+                <View style={style.cardWrap}>
+                  <CardPet animal={item} index={index} onlyPicture={false}></CardPet>
+                </View>
+              )}
+              horizontal
+              showsHorizontalScrollIndicator={false}
+            />
+          </>
+        )}
 
         <TouchableOpacity style={style.secondaryCta} onPress={() => router.push("/inicio-eventos") }>
           <Ionicons name="calendar-outline" size={18} color={colors.primary} />

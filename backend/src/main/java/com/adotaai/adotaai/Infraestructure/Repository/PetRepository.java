@@ -3,6 +3,7 @@ package com.adotaai.adotaai.Infraestructure.Repository;
 import com.adotaai.adotaai.Domain.Entity.PetEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
@@ -19,11 +20,11 @@ public interface PetRepository extends JpaRepository<PetEntity, UUID> {
     @Query("SELECT p FROM PetEntity p WHERE p.fl_ativo = true AND p.status = 'APROVADO'")
     List<PetEntity> findAllVisible();
 
+    @Query("SELECT p FROM PetEntity p WHERE p.fl_ativo = true AND p.status = 'APROVADO' ORDER BY p.created_at DESC")
+    List<PetEntity> findRecentApproved(Pageable pageable);
+
     @Query("SELECT p FROM PetEntity p WHERE p.fl_ativo = true AND p.user.id = :userId")
     List<PetEntity> findAllByFl_ativoTrueAndUserId(@Param("userId") UUID userId);
-
-    @Query("SELECT p FROM PetEntity p WHERE p.fl_ativo = true AND p.user.id = :userId AND p.status = 'APROVADO'")
-    List<PetEntity> findAllByFl_ativoTrueAndUserIdVisible(@Param("userId") UUID userId);
 
     @Query("SELECT p FROM PetEntity p WHERE p.id = :id AND p.fl_ativo = true")
     Optional<PetEntity> findByIdAndFl_ativoTrue(@Param("id") UUID id);
