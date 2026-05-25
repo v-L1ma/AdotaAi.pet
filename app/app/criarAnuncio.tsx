@@ -721,6 +721,7 @@ const styles = StyleSheet.create({
     screen: {
         flex: 1,
         backgroundColor: colors.surface,
+        paddingTop: 50
     },
     safeTop: {
         backgroundColor: colors.surface,

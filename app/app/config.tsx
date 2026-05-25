@@ -126,10 +126,10 @@ const styles = StyleSheet.create({
     screen: {
         flex: 1,
         backgroundColor: colors.surface,
+        paddingTop: 100,
     },
     scroll: {
         flex: 1,
-        paddingTop: 50,
     },
     content: {
         paddingHorizontal: 20,

@@ -113,7 +113,7 @@ function SkeletonBaseEventoCard() {
 function SkeletonBaseListItem() {
   return (
     <View style={skeletonStyles.listItem}>
-      <SkeletonBase width={72} height={72} borderRadius={12} />
+      <SkeletonBase width="100%" height={72} borderRadius={12} />
       <View style={skeletonStyles.listItemContent}>
         <SkeletonBase width="50%" height={18} borderRadius={6} />
         <SkeletonBase width="35%" height={14} borderRadius={4} style={{ marginTop: 6 }} />
@@ -377,6 +377,7 @@ const skeletonStyles = StyleSheet.create({
     paddingBottom: 14,
   },
   eventoCard: {
+    width: "100%",
     borderRadius: 14,
     overflow: "hidden",
     marginBottom: 12,
@@ -386,9 +387,9 @@ const skeletonStyles = StyleSheet.create({
     gap: 4,
   },
   listItem: {
+    width: "100%",
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "#fff",
     borderRadius: 16,
     padding: 10,
     marginBottom: 12,
@@ -457,6 +458,7 @@ const skeletonStyles = StyleSheet.create({
     gap: 8,
   },
   solicitacaoCard: {
+    width: "100%",
     backgroundColor: "#fff",
     borderRadius: 16,
     padding: 12,
