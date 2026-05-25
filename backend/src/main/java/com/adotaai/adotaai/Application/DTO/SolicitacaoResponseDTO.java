@@ -19,6 +19,7 @@ public class SolicitacaoResponseDTO {
     private String anuncianteNome;
     private String anuncianteEmail;
     private String anuncianteTelefone;
+    private String linkFotoPerfil;
     private UUID petId;
     private String petNome;
     private String petFoto;
@@ -27,10 +28,14 @@ public class SolicitacaoResponseDTO {
     private List<PerguntaRespostaDTO> perguntasRespostas;
 
     public SolicitacaoResponseDTO(SolicitacaoAdocaoEntity entity) {
-        this(entity, null);
+        this(entity, null, null);
     }
 
     public SolicitacaoResponseDTO(SolicitacaoAdocaoEntity entity, PetEntity pet) {
+        this(entity, pet, null);
+    }
+
+    public SolicitacaoResponseDTO(SolicitacaoAdocaoEntity entity, PetEntity pet, String linkFotoPerfil) {
         this.id = entity.getId();
         this.adotanteId = entity.getAdotante().getId();
         this.anuncianteId = entity.getAnunciante().getId();
@@ -44,6 +49,7 @@ public class SolicitacaoResponseDTO {
             this.anuncianteEmail = entity.getAnunciante().getEmail();
             this.anuncianteTelefone = entity.getAnunciante().getTelefone();
         }
+        this.linkFotoPerfil = linkFotoPerfil;
         if (pet != null) {
             this.petId = pet.getId();
             this.petNome = pet.getNome();
@@ -90,6 +96,10 @@ public class SolicitacaoResponseDTO {
 
     public String getAnuncianteTelefone() {
         return anuncianteTelefone;
+    }
+
+    public String getLinkFotoPerfil() {
+        return linkFotoPerfil;
     }
 
     public UUID getPetId() {

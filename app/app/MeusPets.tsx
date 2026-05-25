@@ -276,6 +276,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     gap: 6,
     marginTop: 12,
+    width: "100%",
   },
   loadingText: {
     fontSize: 13,

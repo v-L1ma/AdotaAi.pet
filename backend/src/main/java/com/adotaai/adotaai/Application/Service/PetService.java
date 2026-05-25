@@ -11,6 +11,8 @@ import java.util.UUID;
 
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -64,6 +66,14 @@ public class PetService {
     public List<PetDTO> listarTodos() {
         List<PetEntity> pet = petRepository.findAllVisible();
         return pet.stream().map(PetDTO::new).toList();
+    }
+
+    public List<PetDTO> listarDestaques(int limit) {
+        int safeLimit = limit <= 0 ? 5 : Math.min(limit, 20);
+        Pageable pageable = PageRequest.of(0, safeLimit);
+        return petRepository.findRecentApproved(pageable).stream()
+                .map(PetDTO::new)
+                .toList();
     }
 
     public List<PetDTO> listarPetsUsuarioLogado() {

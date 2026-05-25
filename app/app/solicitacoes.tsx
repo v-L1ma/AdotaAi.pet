@@ -25,6 +25,7 @@ type SolicitacaoDTO = {
   anuncianteNome?: string;
   anuncianteEmail?: string;
   anuncianteTelefone?: string;
+  linkFotoPerfil?: string;
 };
 
 type PerguntaRespostaDTO = {
@@ -34,11 +35,12 @@ type PerguntaRespostaDTO = {
 };
 
 type FormularioDetalhadoDTO = {
-  formularioId: string;
+  solicitacaoId: string;
   usuarioCriadorId: string;
   usuarioCriadorNome: string;
   usuarioRespondenteId: string;
   usuarioRespondenteNome: string;
+  linkFotoPerfil?: string;
   perguntasRespostas: PerguntaRespostaDTO[];
 };
 
@@ -127,6 +129,12 @@ export default function Solicitacoes() {
 
   const data = useMemo(() => (tab === 'recebidos' ? recebidos : enviados), [tab, recebidos, enviados]);
   const selecionada = data.find((item) => item.id === aberta) || null;
+  const exibeSolicitante = tab === "recebidos";
+  const perfilLabel = exibeSolicitante ? "Solicitante" : "Anunciante";
+  const perfilNome = exibeSolicitante ? selecionada?.adotanteNome : selecionada?.anuncianteNome;
+  const perfilEmail = exibeSolicitante ? selecionada?.adotanteEmail : selecionada?.anuncianteEmail;
+  const perfilTelefone = exibeSolicitante ? selecionada?.adotanteTelefone : selecionada?.anuncianteTelefone;
+  const perfilFoto = selecionada?.linkFotoPerfil || detalhes?.linkFotoPerfil;
 
   const formatarTempo = (value?: string) => {
     if (!value) {
@@ -176,23 +184,29 @@ export default function Solicitacoes() {
 
         <ScrollView contentContainerStyle={styles.formContent}>
           <View style={styles.formCard}>
-            <Text style={styles.formSectionTitle}>Solicitante</Text>
+            <Text style={styles.formSectionTitle}>{perfilLabel}</Text>
             <View style={styles.publisher}>
-                <Image
-                    source={{uri: "https://images.unsplash.com/photo-1544723795-3fb6469f5b39?w=300"}}
-                    style={styles.publisherImage}
-                ></Image>
+                {selecionada.linkFotoPerfil===null ? (
+                    <View style={styles.avatar}>
+                        <Ionicons name="person" size={24} color={colors.primary} />
+                    </View>
+                ) : (
+                    <Image
+                        source={{uri: selecionada.linkFotoPerfil}}
+                        style={styles.publisherImage}
+                    ></Image>
+                )}
                 <View>
                     <Text style={styles.publisherName}>
-                      {selecionada.adotanteNome || "Nao informado"}
+                      {perfilNome || "Nao informado"}
                     </Text>
                     <Text>
                       <Ionicons name="mail" size={14} color={colors.primary} />{" "}
-                      {selecionada.adotanteEmail || "Nao informado"}
+                      {perfilEmail || "Nao informado"}
                     </Text>
                     <Text>
                       <Ionicons name="phone-portrait-sharp" size={14} color={colors.primary} />{" "}
-                      {selecionada.adotanteTelefone || "Nao informado"}
+                      {perfilTelefone || "Nao informado"}
                     </Text>
                 </View>
             </View>
@@ -274,7 +288,16 @@ export default function Solicitacoes() {
               <Text style={styles.requesterLabel}>{tab === "recebidos" ? "Dados do solicitante" : "Dados do anunciante"}</Text>
 
               <View style={styles.requesterRow}>
-                <Image source={{ uri: "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=400" }} style={styles.userImage} />
+                {item.linkFotoPerfil===null ? (
+                    <View style={styles.avatar}>
+                        <Ionicons name="person" size={24} color={colors.primary} />
+                    </View>
+                ) : (
+                    <Image
+                        source={{uri: item.linkFotoPerfil}}
+                        style={styles.publisherImage}
+                    ></Image>
+                )}
                 <View>
                   <Text style={styles.requesterText}>{tab === "recebidos" ? (item.adotanteNome || "Nao informado") : (item.anuncianteNome || "Nao informado")}</Text>
                   <Text style={styles.requesterSub}>{tab === "recebidos" ? (item.adotanteEmail || "Nao informado") : (item.anuncianteEmail || "Nao informado")}</Text>
@@ -329,7 +352,7 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   tabsWrap: {
-    marginTop: 10,
+    marginTop: 20,
     alignSelf: 'center',
     flexDirection: 'row',
     backgroundColor: '#eceff3',
@@ -341,6 +364,7 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     paddingHorizontal: 14,
     paddingVertical: 8,
+    zIndex: 10,
   },
   tabActive: {
     backgroundColor: '#fff',
@@ -358,6 +382,7 @@ const styles = StyleSheet.create({
     gap: 10,
   },
   loadingWrap: {
+    width: '100%',
     alignItems: "center",
     gap: 6,
     marginTop: 16,
@@ -530,5 +555,13 @@ const styles = StyleSheet.create({
         backgroundColor: "#FFE9E6",
         justifyContent: "center",
         alignItems: "center",
+    },
+    avatar: {
+        width: 58,
+        height: 58,
+        borderRadius: 18,
+        backgroundColor: "#FFE5E2",
+        alignItems: "center",
+        justifyContent: "center",
     },
 });
