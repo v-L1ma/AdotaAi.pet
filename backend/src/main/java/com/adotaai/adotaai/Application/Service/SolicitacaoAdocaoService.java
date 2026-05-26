@@ -22,13 +22,16 @@ public class SolicitacaoAdocaoService implements ISolicitacaoAdocaoService {
     private final SolicitacaoAdocaoRepository solicitacaoRepository;
     private final UsuarioRepository usuarioRepository;
     private final PetRepository petRepository;
+    private final EmailNotificationService emailNotificationService;
 
     public SolicitacaoAdocaoService(SolicitacaoAdocaoRepository solicitacaoRepository,
                                     UsuarioRepository usuarioRepository,
-                                    PetRepository petRepository) {
+                                    PetRepository petRepository,
+                                    EmailNotificationService emailNotificationService) {
         this.solicitacaoRepository = solicitacaoRepository;
         this.usuarioRepository = usuarioRepository;
         this.petRepository = petRepository;
+        this.emailNotificationService = emailNotificationService;
     }
 
     @Override
@@ -99,6 +102,7 @@ public class SolicitacaoAdocaoService implements ISolicitacaoAdocaoService {
         novaSolicitacao.setCreated_by(adotante.getId());
 
         SolicitacaoAdocaoEntity solicitacaoSalva = solicitacaoRepository.save(novaSolicitacao);
+        emailNotificationService.sendAdoptionProposalReceived(anunciante, adotante, pet);
         return new SolicitacaoResponseDTO(solicitacaoSalva, pet);
     }
 
@@ -154,6 +158,7 @@ public class SolicitacaoAdocaoService implements ISolicitacaoAdocaoService {
         solicitacao.setLast_modified_at(java.time.LocalDateTime.now());
         solicitacao.setLast_modified_by(obterUsuarioAutenticado().getId());
         SolicitacaoAdocaoEntity solicitacaoSalva = solicitacaoRepository.save(solicitacao);
+        emailNotificationService.sendAdoptionApproved(solicitacaoSalva.getAdotante(), solicitacaoSalva.getAnunciante(), solicitacaoSalva.getPet());
         return new SolicitacaoResponseDTO(solicitacaoSalva);
     }
 
@@ -167,6 +172,7 @@ public class SolicitacaoAdocaoService implements ISolicitacaoAdocaoService {
         solicitacao.setLast_modified_at(java.time.LocalDateTime.now());
         solicitacao.setLast_modified_by(obterUsuarioAutenticado().getId());
         SolicitacaoAdocaoEntity solicitacaoSalva = solicitacaoRepository.save(solicitacao);
+        emailNotificationService.sendAdoptionRejected(solicitacaoSalva.getAdotante(), solicitacaoSalva.getAnunciante(), solicitacaoSalva.getPet());
         return new SolicitacaoResponseDTO(solicitacaoSalva);
     }
 

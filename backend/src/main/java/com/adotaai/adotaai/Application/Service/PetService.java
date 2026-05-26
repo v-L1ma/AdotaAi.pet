@@ -63,6 +63,9 @@ public class PetService {
     @Autowired
     private ImageUploadService imageUploadService;
 
+    @Autowired
+    private EmailNotificationService emailNotificationService;
+
     public List<PetDTO> listarTodos() {
         List<PetEntity> pet = petRepository.findAllVisible();
         return pet.stream().map(PetDTO::new).toList();
@@ -350,6 +353,7 @@ public class PetService {
         pet.setLast_modified_at(LocalDateTime.now());
         pet.setLast_modified_by(admin.getId());
         petRepository.save(pet);
+        emailNotificationService.sendPetApproved(pet.getUser(), pet);
     }
 
     @Transactional
@@ -369,6 +373,7 @@ public class PetService {
         pet.setLast_modified_at(LocalDateTime.now());
         pet.setLast_modified_by(admin.getId());
         petRepository.save(pet);
+        emailNotificationService.sendPetRejected(pet.getUser(), pet, motivo);
     }
 
 }

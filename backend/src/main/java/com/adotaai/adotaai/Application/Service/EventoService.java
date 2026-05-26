@@ -35,6 +35,9 @@ public class EventoService {
     @Autowired
     private PresencaEventoRepository presencaEventoRepository;
 
+    @Autowired
+    private EmailNotificationService emailNotificationService;
+
     public List<EventoDTO> listarTodos() {
         List<EventoEntity> eventos = eventoRepository.findAllVisible();
         return eventos.stream().map(this::toDtoComPresencas).toList();
@@ -141,6 +144,7 @@ public class EventoService {
 
         PresencaEventoEntity presenca = new PresencaEventoEntity(evento, usuario);
         presencaEventoRepository.save(presenca);
+        emailNotificationService.sendEventPresenceConfirmed(usuario, evento);
     }
 
     public void removerPresenca(UUID eventoId) {
@@ -199,6 +203,7 @@ public class EventoService {
         evento.setLast_modified_at(java.time.LocalDateTime.now());
         evento.setLast_modified_by(admin.getId());
         eventoRepository.save(evento);
+        emailNotificationService.sendEventApproved(evento.getUser(), evento);
     }
 
     @Transactional
@@ -218,6 +223,7 @@ public class EventoService {
         evento.setLast_modified_at(java.time.LocalDateTime.now());
         evento.setLast_modified_by(admin.getId());
         eventoRepository.save(evento);
+        emailNotificationService.sendEventRejected(evento.getUser(), evento, motivo);
     }
 
     private UsuarioEntity obterUsuarioAutenticado() {
