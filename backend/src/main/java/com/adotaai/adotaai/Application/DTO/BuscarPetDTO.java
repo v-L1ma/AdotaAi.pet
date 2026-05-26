@@ -19,6 +19,9 @@ public class BuscarPetDTO {
     private UUID formularioId;
     private boolean isFavoritado;
     private DonoDTO dono;
+    private String bairro;
+    private String cidade;
+    private String uf;
 
     public BuscarPetDTO() {
     }
@@ -26,7 +29,7 @@ public class BuscarPetDTO {
     public BuscarPetDTO(UUID id, String status, String descricao,
                         LocalDate dataNascimento, String nome, String porte,
                         String genero, String raca, UUID racaId, String especie, String linkFoto, UUID formularioId,
-                        boolean isFavoritado, DonoDTO dono) {
+                        boolean isFavoritado, DonoDTO dono, String bairro, String cidade, String uf) {
         this.id = id;
         this.status = status;
         this.descricao = descricao;
@@ -41,6 +44,9 @@ public class BuscarPetDTO {
         this.formularioId = formularioId;
         this.isFavoritado = isFavoritado;
         this.dono = dono;
+        this.bairro = bairro;
+        this.cidade = cidade;
+        this.uf = uf;
     }
 
     public UUID getId() {
@@ -153,6 +159,30 @@ public class BuscarPetDTO {
 
     public void setDono(DonoDTO dono) {
         this.dono = dono;
+    }
+
+    public String getBairro() {
+        return bairro;
+    }
+
+    public void setBairro(String bairro) {
+        this.bairro = bairro;
+    }
+
+    public String getCidade() {
+        return cidade;
+    }
+
+    public void setCidade(String cidade) {
+        this.cidade = cidade;
+    }
+
+    public String getUf() {
+        return uf;
+    }
+
+    public void setUf(String uf) {
+        this.uf = uf;
     }
 
     public static class DonoDTO {

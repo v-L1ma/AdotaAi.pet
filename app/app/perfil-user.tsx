@@ -2,7 +2,7 @@ import * as ImagePicker from "expo-image-picker";
 import { zodResolver } from "@hookform/resolvers/zod";
 import React, { useEffect, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
-import { Alert, Image, SafeAreaView, ScrollView, Text, TextInput, TouchableOpacity, Pressable, View, Linking, StyleSheet, Platform } from "react-native";
+import { Alert, Image, SafeAreaView, ScrollView, Text, TextInput, TouchableOpacity, Pressable, View, Linking, StyleSheet, Platform, Switch } from "react-native";
 import { z } from "zod";
 import Icon1 from "react-native-vector-icons/Ionicons";
 import { getSession } from "../lib/session";
@@ -13,6 +13,7 @@ import { colors } from "@/styles/variables";
 import { MAX_PROFILE_PICTURE_SIZE_BYTES, useUpdateProfilePicture } from "../hooks/useUpdateProfilePicture";
 import { getCurrentUser, updateUser } from "../services/userService";
 import { formatFileSize } from "@/utils/imageUtils";
+import toastService from "@/services/toastService";
 
 type UsuarioAtualizacaoDTO = {
     nome: string;
@@ -72,8 +73,11 @@ type PerfilUsuarioFormData = z.infer<typeof perfilUsuarioSchema>;
 export default function UserScreen() {
     const [isSaving, setIsSaving] = useState(false);
     const [isLoading, setIsLoading] = useState(true);
+    const [isCepLoading, setIsCepLoading] = useState(false);
+    const [lastFetchedCep, setLastFetchedCep] = useState<string | null>(null);
     const [image, setImage] = useState<ImagePicker.ImagePickerAsset | null>(null);
     const [userLogado, setUserLogado] = useState<UsuarioAtualizacaoDTO | null>(null);
+    const [showPasswordFields, setShowPasswordFields] = useState(false);
     const { updateProfilePicture, isUpdatingProfilePicture } = useUpdateProfilePicture();
 
     const {
@@ -82,6 +86,8 @@ export default function UserScreen() {
         reset,
         setValue,
         watch,
+        setError,
+        clearErrors,
         formState: { errors, dirtyFields },
     } = useForm<PerfilUsuarioFormData>({
         resolver: zodResolver(perfilUsuarioSchema),
@@ -104,6 +110,14 @@ export default function UserScreen() {
     });
 
     const linkFoto = watch("link_foto");
+    const cepValue = watch("cep");
+
+    useEffect(() => {
+        if (!showPasswordFields) {
+            setValue("senha", "");
+            setValue("confirmarSenha", "");
+        }
+    }, [setValue, showPasswordFields]);
 
     useEffect(() => {
         const carregarUsuario = async () => {
@@ -144,8 +158,76 @@ export default function UserScreen() {
         void carregarUsuario();
     }, [reset, setValue]);
 
+    useEffect(() => {
+        const digits = (cepValue ?? "").replace(/\D/g, "");
+
+        if (digits.length !== 8) {
+            setIsCepLoading(false);
+            clearErrors("cep");
+            return;
+        }
+
+        if (digits === lastFetchedCep) {
+            return;
+        }
+
+        let isActive = true;
+
+        const fetchCep = async () => {
+            setIsCepLoading(true);
+            clearErrors("cep");
+            try {
+                const response = await fetch(`https://viacep.com.br/ws/${digits}/json/`);
+                if (!response.ok) {
+                    throw new Error("ViaCEP request failed");
+                }
+
+                const data = await response.json();
+
+                if (data?.erro) {
+                    toastService.showErrorToast("CEP nao encontrado", "Verifique o CEP informado.");
+                    setError("cep", { type: "manual", message: "CEP nao encontrado" });
+                    return;
+                }
+
+                if (!isActive) {
+                    return;
+                }
+
+                setValue("endereco", data.logradouro ?? "");
+                setValue("bairro", data.bairro ?? "");
+                setValue("cidade", data.localidade ?? "");
+                setValue("sg_estado", data.uf ?? "");
+                setLastFetchedCep(digits);
+            } catch {
+                if (isActive) {
+                    toastService.showErrorToast("Erro", "Nao foi possivel buscar o endereco agora.");
+                }
+            } finally {
+                if (isActive) {
+                    setIsCepLoading(false);
+                }
+            }
+        };
+
+        void fetchCep();
+
+        return () => {
+            isActive = false;
+        };
+    }, [cepValue, lastFetchedCep, clearErrors, setError, setValue]);
+
+    const formatCep = (text: string) => {
+        const digits = text.replace(/\D/g, "").slice(0, 8);
+        if (digits.length <= 5) {
+            return digits;
+        }
+
+        return `${digits.slice(0, 5)}-${digits.slice(5)}`;
+    };
+
     const onSubmit = async (data: PerfilUsuarioFormData) => {
-        if (isSaving || isUpdatingProfilePicture) {
+        if (isSaving || isUpdatingProfilePicture || Object.keys(errors).length > 0) {
             return;
         }
 
@@ -207,6 +289,8 @@ export default function UserScreen() {
         watch("endereco")!.trim() !== userLogado?.endereco ||
         watch("cep")!.trim() !== userLogado?.cep ||
         !!image;
+
+    const hasFormErrors = Object.keys(errors).length > 0;
 
     const handleBackPress = () => {
         if (!hasUnsavedChanges) {
@@ -332,7 +416,7 @@ export default function UserScreen() {
     };
 
     const renderError = (message?: string) =>
-        message ? <Text style={{ color: "#b00020", marginBottom: 8, width: "100%" }}>{message}</Text> : null;
+        message ? <Text style={{ color: "#b00020", marginBottom: 8, marginLeft: 16, width: "100%" }}>{message}</Text> : null;
 
     if (isLoading) {
         return (
@@ -432,35 +516,20 @@ export default function UserScreen() {
 
                     <Controller
                         control={control}
-                        name="senha"
+                        name="cep"
                         render={({ field: { onChange, onBlur, value } }) => (
                             <Field
-                                label="Nova Senha"
+                                label="CEP"
                                 value={value || ""}
-                                onChangeText={onChange}
+                                onChangeText={(text) => onChange(formatCep(text))}
                                 onBlur={onBlur}
-                                placeholder="Digite sua senha"
-                                secureTextEntry
+                                placeholder="00000-000"
+                                keyboardType="numeric"
+                                maxLength={9}
                             />
                         )}
                     />
-                    {renderError(errors.senha?.message)}
-
-                    <Controller
-                        control={control}
-                        name="confirmarSenha"
-                        render={({ field: { onChange, onBlur, value } }) => (
-                            <Field
-                                label="Confirmar Senha"
-                                value={value || ""}
-                                onChangeText={onChange}
-                                onBlur={onBlur}
-                                placeholder="Confirme sua senha"
-                                secureTextEntry
-                            />
-                        )}
-                    />
-                    {renderError(errors.confirmarSenha?.message)}
+                    {renderError(errors.cep?.message)}
 
                     <Controller
                         control={control}
@@ -473,24 +542,10 @@ export default function UserScreen() {
                                 onBlur={onBlur}
                                 placeholder="Digite seu endereco..."
                                 multiline
+                                editable={!isCepLoading}
                             />
                         )}
                     />
-
-                    <Controller
-                        control={control}
-                        name="cep"
-                        render={({ field: { onChange, onBlur, value } }) => (
-                            <Field
-                                label="CEP"
-                                value={value || ""}
-                                onChangeText={onChange}
-                                onBlur={onBlur}
-                                placeholder="00000-000"
-                            />
-                        )}
-                    />
-                    {renderError(errors.cep?.message)}
 
                     <Controller
                         control={control}
@@ -502,6 +557,7 @@ export default function UserScreen() {
                                 onChangeText={onChange}
                                 onBlur={onBlur}
                                 placeholder="Digite seu bairro"
+                                editable={!isCepLoading}
                             />
                         )}
                     />
@@ -517,6 +573,7 @@ export default function UserScreen() {
                                 onChangeText={onChange}
                                 onBlur={onBlur}
                                 placeholder="Digite sua cidade"
+                                editable={!isCepLoading}
                             />
                         )}
                     />
@@ -532,16 +589,63 @@ export default function UserScreen() {
                                 onChangeText={onChange}
                                 onBlur={onBlur}
                                 placeholder="Ex: SP"
+                                editable={!isCepLoading}
                             />
                         )}
                     />
                     {renderError(errors.sg_estado?.message)}
+
+                    <View style={styles.toggleRow}>
+                        <Text style={styles.toggleLabel}>Alterar senha</Text>
+                        <Switch
+                            value={showPasswordFields}
+                            onValueChange={setShowPasswordFields}
+                            trackColor={{ false: "#cfcfcf", true: colors.primary }}
+                            thumbColor={showPasswordFields ? "#fff" : "#f4f3f4"}
+                        />
+                    </View>
+
+                    {showPasswordFields && (
+                        <>
+                            <Controller
+                                control={control}
+                                name="senha"
+                                render={({ field: { onChange, onBlur, value } }) => (
+                                    <Field
+                                        label="Nova Senha"
+                                        value={value || ""}
+                                        onChangeText={onChange}
+                                        onBlur={onBlur}
+                                        placeholder="Digite sua senha"
+                                        secureTextEntry
+                                    />
+                                )}
+                            />
+                            {renderError(errors.senha?.message)}
+
+                            <Controller
+                                control={control}
+                                name="confirmarSenha"
+                                render={({ field: { onChange, onBlur, value } }) => (
+                                    <Field
+                                        label="Confirmar Senha"
+                                        value={value || ""}
+                                        onChangeText={onChange}
+                                        onBlur={onBlur}
+                                        placeholder="Confirme sua senha"
+                                        secureTextEntry
+                                    />
+                                )}
+                            />
+                            {renderError(errors.confirmarSenha?.message)}
+                        </>
+                    )}
                 </SafeAreaView>
 
                 <TouchableOpacity 
-                    style={[styles.primaryButton, (isSaving || isUpdatingProfilePicture) && { opacity: 0.7 }]} 
+                    style={[styles.primaryButton, (isSaving || isUpdatingProfilePicture || hasFormErrors) && { opacity: 0.7 }]} 
                     onPress={handleSubmit(onSubmit)}
-                    disabled={isSaving || isUpdatingProfilePicture}
+                    disabled={isSaving || isUpdatingProfilePicture || hasFormErrors}
                 >
                     <Text style={styles.primaryButtonText}>
                         {isSaving || isUpdatingProfilePicture ? "Salvando..." : "Salvar alteracoes"}
@@ -562,9 +666,21 @@ type FieldProps = {
     secureTextEntry?: boolean;
     editable?: boolean;
     multiline?: boolean;
+    maxLength?: number;
 };
 
-function Field({ label, value, onChangeText, onBlur, placeholder, keyboardType = "default", secureTextEntry = false, editable = true, multiline = false }: FieldProps) {
+function Field({
+    label,
+    value,
+    onChangeText,
+    onBlur,
+    placeholder,
+    keyboardType = "default",
+    secureTextEntry = false,
+    editable = true,
+    multiline = false,
+    maxLength,
+}: FieldProps) {
     return (
         <View style={styles.fieldWrap}>
             <Text style={styles.label}>{label}</Text>
@@ -579,6 +695,7 @@ function Field({ label, value, onChangeText, onBlur, placeholder, keyboardType =
                 secureTextEntry={secureTextEntry}
                 editable={editable}
                 multiline={multiline}
+                maxLength={maxLength}
             />
         </View>
     );
@@ -654,6 +771,20 @@ const styles = StyleSheet.create({
         paddingHorizontal:15,
         paddingBottom: 10,
         paddingTop: 10,
+    },
+    toggleRow: {
+        flexDirection: "row",
+        alignItems: "center",
+        justifyContent: "space-between",
+        paddingHorizontal: 15,
+        paddingVertical: 12,
+    },
+    toggleLabel: {
+        fontSize: 12,
+        fontWeight: "800",
+        color: colors.primary,
+        textTransform: "uppercase",
+        letterSpacing: 0.8,
     },
     label: {
         fontSize: 11,

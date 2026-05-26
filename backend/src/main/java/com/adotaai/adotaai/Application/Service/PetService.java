@@ -90,8 +90,14 @@ public class PetService {
                 .orElseThrow(() -> new RecursoNaoEncontradoException("Pet não encontrado com ID: " + id));
 
         BuscarPetDTO.DonoDTO dono = null;
+        String bairro = null;
+        String cidade = null;
+        String uf = null;
         if (pet.getUser() != null) {
             dono = new BuscarPetDTO.DonoDTO(pet.getUser().getId(), pet.getUser().getNome(), pet.getUser().getLink_foto());
+            bairro = pet.getUser().getBairro();
+            cidade = pet.getUser().getCidade();
+            uf = pet.getUser().getSg_estado();
         }
 
         boolean isFavoritado = false;
@@ -121,7 +127,10 @@ public class PetService {
             pet.getLink_foto(),
             formularioId,
             isFavoritado,
-            dono);
+                dono,
+                bairro,
+                cidade,
+                uf);
     }
 
     @Transactional
