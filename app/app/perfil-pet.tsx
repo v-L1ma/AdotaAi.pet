@@ -25,6 +25,9 @@ type BuscarPetDTO = {
     link_foto?: string;
     isFavoritado?: boolean;
     isFavorito?: boolean;
+    bairro?: string;
+    cidade?: string;
+    uf?: string;
     dono?: {
         id: string;
         nome: string;
@@ -39,6 +42,12 @@ export default function PerfilPet(){
     const [mapLoading, setMapLoading] = useState<boolean>(true);
     const [mapError, setMapError] = useState<string | null>(null);
     const [coordinates, setCoordinates] = useState<{ lat: number; lon: number } | null>(null);
+    const [isTogglingFavorite, setIsTogglingFavorite] = useState<boolean>(false);
+    const [isPetFavorited, setIsPetFavorited] = useState<boolean>(false);
+    const [pet, setPet] = useState<BuscarPetDTO | null>(null);
+    const [isLoadingPet, setIsLoadingPet] = useState<boolean>(false);
+    const [petError, setPetError] = useState<string | null>(null);
+    const [isAdopting, setIsAdopting] = useState<boolean>(false);
 
     const {nome, imagem, localizacao, bairro, cidade, uf} = useLocalSearchParams<{
         nome?: string | string[];
@@ -50,6 +59,9 @@ export default function PerfilPet(){
     }>();
 
     const locationText = useMemo(() => {
+        const petLocation = [pet?.bairro, pet?.cidade, pet?.uf].filter(Boolean).join(", ");
+        if (petLocation) return petLocation;
+
         const localizacaoValue = Array.isArray(localizacao) ? localizacao[0] : localizacao;
         if (localizacaoValue && localizacaoValue.trim().length > 0) return localizacaoValue;
 
@@ -59,7 +71,7 @@ export default function PerfilPet(){
 
         const dynamicParts = [bairroValue, cidadeValue, ufValue].filter(Boolean).join(", ");
         return dynamicParts || "Marapé, Santos - SP";
-    }, [bairro, cidade, localizacao, uf]);
+    }, [bairro, cidade, localizacao, pet?.bairro, pet?.cidade, pet?.uf, uf]);
 
     // const description = pet?.descricao || "Descrição não informada.";
     const IFrameTag = "iframe" as unknown as React.ElementType;
@@ -120,12 +132,6 @@ export default function PerfilPet(){
         return `https://www.openstreetmap.org/export/embed.html?bbox=${left}%2C${bottom}%2C${right}%2C${top}&layer=mapnik&marker=${coordinates.lat}%2C${coordinates.lon}`;
     }, [coordinates]);
 
-    const [isTogglingFavorite, setIsTogglingFavorite] = useState<boolean>(false);
-    const [isPetFavorited, setIsPetFavorited] = useState<boolean>(false);
-    const [pet, setPet] = useState<BuscarPetDTO | null>(null);
-    const [isLoadingPet, setIsLoadingPet] = useState<boolean>(false);
-    const [petError, setPetError] = useState<string | null>(null);
-    const [isAdopting, setIsAdopting] = useState<boolean>(false);
 
     const petName = pet?.nome || (Array.isArray(nome) ? nome[0] : nome) || "Alfredo";
     const petImage = pet?.link_foto || (Array.isArray(imagem) ? imagem[0] : imagem) || "https://img.freepik.com/fotos-gratis/fotografia-vertical-de-foco-superficial-de-um-bonito-Cão-de-golden-retriever-sentado-em-um-chao-de-grama_181624-27259.jpg?w=360";
