@@ -153,20 +153,40 @@ export default function CriarAnuncioScreen() {
 
     useEffect(() => {
         if (petData) {
+            const especieId = (petData as any).especieId || "";
             reset({
                 nome: petData.nome,
                 dt_nasc: convertISOToDisplay(petData.dt_nasc),
-                especieId: (petData as any).especieId || "",
+                especieId,
                 porte: petData.porte as "pequeno" | "medio" | "grande",
                 genero: (petData as any).genero as genero,
                 racaId: (petData as any).racaId || "",
                 descricao: petData.descricao,
             });
-            setSelectedEspecieId((petData as any).especieId || "");
+            setSelectedEspecieId(especieId || undefined);
             setExistingPhotoUrl(petData.link_foto);
             setFormularioSelecionado(null);
         }
     }, [petData, reset]);
+
+    useEffect(() => {
+        if (!petData) {
+            return;
+        }
+
+        const especieId = (petData as any).especieId as string | undefined;
+        if (especieId || !petData.especie || especies.length === 0) {
+            return;
+        }
+
+        const match = especies.find((esp) => esp.nome.toLowerCase() === String(petData.especie).toLowerCase());
+        if (!match?.id) {
+            return;
+        }
+
+        setValue("especieId", match.id, { shouldValidate: true });
+        setSelectedEspecieId(match.id);
+    }, [petData, especies, setValue]);
 
     useEffect(() => {
         if (selectedEspecieId) {
@@ -312,6 +332,7 @@ export default function CriarAnuncioScreen() {
 
     const handleSave = async (data: CriarAnuncioFormData) => {
         const isoDate = convertDisplayToISO(data.dt_nasc);
+        console.log("oi")
 
         if (isEditing) {
             const result = await editPet({

@@ -69,7 +69,8 @@ export default function RootLayout() {
     }
 
     const isPublicRoute = PUBLIC_ROUTES.has(currentRoute);
-    if (!isAuthenticated && !isPublicRoute) {
+    const hasSession = Boolean(getSession()?.token);
+    if (!isAuthenticated && !hasSession && !isPublicRoute) {
       router.replace("/login");
     }
   }, [currentRoute, isAuthenticated, router]);

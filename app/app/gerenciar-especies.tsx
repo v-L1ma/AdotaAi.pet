@@ -221,7 +221,7 @@ const styles = StyleSheet.create({
   screen: {
     flex: 1,
     backgroundColor: colors.surface,
-    paddingTop: 100,
+    paddingTop: 80,
   },
   list: {
     padding: 16,

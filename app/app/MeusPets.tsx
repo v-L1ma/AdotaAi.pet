@@ -266,7 +266,7 @@ const styles = StyleSheet.create({
     color: "#E74C3C",
   },
   content: {
-    paddingTop: 130,
+    paddingTop: 100,
     paddingBottom: 28,
     alignItems: "center",
     gap: 12,

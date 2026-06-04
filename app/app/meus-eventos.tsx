@@ -142,7 +142,7 @@ export default function MeusEventos() {
     <View style={styles.screen}>
       <AppHeader title="Meus Eventos" titleFontSize={20} />
 
-      <ScrollView showsVerticalScrollIndicator={false}>
+      <ScrollView contentContainerStyle={{display: "flex", alignItems: "center", gap:12}} showsVerticalScrollIndicator={false}>
         <View style={styles.hero}>
           <Text style={styles.heroTitle}>Participe de eventos de adocao e bem-estar animal</Text>
           <Text style={styles.heroSubtitle}>Encontros, campanhas e acoes para conectar familias e pets.</Text>
@@ -250,7 +250,7 @@ const styles = StyleSheet.create({
   screen: {
     flex: 1,
     backgroundColor: "#F8F8F8",
-    paddingTop: 130,
+    paddingTop: 100,
     alignItems: "center",
   },
   list: {

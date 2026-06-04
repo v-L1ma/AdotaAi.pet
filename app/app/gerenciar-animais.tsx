@@ -220,7 +220,7 @@ const styles = StyleSheet.create({
   screen: {
     flex: 1,
     backgroundColor: colors.surface,
-    paddingTop: 100,
+    paddingTop: 80,
   },
   loadingContainer: {
     flex: 1,
@@ -241,7 +241,7 @@ const styles = StyleSheet.create({
   },
   petImage: {
     width: 90,
-    height: "100%",
+    height: 90,
     borderRadius: 12,
     backgroundColor: colors.surface,
   },

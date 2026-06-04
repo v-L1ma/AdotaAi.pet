@@ -15,9 +15,11 @@ public class BuscarPetDTO {
     private String raca;
     private UUID racaId;
     private String especie;
+    private UUID especieId;
     private String link_foto;
     private UUID formularioId;
     private boolean isFavoritado;
+    private boolean solicitacaoEnviada;
     private DonoDTO dono;
     private String bairro;
     private String cidade;
@@ -28,8 +30,8 @@ public class BuscarPetDTO {
 
     public BuscarPetDTO(UUID id, String status, String descricao,
                         LocalDate dataNascimento, String nome, String porte,
-                        String genero, String raca, UUID racaId, String especie, String linkFoto, UUID formularioId,
-                        boolean isFavoritado, DonoDTO dono, String bairro, String cidade, String uf) {
+                        String genero, String raca, UUID racaId, String especie, UUID especieId, String linkFoto, UUID formularioId,
+                        boolean isFavoritado, boolean solicitacaoEnviada, DonoDTO dono, String bairro, String cidade, String uf) {
         this.id = id;
         this.status = status;
         this.descricao = descricao;
@@ -40,9 +42,11 @@ public class BuscarPetDTO {
         this.raca = raca;
         this.racaId = racaId;
         this.especie = especie;
+        this.especieId = especieId;
         this.link_foto = linkFoto;
         this.formularioId = formularioId;
         this.isFavoritado = isFavoritado;
+        this.solicitacaoEnviada = solicitacaoEnviada;
         this.dono = dono;
         this.bairro = bairro;
         this.cidade = cidade;
@@ -129,6 +133,14 @@ public class BuscarPetDTO {
         this.especie = especie;
     }
 
+    public UUID getEspecieId() {
+        return especieId;
+    }
+
+    public void setEspecieId(UUID especieId) {
+        this.especieId = especieId;
+    }
+
     public String getLink_foto() {
         return link_foto;
     }
@@ -151,6 +163,14 @@ public class BuscarPetDTO {
 
     public void setFavoritado(boolean isFavoritado) {
         this.isFavoritado = isFavoritado;
+    }
+
+    public boolean isSolicitacaoEnviada() {
+        return solicitacaoEnviada;
+    }
+
+    public void setSolicitacaoEnviada(boolean solicitacaoEnviada) {
+        this.solicitacaoEnviada = solicitacaoEnviada;
     }
 
     public DonoDTO getDono() {

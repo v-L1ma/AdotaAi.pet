@@ -283,34 +283,35 @@ export default function UserScreen() {
         }
     };
 
-    const hasUnsavedChanges =
-        watch("nome").trim() !== userLogado?.nome ||
-        watch("email").trim() !== userLogado?.email ||
-        watch("telefone")!.trim() !== userLogado?.telefone ||
-        watch("endereco")!.trim() !== userLogado?.endereco ||
-        watch("cep")!.trim() !== userLogado?.cep ||
-        !!image;
+    // const hasUnsavedChanges =
+    //     watch("nome").trim() !== userLogado?.nome ||
+    //     watch("email").trim() !== userLogado?.email ||
+    //     watch("telefone")!.trim() !== userLogado?.telefone ||
+    //     watch("endereco")!.trim() !== userLogado?.endereco ||
+    //     watch("cep")!.trim() !== userLogado?.cep ||
+    //     !!image;
 
     const hasFormErrors = Object.keys(errors).length > 0;
 
     const handleBackPress = () => {
-        if (!hasUnsavedChanges) {
-            router.back();
-            return;
-        }
+        router.back();
+        // if (!hasUnsavedChanges) {
+        //     router.back();
+        //     return;
+        // }
 
-        Alert.alert(
-            "Descartar alteracoes?",
-            "Voce fez alteracoes e ainda nao salvou. Se voltar agora, as alteracoes serao descartadas.",
-            [
-                { text: "Continuar editando", style: "cancel" },
-                {
-                    text: "Descartar e voltar",
-                    style: "destructive",
-                    onPress: () => router.back(),
-                },
-            ]
-        );
+        // Alert.alert(
+        //     "Descartar alteracoes?",
+        //     "Voce fez alteracoes e ainda nao salvou. Se voltar agora, as alteracoes serao descartadas.",
+        //     [
+        //         { text: "Continuar editando", style: "cancel" },
+        //         {
+        //             text: "Descartar e voltar",
+        //             style: "destructive",
+        //             onPress: () => router.back(),
+        //         },
+        //     ]
+        // );
     };
 
     const showPermissionAlert = (type: "camera" | "galeria", canAskAgain: boolean) => {
@@ -704,7 +705,7 @@ const styles = StyleSheet.create({
         backgroundColor: '#f8f9fa',
     },
     content: {
-        paddingTop: 130,
+        paddingTop: 100,
         paddingHorizontal: 16,
         paddingBottom: 28,
         gap: 12,

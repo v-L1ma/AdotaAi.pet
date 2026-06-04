@@ -61,6 +61,7 @@ export default function GerenciarUsuariosScreen() {
   };
 
   const handleDesativar = async (usuarioId: string) => {
+    console.log("Desativando usuário:", usuarioId);
     setIsProcessing(true);
     try {
       await adminService.desativarUsuario(usuarioId);
@@ -192,7 +193,7 @@ const styles = StyleSheet.create({
   screen: {
     flex: 1,
     backgroundColor: colors.surface,
-    paddingTop: 50,
+    paddingTop: 70,
   },
   loadingContainer: {
     flex: 1,
@@ -207,7 +208,8 @@ const styles = StyleSheet.create({
     backgroundColor: colors.surfaceLowest,
     borderRadius: 16,
     padding: 12,
-    marginBottom: 12,
+    marginBottom: 4,
+    marginTop: 4,
     borderWidth: 1,
     borderColor: "#ECECEC",
     alignItems: "center",

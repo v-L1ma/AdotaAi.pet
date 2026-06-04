@@ -229,7 +229,7 @@ const styles = StyleSheet.create({
   screen: {
     flex: 1,
     backgroundColor: "#F8F8F8",
-    paddingTop: 130,
+    paddingTop: 100,
     alignItems: "center",
   },
   list: {

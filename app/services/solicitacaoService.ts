@@ -112,6 +112,18 @@ export async function getDetalhesSolicitacao(id: string): Promise<FormularioDeta
   return response.data;
 }
 
+export async function aprovarSolicitacao(id: string): Promise<SolicitacaoDTO> {
+  const response = await apiService.put<SolicitacaoDTO>(`/solicitacoes/${id}/aprovar`);
+  showSuccessToast("Solicitacao aprovada com sucesso!");
+  return response.data;
+}
+
+export async function recusarSolicitacao(id: string): Promise<SolicitacaoDTO> {
+  const response = await apiService.put<SolicitacaoDTO>(`/solicitacoes/${id}/recusar`);
+  showSuccessToast("Solicitacao reprovada com sucesso!");
+  return response.data;
+}
+
 export const solicitacaoService = {
   getSolicitacoesRecebidas,
   getSolicitacoesEnviadas,
@@ -123,6 +135,8 @@ export const solicitacaoService = {
   submitSolicitacaoRespostas,
   createSolicitacaoComRespostas,
   getDetalhesSolicitacao,
+  aprovarSolicitacao,
+  recusarSolicitacao,
 };
 
 export default solicitacaoService;
