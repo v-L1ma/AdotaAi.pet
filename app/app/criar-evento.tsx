@@ -13,6 +13,7 @@ import AppHeader from "@/components/AppHeader";
 import { ImageUploader } from "@/components/ImageUploader";
 import { EventoDTO, createEvento, updateEvento, getEventoById } from "@/services/eventoService";
 import { compressAvatarImage } from "@/services/imageCompressionService";
+import { formatFileSize } from "@/utils/imageUtils";
 
 
 const timeRegex = /^([01]\d|2[0-3]):[0-5]\d$/;
@@ -21,6 +22,37 @@ const formatarHoraInput = (value: string): string => {
     const numeros = value.replace(/\D/g, "").slice(0, 4);
     if (numeros.length <= 2) return numeros;
     return `${numeros.slice(0, 2)}:${numeros.slice(2)}`;
+};
+
+const applyDateMask = (value: string) => {
+    const cleaned = value.replace(/\D/g, "");
+    let masked = cleaned;
+    if (cleaned.length > 2) {
+        masked = `${cleaned.slice(0, 2)}/${cleaned.slice(2)}`;
+    }
+    if (cleaned.length > 4) {
+        masked = `${cleaned.slice(0, 2)}/${cleaned.slice(2, 4)}/${cleaned.slice(4, 8)}`;
+    }
+    return masked.slice(0, 10);
+};
+
+const convertISOToDisplay = (isoDate: string) => {
+    if (!isoDate) return "";
+    const parts = isoDate.split("-");
+    if (parts.length !== 3) return "";
+    const [y, m, d] = parts.map(Number);
+    const date = new Date(y, m - 1, d);
+    if (isNaN(date.getTime())) return "";
+    const day = date.getDate().toString().padStart(2, "0");
+    const month = (date.getMonth() + 1).toString().padStart(2, "0");
+    const year = date.getFullYear();
+    return `${day}/${month}/${year}`;
+};
+
+const convertDisplayToISO = (displayDate: string) => {
+    if (displayDate.length !== 10) return "";
+    const [day, month, year] = displayDate.split("/");
+    return `${year}-${month.padStart(2, "0")}-${day.padStart(2, "0")}`;
 };
 
 const criarEventoSchema = z.object({
@@ -35,7 +67,12 @@ const criarEventoSchema = z.object({
     data: z
         .string()
         .trim()
-        .refine((valor) => /^\d{4}-\d{2}-\d{2}$/.test(valor), "Informe a data no formato AAAA-MM-DD"),
+        .regex(/^\d{2}\/\d{2}\/\d{4}$/, "Informe a data no formato DD/MM/AAAA")
+        .refine((valor) => {
+            const [d, m, y] = valor.split("/").map(Number);
+            const date = new Date(y, m - 1, d);
+            return !isNaN(date.getTime()) && date.getFullYear() === y && date.getMonth() === m - 1 && date.getDate() === d;
+        }, "Informe uma data válida"),
     hrinicio: z
         .string()
         .trim()
@@ -69,6 +106,8 @@ export default function CriarEventoScreen() {
     const [image, setImage] = useState<ImagePicker.ImagePickerAsset | null>(null);
     const [isCompressingImage, setIsCompressingImage] = useState<boolean>(false);
     const [existingPhotoUrl, setExistingPhotoUrl] = useState<string | null>(null);
+    const [lastFetchedCep, setLastFetchedCep] = useState<string | null>(null);
+    const [imageError, setImageError] = useState<string | null>(null);
 
     useEffect(() => {
         if (!isEditing || !eventoId) {
@@ -113,7 +152,7 @@ export default function CriarEventoScreen() {
                 bairro: eventoData.bairro ?? "",
                 cidade: eventoData.cidade ?? "",
                 cep: eventoData.cep ?? "",
-                data: eventoData.data ?? "",
+                data: convertISOToDisplay(eventoData.data ?? ""),
                 hrinicio: eventoData.hrinicio ?? "",
                 hrfim: eventoData.hrfim ?? "",
                 descricao: eventoData.descricao ?? "",
@@ -137,6 +176,10 @@ export default function CriarEventoScreen() {
         handleSubmit,
         reset,
         getValues,
+        watch,
+        setValue,
+        clearErrors,
+        setError,
         formState: { errors },
     } = useForm<CriarEventoFormData>({
         resolver: zodResolver(criarEventoSchema),
@@ -152,6 +195,68 @@ export default function CriarEventoScreen() {
             setExistingPhotoUrl(eventoData.link_foto);
         }
     }, [eventoData, reset]);
+
+    const cepValue = watch("cep");
+
+    useEffect(() => {
+        const digits = (cepValue ?? "").replace(/\D/g, "");
+
+        if (digits.length !== 8) {
+            clearErrors("cep");
+            return;
+        }
+
+        if (digits === lastFetchedCep) {
+            return;
+        }
+
+        let isActive = true;
+
+        const fetchCep = async () => {
+            clearErrors("cep");
+            try {
+                const response = await fetch(`https://viacep.com.br/ws/${digits}/json/`);
+                if (!response.ok) {
+                    throw new Error("ViaCEP request failed");
+                }
+
+                const data = await response.json();
+
+                if (data?.erro) {
+                    Alert.alert("CEP nao encontrado", "Verifique o CEP informado.");
+                    setError("cep", { type: "manual", message: "CEP nao encontrado" });
+                    return;
+                }
+
+                if (!isActive) {
+                    return;
+                }
+
+                setValue("endereco", data.logradouro ?? "");
+                setValue("bairro", data.bairro ?? "");
+                setValue("cidade", data.localidade ?? "");
+                setLastFetchedCep(digits);
+            } catch {
+                if (isActive) {
+                    Alert.alert("Erro", "Nao foi possivel buscar o endereco agora.");
+                }
+            }
+        };
+
+        void fetchCep();
+
+        return () => {
+            isActive = false;
+        };
+    }, [cepValue, lastFetchedCep, clearErrors, setError, setValue]);
+
+    const formatCep = (text: string) => {
+        const digits = text.replace(/\D/g, "").slice(0, 8);
+        if (digits.length <= 5) {
+            return digits;
+        }
+        return `${digits.slice(0, 5)}-${digits.slice(5)}`;
+    };
 
     const showPermissionAlert = (type: "camera" | "galeria", canAskAgain: boolean) => {
         const recurso = type === "camera" ? "à câmera" : "à galeria";
@@ -174,14 +279,21 @@ export default function CriarEventoScreen() {
         );
     };
 
+    const MAX_IMAGE_SIZE = 50 * 1024 * 1024; // 50MB
+
     const compressImageIfNeeded = async (imageToCompress: ImagePicker.ImagePickerAsset) => {
+        setImageError(null);
+
         if (!imageToCompress.fileSize || imageToCompress.fileSize <= 100 * 1024) {
             return;
         }
 
         setIsCompressingImage(true);
         try {
-            await compressAvatarImage(imageToCompress.uri, imageToCompress.fileSize);
+            const compressedResult = await compressAvatarImage(imageToCompress.uri, imageToCompress.fileSize);
+            if (compressedResult.compressedSize > MAX_IMAGE_SIZE) {
+                setImageError(`A imagem não pode ser maior que 50MB. Tamanho atual: ${formatFileSize(compressedResult.compressedSize)}`);
+            }
         } catch (error) {
             console.warn("Image compression warning:", error);
         } finally {
@@ -272,7 +384,13 @@ export default function CriarEventoScreen() {
             return "Selecionar data";
         }
 
-        const parsed = /^\d{4}-\d{2}-\d{2}$/.test(value) ? new Date(`${value}T00:00:00`) : new Date(value);
+        const match = value.match(/^(\d{2})\/(\d{2})\/(\d{4})$/);
+        if (!match) {
+            return "Selecionar data";
+        }
+
+        const [_, d, m, y] = match;
+        const parsed = new Date(Number(y), Number(m) - 1, Number(d));
         if (Number.isNaN(parsed.getTime())) {
             return "Selecionar data";
         }
@@ -281,12 +399,22 @@ export default function CriarEventoScreen() {
     };
 
     const handleSave = async (data: CriarEventoFormData) => {
+        if (!image && !existingPhotoUrl) {
+            setImageError("Selecione uma imagem para o evento.");
+            return;
+        }
+
+        if (imageError) {
+            return;
+        }
+
         setIsSaving(true);
         try {
             const formData = new FormData();
             
             const payload = {
                 ...data,
+                data: convertDisplayToISO(data.data),
                 hrinicio: data.hrinicio,
                 hrfim: data.hrfim,
             };
@@ -354,6 +482,9 @@ export default function CriarEventoScreen() {
                         onPress={pickImage}
                         isCompressing={isSaving || isCompressingImage}
                     />
+                    {imageError && (
+                        <Text style={styles.imageSizeHint}>{imageError}</Text>
+                    )}
 
                     <Text style={styles.heroTitle}>{isEditing ? "Atualize seu evento" : "Novo evento"}</Text>
                     <Text style={styles.heroSubtitle}>
@@ -379,6 +510,25 @@ export default function CriarEventoScreen() {
                         )}
                     />
                     {renderError(errors.nome?.message)}
+                    
+                    <Controller
+                        control={control}
+                        name="cep"
+                        render={({ field: { onChange, onBlur, value } }) => (
+                            <Field
+                                label="CEP"
+                                value={value}
+                                onChangeText={(text) => onChange(formatCep(text))}
+                                onBlur={onBlur}
+                                placeholder="00000-000"
+                                keyboardType="numeric"
+                                inputRef={cepRef}
+                                returnKeyType="next"
+                                onSubmitEditing={() => Keyboard.dismiss()}
+                            />
+                        )}
+                    />
+                    {renderError(errors.cep?.message)}
 
                     <Controller
                         control={control}
@@ -433,25 +583,6 @@ export default function CriarEventoScreen() {
                         />
                     </View>
                     {renderError(errors.bairro?.message || errors.cidade?.message)}
-
-                    <Controller
-                        control={control}
-                        name="cep"
-                        render={({ field: { onChange, onBlur, value } }) => (
-                            <Field
-                                label="CEP"
-                                value={value}
-                                onChangeText={onChange}
-                                onBlur={onBlur}
-                                placeholder="00000-000"
-                                keyboardType="numeric"
-                                inputRef={cepRef}
-                                returnKeyType="next"
-                                onSubmitEditing={() => Keyboard.dismiss()}
-                            />
-                        )}
-                    />
-                    {renderError(errors.cep?.message)}
                 </View>
 
                 <View style={styles.block}>
@@ -465,8 +596,9 @@ export default function CriarEventoScreen() {
                                     <Field
                                         label=""
                                         value={value}
-                                        onChangeText={onChange}
-                                        placeholder="AAAA-MM-DD"
+                                        onChangeText={(text) => onChange(applyDateMask(text))}
+                                        placeholder="DD/MM/AAAA"
+                                        keyboardType="numeric"
                                     />
                                 ) : (
                                     <TouchableOpacity
@@ -484,12 +616,21 @@ export default function CriarEventoScreen() {
 
                                 {showDatePicker && (
                                     <DateTimePicker
-                                        value={value ? new Date(`${value}T00:00:00`) : new Date()}
+                                        value={
+                                            value && /^\d{2}\/\d{2}\/\d{4}$/.test(value)
+                                                ? new Date(value.split("/").reverse().join("-") + "T00:00:00")
+                                                : new Date()
+                                        }
                                         mode="date"
                                         display="default"
                                         onChange={(event, date) => {
                                             setShowDatePicker(false);
-                                            if (date) onChange(date.toISOString().slice(0, 10));
+                                            if (date) {
+                                                const day = date.getDate().toString().padStart(2, "0");
+                                                const month = (date.getMonth() + 1).toString().padStart(2, "0");
+                                                const year = date.getFullYear();
+                                                onChange(`${day}/${month}/${year}`);
+                                            }
                                         }}
                                     />
                                 )}
@@ -646,6 +787,13 @@ const styles = StyleSheet.create({
     identitySection: {
         alignItems: "center",
         marginBottom: 4,
+    },
+    imageSizeHint: {
+        marginTop: 8,
+        fontSize: 12,
+        color: "red",
+        fontWeight: "500",
+        textAlign: "center",
     },
     heroIcon: {
         width: 60,

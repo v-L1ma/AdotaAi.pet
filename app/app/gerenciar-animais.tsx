@@ -88,7 +88,11 @@ export default function GerenciarAnimaisScreen() {
   };
 
   const renderPet = ({ item }: { item: PetAdminDTO }) => (
-    <View style={styles.card}>
+    <TouchableOpacity
+      style={styles.card}
+      activeOpacity={0.7}
+      onPress={() => router.push(`/perfil-pet?id=${item.id}`)}
+    >
       <Image
         source={item.link_foto ? { uri: item.link_foto } : { uri: "assets/images/pets.png" }}
         style={styles.petImage}
@@ -122,7 +126,7 @@ export default function GerenciarAnimaisScreen() {
           )}
         </View>
       </View>
-    </View>
+    </TouchableOpacity>
   );
 
   if (isLoading) {

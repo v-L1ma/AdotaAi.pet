@@ -53,9 +53,12 @@ export const ImageUploader: React.FC<ImageUploaderProps> = ({
             <ActivityIndicator size="small" color="#FFF" />
           </View>
         )}
-        <View style={styles.avatarEditBadge}>
-          <Icon1 name="pencil" size={14} color="#fff" />
-        </View>
+      </Pressable>
+      <Pressable 
+        style={styles.avatarEditBadge}
+        onPress={onPress} 
+        disabled={isCompressing}>
+        <Icon1 name="pencil" size={14} color="#fff" />
       </Pressable>
     </View>
   );

@@ -3,7 +3,8 @@ import Skeleton from "@/components/Skeleton";
 import { colors } from "@/styles/variables";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useEffect, useMemo, useState } from "react";
-import { ActivityIndicator, Image, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { ActivityIndicator, Image, Platform, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { WebView } from "react-native-webview";
 import { getEventoById, registrarPresenca } from "@/services/eventoService";
 import Ionicons from "@expo/vector-icons/build/Ionicons";
 
@@ -31,6 +32,7 @@ type EventoDTO = {
   status?: string;
   nmorganizador?: string;
   isInscrito?: boolean;
+  link_foto?: string | null;
 };
 
 export default function DetalhesEvento() {
@@ -42,6 +44,10 @@ export default function DetalhesEvento() {
   const [loadError, setLoadError] = useState<string | null>(null);
   const [isInscritoLoading, setIsInscritoLoading] = useState(false);
   const [isInscrito, setIsInscrito] = useState(false);
+  const [mapLoading, setMapLoading] = useState<boolean>(true);
+  const [mapError, setMapError] = useState<string | null>(null);
+  const [coordinates, setCoordinates] = useState<{ lat: number; lon: number } | null>(null);
+  const IFrameTag = "iframe" as unknown as React.ElementType;
   const router = useRouter();
 
   async function loadEvento(isMounted = true) {
@@ -82,7 +88,8 @@ export default function DetalhesEvento() {
       return "Data nao informada";
     }
 
-    const parsed = new Date(evento.data);
+    const [y, m, d] = evento.data.split("-").map(Number);
+    const parsed = new Date(y, m - 1, d);
     if (Number.isNaN(parsed.getTime())) {
       return "Data nao informada";
     }
@@ -122,6 +129,66 @@ const horarioLabel = useMemo(() => {
     return "Localizacao nao informada";
   }, [evento]);
 
+  const locationText = useMemo(() => {
+    return [evento?.endereco, evento?.bairro, evento?.cidade].filter(Boolean).join(", ") || "Brasil";
+  }, [evento]);
+
+  useEffect(() => {
+    let isMounted = true;
+
+    async function geocodeLocation() {
+      try {
+        setMapLoading(true);
+        setMapError(null);
+
+        const query = encodeURIComponent(`${locationText}, Brasil`);
+        const response = await fetch(
+          `https://nominatim.openstreetmap.org/search?format=json&limit=1&countrycodes=br&q=${query}`,
+          {
+            headers: {
+              "Accept-Language": "pt-BR",
+              "User-Agent": "AdotaAi.pet/1.0 (mobile app)",
+            },
+          }
+        );
+
+        const data = await response.json();
+        const first = Array.isArray(data) ? data[0] : null;
+
+        if (!first || !first.lat || !first.lon) {
+          throw new Error("Localização não encontrada.");
+        }
+
+        if (!isMounted) return;
+        setCoordinates({ lat: Number(first.lat), lon: Number(first.lon) });
+      } catch {
+        if (!isMounted) return;
+        setMapError("Não foi possível carregar o mapa para esta localização.");
+      } finally {
+        if (!isMounted) return;
+        setMapLoading(false);
+      }
+    }
+
+    geocodeLocation();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [locationText]);
+
+  const mapUrl = useMemo(() => {
+    if (!coordinates) return "";
+
+    const delta = 0.008;
+    const left = coordinates.lon - delta;
+    const right = coordinates.lon + delta;
+    const top = coordinates.lat + delta;
+    const bottom = coordinates.lat - delta;
+
+    return `https://www.openstreetmap.org/export/embed.html?bbox=${left}%2C${bottom}%2C${right}%2C${top}&layer=mapnik&marker=${coordinates.lat}%2C${coordinates.lon}`;
+  }, [coordinates]);
+
   if (isLoading) {
     return (
       <View style={styles.screen}>
@@ -139,7 +206,7 @@ const horarioLabel = useMemo(() => {
 
       <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
         <View style={styles.heroWrap}>
-          <Image source={{ uri: "https://images.unsplash.com/photo-1517849845537-4d257902454a?w=1400" }} style={styles.heroImage} />
+          <Image source={{ uri: evento?.link_foto || "https://images.unsplash.com/photo-1517849845537-4d257902454a?w=1400" }} style={styles.heroImage} />
           <View style={styles.heroOverlay} />
         </View>
 
@@ -228,7 +295,37 @@ const horarioLabel = useMemo(() => {
 
             <View style={styles.mapSection}>
               <Text style={styles.sectionTitle}>Localizacao</Text>
-              <Image source={{ uri: "https://images.unsplash.com/photo-1524661135-423995f22d0b?w=1400" }} style={styles.mapImage} />
+              <Text style={styles.sectionText}>{localLabel}</Text>
+              <View style={styles.mapFrame}>
+                {mapLoading ? (
+                  <View style={styles.mapFallback}>
+                    <ActivityIndicator size="small" color={colors.primary} />
+                    <Text style={styles.mapStatus}>Carregando mapa...</Text>
+                  </View>
+                ) : mapError || !mapUrl ? (
+                  <View style={styles.mapFallback}>
+                    <Ionicons name="map-outline" size={24} color={colors.primary} />
+                    <Text style={styles.mapStatus}>{mapError || "Mapa indisponivel no momento."}</Text>
+                  </View>
+                ) : (
+                  Platform.OS === "web" ? (
+                    <IFrameTag
+                      src={mapUrl}
+                      style={styles.mapIframe as never}
+                      loading="lazy"
+                      referrerPolicy="no-referrer-when-downgrade"
+                    />
+                  ) : (
+                    <WebView
+                      style={styles.mapWebview}
+                      source={{ uri: mapUrl }}
+                      scrollEnabled={false}
+                      showsHorizontalScrollIndicator={false}
+                      showsVerticalScrollIndicator={false}
+                    />
+                  )
+                )}
+              </View>
             </View>
           </>
         )}
@@ -343,10 +440,33 @@ const styles = StyleSheet.create({
     marginHorizontal: 14,
     gap: 8,
   },
-  mapImage: {
+  mapFrame: {
     width: "100%",
-    height: 150,
+    height: 180,
     borderRadius: 14,
+    overflow: "hidden",
+    backgroundColor: "#F1F1F1",
+  },
+  mapWebview: {
+    flex: 1,
+    backgroundColor: "transparent",
+  },
+  mapIframe: {
+    width: "100%",
+    height: "100%",
+    borderWidth: 0,
+  },
+  mapFallback: {
+    flex: 1,
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 8,
+    paddingHorizontal: 20,
+  },
+  mapStatus: {
+    color: "#555",
+    fontSize: 13,
+    textAlign: "center",
   },
   loadingWrap: {
     alignItems: "center",

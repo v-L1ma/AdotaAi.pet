@@ -2,8 +2,8 @@ import AppHeader from "@/components/AppHeader";
 import Skeleton from "@/components/Skeleton";
 import { colors } from "@/styles/variables";
 import { useRouter } from "expo-router";
-import { useEffect, useMemo, useState, useCallback } from "react";
-import { Alert, FlatList, Image, Pressable, StyleSheet, Text, TouchableOpacity, useWindowDimensions, View, RefreshControl } from "react-native";
+import { useMemo, useState, useCallback } from "react";
+import { Alert, FlatList, Image, Pressable, ScrollView, StyleSheet, Text, TouchableOpacity, useWindowDimensions, View } from "react-native";
 import { deleteEvento, EventoDTO, getEventosUsuario } from "@/services/eventoService";
 import Ionicons from "@expo/vector-icons/build/Ionicons";
 import { useFocusEffect } from "@react-navigation/native";
@@ -71,7 +71,8 @@ export default function MeusEventos() {
       return "Data nao informada";
     }
 
-    const parsed = new Date(data);
+    const [y, m, d] = data.split("-").map(Number);
+    const parsed = new Date(y, m - 1, d);
     if (Number.isNaN(parsed.getTime())) {
       return "Data nao informada";
     }
@@ -141,110 +142,106 @@ export default function MeusEventos() {
     <View style={styles.screen}>
       <AppHeader title="Meus Eventos" titleFontSize={20} />
 
-      <View style={styles.hero}>
-        <Text style={styles.heroTitle}>Participe de eventos de adocao e bem-estar animal</Text>
-        <Text style={styles.heroSubtitle}>Encontros, campanhas e acoes para conectar familias e pets.</Text>
-      </View>
-
-      <TouchableOpacity
-          onPress={() => {router.push("/criar-evento")}}
-          style={[styles.addButton, { width: metrics.cardWidth }]}
-        >
-        <Ionicons name="add-circle-outline" size={metrics.iconSize + 2} color={colors.primary} />
-        <Text style={[styles.addButtonText, { fontSize: isSmall ? 16 : 17 }]}>Adicionar novo evento</Text>
-      </TouchableOpacity>
-
-      <FlatList
-        data={eventos}
-        keyExtractor={(item) => item.id ?? ""}
-        contentContainerStyle={styles.list}
-        showsVerticalScrollIndicator={false}
-        style={{ width: metrics.cardWidth }}
-        refreshing={refreshing}
-        onRefresh={onRefresh}
-        ListEmptyComponent={
-          isLoading ? (
-            <View style={styles.loadingWrap}>
-              {[1, 2, 3, 4].map((i) => (
-                <Skeleton.EventoCard key={i} />
-              ))}
-            </View>
-          ) : loadError ? (
-            <Text style={styles.emptyText}>{loadError}</Text>
-          ) : (
-            <Text style={styles.emptyText}>Nenhum evento encontrado.</Text>
-          )
-        }
-        renderItem={({ item }) => (
-          <View style={styles.cardWrap}>
-            <TouchableOpacity
-              style={styles.card}
-              onPress={() =>
-                router.push({
-                  pathname: "/detalhes-evento" as never,
-                  params: {
-                    id: item.id,
-                  },
-                })
-              }
-              disabled={!!menuVisible}
-            >
-              <Image
-                source={{ uri: item.link_foto || "https://images.unsplash.com/photo-1548199973-03cce0bbc87b?w=1200" }}
-                style={styles.cardImage}
-              />
-
-              <View style={styles.cardBody}>
-                {item.mensagemReprovado && (
-                  <View style={styles.warningBox}>
-                    <Ionicons name="warning" size={14} color="#856404" />
-                    <Text style={styles.warningText}>Atenção: {item.mensagemReprovado}</Text>
-                  </View>
-                )}
-                <View style={{ display: "flex", flexDirection: "row", justifyContent: "space-between", alignItems: "center", gap: 8 }}>
-                  <Text style={styles.title}>{item.nome}</Text>
-                  <Text style={[styles.meta, {color: colors.primary}]}>
-                    <Ionicons name="people" size={16} color={colors.primary} /> 
-                    {item.contagemPresencas}
-                  </Text>
-                </View>
-              <Text style={styles.meta}>{formatarData(item.data, formatarHoraDisplay(item.hrinicio))}</Text>
-              <Text style={styles.meta}>{formatarLocal(item)}</Text>
-            </View>
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            style={styles.menuButton}
-            onPress={() => setMenuVisible(menuVisible === (item.id ?? "") ? null : item.id ?? "")}
-          >
-            <Ionicons name="ellipsis-vertical" size={18} color={colors.text} />
-          </TouchableOpacity>
-
-          {menuVisible === item.id && (
-            <View style={styles.menuPopup}>
-              <TouchableOpacity style={styles.menuOption} onPress={() => handleEdit(item)}>
-                <Ionicons name="create-outline" size={16} color={colors.text} />
-                <Text style={styles.menuOptionText}>Editar</Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                style={styles.menuOption}
-                onPress={() => handleDelete(item)}
-                disabled={isDeleting === item.id}
-              >
-                <Ionicons name="trash-outline" size={16} color="#b00020" />
-                <Text style={[styles.menuOptionText, { color: "#b00020" }]}>
-                  {isDeleting === item.id ? "Removendo..." : "Remover"}
-                </Text>
-              </TouchableOpacity>
-            </View>
-          )}
-
-          {menuVisible && menuVisible !== item.id && (
-            <Pressable style={styles.menuOverlay} onPress={closeMenu} />
-          )}
+      <ScrollView showsVerticalScrollIndicator={false}>
+        <View style={styles.hero}>
+          <Text style={styles.heroTitle}>Participe de eventos de adocao e bem-estar animal</Text>
+          <Text style={styles.heroSubtitle}>Encontros, campanhas e acoes para conectar familias e pets.</Text>
         </View>
-      )}
-      />
+        <TouchableOpacity
+            onPress={() => {router.push("/criar-evento")}}
+            style={[styles.addButton, { width: metrics.cardWidth }]}
+          >
+          <Ionicons name="add-circle-outline" size={metrics.iconSize + 2} color={colors.primary} />
+          <Text style={[styles.addButtonText, { fontSize: isSmall ? 16 : 17 }]}>Adicionar novo evento</Text>
+        </TouchableOpacity>
+        <FlatList
+          data={eventos}
+          keyExtractor={(item) => item.id ?? ""}
+          contentContainerStyle={styles.list}
+          showsVerticalScrollIndicator={false}
+          style={{ width: metrics.cardWidth }}
+          refreshing={refreshing}
+          onRefresh={onRefresh}
+          ListEmptyComponent={
+            isLoading ? (
+              <View style={styles.loadingWrap}>
+                {[1, 2, 3, 4].map((i) => (
+                  <Skeleton.EventoCard key={i} />
+                ))}
+              </View>
+            ) : loadError ? (
+              <Text style={styles.emptyText}>{loadError}</Text>
+            ) : (
+              <Text style={styles.emptyText}>Nenhum evento encontrado.</Text>
+            )
+          }
+          renderItem={({ item }) => (
+            <View style={styles.cardWrap}>
+              <TouchableOpacity
+                style={styles.card}
+                onPress={() =>
+                  router.push({
+                    pathname: "/detalhes-evento" as never,
+                    params: {
+                      id: item.id,
+                    },
+                  })
+                }
+                disabled={!!menuVisible}
+              >
+                <Image
+                  source={{ uri: item.link_foto || "https://images.unsplash.com/photo-1548199973-03cce0bbc87b?w=1200" }}
+                  style={styles.cardImage}
+                />
+                <View style={styles.cardBody}>
+                  {item.mensagemReprovado && (
+                    <View style={styles.warningBox}>
+                      <Ionicons name="warning" size={14} color="#856404" />
+                      <Text style={styles.warningText}>Atenção: {item.mensagemReprovado}</Text>
+                    </View>
+                  )}
+                  <View style={{ display: "flex", flexDirection: "row", justifyContent: "space-between", alignItems: "center", gap: 8 }}>
+                    <Text style={styles.title}>{item.nome}</Text>
+                    <Text style={[styles.meta, {color: colors.primary}]}>
+                      <Ionicons name="people" size={16} color={colors.primary} />
+                      {item.contagemPresencas}
+                    </Text>
+                  </View>
+                <Text style={styles.meta}>{formatarData(item.data, formatarHoraDisplay(item.hrinicio))}</Text>
+                <Text style={styles.meta}>{formatarLocal(item)}</Text>
+              </View>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={styles.menuButton}
+              onPress={() => setMenuVisible(menuVisible === (item.id ?? "") ? null : item.id ?? "")}
+            >
+              <Ionicons name="ellipsis-vertical" size={18} color={colors.text} />
+            </TouchableOpacity>
+            {menuVisible === item.id && (
+              <View style={styles.menuPopup}>
+                <TouchableOpacity style={styles.menuOption} onPress={() => handleEdit(item)}>
+                  <Ionicons name="create-outline" size={16} color={colors.text} />
+                  <Text style={styles.menuOptionText}>Editar</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={styles.menuOption}
+                  onPress={() => handleDelete(item)}
+                  disabled={isDeleting === item.id}
+                >
+                  <Ionicons name="trash-outline" size={16} color="#b00020" />
+                  <Text style={[styles.menuOptionText, { color: "#b00020" }]}>
+                    {isDeleting === item.id ? "Removendo..." : "Remover"}
+                  </Text>
+                </TouchableOpacity>
+              </View>
+            )}
+            {menuVisible && menuVisible !== item.id && (
+              <Pressable style={styles.menuOverlay} onPress={closeMenu} />
+            )}
+          </View>
+        )}
+        />
+      </ScrollView>
     </View>
   );
 }

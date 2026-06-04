@@ -2,11 +2,13 @@ import AppHeader from "@/components/AppHeader";
 import Skeleton from "@/components/Skeleton";
 import { colors } from "@/styles/variables";
 import { useRouter } from "expo-router";
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useMemo } from "react";
 import { ActivityIndicator, FlatList, Image, StyleSheet, Text, TouchableOpacity, View } from "react-native";
-import { EventoDTO, getEventos } from "@/services/eventoService";
+import { EventoDTO } from "@/services/eventoService";
 import NavBar from "@/components/NavBar";
 import { Ionicons } from "@expo/vector-icons";
+import { useFocusEffect } from "@react-navigation/native";
+import { useEvento } from "@/hooks/useEvento";
 
 const timeRegex = /^([01]\d|2[0-3]):[0-5]\d$/;
 
@@ -20,46 +22,21 @@ const formatarHoraDisplay = (hora: string | undefined): string => {
 
 export default function Eventos() {
   const router = useRouter();
-  const [eventos, setEventos] = useState<EventoDTO[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
-  const [loadError, setLoadError] = useState<string | null>(null);
+  const { eventos, isLoading, error, refetch } = useEvento();
 
-  useEffect(() => {
-    let isMounted = true;
-
-    async function loadEventos() {
-      setIsLoading(true);
-      setLoadError(null);
-
-      try {
-        const response = await getEventos();
-        if (isMounted) {
-          setEventos(response ?? []);
-        }
-      } catch {
-        if (isMounted) {
-          setLoadError("Nao foi possivel carregar os eventos.");
-        }
-      } finally {
-        if (isMounted) {
-          setIsLoading(false);
-        }
-      }
-    }
-
-    loadEventos();
-
-    return () => {
-      isMounted = false;
-    };
-  }, []);
+  useFocusEffect(
+    useCallback(() => {
+      refetch();
+    }, [refetch])
+  );
 
   const formatarData = (data?: string, hora?: string) => {
     if (!data) {
       return "Data nao informada";
     }
 
-    const parsed = new Date(data);
+    const [y, m, d] = data.split("-").map(Number);
+    const parsed = new Date(y, m - 1, d);
     if (Number.isNaN(parsed.getTime())) {
       return "Data nao informada";
     }
@@ -100,8 +77,8 @@ export default function Eventos() {
                 <Skeleton.EventoCard key={i} />
               ))}
             </View>
-          ) : loadError ? (
-            <Text style={styles.emptyText}>{loadError}</Text>
+          ) : error ? (
+            <Text style={styles.emptyText}>{error}</Text>
           ) : (
             <Text style={styles.emptyText}>Nenhum evento encontrado.</Text>
           )
