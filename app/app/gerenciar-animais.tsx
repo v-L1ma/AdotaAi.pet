@@ -18,12 +18,14 @@ import Skeleton from "@/components/Skeleton";
 import { colors } from "@/styles/variables";
 import adminService, { type PetAdminDTO } from "@/services/adminService";
 import StatusBadge from "@/components/StatusBadgeFactory";
+import { useFocusEffect } from "@react-navigation/native";
 // import placeholderPet from "@/assets/images/pets.png";
 
 export default function GerenciarAnimaisScreen() {
   const router = useRouter();
   const [pets, setPets] = useState<PetAdminDTO[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
   const [selectedPet, setSelectedPet] = useState<PetAdminDTO | null>(null);
   const [showReprovarModal, setShowReprovarModal] = useState(false);
   const [motivo, setMotivo] = useState("");
@@ -40,8 +42,16 @@ export default function GerenciarAnimaisScreen() {
     }
   }, []);
 
-  useEffect(() => {
-    loadPets();
+  useFocusEffect(
+    useCallback(() => {
+      loadPets();
+    }, [loadPets])
+  );
+
+  const onRefresh = useCallback(async () => {
+    setRefreshing(true);
+    await loadPets();
+    setRefreshing(false);
   }, [loadPets]);
 
   const handleAprovar = async (petId: string) => {
@@ -138,6 +148,8 @@ export default function GerenciarAnimaisScreen() {
         renderItem={renderPet}
         keyExtractor={(item) => item.id}
         contentContainerStyle={styles.list}
+        refreshing={refreshing}
+        onRefresh={onRefresh}
         ListEmptyComponent={
           <View style={styles.emptyContainer}>
             <Ionicons name="paw" size={64} color={colors.textMuted} />

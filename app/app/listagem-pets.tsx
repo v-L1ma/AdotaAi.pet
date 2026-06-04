@@ -3,13 +3,14 @@ import NavBar from "@/components/NavBar";
 import Skeleton from "@/components/Skeleton";
 import { colors } from "@/styles/variables";
 import { animal } from "@/types/TAnimal";
-import React, { useEffect, useMemo, useState } from "react";
-import { Animated, Dimensions, Easing, Image, Pressable, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
+import React, { useEffect, useMemo, useState, useCallback } from "react";
+import { Animated, Dimensions, Easing, Image, Pressable, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View, RefreshControl } from "react-native";
 import Icon from "react-native-vector-icons/FontAwesome5";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { especie } from "@/types/TEspecie";
 import { porte } from "@/types/TPorte";
 import { getPets } from "@/services/petService";
+import { useFocusEffect } from "@react-navigation/native";
 
 const width = Dimensions.get("window").width
 const columnGap = 12;
@@ -25,26 +26,33 @@ export default function ListagemPets(){
     const [searchText, setSearchText] = useState<string>("")
     const [pets, setPets] = useState<animal[]>([]);
     const [isLoadingPets, setIsLoadingPets] = useState<boolean>(true);
-    const [petsError, setPetsError] = useState<string | null>(null);
-    const width = Dimensions.get(`window`).width;
+    const [refreshing, setRefreshing] = useState(false);
 
-    useEffect(() => {
-        async function loadPets() {
-            setIsLoadingPets(true);
-            setPetsError(null);
+    const loadPets = useCallback(async () => {
+        setIsLoadingPets(true);
+        // setPetsError(null);
 
-            try {
-                const response = await getPets();
-                setPets(response);
-            } catch {
-                setPetsError("Nao foi possivel carregar os pets.");
-            } finally {
-                setIsLoadingPets(false);
-            }
+        try {
+            const response = await getPets();
+            setPets(response);
+        } catch {
+            // setPetsError("Nao foi possivel carregar os pets.");
+        } finally {
+            setIsLoadingPets(false);
         }
-
-        void loadPets();
     }, []);
+
+    useFocusEffect(
+        useCallback(() => {
+            loadPets();
+        }, [loadPets])
+    );
+
+    const onRefresh = useCallback(async () => {
+        setRefreshing(true);
+        await loadPets();
+        setRefreshing(false);
+    }, [loadPets]);
     
     const [imageRatios, setImageRatios] = useState<Record<string, number>>({});
     const sheetTranslateY = useMemo(() => new Animated.Value(460), []);
@@ -232,6 +240,9 @@ export default function ListagemPets(){
                 <ScrollView
                     contentContainerStyle={styles.listContent}
                     showsVerticalScrollIndicator={false}
+                    refreshControl={
+                        <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+                    }
                 >
                     <Skeleton.MasonryGrid />
                 </ScrollView>
@@ -244,6 +255,9 @@ export default function ListagemPets(){
                 <ScrollView
                     contentContainerStyle={styles.listContent}
                     showsVerticalScrollIndicator={false}
+                    refreshControl={
+                        <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+                    }
                 >
                     <View style={styles.masonryRow}>
                         <View style={styles.masonryColumn}>

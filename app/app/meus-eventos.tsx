@@ -2,10 +2,11 @@ import AppHeader from "@/components/AppHeader";
 import Skeleton from "@/components/Skeleton";
 import { colors } from "@/styles/variables";
 import { useRouter } from "expo-router";
-import { useEffect, useMemo, useState } from "react";
-import { Alert, FlatList, Image, Pressable, StyleSheet, Text, TouchableOpacity, useWindowDimensions, View } from "react-native";
+import { useEffect, useMemo, useState, useCallback } from "react";
+import { Alert, FlatList, Image, Pressable, StyleSheet, Text, TouchableOpacity, useWindowDimensions, View, RefreshControl } from "react-native";
 import { deleteEvento, EventoDTO, getEventosUsuario } from "@/services/eventoService";
 import Ionicons from "@expo/vector-icons/build/Ionicons";
+import { useFocusEffect } from "@react-navigation/native";
 
 const timeRegex = /^([01]\d|2[0-3]):[0-5]\d$/;
 
@@ -14,6 +15,7 @@ export default function MeusEventos() {
   const [eventos, setEventos] = useState<EventoDTO[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [loadError, setLoadError] = useState<string | null>(null);
+  const [refreshing, setRefreshing] = useState(false);
   const [menuVisible, setMenuVisible] = useState<string | null>(null);
   const [isDeleting, setIsDeleting] = useState<string | null>(null);
 
@@ -38,35 +40,31 @@ export default function MeusEventos() {
     };
   }, [isSmall, isTablet, width]);
 
-  useEffect(() => {
-    let isMounted = true;
+  const loadEventos = useCallback(async () => {
+    setIsLoading(true);
+    setLoadError(null);
 
-    async function loadEventos() {
-      setIsLoading(true);
-      setLoadError(null);
-
-      try {
-        const response = await getEventosUsuario();
-        if (isMounted) {
-          setEventos(response ?? []);
-        }
-      } catch {
-        if (isMounted) {
-          setLoadError("Nao foi possivel carregar os eventos.");
-        }
-      } finally {
-        if (isMounted) {
-          setIsLoading(false);
-        }
-      }
+    try {
+      const response = await getEventosUsuario();
+      setEventos(response ?? []);
+    } catch {
+      setLoadError("Nao foi possivel carregar os eventos.");
+    } finally {
+      setIsLoading(false);
     }
-
-    loadEventos();
-
-    return () => {
-      isMounted = false;
-    };
   }, []);
+
+  useFocusEffect(
+    useCallback(() => {
+      loadEventos();
+    }, [loadEventos])
+  );
+
+  const onRefresh = useCallback(async () => {
+    setRefreshing(true);
+    await loadEventos();
+    setRefreshing(false);
+  }, [loadEventos]);
 
   const formatarData = (data?: string, hora?: string) => {
     if (!data) {
@@ -162,6 +160,8 @@ export default function MeusEventos() {
         contentContainerStyle={styles.list}
         showsVerticalScrollIndicator={false}
         style={{ width: metrics.cardWidth }}
+        refreshing={refreshing}
+        onRefresh={onRefresh}
         ListEmptyComponent={
           isLoading ? (
             <View style={styles.loadingWrap}>

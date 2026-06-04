@@ -10,6 +10,7 @@ import {
   Touchable,
   TouchableOpacity,
   View,
+  RefreshControl,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import AppHeader from "@/components/AppHeader";
@@ -18,11 +19,13 @@ import Skeleton from "@/components/Skeleton";
 import { colors } from "@/styles/variables";
 import adminService, { type EventoAdminDTO } from "@/services/adminService";
 import StatusBadge from "@/components/StatusBadgeFactory";
+import { useFocusEffect } from "@react-navigation/native";
 
 export default function GerenciarEventosScreen() {
   const router = useRouter();
   const [eventos, setEventos] = useState<EventoAdminDTO[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
   const [selectedEvento, setSelectedEvento] = useState<EventoAdminDTO | null>(null);
   const [showReprovarModal, setShowReprovarModal] = useState(false);
   const [motivo, setMotivo] = useState("");
@@ -39,8 +42,16 @@ export default function GerenciarEventosScreen() {
     }
   }, []);
 
-  useEffect(() => {
-    loadEventos();
+  useFocusEffect(
+    useCallback(() => {
+      loadEventos();
+    }, [loadEventos])
+  );
+
+  const onRefresh = useCallback(async () => {
+    setRefreshing(true);
+    await loadEventos();
+    setRefreshing(false);
   }, [loadEventos]);
 
   const handleAprovar = async (eventoId: string) => {
@@ -168,7 +179,7 @@ export default function GerenciarEventosScreen() {
       </SafeAreaView>
     );
   }
-
+  
   return (
     <SafeAreaView style={styles.screen}>
       <AppHeader title="Gerenciar Eventos" onBackPress={() => router.back()} />
@@ -177,6 +188,8 @@ export default function GerenciarEventosScreen() {
         renderItem={renderEvento}
         keyExtractor={(item) => item.id}
         contentContainerStyle={styles.list}
+        refreshing={refreshing}
+        onRefresh={onRefresh} 
         ListEmptyComponent={
           <View style={styles.emptyContainer}>
             <Ionicons name="calendar-outline" size={64} color={colors.textMuted} />

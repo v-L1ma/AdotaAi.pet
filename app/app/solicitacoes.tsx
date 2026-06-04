@@ -1,6 +1,6 @@
 import { useRouter } from "expo-router";
-import React, { useEffect, useMemo, useState } from "react";
-import { ActivityIndicator, Image, Pressable, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import React, { useEffect, useMemo, useState, useCallback } from "react";
+import { ActivityIndicator, Image, Pressable, ScrollView, StyleSheet, Text, TouchableOpacity, View, RefreshControl } from "react-native";
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { colors } from '../styles/variables';
 import Skeleton from "@/components/Skeleton";
@@ -11,6 +11,7 @@ import {
 } from "@/services/solicitacaoService";
 import AppHeader from '@/components/AppHeader';
 import { Ionicons } from "@expo/vector-icons";
+import { useFocusEffect } from "@react-navigation/native";
 
 type SolicitacaoDTO = {
   id: string;
@@ -51,45 +52,42 @@ export default function Solicitacoes() {
   const [recebidos, setRecebidos] = useState<SolicitacaoDTO[]>([]);
   const [enviados, setEnviados] = useState<SolicitacaoDTO[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [refreshing, setRefreshing] = useState(false);
   const [loadError, setLoadError] = useState<string | null>(null);
   const [detalhes, setDetalhes] = useState<FormularioDetalhadoDTO | null>(null);
   const [isLoadingDetalhes, setIsLoadingDetalhes] = useState(false);
   const [detalhesError, setDetalhesError] = useState<string | null>(null);
 
-  useEffect(() => {
-    let isMounted = true;
+  const loadSolicitacoes = useCallback(async () => {
+    setIsLoading(true);
+    setLoadError(null);
 
-    async function loadSolicitacoes() {
-      setIsLoading(true);
-      setLoadError(null);
+    try {
+      const [recebidosRes, enviadosRes] = await Promise.all([
+        getSolicitacoesRecebidas(),
+        getSolicitacoesEnviadas(),
+      ]);
 
-      try {
-        const [recebidosRes, enviadosRes] = await Promise.all([
-          getSolicitacoesRecebidas(),
-          getSolicitacoesEnviadas(),
-        ]);
-
-        if (isMounted) {
-          setRecebidos(recebidosRes ?? []);
-          setEnviados(enviadosRes ?? []);
-        }
-      } catch {
-        if (isMounted) {
-          setLoadError("Nao foi possivel carregar as solicitacoes.");
-        }
-      } finally {
-        if (isMounted) {
-          setIsLoading(false);
-        }
-      }
+      setRecebidos(recebidosRes ?? []);
+      setEnviados(enviadosRes ?? []);
+    } catch {
+      setLoadError("Nao foi possivel carregar as solicitacoes.");
+    } finally {
+      setIsLoading(false);
     }
-
-    loadSolicitacoes();
-
-    return () => {
-      isMounted = false;
-    };
   }, []);
+
+  useFocusEffect(
+    useCallback(() => {
+      loadSolicitacoes();
+    }, [loadSolicitacoes])
+  );
+
+  const onRefresh = useCallback(async () => {
+    setRefreshing(true);
+    await loadSolicitacoes();
+    setRefreshing(false);
+  }, [loadSolicitacoes]);
 
   useEffect(() => {
     if (!aberta) {
@@ -182,7 +180,7 @@ export default function Solicitacoes() {
       <SafeAreaView style={styles.screen} edges={['top', 'left', 'right', 'bottom']}>
         <AppHeader title="Solicitações" onBackPress={() => router.back()} />
 
-        <ScrollView contentContainerStyle={styles.formContent}>
+        <ScrollView contentContainerStyle={styles.formContent} refreshControl={<Text>oi</Text>}>
           <View style={styles.formCard}>
             <Text style={styles.formSectionTitle}>{perfilLabel}</Text>
             <View style={styles.publisher}>
@@ -252,7 +250,13 @@ export default function Solicitacoes() {
           </TouchableOpacity>
         </View>
 
-        <ScrollView contentContainerStyle={styles.cardsContent} showsVerticalScrollIndicator={false}>
+        <ScrollView 
+          contentContainerStyle={styles.cardsContent} 
+          showsVerticalScrollIndicator={false}
+          refreshControl={
+            <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+          }
+        >
           {isLoading && (
             <View style={styles.loadingWrap}>
               {[1, 2, 3].map((i) => (

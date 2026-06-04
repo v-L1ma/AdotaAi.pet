@@ -2,7 +2,6 @@ import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import React, { useCallback, useEffect, useState } from "react";
 import {
-  ActivityIndicator,
   FlatList,
   Image,
   StyleSheet,
@@ -15,11 +14,13 @@ import AppHeader from "@/components/AppHeader";
 import Skeleton from "@/components/Skeleton";
 import { colors } from "@/styles/variables";
 import adminService, { type UsuarioAdminDTO } from "@/services/adminService";
+import { useFocusEffect } from "@react-navigation/native";
 
 export default function GerenciarUsuariosScreen() {
   const router = useRouter();
   const [usuarios, setUsuarios] = useState<UsuarioAdminDTO[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
 
   const loadUsuarios = useCallback(async () => {
@@ -33,8 +34,16 @@ export default function GerenciarUsuariosScreen() {
     }
   }, []);
 
-  useEffect(() => {
-    loadUsuarios();
+  useFocusEffect(
+    useCallback(() => {
+      loadUsuarios();
+    }, [loadUsuarios])
+  );
+
+  const onRefresh = useCallback(async () => {
+    setRefreshing(true);
+    await loadUsuarios();
+    setRefreshing(false);
   }, [loadUsuarios]);
 
   const handleAtivar = async (usuarioId: string) => {
@@ -166,7 +175,8 @@ export default function GerenciarUsuariosScreen() {
         data={usuarios}
         renderItem={renderUsuario}
         keyExtractor={(item) => item.id}
-        contentContainerStyle={styles.list}
+        contentContainerStyle={styles.list}        refreshing={refreshing}
+        onRefresh={onRefresh}
         ListEmptyComponent={
           <View style={styles.emptyContainer}>
             <Ionicons name="people-outline" size={64} color={colors.textMuted} />

@@ -1,13 +1,14 @@
 import { Entypo, Ionicons, MaterialIcons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
-import React, { useEffect, useMemo, useState } from "react";
-import { ActivityIndicator, Alert, Image, ScrollView, StyleSheet, Text, TouchableOpacity, View, useWindowDimensions } from "react-native";
+import React, { useMemo, useState, useCallback } from "react";
+import { Alert, Image, ScrollView, StyleSheet, Text, TouchableOpacity, View, useWindowDimensions, RefreshControl } from "react-native";
 import colors from "../styles/colors";
 import { useTabNavigation } from "@/hooks/useTabNavigation";
 import { animal } from "@/types/TAnimal";
 import AppHeader from "@/components/AppHeader";
 import Skeleton from "@/components/Skeleton";
 import { deletePet, getUserPets } from "@/services/petService";
+import { useFocusEffect } from "@react-navigation/native";
 
 export default function MeusPets() {
   const router = useRouter();
@@ -36,37 +37,34 @@ export default function MeusPets() {
   const [pets, setPets] = useState<animal[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [loadError, setLoadError] = useState<string | null>(null);
+  const [refreshing, setRefreshing] = useState(false);
   const [popoverPetId, setPopoverPetId] = useState<string | null>(null);
 
-  useEffect(() => {
-    let isMounted = true;
+  const loadPets = useCallback(async () => {
+    setIsLoading(true);
+    setLoadError(null);
 
-    async function loadPets() {
-      setIsLoading(true);
-      setLoadError(null);
-
-      try {
-        const response = await getUserPets();
-        if (isMounted) {
-          setPets(response ?? []);
-        }
-      } catch {
-        if (isMounted) {
-          setLoadError("Nao foi possivel carregar seus pets.");
-        }
-      } finally {
-        if (isMounted) {
-          setIsLoading(false);
-        }
-      }
+    try {
+      const response = await getUserPets();
+      setPets(response ?? []);
+    } catch {
+      setLoadError("Nao foi possivel carregar seus pets.");
+    } finally {
+      setIsLoading(false);
     }
-
-    loadPets();
-
-    return () => {
-      isMounted = false;
-    };
   }, []);
+
+  useFocusEffect(
+    useCallback(() => {
+      loadPets();
+    }, [loadPets])
+  );
+
+  const onRefresh = useCallback(async () => {
+    setRefreshing(true);
+    await loadPets();
+    setRefreshing(false);
+  }, [loadPets]);
 
   const formatarIdade = (dtNasc?: string) => {
     if (!dtNasc) {
@@ -115,6 +113,9 @@ export default function MeusPets() {
       <AppHeader title="Meus Pets" onBackPress={() => router.back()} />
 
       <ScrollView
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+        }
         contentContainerStyle={[
           styles.content,
           { paddingHorizontal: metrics.horizontalPadding },

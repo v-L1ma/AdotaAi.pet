@@ -7,13 +7,14 @@ import { Formulario } from "@/types/Formulario";
 import { useRouter } from "expo-router";
 import { useFocusEffect } from "@react-navigation/native";
 import React, { useCallback, useState } from "react";
-import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { ScrollView, StyleSheet, Text, TouchableOpacity, View, RefreshControl } from "react-native";
 import { getFormularios } from "@/services/formularioService";
 
 export default function GerenciarFormularios() {
   const router = useRouter();
   const [formularios, setFormularios] = useState<Formulario[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isPetModalVisible, setIsPetModalVisible] = useState(false);
   const [formularioSelecionado, setFormularioSelecionado] = useState<Formulario | null>(null);
@@ -50,6 +51,12 @@ export default function GerenciarFormularios() {
     }, [carregarFormularios])
   );
 
+  const onRefresh = useCallback(async () => {
+    setRefreshing(true);
+    await carregarFormularios();
+    setRefreshing(false);
+  }, [carregarFormularios]);
+
   const handleAbrirModal = (formulario: Formulario) => {
     setFormularioSelecionado(formulario);
     setIsPetModalVisible(true);
@@ -64,7 +71,13 @@ export default function GerenciarFormularios() {
     <View style={styles.screen}>
       <AppHeader title={"Gerenciar\nFormulários"} titleFontSize={20} titleNumberOfLines={2} />
 
-      <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
+      <ScrollView 
+        contentContainerStyle={styles.content} 
+        showsVerticalScrollIndicator={false}
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+        }
+      >
         <View style={styles.hero}>
           <Text style={styles.heroSubtitle}>Edite e organize os formulários que os candidatos irão responder.</Text>
         </View>

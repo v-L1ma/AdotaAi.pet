@@ -2,11 +2,12 @@ import AppHeader from "@/components/AppHeader";
 import Skeleton from "@/components/Skeleton";
 import { colors } from "@/styles/variables";
 import { useRouter } from "expo-router";
-import { useEffect, useMemo, useState } from "react";
-import { ActivityIndicator, Alert, FlatList, Image, Platform, Pressable, StyleSheet, Text, TouchableOpacity, useWindowDimensions, View } from "react-native";
+import { useMemo, useState, useCallback } from "react";
+import { ActivityIndicator, Alert, FlatList, Image, Platform, StyleSheet, Text, TouchableOpacity, useWindowDimensions, View } from "react-native";
 import { EventoDTO, removerPresenca } from "@/services/eventoService";
 import Ionicons from "@expo/vector-icons/build/Ionicons";
 import { useEventosInscritos } from "@/hooks/useEventosInscritos";
+import { useFocusEffect } from "@react-navigation/native";
 
 const timeRegex = /^([01]\d|2[0-3]):[0-5]\d$/;
 
@@ -14,6 +15,19 @@ export default function EventosInscritos() {
   const router = useRouter();
   const {eventos, isLoading, error, refetch} = useEventosInscritos();
   const [isCancelling, setIsCancelling] = useState<string | null>(null);
+  const [refreshing, setRefreshing] = useState(false);
+
+  useFocusEffect(
+    useCallback(() => {
+      refetch();
+    }, [refetch])
+  );
+
+  const onRefresh = useCallback(async () => {
+    setRefreshing(true);
+    await refetch();
+    setRefreshing(false);
+  }, [refetch]);
 
   const { width } = useWindowDimensions();
   const isSmall = width < 360;
@@ -122,6 +136,8 @@ export default function EventosInscritos() {
         contentContainerStyle={styles.list}
         showsVerticalScrollIndicator={false}
         style={{ width: metrics.cardWidth }}
+        refreshing={refreshing}
+        onRefresh={onRefresh}
         ListEmptyComponent={
           isLoading ? (
             <View style={styles.loadingWrap}>

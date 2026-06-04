@@ -1,49 +1,47 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from "expo-router";
-import React, { useEffect, useState } from "react";
-import { Alert, FlatList, Image, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import React, { useEffect, useState, useCallback } from "react";
+import { Alert, FlatList, Image, StyleSheet, Text, TouchableOpacity, View, RefreshControl } from "react-native";
 import { SafeAreaView } from 'react-native-safe-area-context';
 import colors from '../styles/colors';
 import { animal } from "@/types/TAnimal";
 import AppHeader from '@/components/AppHeader';
 import Skeleton from '@/components/Skeleton';
 import { getUserFavorites, unfavoritePet } from "@/services/petService";
+import { useFocusEffect } from "@react-navigation/native";
 
 export default function MeusFavoritos() {
   const router = useRouter();
   const [favoritos, setFavoritos] = useState<animal[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [refreshing, setRefreshing] = useState(false);
   const [loadError, setLoadError] = useState<string | null>(null);
 
-  useEffect(() => {
-    let isMounted = true;
+  const loadFavoritos = useCallback(async () => {
+    setIsLoading(true);
+    setLoadError(null);
 
-    async function loadFavoritos() {
-      setIsLoading(true);
-      setLoadError(null);
-
-      try {
-        const response = await getUserFavorites();
-        if (isMounted) {
-          setFavoritos(response ?? []);
-        }
-      } catch {
-        if (isMounted) {
-          setLoadError("Nao foi possivel carregar seus favoritos.");
-        }
-      } finally {
-        if (isMounted) {
-          setIsLoading(false);
-        }
-      }
+    try {
+      const response = await getUserFavorites();
+      setFavoritos(response ?? []);
+    } catch {
+      setLoadError("Nao foi possivel carregar seus favoritos.");
+    } finally {
+      setIsLoading(false);
     }
-
-    loadFavoritos();
-
-    return () => {
-      isMounted = false;
-    };
   }, []);
+
+  useFocusEffect(
+    useCallback(() => {
+      loadFavoritos();
+    }, [loadFavoritos])
+  );
+
+  const onRefresh = useCallback(async () => {
+    setRefreshing(true);
+    await loadFavoritos();
+    setRefreshing(false);
+  }, [loadFavoritos]);
 
   const formatarIdade = (dtNasc?: string) => {
     if (!dtNasc) {
@@ -117,6 +115,8 @@ export default function MeusFavoritos() {
           renderItem={renderItem}
           contentContainerStyle={{ paddingBottom: 32, paddingTop: 12, paddingHorizontal: 2 }}
           showsVerticalScrollIndicator={false}
+          refreshing={refreshing}
+          onRefresh={onRefresh}
           ListEmptyComponent={
             isLoading ? (
               <View style={{ paddingHorizontal: 2 }}>
