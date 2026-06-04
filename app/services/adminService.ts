@@ -26,6 +26,7 @@ export type EventoAdminDTO = {
   cep: string;
   status: string;
   nmorganizador: string;
+  link_foto?: string;
   user_id: string;
   contagemPresencas: number;
 };

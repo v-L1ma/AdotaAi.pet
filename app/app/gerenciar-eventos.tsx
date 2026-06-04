@@ -11,6 +11,7 @@ import {
   TouchableOpacity,
   View,
   RefreshControl,
+  Image,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import AppHeader from "@/components/AppHeader";
@@ -115,8 +116,16 @@ export default function GerenciarEventosScreen() {
                   },
                 })} >
         <View style={styles.cardHeader}>
-          <Text style={styles.eventoName}>{item.nome}</Text>
-          <StatusBadge status={item.status} />
+          <View style={{ flex: 1 }}>
+            <Text style={styles.eventoName}>{item.nome}</Text>
+            <StatusBadge status={item.status} />
+          </View>
+          {item.link_foto && (
+            <Image 
+              source={{ uri: item.link_foto }} 
+              style={{ width: 60, height: 60, borderRadius: 8 }} 
+            />
+          )}
         </View>
         <Text style={styles.eventoInfo}>{item.descricao}</Text>
         <View style={styles.eventoDetails}>

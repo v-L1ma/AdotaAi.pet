@@ -3,12 +3,17 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Controller, useForm } from "react-hook-form";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import { useLocalSearchParams, useRouter } from "expo-router";
+import * as ImagePicker from "expo-image-picker";
+import * as Linking from "expo-linking";
 import React, { useEffect, useRef, useState } from "react";
 import { Alert, Keyboard, Platform, SafeAreaView, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
 import Icon from "react-native-vector-icons/Ionicons";
 import { colors } from "@/styles/variables";
 import AppHeader from "@/components/AppHeader";
+import { ImageUploader } from "@/components/ImageUploader";
 import { EventoDTO, createEvento, updateEvento, getEventoById } from "@/services/eventoService";
+import { compressAvatarImage } from "@/services/imageCompressionService";
+
 
 const timeRegex = /^([01]\d|2[0-3]):[0-5]\d$/;
 
@@ -61,6 +66,10 @@ export default function CriarEventoScreen() {
     const [isLoadingEvento, setIsLoadingEvento] = useState(false);
     const [isSaving, setIsSaving] = useState(false);
 
+    const [image, setImage] = useState<ImagePicker.ImagePickerAsset | null>(null);
+    const [isCompressingImage, setIsCompressingImage] = useState<boolean>(false);
+    const [existingPhotoUrl, setExistingPhotoUrl] = useState<string | null>(null);
+
     useEffect(() => {
         if (!isEditing || !eventoId) {
             return;
@@ -76,6 +85,9 @@ export default function CriarEventoScreen() {
 
                 if (isMounted) {
                     setEventoData(evento);
+                    if (evento.link_foto) {
+                        setExistingPhotoUrl(evento.link_foto);
+                    }
                 }
             } catch (error) {
                 console.error(error);
@@ -136,7 +148,114 @@ export default function CriarEventoScreen() {
             return;
         }
         reset(getDefaultValues());
+        if (eventoData.link_foto) {
+            setExistingPhotoUrl(eventoData.link_foto);
+        }
     }, [eventoData, reset]);
+
+    const showPermissionAlert = (type: "camera" | "galeria", canAskAgain: boolean) => {
+        const recurso = type === "camera" ? "à câmera" : "à galeria";
+
+        if (canAskAgain) {
+            Alert.alert(
+                "Permissão necessária",
+                `Precisamos de acesso ${recurso} para selecionar a foto do evento.`,
+            );
+            return;
+        }
+
+        Alert.alert(
+            `Permissão da ${type} bloqueada`,
+            `Ative o acesso ${recurso} nas configurações do aparelho para continuar.`,
+            [
+                { text: "Cancelar", style: "cancel" },
+                { text: "Abrir configurações", onPress: () => Linking.openSettings() },
+            ]
+        );
+    };
+
+    const compressImageIfNeeded = async (imageToCompress: ImagePicker.ImagePickerAsset) => {
+        if (!imageToCompress.fileSize || imageToCompress.fileSize <= 100 * 1024) {
+            return;
+        }
+
+        setIsCompressingImage(true);
+        try {
+            await compressAvatarImage(imageToCompress.uri, imageToCompress.fileSize);
+        } catch (error) {
+            console.warn("Image compression warning:", error);
+        } finally {
+            setIsCompressingImage(false);
+        }
+    };
+
+    const pickImageFromCamera = async () => {
+        try {
+            const permission = await ImagePicker.requestCameraPermissionsAsync();
+
+            if (!permission.granted) {
+                showPermissionAlert("camera", permission.canAskAgain);
+                return;
+            }
+
+            const result = await ImagePicker.launchCameraAsync({
+                mediaTypes: ImagePicker.MediaTypeOptions.Images,
+                allowsEditing: true,
+                aspect: [16, 9],
+                quality: 1,
+            });
+
+            if (!result.canceled && result.assets && result.assets.length > 0) {
+                const selectedImage = result.assets[0];
+                setImage(selectedImage);
+                await compressImageIfNeeded(selectedImage);
+            }
+        } catch {
+            Alert.alert("Erro", "Não foi possível abrir a câmera agora.");
+        }
+    };
+
+    const pickImageFromGallery = async () => {
+        try {
+            const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
+
+            if (!permission.granted) {
+                showPermissionAlert("galeria", permission.canAskAgain);
+                return;
+            }
+
+            const result = await ImagePicker.launchImageLibraryAsync({
+                mediaTypes: ImagePicker.MediaTypeOptions.Images,
+                allowsEditing: true,
+                aspect: [16, 9],
+                quality: 1,
+            });
+
+            if (!result.canceled && result.assets && result.assets.length > 0) {
+                const selectedImage = result.assets[0];
+                setImage(selectedImage);
+                await compressImageIfNeeded(selectedImage);
+            }
+        } catch {
+            Alert.alert("Erro", "Não foi possível abrir a galeria agora.");
+        }
+    };
+
+    const pickImage = () => {
+        if (Platform.OS === "web") {
+            pickImageFromGallery();
+            return;
+        }
+        Alert.alert(
+            "Escolher foto",
+            "Selecione de onde deseja importar a imagem.",
+            [
+                { text: "Galeria", onPress: () => void pickImageFromGallery() },
+                { text: "Câmera", onPress: () => void pickImageFromCamera() },
+                { text: "Cancelar", style: "cancel" },
+            ]
+        );
+    };
 
     const router = useRouter();
     const nomeRef = useRef<TextInput>(null);
@@ -162,23 +281,53 @@ export default function CriarEventoScreen() {
     };
 
     const handleSave = async (data: CriarEventoFormData) => {
-        const payload = {
-            ...data,
-            hrinicio: data.hrinicio,
-            hrfim: data.hrfim,
-        };
-
         setIsSaving(true);
         try {
+            const formData = new FormData();
+            
+            const payload = {
+                ...data,
+                hrinicio: data.hrinicio,
+                hrfim: data.hrfim,
+            };
+
+            const payloadJson = JSON.stringify(payload);
+            if (Platform.OS === "web") {
+                formData.append("dados", new Blob([payloadJson], { type: "application/json" }));
+            } else {
+                formData.append("dados", payloadJson);
+            }
+
+            if (image) {
+                const uri = Platform.OS === "ios" ? image.uri.replace("file://", "") : image.uri;
+                const filename = image.fileName || `evento_${Date.now()}.jpg`;
+                const mimeType = image.mimeType || "image/jpeg";
+
+                if (Platform.OS === "web") {
+                    const response = await fetch(image.uri);
+                    const blob = await response.blob();
+                    formData.append("imagem", blob, filename);
+                } else {
+                    formData.append("imagem", {
+                        uri: image.uri,
+                        name: filename,
+                        type: mimeType,
+                    } as any);
+                }
+            }
+
             if (isEditing && eventoId) {
-                await updateEvento(eventoId, payload);
+                await updateEvento(eventoId, formData);
                 router.back();
                 return;
             }
 
-            await createEvento(payload);
+            await createEvento(formData);
             reset();
-        } catch {
+            setImage(null);
+            setExistingPhotoUrl(null);
+        } catch (error) {
+            console.error(error);
             Alert.alert("Erro", "Nao foi possivel salvar o evento.");
         } finally {
             setIsSaving(false);
@@ -199,9 +348,13 @@ export default function CriarEventoScreen() {
                 showsVerticalScrollIndicator={false}
             >
                 <View style={styles.identitySection}>
-                    <View style={styles.heroIcon}>
-                        <Icon name="calendar-outline" size={28} color="#fff" />
-                    </View>
+                    <ImageUploader 
+                        imageUri={image?.uri}
+                        existingPhotoUrl={existingPhotoUrl}
+                        onPress={pickImage}
+                        isCompressing={isSaving || isCompressingImage}
+                    />
+
                     <Text style={styles.heroTitle}>{isEditing ? "Atualize seu evento" : "Novo evento"}</Text>
                     <Text style={styles.heroSubtitle}>
                         {isEditing ? "Ajuste os detalhes e horarios" : "Compartilhe data, horario e local"}

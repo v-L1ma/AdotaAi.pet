@@ -75,6 +75,17 @@ public class ImageUploadService {
         return construirUrlPublica(bucketName, objectPath);
     }
 
+    public String uploadEventoImage(MultipartFile imagem, UUID eventoId) {
+        validarConfiguracaoSupabase();
+        validarArquivoRecebido(imagem, maxImageBytes);
+
+        byte[] imagemComprimida = processarImagem(imagem);
+        String objectPath = montarNomeArquivoEvento(eventoId);
+        enviarParaSupabase(bucketName, objectPath, imagemComprimida);
+
+        return construirUrlPublica(bucketName, objectPath);
+    }
+
     public String uploadUserProfileImage(MultipartFile imagem, UUID userId) {
         validarConfiguracaoSupabase();
         validarArquivoObrigatorio(imagem);
@@ -229,6 +240,17 @@ public class ImageUploadService {
                 hoje.getYear(),
                 hoje.getMonthValue(),
                 petId,
+                UUID.randomUUID());
+    }
+
+    private String montarNomeArquivoEvento(UUID eventoId) {
+        LocalDate hoje = LocalDate.now();
+        return String.format(
+                Locale.ROOT,
+                "eventos/%d/%02d/%s-%s.jpg",
+                hoje.getYear(),
+                hoje.getMonthValue(),
+                eventoId,
                 UUID.randomUUID());
     }
 

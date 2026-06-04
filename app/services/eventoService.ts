@@ -13,6 +13,7 @@ export type EventoDTO = {
     descricao?: string;
     data?: string;
   status?: string;
+  link_foto?: string | null;
   nmorganizador?: string;
   contagemPresencas?: number;
   isInscrito?: boolean;
@@ -29,14 +30,14 @@ export async function getEventoById(id: string): Promise<EventoDTO> {
   return response.data;
 }
 
-export async function createEvento(evento: Omit<EventoDTO, "id">): Promise<EventoDTO> {
-  const response = await apiService.post<EventoDTO>("/eventos", evento);
+export async function createEvento(formData: FormData): Promise<EventoDTO> {
+  const response = await apiService.post<EventoDTO>("/eventos", formData);
   showSuccessToast("Evento criado com sucesso!");
   return response.data;
 }
 
-export async function updateEvento(id: string, evento: Omit<EventoDTO, "id">): Promise<EventoDTO> {
-  const response = await apiService.put<EventoDTO>(`/eventos/${id}`, evento);
+export async function updateEvento(id: string, formData: FormData): Promise<EventoDTO> {
+  const response = await apiService.put<EventoDTO>(`/eventos/${id}`, formData);
   showSuccessToast("Evento atualizado com sucesso!");
   return response.data;
 }

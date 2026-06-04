@@ -177,7 +177,7 @@ export default function EventosInscritos() {
               }
             >
               <Image
-                source={{ uri: "https://images.unsplash.com/photo-1548199973-03cce0bbc87b?w=1200" }}
+                source={{ uri: item.link_foto || "https://images.unsplash.com/photo-1548199973-03cce0bbc87b?w=1200" }}
                 style={styles.cardImage}
               />
 
