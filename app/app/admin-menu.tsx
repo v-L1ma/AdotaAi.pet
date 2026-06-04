@@ -41,6 +41,20 @@ export default function AdminMenuScreen() {
       route: "/gerenciar-usuarios",
       color: "#FF9800",
     },
+    {
+      title: "Gerenciar Raças",
+      subtitle: "Cadastrar e editar raças",
+      icon: "git-network-outline",
+      route: "/gerenciar-racas",
+      color: "#9C27B0",
+    },
+    {
+      title: "Gerenciar Espécies",
+      subtitle: "Cadastrar e editar espécies",
+      icon: "leaf-outline",
+      route: "/gerenciar-especies",
+      color: "#009688",
+    },
   ];
 
   return (

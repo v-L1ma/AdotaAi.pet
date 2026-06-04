@@ -42,13 +42,30 @@ export type UsuarioAdminDTO = {
   fl_ativo: boolean;
 };
 
+export type EspecieAdminDTO = {
+  id: string;
+  nome: string;
+};
+
+export type RacaAdminDTO = {
+  id: string;
+  nome: string;
+  especieId: string;
+};
+
 export type AprovarReprovarRequest = {
   motivo?: string;
 };
 
+type BaseResponse<T> = {
+  message: string;
+  data: T[];
+  errors?: string[];
+};
+
 export const adminService = {
   async listarPetsPendentes(): Promise<PetAdminDTO[]> {
-    const response = await apiService.get<{ data: PetAdminDTO[] }>("/pets/pendentes");
+    const response = await apiService.get<BaseResponse<PetAdminDTO>>("/pets/pendentes");
     return response.data.data;
   },
 
@@ -61,7 +78,7 @@ export const adminService = {
   },
 
   async listarEventosPendentes(): Promise<EventoAdminDTO[]> {
-    const response = await apiService.get<{ data: EventoAdminDTO[] }>("/eventos/pendentes");
+    const response = await apiService.get<BaseResponse<EventoAdminDTO>>("/eventos/pendentes");
     return response.data.data;
   },
 
@@ -74,7 +91,7 @@ export const adminService = {
   },
 
   async listarUsuarios(): Promise<UsuarioAdminDTO[]> {
-    const response = await apiService.get<{ data: UsuarioAdminDTO[] }>("/usuario/admin/usuarios");
+    const response = await apiService.get<BaseResponse<UsuarioAdminDTO>>("/usuario/admin/usuarios");
     return response.data.data;
   },
 
@@ -84,6 +101,43 @@ export const adminService = {
 
   async desativarUsuario(id: string): Promise<void> {
     await apiService.put(`/usuario/admin/${id}/desativar`);
+  },
+
+  // Espécies
+  async listarEspecies(): Promise<EspecieAdminDTO[]> {
+    const response = await apiService.get<BaseResponse<EspecieAdminDTO>>("/especies");
+    return response.data.data;
+  },
+
+  async criarEspecie(dto: { nome: string }): Promise<void> {
+    await apiService.post("/especies", dto);
+  },
+
+  async atualizarEspecie(id: string, dto: { nome: string }): Promise<void> {
+    await apiService.put(`/especies/${id}`, dto);
+  },
+
+  async excluirEspecie(id: string): Promise<void> {
+    await apiService.delete(`/especies/${id}`);
+  },
+
+  // Raças
+  async listarRacas(especieId?: string): Promise<RacaAdminDTO[]> {
+    const params = especieId ? { especieId } : undefined;
+    const response = await apiService.get<BaseResponse<RacaAdminDTO>>("/racas", { params });
+    return response.data.data;
+  },
+
+  async criarRaca(dto: { nome: string; especieId: string }): Promise<void> {
+    await apiService.post("/racas", dto);
+  },
+
+  async atualizarRaca(id: string, dto: { nome: string; especieId?: string }): Promise<void> {
+    await apiService.put(`/racas/${id}`, dto);
+  },
+
+  async excluirRaca(id: string): Promise<void> {
+    await apiService.delete(`/racas/${id}`);
   },
 };
 

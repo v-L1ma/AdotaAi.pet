@@ -357,7 +357,7 @@ const styles = StyleSheet.create({
   },
   tabsWrap: {
     marginTop: 20,
-    alignSelf: 'center',
+    marginHorizontal: 16,
     flexDirection: 'row',
     backgroundColor: '#eceff3',
     borderRadius: 14,
@@ -365,10 +365,11 @@ const styles = StyleSheet.create({
     gap: 4,
   },
   tab: {
+    flex: 1,
     borderRadius: 10,
-    paddingHorizontal: 14,
-    paddingVertical: 8,
-    zIndex: 10,
+    paddingVertical: 12,
+    alignItems: "center",
+    justifyContent: "center",
   },
   tabActive: {
     backgroundColor: '#fff',
@@ -376,6 +377,8 @@ const styles = StyleSheet.create({
   tabText: {
     color: '#777',
     fontWeight: '700',
+    fontSize: 14,
+    userSelect: "none",
   },
   tabTextActive: {
     color: colors.primary,

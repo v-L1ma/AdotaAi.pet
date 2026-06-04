@@ -187,9 +187,11 @@ public class EventoService {
         UsuarioEntity usuario = obterUsuarioAutenticado();
         List<PresencaEventoEntity> presencas = presencaEventoRepository.findByUsuarioId(usuario.getId());
         return presencas.stream()
-                .map(presenca -> {
-                    EventoDTO dto = new EventoDTO(presenca.getEvento());
-                    dto.setContagemPresencas(presencaEventoRepository.countByEventoId(presenca.getEvento().getId()));
+                .map(PresencaEventoEntity::getEvento)
+                .filter(evento -> "APROVADO".equals(evento.getStatus()))
+                .map(evento -> {
+                    EventoDTO dto = new EventoDTO(evento);
+                    dto.setContagemPresencas(presencaEventoRepository.countByEventoId(evento.getId()));
                     return dto;
                 })
                 .toList();

@@ -1,7 +1,7 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import React from 'react';
-import { SafeAreaView, Text, TouchableOpacity, View } from 'react-native';
+import { Text, TouchableOpacity, View } from 'react-native';
 import colors from '../styles/colors';
 
 type AppHeaderProps = {
@@ -16,7 +16,6 @@ export default function AppHeader({ title, onBackPress, titleFontSize = 28, titl
 
   return (
     <>
-      <SafeAreaView style={{ position: 'absolute', top: 0, left: 0, right: 0, backgroundColor: 'transparent', zIndex: 10 }} />
       <View
         style={{
           position: 'absolute',

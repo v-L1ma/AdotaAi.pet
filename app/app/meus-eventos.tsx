@@ -196,8 +196,8 @@ export default function MeusEventos() {
                 <View style={styles.cardBody}>
                   {item.mensagemReprovado && (
                     <View style={styles.warningBox}>
-                      <Ionicons name="warning" size={14} color="#856404" />
-                      <Text style={styles.warningText}>Atenção: {item.mensagemReprovado}</Text>
+                      <Text style={styles.warningText}><Ionicons name="warning" size={14} color="#856404" /> Atenção: {item.mensagemReprovado}</Text>
+                      <Text style={[styles.warningText,{fontWeight: "900"}]}>Revise as diretrizes de publicação para garantir que seu anúncio seja aprovado.</Text>
                     </View>
                   )}
                   <View style={{ display: "flex", flexDirection: "row", justifyContent: "space-between", alignItems: "center", gap: 8 }}>
@@ -406,8 +406,7 @@ const styles = StyleSheet.create({
   },
   warningBox: {
     display: "flex",
-    flexDirection: "row",
-    alignItems: "center",
+    flexDirection: "column",
     gap: 6,
     backgroundColor: "#FFF3CD",
     borderRadius: 2,
