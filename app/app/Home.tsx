@@ -168,7 +168,7 @@ export default function Home() {
           <>
             <View style={style.sectionHeader}>
               <Text style={style.sectionTitle}>Destaques</Text>
-              <TouchableOpacity onPress={() => router.push("/destaques")}>
+              <TouchableOpacity onPress={() => router.push("/listagem-pets")}>
                 <Text style={style.sectionLink}>Ver todos</Text>
               </TouchableOpacity>
             </View>
@@ -187,7 +187,7 @@ export default function Home() {
           </>
         )}
 
-        <TouchableOpacity style={style.secondaryCta} onPress={() => router.push("/inicio-eventos") }>
+        <TouchableOpacity style={style.secondaryCta} onPress={() => router.push("/eventos") }>
           <Ionicons name="calendar-outline" size={18} color={colors.primary} />
           <Text style={style.secondaryCtaText}>Ver eventos de adoção</Text>
         </TouchableOpacity>
@@ -216,7 +216,7 @@ const style = StyleSheet.create({
     backgroundColor: "#F8F9FA",
   },
   content: {
-    paddingTop: 62,
+    paddingTop: 22,
     paddingHorizontal: 20,
     paddingBottom: 120,
     gap: 16,

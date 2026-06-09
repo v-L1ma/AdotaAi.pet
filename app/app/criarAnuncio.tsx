@@ -8,7 +8,7 @@ import { useEspecies } from "../hooks/useEspecies";
 import * as ImagePicker from "expo-image-picker";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import React, { useEffect, useRef, useState } from "react";
-import { Alert, Image, InputAccessoryView, Keyboard, Linking, Modal, Platform, Pressable, SafeAreaView, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View, ActivityIndicator } from "react-native";
+import { Alert, InputAccessoryView, Keyboard, Linking, Modal, Platform, SafeAreaView, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
 import Icon1 from "react-native-vector-icons/Ionicons";
 import { colors } from "@/styles/variables";
 import SelecionarFormularioModal from "@/components/SelecionarFormularioModal";
@@ -19,6 +19,7 @@ import { animal } from "@/types/TAnimal";
 import AppHeader from "@/components/AppHeader";
 import { getPetById } from "@/services/petService";
 import { genero } from "@/types/TGenero";
+import { ImageUploader } from "@/components/ImageUploader";
 
 const applyDateMask = (value: string) => {
     const cleaned = value.replace(/\D/g, "");
@@ -152,20 +153,40 @@ export default function CriarAnuncioScreen() {
 
     useEffect(() => {
         if (petData) {
+            const especieId = (petData as any).especieId || "";
             reset({
                 nome: petData.nome,
                 dt_nasc: convertISOToDisplay(petData.dt_nasc),
-                especieId: (petData as any).especieId || "",
+                especieId,
                 porte: petData.porte as "pequeno" | "medio" | "grande",
                 genero: (petData as any).genero as genero,
                 racaId: (petData as any).racaId || "",
                 descricao: petData.descricao,
             });
-            setSelectedEspecieId((petData as any).especieId || "");
+            setSelectedEspecieId(especieId || undefined);
             setExistingPhotoUrl(petData.link_foto);
             setFormularioSelecionado(null);
         }
     }, [petData, reset]);
+
+    useEffect(() => {
+        if (!petData) {
+            return;
+        }
+
+        const especieId = (petData as any).especieId as string | undefined;
+        if (especieId || !petData.especie || especies.length === 0) {
+            return;
+        }
+
+        const match = especies.find((esp) => esp.nome.toLowerCase() === String(petData.especie).toLowerCase());
+        if (!match?.id) {
+            return;
+        }
+
+        setValue("especieId", match.id, { shouldValidate: true });
+        setSelectedEspecieId(match.id);
+    }, [petData, especies, setValue]);
 
     useEffect(() => {
         if (selectedEspecieId) {
@@ -311,6 +332,7 @@ export default function CriarAnuncioScreen() {
 
     const handleSave = async (data: CriarAnuncioFormData) => {
         const isoDate = convertDisplayToISO(data.dt_nasc);
+        console.log("oi")
 
         if (isEditing) {
             const result = await editPet({
@@ -378,26 +400,12 @@ export default function CriarAnuncioScreen() {
                 showsVerticalScrollIndicator={false}
             >
                 <View style={styles.identitySection}>
-<Pressable style={styles.avatarUploader} onPress={pickImage} disabled={isCompressingImage}>
-                    {image?.uri ? (
-                        <Image source={{ uri: image.uri }} style={styles.avatarImage} />
-                    ) : existingPhotoUrl ? (
-                        <Image source={{ uri: existingPhotoUrl }} style={styles.avatarImage} />
-                    ) : (
-                        <View style={styles.avatarPlaceholder}>
-                            <Icon1 name="camera-outline" size={30} color="#8c8c8c" />
-                            <Text style={styles.avatarHint}>ADICIONAR FOTO</Text>
-                        </View>
-                    )}
-                    {isCompressingImage && (
-                        <View style={styles.avatarLoadingOverlay}>
-                            <ActivityIndicator size="small" color="#FFF" />
-                        </View>
-                    )}
-                    <View style={styles.avatarEditBadge}>
-                        <Icon1 name="pencil" size={14} color="#fff" />
-                    </View>
-                </Pressable>
+                    <ImageUploader 
+                        imageUri={image?.uri}
+                        existingPhotoUrl={existingPhotoUrl}
+                        onPress={pickImage}
+                        isCompressing={isCompressingImage}
+                    />
                 {(image?.fileSize ?? 0) > 50000000 && (
                     <Text style={styles.imageSizeHint}>
                         A imagem não pode ser maior que 50MB. Tamanho atual: {formatFileSize(image?.fileSize || 0)}

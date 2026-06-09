@@ -149,6 +149,10 @@ export default function CriarFormulario(){
 
 
     function criarNovaPergunta(){
+        if (perguntasSelecionadas.length >= 20) {
+            setErroMessage("Você já selecionou 20 perguntas, que é o máximo permitido.");
+            return;
+        }
 
         if(perguntaInput.length<=0){
             setErroMessage("A pergunta não pode ser vazia.");

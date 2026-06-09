@@ -1,5 +1,5 @@
 import React from "react";
-import { Modal, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
+import { Modal, Pressable, StyleSheet, Text, View } from "react-native";
 
 type AppModalProps = {
   visible: boolean;
@@ -33,13 +33,7 @@ export default function AppModal({
                 {message ? <Text style={styles.modalMessage}>{message}</Text> : null}
               </View>
             )}
-            {children ? (
-              <View >
-                <ScrollView style={styles.body}>
-                  {children}
-                </ScrollView>
-              </View>
-            ) : null}
+            {children ? <View style={styles.body}>{children}</View> : null}
             {footer ? <View style={styles.footer}>{footer}</View> : null}
           </View>
         </Pressable>
@@ -59,7 +53,6 @@ const styles = StyleSheet.create({
   modalCard: {
     width: "100%",
     maxHeight: 700,
-    overflowY: "scroll",
     borderRadius: 18,
     backgroundColor: "#fff",
     padding: 20,
@@ -79,7 +72,6 @@ const styles = StyleSheet.create({
   },
   body: {
     gap: 12,
-    overflowY: "scroll",
   },
   footer: {
     marginTop: 6,

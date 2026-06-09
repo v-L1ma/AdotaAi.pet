@@ -3,7 +3,7 @@ import Skeleton from "@/components/Skeleton";
 import { colors } from "@/styles/variables";
 import { useRouter } from "expo-router";
 import { useMemo, useState, useCallback } from "react";
-import { ActivityIndicator, Alert, FlatList, Image, Platform, StyleSheet, Text, TouchableOpacity, useWindowDimensions, View } from "react-native";
+import { ActivityIndicator, Alert, FlatList, Image, Platform, ScrollView, StyleSheet, Text, TouchableOpacity, useWindowDimensions, View } from "react-native";
 import { EventoDTO, removerPresenca } from "@/services/eventoService";
 import Ionicons from "@expo/vector-icons/build/Ionicons";
 import { useEventosInscritos } from "@/hooks/useEventosInscritos";
@@ -55,7 +55,8 @@ export default function EventosInscritos() {
       return "Data nao informada";
     }
 
-    const parsed = new Date(data);
+    const [y, m, d] = data.split("-").map(Number);
+    const parsed = new Date(y, m - 1, d);
     if (Number.isNaN(parsed.getTime())) {
       return "Data nao informada";
     }
@@ -125,6 +126,7 @@ export default function EventosInscritos() {
     <View style={styles.screen}>
       <AppHeader title="Meus Eventos Inscritos" titleFontSize={20} />
 
+    <ScrollView showsVerticalScrollIndicator={false}>
       <View style={styles.hero}>
         <Text style={styles.heroTitle}>Eventos que você confirmou presença</Text>
         <Text style={styles.heroSubtitle}>Gerencie suas inscrições em eventos de adoção.</Text>
@@ -177,7 +179,7 @@ export default function EventosInscritos() {
               }
             >
               <Image
-                source={{ uri: "https://images.unsplash.com/photo-1548199973-03cce0bbc87b?w=1200" }}
+                source={{ uri: item.link_foto || "https://images.unsplash.com/photo-1548199973-03cce0bbc87b?w=1200" }}
                 style={styles.cardImage}
               />
 
@@ -218,6 +220,7 @@ export default function EventosInscritos() {
           </View>
         )}
       />
+      </ScrollView>
     </View>
   );
 }
@@ -226,7 +229,7 @@ const styles = StyleSheet.create({
   screen: {
     flex: 1,
     backgroundColor: "#F8F8F8",
-    paddingTop: 130,
+    paddingTop: 100,
     alignItems: "center",
   },
   list: {

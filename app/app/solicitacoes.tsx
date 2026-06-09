@@ -1,6 +1,6 @@
 import { useRouter } from "expo-router";
 import React, { useEffect, useMemo, useState, useCallback } from "react";
-import { ActivityIndicator, Image, Pressable, ScrollView, StyleSheet, Text, TouchableOpacity, View, RefreshControl } from "react-native";
+import { ActivityIndicator, Image, Pressable, ScrollView, StyleSheet, Text, TouchableOpacity, View, RefreshControl, Alert } from "react-native";
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { colors } from '../styles/variables';
 import Skeleton from "@/components/Skeleton";
@@ -8,6 +8,8 @@ import {
   getDetalhesSolicitacao,
   getSolicitacoesEnviadas,
   getSolicitacoesRecebidas,
+  aprovarSolicitacao,
+  recusarSolicitacao,
 } from "@/services/solicitacaoService";
 import AppHeader from '@/components/AppHeader';
 import { Ionicons } from "@expo/vector-icons";
@@ -57,6 +59,7 @@ export default function Solicitacoes() {
   const [detalhes, setDetalhes] = useState<FormularioDetalhadoDTO | null>(null);
   const [isLoadingDetalhes, setIsLoadingDetalhes] = useState(false);
   const [detalhesError, setDetalhesError] = useState<string | null>(null);
+  const [isUpdatingStatus, setIsUpdatingStatus] = useState(false);
 
   const loadSolicitacoes = useCallback(async () => {
     setIsLoading(true);
@@ -133,6 +136,9 @@ export default function Solicitacoes() {
   const perfilEmail = exibeSolicitante ? selecionada?.adotanteEmail : selecionada?.anuncianteEmail;
   const perfilTelefone = exibeSolicitante ? selecionada?.adotanteTelefone : selecionada?.anuncianteTelefone;
   const perfilFoto = selecionada?.linkFotoPerfil || detalhes?.linkFotoPerfil;
+  const canDecide = tab === "recebidos";
+  const statusAtual = selecionada?.status?.toUpperCase();
+  const isFinalStatus = statusAtual === "APROVADO" || statusAtual === "REPROVADO" || statusAtual === "RECUSADO";
 
   const formatarTempo = (value?: string) => {
     if (!value) {
@@ -174,6 +180,43 @@ export default function Solicitacoes() {
 
     return status;
   };
+
+  const updateSolicitacaoStatus = (id: string, status: string) => {
+    setRecebidos((current) => current.map((item) => (item.id === id ? { ...item, status } : item)));
+    setEnviados((current) => current.map((item) => (item.id === id ? { ...item, status } : item)));
+  };
+
+  async function handleAprovarSolicitacao() {
+    if (!selecionada?.id || isUpdatingStatus || isFinalStatus) {
+      return;
+    }
+
+    setIsUpdatingStatus(true);
+    try {
+      await aprovarSolicitacao(selecionada.id);
+      updateSolicitacaoStatus(selecionada.id, "APROVADO");
+    } catch {
+      Alert.alert("Erro", "Nao foi possivel aprovar a solicitacao.");
+    } finally {
+      setIsUpdatingStatus(false);
+    }
+  }
+
+  async function handleRecusarSolicitacao() {
+    if (!selecionada?.id || isUpdatingStatus || isFinalStatus) {
+      return;
+    }
+
+    setIsUpdatingStatus(true);
+    try {
+      await recusarSolicitacao(selecionada.id);
+      updateSolicitacaoStatus(selecionada.id, "REPROVADO");
+    } catch {
+      Alert.alert("Erro", "Nao foi possivel reprovar a solicitacao.");
+    } finally {
+      setIsUpdatingStatus(false);
+    }
+  }
 
   if (selecionada) {
     return (
@@ -230,6 +273,27 @@ export default function Solicitacoes() {
               ))
             ) : null}
           </View>
+
+          {canDecide && (
+            <View style={styles.actionRow}>
+              <TouchableOpacity
+                style={[styles.actionButton, styles.rejectButton, (isFinalStatus || isUpdatingStatus) && styles.actionDisabled]}
+                onPress={handleRecusarSolicitacao}
+                disabled={isFinalStatus || isUpdatingStatus}
+              >
+                <Ionicons name="thumbs-down" size={18} color="#fff" />
+                <Text style={styles.actionButtonText}>Reprovar</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={[styles.actionButton, styles.approveButton, (isFinalStatus || isUpdatingStatus) && styles.actionDisabled]}
+                onPress={handleAprovarSolicitacao}
+                disabled={isFinalStatus || isUpdatingStatus}
+              >
+                <Ionicons name="thumbs-up" size={18} color="#fff" />
+                <Text style={styles.actionButtonText}>Aprovar</Text>
+              </TouchableOpacity>
+            </View>
+          )}
         </ScrollView>
       </SafeAreaView>
     );
@@ -325,7 +389,7 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#f6f7f9',
     paddingHorizontal: 16,
-    paddingTop: 100,
+    paddingTop: 70,
   },
   header: {
     width: '100%',
@@ -357,7 +421,7 @@ const styles = StyleSheet.create({
   },
   tabsWrap: {
     marginTop: 20,
-    alignSelf: 'center',
+    marginHorizontal: 16,
     flexDirection: 'row',
     backgroundColor: '#eceff3',
     borderRadius: 14,
@@ -365,10 +429,11 @@ const styles = StyleSheet.create({
     gap: 4,
   },
   tab: {
+    flex: 1,
     borderRadius: 10,
-    paddingHorizontal: 14,
-    paddingVertical: 8,
-    zIndex: 10,
+    paddingVertical: 12,
+    alignItems: "center",
+    justifyContent: "center",
   },
   tabActive: {
     backgroundColor: '#fff',
@@ -376,6 +441,8 @@ const styles = StyleSheet.create({
   tabText: {
     color: '#777',
     fontWeight: '700',
+    fontSize: 14,
+    userSelect: "none",
   },
   tabTextActive: {
     color: colors.primary,
@@ -521,6 +588,34 @@ const styles = StyleSheet.create({
   formLoading: {
     alignItems: "flex-start",
     gap: 6,
+  },
+  actionRow: {
+    marginTop: 6,
+    flexDirection: "row",
+    gap: 12,
+  },
+  actionButton: {
+    flex: 1,
+    paddingVertical: 12,
+    borderRadius: 12,
+    alignItems: "center",
+    justifyContent: "center",
+    flexDirection: "row",
+    gap: 8,
+  },
+  actionButtonText: {
+    color: "#fff",
+    fontWeight: "800",
+    fontSize: 14,
+  },
+  rejectButton: {
+    backgroundColor: "#e74c3c",
+  },
+  approveButton: {
+    backgroundColor: "#2ecc71",
+  },
+  actionDisabled: {
+    opacity: 0.6,
   },
   emptyText: {
     textAlign: 'center',

@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -12,12 +13,17 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.adotaai.adotaai.Application.DTO.AprovarReprovarRequestDTO;
 import com.adotaai.adotaai.Application.DTO.EventoDTO;
 import com.adotaai.adotaai.Application.Service.EventoService;
 import com.adotaai.adotaai.Application.Util.BaseResponse;
+import com.adotaai.adotaai.Domain.Exception.RegraDeNegocioException;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import jakarta.validation.Valid;
 
@@ -29,6 +35,9 @@ public class EventoController {
     @Autowired
     private EventoService eventoService;
 
+    @Autowired
+    private ObjectMapper objectMapper;
+
     @GetMapping
     public List<EventoDTO> ListarEventos() {
         return eventoService.listarTodos();
@@ -39,16 +48,38 @@ public class EventoController {
         return ResponseEntity.ok(eventoService.buscarPorId(id));
     }
 
-    @PostMapping
-    public ResponseEntity<EventoDTO> criarEvento(@RequestBody EventoDTO evento) {
-        EventoDTO criado = eventoService.criarEvento(evento);
+    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<EventoDTO> criarEvento(
+            @RequestPart("dados") String dadosJson,
+            @RequestPart(required = false) MultipartFile imagem) {
+        EventoDTO evento = parseDados(dadosJson);
+        EventoDTO criado = eventoService.criarEvento(evento, imagem);
         return ResponseEntity.ok(criado);
     }
 
-    @PutMapping("/{id}")
-    public ResponseEntity<EventoDTO> atualizarPet(@PathVariable UUID id, @RequestBody EventoDTO evento) {
-        EventoDTO atualizado = eventoService.atualizarEvento(id, evento);
+    @PutMapping(value = "/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<EventoDTO> atualizarEvento(
+            @PathVariable UUID id,
+            @RequestPart(value = "dados", required = false) String dadosJson,
+            @RequestPart(value = "imagem", required = false) MultipartFile imagem) {
+        
+        EventoDTO evento;
+        if (dadosJson != null) {
+            evento = parseDados(dadosJson);
+        } else {
+            evento = new EventoDTO();
+        }
+        
+        EventoDTO atualizado = eventoService.atualizarEvento(id, evento, imagem);
         return ResponseEntity.ok(atualizado);
+    }
+
+    private EventoDTO parseDados(String dadosJson) {
+        try {
+            return objectMapper.readValue(dadosJson, EventoDTO.class);
+        } catch (JsonProcessingException exception) {
+            throw new RegraDeNegocioException("Dados do evento inválidos no part 'dados'.");
+        }
     }
 
     @DeleteMapping("/{id}")

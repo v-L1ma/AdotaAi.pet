@@ -29,7 +29,7 @@ export default function GerenciarAnimaisScreen() {
   const [selectedPet, setSelectedPet] = useState<PetAdminDTO | null>(null);
   const [showReprovarModal, setShowReprovarModal] = useState(false);
   const [motivo, setMotivo] = useState("");
-  const [isProcessing, setIsProcessing] = useState(false);
+  const [processingPetId, setProcessingPetId] = useState<string | null>(null);
 
   const loadPets = useCallback(async () => {
     try {
@@ -55,20 +55,20 @@ export default function GerenciarAnimaisScreen() {
   }, [loadPets]);
 
   const handleAprovar = async (petId: string) => {
-    setIsProcessing(true);
+    setProcessingPetId(petId);
     try {
       await adminService.aprovarPet(petId);
       loadPets();
     } catch (error) {
       console.error("Erro ao aprovar pet:", error);
     } finally {
-      setIsProcessing(false);
+      setProcessingPetId(null);
     }
   };
 
   const handleReprovar = async () => {
     if (!selectedPet) return;
-    setIsProcessing(true);
+    setProcessingPetId(selectedPet.id);
     try {
       await adminService.reprovarPet(selectedPet.id, motivo);
       setShowReprovarModal(false);
@@ -78,7 +78,7 @@ export default function GerenciarAnimaisScreen() {
     } catch (error) {
       console.error("Erro ao reprovar pet:", error);
     } finally {
-      setIsProcessing(false);
+      setProcessingPetId(null);
     }
   };
 
@@ -89,38 +89,56 @@ export default function GerenciarAnimaisScreen() {
 
   const renderPet = ({ item }: { item: PetAdminDTO }) => (
     <View style={styles.card}>
-      <Image
-        source={item.link_foto ? { uri: item.link_foto } : { uri: "assets/images/pets.png" }}
-        style={styles.petImage}
-      />
-      <View style={styles.cardContent}>
-        <Text style={styles.petName}>{item.nome}</Text>
-        <Text style={styles.petInfo}>
-          {item.especie} • {item.raca} • {item.porte}
-        </Text>
-        <StatusBadge status={item.status} />
-        <View style={styles.cardActions}>
-          {item.status.toLocaleUpperCase() !== "APROVADO" && (
-            <TouchableOpacity
-              style={[styles.actionButton, styles.aprovarButton]}
-              onPress={() => handleAprovar(item.id)}
-              disabled={isProcessing}
-            >
-              <Ionicons name="checkmark-circle" size={20} color="#fff" />
-              <Text style={styles.actionButtonText}>Aprovar</Text>
-            </TouchableOpacity>
-          )}
-          {item.status.toLocaleUpperCase() !== "REPROVADO" && (
-            <TouchableOpacity
-              style={[styles.actionButton, styles.reprovarButton]}
-              onPress={() => openReprovarModal(item)}
-              disabled={isProcessing}
-            >
-              <Ionicons name="close-circle" size={20} color="#fff" />
-              <Text style={styles.actionButtonText}>Reprovar</Text>
-            </TouchableOpacity>
-          )}
+      <TouchableOpacity
+        activeOpacity={0.7}
+        onPress={() => router.push(`/perfil-pet?id=${item.id}`)}
+        style={styles.cardTouchable}
+      >
+        <Image
+          source={item.link_foto ? { uri: item.link_foto } : { uri: "assets/images/pets.png" }}
+          style={styles.petImage}
+        />
+        <View style={styles.cardContent}>
+          <Text style={styles.petName}>{item.nome}</Text>
+          <Text style={styles.petInfo}>
+            {item.especie} • {item.raca} • {item.porte}
+          </Text>
+          <StatusBadge status={item.status} />
         </View>
+      </TouchableOpacity>
+      <View style={styles.cardActions}>
+        {item.status.toLocaleUpperCase() !== "APROVADO" && (
+          <TouchableOpacity
+            style={[styles.actionButton, styles.aprovarButton]}
+            onPress={() => handleAprovar(item.id)}
+            disabled={!!processingPetId}
+          >
+            {processingPetId === item.id ? (
+              <ActivityIndicator size="small" color="#fff" />
+            ) : (
+              <>
+                <Ionicons name="checkmark-circle" size={20} color="#fff" />
+                <Text style={styles.actionButtonText}>Aprovar</Text>
+              </>
+            )}
+          </TouchableOpacity>
+        )}
+        {item.status.toLocaleUpperCase() !== "REPROVADO" && (
+          <TouchableOpacity
+            style={[styles.actionButton, styles.reprovarButton]}
+            onPress={() => openReprovarModal(item)}
+            disabled={!!processingPetId}
+          >
+            {processingPetId === item.id ? (
+              <ActivityIndicator size="small" color="#fff" />
+            ) : (
+              <>
+                <Ionicons name="close-circle" size={20} color="#fff" />
+                <Text style={styles.actionButtonText}>Reprovar</Text>
+              </>
+            )}
+          </TouchableOpacity>
+        )}
       </View>
     </View>
   );
@@ -182,9 +200,9 @@ export default function GerenciarAnimaisScreen() {
             <TouchableOpacity
               style={styles.confirmReprovarButton}
               onPress={handleReprovar}
-              disabled={isProcessing}
+              disabled={processingPetId === selectedPet?.id || motivo.trim() === ""}
             >
-              {isProcessing ? (
+              {processingPetId === selectedPet?.id ? (
                 <ActivityIndicator size="small" color="#fff" />
               ) : (
                 <Text style={styles.confirmButtonText}>Reprovar</Text>
@@ -216,7 +234,7 @@ const styles = StyleSheet.create({
   screen: {
     flex: 1,
     backgroundColor: colors.surface,
-    paddingTop: 100,
+    paddingTop: 80,
   },
   loadingContainer: {
     flex: 1,
@@ -227,7 +245,6 @@ const styles = StyleSheet.create({
     padding: 16,
   },
   card: {
-    flexDirection: "row",
     backgroundColor: colors.surfaceLowest,
     borderRadius: 16,
     padding: 12,
@@ -235,9 +252,12 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: "#ECECEC",
   },
+  cardTouchable: {
+    flexDirection: "row",
+  },
   petImage: {
     width: 90,
-    height: "100%",
+    height: 90,
     borderRadius: 12,
     backgroundColor: colors.surface,
   },
@@ -271,10 +291,12 @@ const styles = StyleSheet.create({
   actionButton: {
     flexDirection: "row",
     alignItems: "center",
+    justifyContent: "center",
     paddingVertical: 6,
     paddingHorizontal: 12,
     borderRadius: 8,
     gap: 4,
+    minWidth: 95,
   },
   aprovarButton: {
     backgroundColor: colors.primary,

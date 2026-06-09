@@ -28,6 +28,8 @@ public class EventoDTO {
     @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     private String status = Status.PENDENTE.name();
 
+    private String link_foto;
+
     @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     private String nmorganizador;
 
@@ -54,6 +56,7 @@ public class EventoDTO {
         this.descricao = evento.getDescricao();
         this.data = evento.getData();
         this.status = evento.getStatus();
+        this.link_foto = evento.getLink_foto();
         this.nmorganizador = evento.getNmorganizador();
 
         if (evento.getUser() != null) {
@@ -127,6 +130,14 @@ public class EventoDTO {
 
     public void setStatus(String status) {
         this.status = status;
+    }
+
+    public String getLink_foto() {
+        return link_foto;
+    }
+
+    public void setLink_foto(String link_foto) {
+        this.link_foto = link_foto;
     }
 
     public LocalDate getData() {

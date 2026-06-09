@@ -389,7 +389,6 @@ const styles = StyleSheet.create({
         flex: 1,
     },
     screen:{
-        paddingTop:50,
         paddingHorizontal:20,
         gap:14,
         flex:1,
@@ -397,7 +396,7 @@ const styles = StyleSheet.create({
         position:"relative"
     },
     searchZone: {
-        paddingTop: 50,
+        paddingTop: 20,
         gap: 10,
     },
     title: {

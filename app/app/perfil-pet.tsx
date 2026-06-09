@@ -25,6 +25,7 @@ type BuscarPetDTO = {
     link_foto?: string;
     isFavoritado?: boolean;
     isFavorito?: boolean;
+    solicitacaoEnviada?: boolean;
     bairro?: string;
     cidade?: string;
     uf?: string;
@@ -194,6 +195,8 @@ export default function PerfilPet(){
         return date.toLocaleDateString("pt-BR");
     }, [pet?.dt_nasc]);
 
+    const hasSolicitacao = pet?.solicitacaoEnviada ?? false;
+
     async function handleToggleFavorite(){
         if (!petId || !pet || isTogglingFavorite) {
             return;
@@ -235,6 +238,10 @@ export default function PerfilPet(){
         } finally {
             setIsAdopting(false);
         }
+    }
+
+    function handleVerSolicitacoes() {
+        router.push("/solicitacoes");
     }
 
     if (isLoadingPet) {
@@ -299,7 +306,7 @@ export default function PerfilPet(){
                         </View>
 
                         <View style={style.caracteristicasCard}>
-                            <Text style={style.kicker}>Gênero</Text>
+                            <Text style={style.kicker}>Espécie</Text>
                             <Text style={style.tituloCard}>{pet?.especie || "Nao informado"}</Text>
                         </View>
 
@@ -374,9 +381,15 @@ export default function PerfilPet(){
             </ScrollView>
 
 <View style={style.footer}>
-        <TouchableOpacity style={style.button} onPress={handleAdotar}>
-            <Text style={style.buttonText}>Quero adotar!</Text>
-        </TouchableOpacity>
+        {hasSolicitacao ? (
+            <TouchableOpacity style={style.button} onPress={handleVerSolicitacoes}>
+                <Text style={style.buttonText}>Ver solicitacoes</Text>
+            </TouchableOpacity>
+        ) : (
+            <TouchableOpacity style={style.button} onPress={handleAdotar}>
+                <Text style={style.buttonText}>Quero adotar!</Text>
+            </TouchableOpacity>
+        )}
     </View>
         </View>
     )

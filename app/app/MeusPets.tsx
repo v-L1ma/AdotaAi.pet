@@ -148,75 +148,78 @@ export default function MeusPets() {
         )}
 
         {pets.map((pet) => (
-            <View
-              key={pet.id}
-              style={[
-                styles.card, 
-                { width: metrics.cardWidth },
-                popoverPetId === pet.id && { zIndex: 100 }
-              ]}
-            >
-              <Image
-                source={{ uri: pet.link_foto }}
+            <View key={pet.id} style={[
+                  styles.wrapper,
+                  { width: metrics.cardWidth },
+                  popoverPetId === pet.id && { zIndex: 100 }
+                ]}>
+              <View
                 style={[
-                  styles.petImage,
-                  {
-                    width: metrics.imageSize,
-                    height: metrics.imageSize,
-                    borderRadius: isSmall ? 14 : 16,
-                  },
+                  styles.card,
+                  popoverPetId === pet.id && { zIndex: 100 }
                 ]}
-                resizeMode="cover"
-              />
-              <View style={styles.petInfo}>
-                {pet.mensagemReprovado && (
-                  <View style={styles.warningBox}>
-                    <Text style={styles.warningText}>Atenção: {pet.mensagemReprovado}</Text>
+              >
+                <Image
+                  source={{ uri: pet.link_foto }}
+                  style={[
+                    styles.petImage,
+                    {
+                      width: metrics.imageSize,
+                      height: metrics.imageSize,
+                      borderRadius: isSmall ? 14 : 16,
+                    },
+                  ]}
+                  resizeMode="cover"
+                />
+                <View style={styles.petInfo}>
+                  <Text numberOfLines={1} style={[styles.petName, { fontSize: metrics.titleSize }]}>{pet.nome}</Text>
+                  <Text numberOfLines={1} style={[styles.petAge, { fontSize: metrics.subtitleSize }]}>{formatarIdade(pet.dt_nasc)}</Text>
+                  <View style={styles.speciesBadge}>
+                    <Text style={[styles.speciesText, { fontSize: metrics.speciesSize }]}>{pet.especie}</Text>
                   </View>
-                )}
-                <Text numberOfLines={1} style={[styles.petName, { fontSize: metrics.titleSize }]}>{pet.nome}</Text>
-                <Text numberOfLines={1} style={[styles.petAge, { fontSize: metrics.subtitleSize }]}>{formatarIdade(pet.dt_nasc)}</Text>
-                <View style={styles.speciesBadge}>
-                  <Text style={[styles.speciesText, { fontSize: metrics.speciesSize }]}>{pet.especie}</Text>
+                </View>
+                <View style={styles.actionsColumn}>
+                  <View style={{ position: "relative" }}>
+                    <TouchableOpacity
+                      onPress={() => setPopoverPetId(popoverPetId === pet.id ? null : pet.id)}
+                      style={[styles.actionButton, { width: metrics.actionSize, height: metrics.actionSize }]}
+                      hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+                    >
+                      <Entypo name="dots-three-vertical" size={metrics.iconSize} color={colors.primary} />
+                    </TouchableOpacity>
+                    {popoverPetId === pet.id && (
+                      <View style={styles.popover}>
+                        <TouchableOpacity
+                          style={styles.popoverItem}
+                          onPress={() => {
+                            setPopoverPetId(null);
+                            navigateToTab(`/criar-anuncio?petId=${pet.id}`);
+                          }}
+                        >
+                          <Ionicons name="create-outline" size={18} color={colors.primary} />
+                          <Text style={styles.popoverText}>Editar</Text>
+                        </TouchableOpacity>
+                        <TouchableOpacity
+                          style={styles.popoverItem}
+                          onPress={() => {
+                            setPopoverPetId(null);
+                            handleDelete(pet.id);
+                          }}
+                        >
+                          <MaterialIcons name="delete" size={18} color="#E74C3C" />
+                          <Text style={[styles.popoverText, { color: "#E74C3C" }]}>Excluir</Text>
+                        </TouchableOpacity>
+                      </View>
+                    )}
+                  </View>
                 </View>
               </View>
-
-              <View style={styles.actionsColumn}>
-                <View style={{ position: "relative" }}>
-                  <TouchableOpacity
-                    onPress={() => setPopoverPetId(popoverPetId === pet.id ? null : pet.id)}
-                    style={[styles.actionButton, { width: metrics.actionSize, height: metrics.actionSize }]}
-                    hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
-                  >
-                    <Entypo name="dots-three-vertical" size={metrics.iconSize} color={colors.primary} />
-                  </TouchableOpacity>
-
-                  {popoverPetId === pet.id && (
-                    <View style={styles.popover}>
-                      <TouchableOpacity
-                        style={styles.popoverItem}
-                        onPress={() => {
-                          setPopoverPetId(null);
-                          navigateToTab(`/criar-anuncio?petId=${pet.id}`);
-                        }}
-                      >
-                        <Ionicons name="create-outline" size={18} color={colors.primary} />
-                        <Text style={styles.popoverText}>Editar</Text>
-                      </TouchableOpacity>
-                      <TouchableOpacity
-                        style={styles.popoverItem}
-                        onPress={() => {
-                          setPopoverPetId(null);
-                          handleDelete(pet.id);
-                        }}
-                      >
-                        <MaterialIcons name="delete" size={18} color="#E74C3C" />
-                        <Text style={[styles.popoverText, { color: "#E74C3C" }]}>Excluir</Text>
-                      </TouchableOpacity>
-                    </View>
-                  )}
+              {pet.mensagemReprovado && (
+                <View style={styles.warningBox}>
+                  <Text style={styles.warningText}>Atenção: {pet.mensagemReprovado}</Text>
+                  <Text style={[styles.warningText,{fontWeight: "900"}]}>Revise as diretrizes de publicação para garantir que seu anúncio seja aprovado.</Text>
                 </View>
-              </View>
+              )}
             </View>
           ))}
       </ScrollView>
@@ -263,7 +266,7 @@ const styles = StyleSheet.create({
     color: "#E74C3C",
   },
   content: {
-    paddingTop: 130,
+    paddingTop: 100,
     paddingBottom: 28,
     alignItems: "center",
     gap: 12,
@@ -314,9 +317,8 @@ const styles = StyleSheet.create({
     color: colors.primary,
     fontWeight: "800",
   },
-  card: {
-    flexDirection: "row",
-    alignItems: "center",
+  wrapper: {
+    flexDirection: "column",
     backgroundColor: "#fff",
     borderRadius: 18,
     minHeight: 96,
@@ -327,6 +329,11 @@ const styles = StyleSheet.create({
     padding: 12,
     borderWidth: 1,
     borderColor: "#ECECEC",
+    zIndex: 1,
+  },
+  card: {
+    flexDirection: "row",
+    minHeight: 96,
     gap: 12,
     zIndex: 1,
   },

@@ -53,6 +53,9 @@ public class EventoEntity extends AuditableEntity {
     @Column(nullable = false)
     private LocalDate data;
 
+    @Column(nullable = true)
+    private String link_foto;
+
     @Column(nullable = false)
     private String status;
 
@@ -98,6 +101,14 @@ public class EventoEntity extends AuditableEntity {
 
     public void setEndereco(String endereco) {
         this.endereco = endereco;
+    }
+
+    public String getLink_foto() {
+        return link_foto;
+    }
+
+    public void setLink_foto(String link_foto) {
+        this.link_foto = link_foto;
     }
 
     public String getBairro() {

@@ -9,6 +9,7 @@ import { getSession } from "../lib/session";
 import { router } from "expo-router";
 import AppHeader from "@/components/AppHeader";
 import Skeleton from "@/components/Skeleton";
+import { ImageUploader } from "@/components/ImageUploader";
 import { colors } from "@/styles/variables";
 import { MAX_PROFILE_PICTURE_SIZE_BYTES, useUpdateProfilePicture } from "../hooks/useUpdateProfilePicture";
 import { getCurrentUser, updateUser } from "../services/userService";
@@ -282,34 +283,35 @@ export default function UserScreen() {
         }
     };
 
-    const hasUnsavedChanges =
-        watch("nome").trim() !== userLogado?.nome ||
-        watch("email").trim() !== userLogado?.email ||
-        watch("telefone")!.trim() !== userLogado?.telefone ||
-        watch("endereco")!.trim() !== userLogado?.endereco ||
-        watch("cep")!.trim() !== userLogado?.cep ||
-        !!image;
+    // const hasUnsavedChanges =
+    //     watch("nome").trim() !== userLogado?.nome ||
+    //     watch("email").trim() !== userLogado?.email ||
+    //     watch("telefone")!.trim() !== userLogado?.telefone ||
+    //     watch("endereco")!.trim() !== userLogado?.endereco ||
+    //     watch("cep")!.trim() !== userLogado?.cep ||
+    //     !!image;
 
     const hasFormErrors = Object.keys(errors).length > 0;
 
     const handleBackPress = () => {
-        if (!hasUnsavedChanges) {
-            router.back();
-            return;
-        }
+        router.back();
+        // if (!hasUnsavedChanges) {
+        //     router.back();
+        //     return;
+        // }
 
-        Alert.alert(
-            "Descartar alteracoes?",
-            "Voce fez alteracoes e ainda nao salvou. Se voltar agora, as alteracoes serao descartadas.",
-            [
-                { text: "Continuar editando", style: "cancel" },
-                {
-                    text: "Descartar e voltar",
-                    style: "destructive",
-                    onPress: () => router.back(),
-                },
-            ]
-        );
+        // Alert.alert(
+        //     "Descartar alteracoes?",
+        //     "Voce fez alteracoes e ainda nao salvou. Se voltar agora, as alteracoes serao descartadas.",
+        //     [
+        //         { text: "Continuar editando", style: "cancel" },
+        //         {
+        //             text: "Descartar e voltar",
+        //             style: "destructive",
+        //             onPress: () => router.back(),
+        //         },
+        //     ]
+        // );
     };
 
     const showPermissionAlert = (type: "camera" | "galeria", canAskAgain: boolean) => {
@@ -435,16 +437,12 @@ export default function UserScreen() {
 
             <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
                 <View style={styles.heroCard}>
-                    <Pressable style={styles.avatarWrap} onPress={pickImage}>
-                        {image || linkFoto ? (
-                            <Image source={{ uri: image?.uri ?? linkFoto ?? "" }} style={styles.avatarImage} />
-                        ) : (
-                            <Icon1 name="image" size={40} color="#868585ff" />
-                        )}
-                        <View style={styles.cameraBadge}>
-                            <Icon1 name="camera" size={16} color="#fff" />
-                        </View>
-                    </Pressable>
+                    <ImageUploader 
+                        imageUri={image?.uri}
+                        existingPhotoUrl={linkFoto}
+                        onPress={pickImage}
+                        isCompressing={isUpdatingProfilePicture}
+                    />
                     {(image?.fileSize ?? 0) > 50000000 && (
                     <Text style={styles.imageSizeText}>
                         A imagem não pode ser maior que 50MB. Tamanho atual: {formatFileSize(image?.fileSize || 0)}
@@ -707,7 +705,7 @@ const styles = StyleSheet.create({
         backgroundColor: '#f8f9fa',
     },
     content: {
-        paddingTop: 130,
+        paddingTop: 100,
         paddingHorizontal: 16,
         paddingBottom: 28,
         gap: 12,
@@ -715,34 +713,6 @@ const styles = StyleSheet.create({
     heroCard: {
         alignItems: 'center',
         marginBottom: 6,
-    },
-    avatarWrap: {
-        width: 140,
-        height: 140,
-        borderRadius: 70,
-        backgroundColor: '#ebeaea',
-        alignItems: 'center',
-        justifyContent: 'center',
-        borderWidth: 5,
-        borderColor: '#fff',
-        //overflow: 'hidden',
-        position: 'relative',
-    },
-    avatarImage: {
-        width: 140,
-        height: 140,
-        borderRadius: 70,
-    },
-    cameraBadge: {
-        position: 'absolute',
-        bottom: 8,
-        right: 8,
-        width: 32,
-        height: 32,
-        borderRadius: 16,
-        alignItems: 'center',
-        justifyContent: 'center',
-        backgroundColor: colors.primary,
     },
     imageSizeText: {
         marginTop: 8,

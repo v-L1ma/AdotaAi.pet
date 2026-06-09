@@ -16,6 +16,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.lang.Thread.State;
 import java.time.LocalTime;
@@ -37,6 +38,9 @@ public class EventoService {
 
     @Autowired
     private EmailNotificationService emailNotificationService;
+
+    @Autowired
+    private ImageUploadService imageUploadService;
 
     public List<EventoDTO> listarTodos() {
         List<EventoEntity> eventos = eventoRepository.findAllVisible();
@@ -78,7 +82,7 @@ public class EventoService {
         eventoRepository.save(evento);
     }
 
-    public EventoDTO criarEvento(EventoDTO eventoDTO) {
+    public EventoDTO criarEvento(EventoDTO eventoDTO, MultipartFile imagem) {
         EventoEntity evento = new EventoEntity();
         evento.setNome(eventoDTO.getNome());
         evento.setEndereco(eventoDTO.getEndereco());
@@ -99,15 +103,17 @@ public class EventoService {
 
         evento = eventoRepository.save(evento);
 
-        EventoDTO dto = new EventoDTO();
-        BeanUtils.copyProperties(evento, dto);
-        dto.setUser_id(evento.getUser().getId());
-        dto.setContagemPresencas(0L);
-        return dto;
+        if (imagem != null && !imagem.isEmpty()) {
+            String linkFoto = imageUploadService.uploadEventoImage(imagem, evento.getId());
+            evento.setLink_foto(linkFoto);
+            evento = eventoRepository.save(evento);
+        }
+
+        return toDtoComPresencas(evento);
     }
 
     @Transactional
-    public EventoDTO atualizarEvento(UUID id, EventoDTO eventoDto) {
+    public EventoDTO atualizarEvento(UUID id, EventoDTO eventoDto, MultipartFile imagem) {
         UsuarioEntity usuario = obterUsuarioAutenticado();
         EventoEntity evento = eventoRepository.findById(id)
                 .orElseThrow(() -> new RecursoNaoEncontradoException("Evento não encontrado com ID: " + id));
@@ -126,6 +132,11 @@ public class EventoService {
         evento.setLast_modified_at(java.time.LocalDateTime.now());
         evento.setLast_modified_by(usuario.getId());
         evento.setStatus(Status.PENDENTE.name());
+
+        if (imagem != null && !imagem.isEmpty()) {
+            String linkFoto = imageUploadService.uploadEventoImage(imagem, evento.getId());
+            evento.setLink_foto(linkFoto);
+        }
 
         EventoEntity eventoatualizado = eventoRepository.save(evento);
 
@@ -176,9 +187,11 @@ public class EventoService {
         UsuarioEntity usuario = obterUsuarioAutenticado();
         List<PresencaEventoEntity> presencas = presencaEventoRepository.findByUsuarioId(usuario.getId());
         return presencas.stream()
-                .map(presenca -> {
-                    EventoDTO dto = new EventoDTO(presenca.getEvento());
-                    dto.setContagemPresencas(presencaEventoRepository.countByEventoId(presenca.getEvento().getId()));
+                .map(PresencaEventoEntity::getEvento)
+                .filter(evento -> "APROVADO".equals(evento.getStatus()))
+                .map(evento -> {
+                    EventoDTO dto = new EventoDTO(evento);
+                    dto.setContagemPresencas(presencaEventoRepository.countByEventoId(evento.getId()));
                     return dto;
                 })
                 .toList();

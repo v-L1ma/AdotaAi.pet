@@ -35,6 +35,7 @@ import com.adotaai.adotaai.Infraestructure.Repository.FavoritoPetRepository;
 import com.adotaai.adotaai.Infraestructure.Repository.FormularioRepository;
 import com.adotaai.adotaai.Infraestructure.Repository.PetRepository;
 import com.adotaai.adotaai.Infraestructure.Repository.RacaRepository;
+import com.adotaai.adotaai.Infraestructure.Repository.SolicitacaoAdocaoRepository;
 import com.adotaai.adotaai.Infraestructure.Repository.UsuarioRepository;
 
 import jakarta.transaction.Transactional;
@@ -56,6 +57,9 @@ public class PetService {
 
     @Autowired
     private RacaRepository racaRepository;
+
+    @Autowired
+    private SolicitacaoAdocaoRepository solicitacaoAdocaoRepository;
 
     @Autowired
     private EspecieRepository especieRepository;
@@ -101,15 +105,20 @@ public class PetService {
         }
 
         boolean isFavoritado = false;
+        boolean solicitacaoEnviada = false;
         Optional<UsuarioEntity> usuarioAutenticado = obterUsuarioAutenticadoOpcional();
         if (usuarioAutenticado.isPresent()) {
             isFavoritado = favoritoPetRepository.existsByUsuarioIdAndPetId(
+                usuarioAutenticado.get().getId(),
+                pet.getId());
+            solicitacaoEnviada = solicitacaoAdocaoRepository.existsByAdotanteIdAndPetId(
                 usuarioAutenticado.get().getId(),
                 pet.getId());
         }
 
         UUID formularioId = pet.getFormulario() != null ? pet.getFormulario().getId() : null;
         UUID racaId = pet.getRacaEntity() != null ? pet.getRacaEntity().getId() : null;
+        UUID especieId = pet.getEspecieEntity() != null ? pet.getEspecieEntity().getId() : null;
 
         String genero = normalizeGenero(pet.getGenero());
 
@@ -124,9 +133,11 @@ public class PetService {
             pet.getRaca(),
             racaId,
             pet.getEspecie(),
+            especieId,
             pet.getLink_foto(),
             formularioId,
             isFavoritado,
+            solicitacaoEnviada,
                 dono,
                 bairro,
                 cidade,
@@ -183,10 +194,7 @@ public class PetService {
 
         pet = petRepository.save(pet);
 
-        PetDTO dto = new PetDTO();
-        BeanUtils.copyProperties(pet, dto);
-        dto.setUser_id(pet.getUser().getId());
-        return dto;
+        return new PetDTO(pet);
     }
 
     @Transactional

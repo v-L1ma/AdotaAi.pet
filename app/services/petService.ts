@@ -24,6 +24,7 @@ export type PetDetail = animal & {
   especieId?: string;
   isFavoritado?: boolean;
   isFavorito?: boolean;
+  solicitacaoEnviada?: boolean;
   dono?: PetOwner;
 };
 

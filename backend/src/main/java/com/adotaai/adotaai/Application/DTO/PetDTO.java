@@ -19,6 +19,7 @@ public class PetDTO {
     private String raca;
     private UUID racaId;
     private String especie;
+    private UUID especieId;
     private String link_foto;
     private UUID formularioId;
     private String mensagemReprovado;
@@ -39,6 +40,9 @@ public class PetDTO {
             this.racaId = pet.getRacaEntity().getId();
         }
         this.especie = pet.getEspecie();
+        if (pet.getEspecieEntity() != null) {
+            this.especieId = pet.getEspecieEntity().getId();
+        }
         this.link_foto = pet.getLink_foto();
         if (pet.getFormulario() != null) {
             this.formularioId = pet.getFormulario().getId();
@@ -131,6 +135,14 @@ public class PetDTO {
 
     public void setEspecie(String especie) {
         this.especie = especie;
+    }
+
+    public UUID getEspecieId() {
+        return especieId;
+    }
+
+    public void setEspecieId(UUID especieId) {
+        this.especieId = especieId;
     }
 
     public String getLink_foto() {
