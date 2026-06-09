@@ -239,7 +239,7 @@ const horarioLabel = useMemo(() => {
 
         {isInscrito ? (
           <>
-            <TouchableOpacity style={[styles.button, styles.buttonDisabled, { display: "flex" }]} disabled>
+            <TouchableOpacity style={[styles.button, styles.buttonDisabled]} disabled>
               <Ionicons name="checkmark-circle" size={20} color="white" />
               <Text style={styles.buttonText}>Inscrito</Text>
             </TouchableOpacity>
@@ -250,7 +250,7 @@ const horarioLabel = useMemo(() => {
               <Text style={styles.linkText}>Gostaria de desmarcar sua presença? Gerencie seus eventos inscritos</Text>
             </TouchableOpacity>
           </>
-        ) : (
+        ) : evento?.status === "APROVADO" ? (
           <TouchableOpacity
             style={styles.button}
             onPress={async () => {
@@ -274,7 +274,7 @@ const horarioLabel = useMemo(() => {
               <Text style={styles.buttonText}>Quero participar!</Text>
             )}
           </TouchableOpacity>
-        )}
+        ) : null}
 
         {evento && (
           <>
@@ -340,13 +340,13 @@ const styles = StyleSheet.create({
     backgroundColor: colors.surface,
   },
   content: {
-    paddingTop: 112,
+    paddingTop: 40,
     paddingBottom: 28,
     gap: 12,
   },
   heroWrap: {
     width: "100%",
-    height: 200,
+    height: 300,
     position: "relative",
   },
   heroImage: {

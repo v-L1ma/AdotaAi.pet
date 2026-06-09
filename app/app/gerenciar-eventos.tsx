@@ -1,16 +1,14 @@
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useState } from "react";
 import {
   ActivityIndicator,
   FlatList,
   StyleSheet,
   Text,
   TextInput,
-  Touchable,
   TouchableOpacity,
   View,
-  RefreshControl,
   Image,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -30,7 +28,7 @@ export default function GerenciarEventosScreen() {
   const [selectedEvento, setSelectedEvento] = useState<EventoAdminDTO | null>(null);
   const [showReprovarModal, setShowReprovarModal] = useState(false);
   const [motivo, setMotivo] = useState("");
-  const [isProcessing, setIsProcessing] = useState(false);
+  const [processingEventoId, setProcessingEventoId] = useState<string | null>(null);
 
   const loadEventos = useCallback(async () => {
     try {
@@ -56,20 +54,20 @@ export default function GerenciarEventosScreen() {
   }, [loadEventos]);
 
   const handleAprovar = async (eventoId: string) => {
-    setIsProcessing(true);
+    setProcessingEventoId(eventoId);
     try {
       await adminService.aprovarEvento(eventoId);
       loadEventos();
     } catch (error) {
       console.error("Erro ao aprovar evento:", error);
     } finally {
-      setIsProcessing(false);
+      setProcessingEventoId(null);
     }
   };
 
   const handleReprovar = async () => {
     if (!selectedEvento) return;
-    setIsProcessing(true);
+    setProcessingEventoId(selectedEvento.id);
     try {
       await adminService.reprovarEvento(selectedEvento.id, motivo);
       setShowReprovarModal(false);
@@ -79,7 +77,7 @@ export default function GerenciarEventosScreen() {
     } catch (error) {
       console.error("Erro ao reprovar evento:", error);
     } finally {
-      setIsProcessing(false);
+      setProcessingEventoId(null);
     }
   };
 
@@ -154,20 +152,32 @@ export default function GerenciarEventosScreen() {
         <TouchableOpacity
           style={[styles.actionButton, styles.aprovarButton]}
           onPress={() => handleAprovar(item.id)}
-          disabled={isProcessing}
+          disabled={!!processingEventoId}
         >
-          <Ionicons name="checkmark-circle" size={20} color="#fff" />
-          <Text style={styles.actionButtonText}>Aprovar</Text>
+          {processingEventoId === item.id ? (
+            <ActivityIndicator size="small" color="#fff" />
+          ) : (
+            <>
+              <Ionicons name="checkmark-circle" size={20} color="#fff" />
+              <Text style={styles.actionButtonText}>Aprovar</Text>
+            </>
+          )}
         </TouchableOpacity>
         )}
         {item.status != "REPROVADO" && (
         <TouchableOpacity
           style={[styles.actionButton, styles.reprovarButton]}
           onPress={() => openReprovarModal(item)}
-          disabled={isProcessing}
+          disabled={!!processingEventoId}
         >
-          <Ionicons name="close-circle" size={20} color="#fff" />
-          <Text style={styles.actionButtonText}>Reprovar</Text>
+          {processingEventoId === item.id ? (
+            <ActivityIndicator size="small" color="#fff" />
+          ) : (
+            <>
+              <Ionicons name="close-circle" size={20} color="#fff" />
+              <Text style={styles.actionButtonText}>Reprovar</Text>
+            </>
+          )}
         </TouchableOpacity>
         )}
       </View>
@@ -231,9 +241,9 @@ export default function GerenciarEventosScreen() {
             <TouchableOpacity
               style={styles.confirmReprovarButton}
               onPress={handleReprovar}
-              disabled={isProcessing}
+              disabled={!!processingEventoId}
             >
-              {isProcessing ? (
+              {!!processingEventoId ? (
                 <ActivityIndicator size="small" color="#fff" />
               ) : (
                 <Text style={styles.confirmButtonText}>Reprovar</Text>
@@ -337,6 +347,7 @@ const styles = StyleSheet.create({
     gap: 4,
     flex: 1,
     justifyContent: "center",
+    minWidth: "48%",
   },
   aprovarButton: {
     backgroundColor: colors.primary,

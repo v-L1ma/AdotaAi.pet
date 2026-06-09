@@ -389,7 +389,7 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#f6f7f9',
     paddingHorizontal: 16,
-    paddingTop: 30,
+    paddingTop: 70,
   },
   header: {
     width: '100%',

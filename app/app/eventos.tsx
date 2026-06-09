@@ -2,13 +2,13 @@ import AppHeader from "@/components/AppHeader";
 import Skeleton from "@/components/Skeleton";
 import { colors } from "@/styles/variables";
 import { useRouter } from "expo-router";
-import { useCallback, useMemo } from "react";
-import { ActivityIndicator, FlatList, Image, StyleSheet, Text, TouchableOpacity, View } from "react-native";
-import { EventoDTO } from "@/services/eventoService";
+import { useCallback } from "react";
+import { ActivityIndicator, Image, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import NavBar from "@/components/NavBar";
 import { Ionicons } from "@expo/vector-icons";
 import { useFocusEffect } from "@react-navigation/native";
 import { useEvento } from "@/hooks/useEvento";
+import { EventoDTO } from "@/services/eventoService";
 
 const timeRegex = /^([01]\d|2[0-3]):[0-5]\d$/;
 
@@ -58,63 +58,58 @@ export default function Eventos() {
     return "Local nao informado";
   };
 
-  const listHeader = useMemo(() => <Hero />, []);
-
   return (
     <View style={styles.screen}>
       <AppHeader title="Eventos" titleFontSize={20} />
 
-      <FlatList
-        data={eventos}
-        keyExtractor={(item) => item.id ?? ""}
+      <ScrollView
         contentContainerStyle={styles.list}
         showsVerticalScrollIndicator={false}
-        ListHeaderComponent={listHeader}
-        ListEmptyComponent={
-          isLoading ? (
-            <View style={styles.loadingWrap}>
-              {[1, 2, 3, 4].map((i) => (
-                <Skeleton.EventoCard key={i} />
-              ))}
-            </View>
-          ) : error ? (
-            <Text style={styles.emptyText}>{error}</Text>
-          ) : (
-            <Text style={styles.emptyText}>Nenhum evento encontrado.</Text>
-          )
-        }
-        renderItem={({ item }) => (
-          <TouchableOpacity
-            style={styles.card}
-            onPress={() =>
-              router.push({
-                pathname: "/detalhes-evento" as never,
-                params: {
-                  id: item.id,
-                },
-              })
-            }
-          >
-            <Image
-              source={{ uri: item.link_foto || "https://images.unsplash.com/photo-1548199973-03cce0bbc87b?w=1200" }}
-              style={styles.cardImage}
-            />
+      >
+        <Hero />
 
-            <View style={styles.cardBody}>
-              <View style={{ display: "flex", flexDirection: "row", justifyContent: "space-between", alignItems: "center", gap: 8 }}>
-                <Text style={styles.title}>{item.nome}</Text>
-                <Text style={[styles.meta, {color: colors.primary}]}>
-                  <Ionicons name="people" size={16} color={colors.primary} /> 
-                  {item.contagemPresencas}
-                </Text>
+        {isLoading ? (
+          <View style={styles.loadingWrap}>
+            {[1, 2, 3, 4].map((i) => (
+              <Skeleton.EventoCard key={i} />
+            ))}
+          </View>
+        ) : error ? (
+          <Text style={styles.emptyText}>{error}</Text>
+        ) : eventos.length === 0 ? (
+          <Text style={styles.emptyText}>Nenhum evento encontrado.</Text>
+        ) : (
+          eventos.map((item) => (
+            <TouchableOpacity
+              key={item.id}
+              style={styles.card}
+              onPress={() =>
+                router.push({
+                  pathname: "/detalhes-evento" as never,
+                  params: { id: item.id },
+                })
+              }
+            >
+              <Image
+                source={{ uri: item.link_foto || "https://images.unsplash.com/photo-1548199973-03cce0bbc87b?w=1200" }}
+                style={styles.cardImage}
+              />
+              <View style={styles.cardBody}>
+                <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center", gap: 8 }}>
+                  <Text style={styles.title}>{item.nome}</Text>
+                  <Text style={[styles.meta, {color: colors.primary}]}>
+                    <Ionicons name="people" size={16} color={colors.primary} /> 
+                    {item.contagemPresencas}
+                  </Text>
+                </View>
+                <Text style={styles.meta}>{formatarData(item.data, formatarHoraDisplay(item.hrinicio))}</Text>
+                <Text style={styles.meta}>{formatarLocal(item)}</Text>
               </View>
-              <Text style={styles.meta}>{formatarData(item.data, formatarHoraDisplay(item.hrinicio))}</Text>
-              <Text style={styles.meta}>{formatarLocal(item)}</Text>
-            </View>
-          </TouchableOpacity>
+            </TouchableOpacity>
+          ))
         )}
-      />
-      <NavBar></NavBar>
+      </ScrollView>
+      <NavBar />
     </View>
   );
 }
@@ -134,9 +129,9 @@ const styles = StyleSheet.create({
     backgroundColor: "#F8F8F8",
   },
   list: {
-    paddingTop: 110,
+    paddingTop: 80,
     paddingHorizontal: 14,
-    paddingBottom: 32,
+    paddingBottom: 102,
     gap: 12,
   },
   hero: {
